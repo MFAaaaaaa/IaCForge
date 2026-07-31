@@ -39,7 +39,6 @@ Visible Prompt
     -> IR-guided Exact Schema Grounding
     -> Graph IR + Schema + KG References
     -> Canonical Provider Contract v2
-    -> 可选 Deterministic HCL Skeleton
     -> Compiler LLM
     -> Common Normalize
     -> HCL Mechanism Metrics
@@ -701,14 +700,15 @@ resource "aws_subnet" "public_subnet" {
 }
 ```
 
-开关：
+该功能不属于默认完整流程，仅保留用于独立消融。默认值：
 
 ```text
-IAC_USE_HCL_SKELETON=1
+IAC_USE_HCL_SKELETON=0
 ```
 
-Skeleton 不猜未知值；LLM 只补 Prompt literal、未解析 required、相关 optional 和
-nested block。
+仅在显式设置 `IAC_USE_HCL_SKELETON=1` 时，Skeleton 才会加入 Compiler
+Prompt。Skeleton 不猜未知值；启用后 LLM 只补 Prompt literal、未解析
+required、相关 optional 和 nested block。
 
 ## 15. Compiler LLM
 
@@ -719,8 +719,10 @@ Visible Prompt
 Normalized Graph IR
 Exact Schema Projection
 Canonical Provider Contract
-optional HCL Skeleton
 ```
+
+默认流程不输入 HCL Skeleton。显式设置 `IAC_USE_HCL_SKELETON=1` 时，可将其
+作为单独的工程增强/消融变量加入。
 
 强制规则：
 

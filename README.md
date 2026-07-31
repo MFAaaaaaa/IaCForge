@@ -11,7 +11,6 @@ Visible Prompt
   -> safe parse + provider-schema consistency checking
   -> IR-guided exact Schema Grounding
   -> instance-level Provider Contract
-  -> optional deterministic HCL skeleton
   -> LLM -> one HCL candidate
   -> common Normalize
   -> validate -> plan -> OPA
@@ -138,6 +137,7 @@ Provider Contract         2.0
 retriever                 hybrid-v2
 IR decoding               temperature=0, top_p=1, guided JSON
 HCL decoding              temperature=0, top_p=1
+HCL skeleton              disabled (explicit ablation only)
 ```
 
 Changing the provider version without rebuilding the schema, documentation KG,

@@ -355,6 +355,16 @@ def result_category(mode):
     return categories[mode]
 
 
+def hcl_skeleton_enabled():
+    """Return whether the non-default deterministic skeleton ablation is enabled."""
+
+    return os.environ.get("IAC_USE_HCL_SKELETON", "0").lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+
+
 def _graph_details(raw_graph_ir):
     validation = graph_ir.safe_parse_graph_ir(raw_graph_ir)
     return validation, graph_ir.provenance("", validation)
@@ -510,11 +520,10 @@ def build_generation_prompt(mode, question_prompt):
         contract_validation = provider_contract_builder.validate_provider_contract(
             provider_contract
         )
-        use_skeleton = os.environ.get("IAC_USE_HCL_SKELETON", "1").lower() in {
-            "1",
-            "true",
-            "yes",
-        }
+        # The canonical full pipeline lets the compiler generate HCL from the
+        # prompt, normalized IR, exact schema projection and Provider Contract.
+        # A deterministic skeleton is retained only as an explicit ablation.
+        use_skeleton = hcl_skeleton_enabled()
         skeleton = (
             provider_contract_builder.build_hcl_skeleton(provider_contract)
             if use_skeleton
@@ -533,6 +542,8 @@ def build_generation_prompt(mode, question_prompt):
             "IR-guided exact provider schema",
             "task-specific canonical Provider Contract",
         ]
+        if use_skeleton:
+            inputs.append("deterministic HCL skeleton (explicit ablation)")
     else:
         provider_contract = {}
         contract_validation = {"valid": True, "violations": []}
@@ -570,6 +581,9 @@ def build_generation_prompt(mode, question_prompt):
         },
         "compiler_contract": {
             "contract_sha256": provider_contract.get("contract_sha256", ""),
+            "hcl_skeleton_enabled": bool(
+                mode in compiler_kg_modes and hcl_skeleton_enabled()
+            ),
             "resource_instances": sorted(
                 provider_contract.get("instance_contracts", {})
             ),

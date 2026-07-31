@@ -76,6 +76,7 @@ COMMON_ENV=(
   IAC_PROVIDER_CONTRACT_ROOT="$ROOT_DIR/data/leakfree_multigranular_kg/terraform_aws_5.90.0_public_kg"
   IAC_OFFLINE_PROVIDER_CONTRACT_CACHE="$ROOT_DIR/data/leakfree_multigranular_kg/offline_retrieval/provider_contract_full458.jsonl"
   IAC_ALLOW_ONLINE_KG_RETRIEVAL="${IAC_ALLOW_ONLINE_KG_RETRIEVAL:-0}"
+  IAC_USE_HCL_SKELETON="${IAC_USE_HCL_SKELETON:-0}"
   PYTHONUNBUFFERED=1
 )
 
