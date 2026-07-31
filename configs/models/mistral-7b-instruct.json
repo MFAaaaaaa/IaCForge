@@ -1,0 +1,4 @@
+{
+  "samples": 1,
+  "models": ["mistral-7b-instruct"]
+}

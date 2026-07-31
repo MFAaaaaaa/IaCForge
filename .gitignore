@@ -1,0 +1,25 @@
+evaluation/logs/*.log
+evaluation/tmp/
+evaluation/results/
+
+# Local Terraform provider binaries and mirrors are reproducible runtime assets.
+# GitHub rejects the archived binaries because individual files exceed 100 MB.
+data/provider_mirror/
+data/provider_mirror_5_100_archive/
+
+.runtime/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Local Terraform state and credentials must never be committed.
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+.env
+.env.*
+*.tfvars
+*.tfvars.json

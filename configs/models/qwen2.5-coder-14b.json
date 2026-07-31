@@ -1,0 +1,4 @@
+{
+  "samples": 1,
+  "models": ["qwen2.5-coder-14b"]
+}
