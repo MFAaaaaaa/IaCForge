@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "evaluation"))
 
 import evidence_projection
+import eval_verigraph
 import graph_ir
 import hcl_metrics
 import hcl_safety
@@ -71,6 +72,19 @@ class SafeGraphIRTests(unittest.TestCase):
         binding = validation.graph["bindings"][0]
         self.assertEqual(binding["source"], {"resource": "public", "path": "vpc_id"})
         self.assertEqual(binding["target"], {"resource": "main", "path": "id"})
+
+
+class CheckpointResumeTests(unittest.TestCase):
+    def test_nan_checkpoint_cells_are_not_completed(self):
+        row = {
+            "LLM Output #0": float("nan"),
+            "LLM Compile Phase Error #0": float("nan"),
+        }
+        self.assertFalse(eval_verigraph.row_completed(row))
+
+    def test_hcl_output_marks_checkpoint_row_completed(self):
+        row = {"LLM Output #0": 'resource "aws_vpc" "main" {}'}
+        self.assertTrue(eval_verigraph.row_completed(row))
 
 
 class EvidenceProjectionTests(unittest.TestCase):

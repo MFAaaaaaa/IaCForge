@@ -911,9 +911,14 @@ def restore_checkpoint(df, candidates):
 
 
 def row_completed(row):
+    def has_value(value):
+        if value is None or pd.isna(value):
+            return False
+        return bool(str(value).strip())
+
     return bool(
-        str(row.get("LLM Output #0", "") or "").strip()
-        or str(row.get("LLM Compile Phase Error #0", "") or "").strip()
+        has_value(row.get("LLM Output #0", ""))
+        or has_value(row.get("LLM Compile Phase Error #0", ""))
     )
 
 
