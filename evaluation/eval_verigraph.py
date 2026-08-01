@@ -26,6 +26,7 @@ import pandas as pd
 import graph_ir
 import evidence_projection
 import hcl_metrics
+import hcl_safety
 import ir_schema_checker
 import models
 import opa_evaluator
@@ -60,7 +61,8 @@ PLANNER_SYSTEM_PROMPT = (
 COMPILER_SYSTEM_PROMPT = (
     "You are a deterministic Infrastructure-as-Code compiler. Emit concise, "
     "complete, offline-valid Terraform HCL that exactly implements the supplied "
-    "typed contract. Never use hidden benchmark labels, reference outputs, "
+    "typed contract. Never reference undeclared input variables, and never use "
+    "an input variable without a concrete default. Never use hidden benchmark labels, reference outputs, "
     "evaluator policies, or feedback traces."
 )
 SYSTEM_PROMPT = COMPILER_SYSTEM_PROMPT
@@ -365,6 +367,16 @@ def hcl_skeleton_enabled():
     }
 
 
+def hcl_safety_repair_enabled():
+    """Enable one prompt-only repair for deterministic HCL safety failures."""
+
+    return os.environ.get("IAC_REPAIR_UNDECLARED_VARIABLES", "1").lower() in {
+        "1",
+        "true",
+        "yes",
+    }
+
+
 def _graph_details(raw_graph_ir):
     validation = graph_ir.safe_parse_graph_ir(raw_graph_ir)
     return validation, graph_ir.provenance("", validation)
@@ -489,6 +501,59 @@ def build_generation_prompt(mode, question_prompt):
     graph_note["planner_evidence_sha256"] = (
         versioning.canonical_sha256(planner_evidence) if planner_evidence else ""
     )
+    retrieval_note = {
+        "candidate_types": [
+            item.get("type", "")
+            for item in planner_evidence.get("candidate_resources", [])
+        ],
+        "scores": [
+            item.get("score", 0)
+            for item in planner_evidence.get("candidate_resources", [])
+        ],
+        "matched_rules": [
+            item.get("matched_by", [])
+            for item in planner_evidence.get("candidate_resources", [])
+        ],
+        "planner_evidence_sha256": (
+            versioning.canonical_sha256(planner_evidence)
+            if planner_evidence
+            else ""
+        ),
+    }
+
+    # Invalid structured output must not become an empty hard constraint. Keep
+    # its provenance, then safely fall back to the visible prompt.
+    has_provider_nodes = bool(graph_ir.resource_types(normalized_graph))
+    if not validation.valid or not has_provider_nodes:
+        fallback_reason = (
+            "planner output failed safe parsing or structural validation"
+            if not validation.valid
+            else "planner output contains no AWS resource or data source"
+        )
+        fallback_code = "invalid_graph_ir" if not validation.valid else "empty_graph_ir"
+        return prompt_templates.baseline_generation_prompt(question_prompt), {
+            "mode": mode,
+            "version_manifest": _version_manifest(),
+            "generation_inputs": ["Prompt", "safe fallback after invalid Graph IR"],
+            "fallback": {
+                "stage": "graph_ir",
+                "reason": fallback_reason,
+            },
+            "graph_ir": graph_note,
+            "kg": kg_note,
+            "retrieval": retrieval_note,
+            "compiler_contract": {
+                "applied": False,
+                "fallback_reason": fallback_code,
+                "validation": {"valid": False, "violations": []},
+            },
+            "generation_cost": {
+                "retrieval_ms": retrieval_ms,
+                "ir": _generation_note(ir_output),
+            },
+            "_normalized_ir": graph_ir.empty_graph_ir(),
+            "_provider_contract": {},
+        }
 
     if mode == "ir_only":
         prompt = prompt_templates.resource_graph_ir_generation_prompt(
@@ -507,43 +572,89 @@ def build_generation_prompt(mode, question_prompt):
         }
 
     schema_check = ir_schema_checker.check_graph_ir(normalized_graph)
+    schema_check = ir_schema_checker.salvage_by_dropping_invalid_bindings(schema_check)
     normalized_graph = schema_check.graph
     graph_note["schema_consistency"] = schema_check.as_dict()
+    if not schema_check.valid:
+        return prompt_templates.baseline_generation_prompt(question_prompt), {
+            "mode": mode,
+            "version_manifest": _version_manifest(),
+            "generation_inputs": [
+                "Prompt",
+                "safe fallback after IR-Schema validation failure",
+            ],
+            "fallback": {
+                "stage": "ir_schema_checker",
+                "reason": "Graph IR is inconsistent with the configured provider schema",
+            },
+            "graph_ir": graph_note,
+            "kg": kg_note,
+            "retrieval": retrieval_note,
+            "compiler_contract": {
+                "applied": False,
+                "fallback_reason": "invalid_ir_schema",
+                "validation": schema_check.as_dict(),
+            },
+            "generation_cost": {
+                "retrieval_ms": retrieval_ms,
+                "ir": _generation_note(ir_output),
+            },
+            "_normalized_ir": graph_ir.empty_graph_ir(),
+            "_provider_contract": {},
+        }
     schema = schema_rag.retrieve_schema_for_graph(normalized_graph, question_prompt)
     if mode in compiler_kg_modes:
-        provider_contract = provider_contract_builder.build_provider_contract(
+        candidate_contract = provider_contract_builder.build_provider_contract(
             question_prompt,
             normalized_graph,
             schema.projection,
             kg_evidence,
         )
         contract_validation = provider_contract_builder.validate_provider_contract(
-            provider_contract
+            candidate_contract
         )
         # The canonical full pipeline lets the compiler generate HCL from the
         # prompt, normalized IR, exact schema projection and Provider Contract.
         # A deterministic skeleton is retained only as an explicit ablation.
-        use_skeleton = hcl_skeleton_enabled()
-        skeleton = (
-            provider_contract_builder.build_hcl_skeleton(provider_contract)
-            if use_skeleton
-            else ""
-        )
-        prompt = prompt_templates.resource_graph_ir_schema_contract_generation_prompt(
-            question_prompt,
-            graph_ir.render_graph_ir(normalized_graph),
-            schema.context,
-            provider_contract_builder.render_provider_contract(provider_contract),
-            skeleton,
-        )
-        inputs = [
-            "Prompt",
-            "normalized typed Graph IR",
-            "IR-guided exact provider schema",
-            "task-specific canonical Provider Contract",
-        ]
-        if use_skeleton:
-            inputs.append("deterministic HCL skeleton (explicit ablation)")
+        contract_applied = bool(contract_validation.get("valid"))
+        use_skeleton = contract_applied and hcl_skeleton_enabled()
+        if contract_applied:
+            provider_contract = candidate_contract
+            skeleton = (
+                provider_contract_builder.build_hcl_skeleton(provider_contract)
+                if use_skeleton
+                else ""
+            )
+            prompt = prompt_templates.resource_graph_ir_schema_contract_generation_prompt(
+                question_prompt,
+                graph_ir.render_graph_ir(normalized_graph),
+                schema.context,
+                provider_contract_builder.render_provider_contract(provider_contract),
+                skeleton,
+            )
+            inputs = [
+                "Prompt",
+                "normalized typed Graph IR",
+                "IR-guided exact provider schema",
+                "validated task-specific canonical Provider Contract",
+            ]
+            if use_skeleton:
+                inputs.append("deterministic HCL skeleton (explicit ablation)")
+        else:
+            # A rejected contract remains in provenance, but is never presented
+            # to the compiler as an implementation contract.
+            provider_contract = {}
+            prompt = prompt_templates.resource_graph_ir_schema_generation_prompt(
+                question_prompt,
+                graph_ir.render_graph_ir(normalized_graph),
+                schema.context,
+            )
+            inputs = [
+                "Prompt",
+                "normalized typed Graph IR",
+                "IR-guided exact provider schema",
+                "safe fallback after Provider Contract validation failure",
+            ]
     else:
         provider_contract = {}
         contract_validation = {"valid": True, "violations": []}
@@ -560,34 +671,38 @@ def build_generation_prompt(mode, question_prompt):
         "graph_ir": graph_note,
         "schema_rag": schema.as_dict(),
         "kg": kg_note,
-        "retrieval": {
-            "candidate_types": [
-                item.get("type", "")
-                for item in planner_evidence.get("candidate_resources", [])
-            ],
-            "scores": [
-                item.get("score", 0)
-                for item in planner_evidence.get("candidate_resources", [])
-            ],
-            "matched_rules": [
-                item.get("matched_by", [])
-                for item in planner_evidence.get("candidate_resources", [])
-            ],
-            "planner_evidence_sha256": (
-                versioning.canonical_sha256(planner_evidence)
-                if planner_evidence
+        "retrieval": retrieval_note,
+        "compiler_contract": {
+            "contract_sha256": (
+                candidate_contract.get("contract_sha256", "")
+                if mode in compiler_kg_modes
                 else ""
             ),
-        },
-        "compiler_contract": {
-            "contract_sha256": provider_contract.get("contract_sha256", ""),
+            "applied": bool(
+                mode in compiler_kg_modes and contract_validation.get("valid")
+            ),
+            "fallback_reason": (
+                ""
+                if mode not in compiler_kg_modes or contract_validation.get("valid")
+                else "invalid_provider_contract"
+            ),
             "hcl_skeleton_enabled": bool(
-                mode in compiler_kg_modes and hcl_skeleton_enabled()
+                mode in compiler_kg_modes
+                and contract_validation.get("valid")
+                and hcl_skeleton_enabled()
             ),
             "resource_instances": sorted(
-                provider_contract.get("instance_contracts", {})
+                (
+                    candidate_contract.get("instance_contracts", {})
+                    if mode in compiler_kg_modes
+                    else {}
+                )
             ),
-            "bindings": provider_contract.get("bindings", []),
+            "bindings": (
+                candidate_contract.get("bindings", [])
+                if mode in compiler_kg_modes
+                else []
+            ),
             "validation": contract_validation,
         },
         "generation_cost": {
@@ -640,12 +755,11 @@ def evaluate_one(row, mode, static_plan):
     with tempfile.TemporaryDirectory(prefix="iacforge-") as tmp:
         workdir = Path(tmp)
         (workdir / "main.tf").write_text(hcl, encoding="utf-8")
-        compilable, compile_error = terraform_validate(workdir, static_plan)
-        initial_validate = bool(compilable)
+        initial_validate = False
         initial_plan = False
         repair_used = False
 
-        def repair_once(diagnostic):
+        def repair_once(diagnostic, reason="terraform_diagnostic"):
             nonlocal hcl, raw_llm_hcl, normalization_diff, repair_used
             repair_prompt = prompt_templates.local_repair_prompt(
                 question_prompt,
@@ -670,6 +784,7 @@ def evaluate_one(row, mode, static_plan):
             repair_used = True
             notes["repair"] = {
                 "calls": 1,
+                "reason": reason,
                 "input_policy": [
                     "Prompt",
                     "Graph IR",
@@ -684,8 +799,26 @@ def evaluate_one(row, mode, static_plan):
             notes["hcl_generation"]["repaired_normalized_hcl"] = hcl
             notes["hcl_generation"]["repair_normalization_diff"] = normalization_diff
 
-        if not compilable and mode == "full_repair1":
-            repair_once(compile_error)
+        safety_before = hcl_safety.diagnostics(hcl)
+        notes["hcl_safety"] = {"before_repair": safety_before}
+        safety_repair_modes = {"compiler_kg", "full", "full_strict", "full_repair1"}
+        if (
+            mode in safety_repair_modes
+            and hcl_safety_repair_enabled()
+            and hcl_safety.has_issues(safety_before)
+        ):
+            repair_once(
+                hcl_safety.render_repair_diagnostic(safety_before),
+                reason="deterministic_hcl_safety",
+            )
+        safety_after = hcl_safety.diagnostics(hcl)
+        notes["hcl_safety"]["after_repair"] = safety_after
+        notes["hcl_safety"]["passed"] = not hcl_safety.has_issues(safety_after)
+
+        compilable, compile_error = terraform_validate(workdir, static_plan)
+        initial_validate = bool(compilable)
+        if not compilable and mode == "full_repair1" and not repair_used:
+            repair_once(compile_error, reason="terraform_validate")
             compilable, compile_error = terraform_validate(workdir, static_plan)
         result["LLM Compilable? #0"] = bool(compilable)
         result["LLM Compile Phase Error #0"] = "" if compilable else compile_error

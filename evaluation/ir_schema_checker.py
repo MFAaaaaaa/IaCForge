@@ -192,6 +192,39 @@ def check_graph_ir(graph: dict[str, Any], apply_safe_repairs: bool = True) -> IR
     return IRSchemaCheck(not unresolved, normalized, tuple(violations), tuple(actions))
 
 
+def salvage_by_dropping_invalid_bindings(check: IRSchemaCheck) -> IRSchemaCheck:
+    """Keep valid provider nodes while removing only schema-invalid bindings.
+
+    Salvage is deliberately unavailable when any violation belongs to a node
+    rather than a binding. The reduced graph is checked again from scratch.
+    """
+    if check.valid or not check.violations:
+        return check
+    binding_indices = {_binding_index(item.get("path", "")) for item in check.violations}
+    if None in binding_indices or not binding_indices:
+        return check
+
+    graph = copy.deepcopy(check.graph)
+    bindings = graph.get("bindings", [])
+    graph["bindings"] = [
+        binding for index, binding in enumerate(bindings) if index not in binding_indices
+    ]
+    rechecked = check_graph_ir(graph)
+    if not rechecked.valid:
+        return check
+    actions = list(check.normalization_actions)
+    actions.extend(
+        {
+            "code": "DROP_SCHEMA_INVALID_BINDING",
+            "binding_index": index,
+            "reason": "binding failed provider-schema consistency checking",
+        }
+        for index in sorted(binding_indices)
+    )
+    actions.extend(rechecked.normalization_actions)
+    return IRSchemaCheck(True, rechecked.graph, check.violations, tuple(actions))
+
+
 def _binding_index(path: str):
     if not path.startswith("bindings["):
         return None

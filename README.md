@@ -9,9 +9,13 @@ Visible Prompt
   -> Planner Evidence projection
   -> LLM -> Typed task Graph IR v2
   -> safe parse + provider-schema consistency checking
+     -> invalid bindings only: drop those bindings and re-check the IR
+     -> invalid IR: safe Prompt-only compiler fallback
   -> IR-guided exact Schema Grounding
-  -> instance-level Provider Contract
+  -> instance-level Provider Contract validation
+     -> invalid Contract: Graph IR + Schema compiler fallback
   -> LLM -> one HCL candidate
+  -> deterministic input-variable safety check + optional prompt-only repair
   -> common Normalize
   -> validate -> plan -> OPA
 ```
@@ -29,8 +33,9 @@ The historical research workspace remains archived, unchanged, at:
 - Full KG evidence is projected into separate planner and compiler interfaces.
 - Graph IR v2 distinguishes resources, data sources and external inputs, and
   represents field-level bindings and structured constraints.
-- Invalid IR text is replaced with a canonical empty IR; malformed model text
-  is never forwarded to the compiler.
+- Malformed or empty IR is never forwarded to the compiler as a hard
+  constraint. Schema-invalid bindings can be removed deterministically while
+  preserving valid provider nodes; the reduced IR is checked again.
 - Exact Schema Grounding returns a structured task-relevant projection rather
   than all optional fields.
 - `Graph IR + Schema + KG` is compiled into one canonical, instance-level
@@ -45,8 +50,8 @@ The historical research workspace remains archived, unchanged, at:
 
 - `evaluation/graph_ir.py`: Graph IR v2 parsing, v1 compatibility, validation
   and safe fallback.
-- `evaluation/ir_schema_checker.py`: exact kind/field/type consistency checking
-  and high-confidence path correction.
+- `evaluation/ir_schema_checker.py`: exact kind/field/type consistency checking,
+  high-confidence path correction, and schema-invalid binding salvage.
 - `evaluation/evidence_projection.py`: planner-only KG projection.
 - `evaluation/schema_rag.py`: IR-guided exact schema grounding.
 - `evaluation/provider_schema.py`: provider schema access and structured schema
@@ -60,6 +65,8 @@ The historical research workspace remains archived, unchanged, at:
 - `evaluation/iac_kg/offline_provider_contract_cache.py`: canonical,
   provenance-complete offline cache.
 - `evaluation/hcl_metrics.py`: pre-Terraform IR/HCL mechanism metrics.
+- `evaluation/hcl_safety.py`: deterministic undeclared/defaultless input-variable
+  detection before Terraform validation.
 - `evaluation/eval_verigraph.py`: generation, normalization, evaluation,
   checkpoint and repair orchestration.
 
@@ -138,7 +145,17 @@ retriever                 hybrid-v2
 IR decoding               temperature=0, top_p=1, guided JSON
 HCL decoding              temperature=0, top_p=1
 HCL skeleton              disabled (explicit ablation only)
+Planner candidate cap     8 (`IAC_PLANNER_MAX_CANDIDATES`)
+Variable safety repair    enabled (`IAC_REPAIR_UNDECLARED_VARIABLES=1`)
 ```
+
+Invalid Graph IR is never forwarded as an empty hard constraint. An IR with no
+AWS resource/data-source nodes falls back to visible-Prompt generation. If only
+bindings fail provider-schema checking, those bindings are dropped and the
+reduced IR is rechecked before Schema Grounding. A schema-valid IR with an
+invalid Provider Contract falls back to Prompt + Graph IR + exact Schema.
+Rejected artifacts remain in provenance but are not shown to the Compiler as
+binding implementation contracts.
 
 Changing the provider version without rebuilding the schema, documentation KG,
 dense index and offline cache fails closed.

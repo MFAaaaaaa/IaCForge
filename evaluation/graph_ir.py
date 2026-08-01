@@ -157,6 +157,25 @@ def _normalize_legacy_graph(
     bindings = graph.get("bindings", [])
     if not isinstance(bindings, list):
         bindings = []
+    normalized_bindings = []
+    for item in bindings:
+        if not isinstance(item, dict):
+            normalized_bindings.append(item)
+            continue
+        normalized_binding = dict(item)
+        used_explicit_roles = "consumer" in item or "producer" in item
+        if "source" not in normalized_binding and "consumer" in item:
+            normalized_binding["source"] = item.get("consumer")
+        if "target" not in normalized_binding and "producer" in item:
+            normalized_binding["target"] = item.get("producer")
+        normalized_binding.pop("consumer", None)
+        normalized_binding.pop("producer", None)
+        normalized_bindings.append(normalized_binding)
+        if used_explicit_roles:
+            actions.append(
+                "normalized binding consumer/producer roles to canonical source/target"
+            )
+    bindings = normalized_bindings
     explicit_dependencies = graph.get("explicit_dependencies", [])
     if not isinstance(explicit_dependencies, list):
         explicit_dependencies = []

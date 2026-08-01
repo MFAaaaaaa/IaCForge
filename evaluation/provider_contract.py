@@ -101,11 +101,17 @@ def _binding_contract(binding, instances):
     source_path = str(source.get("path", ""))
     target_path = str(target.get("path", ""))
     target_instance = instances.get(target_id, {})
+    consumer_assignment = f"{source_id}.{source_path}"
+    producer_reference = f"{target_id}.{target_path}"
     return {
         "id": binding.get("id")
         or f"binding:{source_id}.{source_path}->{target_id}.{target_path}",
-        "source": f"{source_id}.{source_path}",
-        "target": f"{target_id}.{target_path}",
+        # source/target are retained for archived metrics. The explicit names
+        # prevent small compilers from reversing the assignment direction.
+        "source": consumer_assignment,
+        "target": producer_reference,
+        "consumer_assignment": consumer_assignment,
+        "producer_reference": producer_reference,
         "kind": binding.get("kind", "attribute_reference"),
         "expression": _reference_expression(target_instance, target_path),
         "evidence_id": binding.get("evidence_id", ""),
@@ -148,6 +154,22 @@ def _instantiate_kg_bindings(evidence, graph, existing):
         target_id, target_instance = targets[0]
         source_path = str(template.get("attr"))
         target_path = str(template.get("target_path") or "id")
+        source_type = str(template.get("from_type", ""))
+        target_type = str(template.get("to_type", ""))
+        # Type-level KG edges are compiler bindings only when the configured
+        # provider schema proves both endpoint roles and value compatibility.
+        if not provider_schema.is_assignable(source_type, source_path, "resource"):
+            continue
+        if not provider_schema.is_exported(target_type, target_path, "resource"):
+            continue
+        source_spec = provider_schema.attribute_type(
+            source_type, source_path.split(".", 1)[0], "resource"
+        )
+        target_spec = provider_schema.attribute_type(
+            target_type, target_path.split(".", 1)[0], "resource"
+        )
+        if not provider_schema.types_compatible(source_spec, target_spec):
+            continue
         pair = (f"{source_id}.{source_path}", f"{target_id}.{target_path}")
         if pair in existing_pairs:
             continue
@@ -158,6 +180,8 @@ def _instantiate_kg_bindings(evidence, graph, existing):
                 or f"binding:{pair[0]}->{pair[1]}",
                 "source": pair[0],
                 "target": pair[1],
+                "consumer_assignment": pair[0],
+                "producer_reference": pair[1],
                 "kind": "attribute_reference",
                 "expression": _reference_expression(target_instance, target_path),
                 "evidence_id": template.get("evidence_id", ""),

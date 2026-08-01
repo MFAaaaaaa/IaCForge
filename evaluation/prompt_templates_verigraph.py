@@ -16,8 +16,8 @@ GRAPH_IR_JSON_SHAPE = r"""
   "bindings": [
     {
       "id": "binding:consumer.argument->producer.attribute",
-      "source": {"resource": "consumer_instance_id", "path": "assignable_argument"},
-      "target": {"resource": "producer_instance_id", "path": "exported_attribute"},
+      "consumer": {"resource": "consumer_instance_id", "path": "assignable_argument"},
+      "producer": {"resource": "producer_instance_id", "path": "exported_attribute"},
       "kind": "attribute_reference",
       "evidence_id": "optional public evidence id"
     }
@@ -62,7 +62,8 @@ Planner rules:
 - Create a stable instance for each object explicitly required by the visible prompt.
 - Distinguish managed `resource`, read-only `data_source`, and `external_input`.
 - "Use an existing X" must not silently become a newly managed resource.
-- Express value flow as field-level `bindings`: source is the consumer's assignable argument; target is the producer's exported attribute.
+- Express value flow as field-level `bindings`: `consumer` is the block and assignable argument receiving the value; `producer` is the block and exported attribute being referenced.
+- Never reverse consumer and producer. Example: subnet.vpc_id = vpc.id means consumer=subnet.vpc_id and producer=vpc.id.
 - `explicit_dependencies` is only for a genuine Terraform depends_on relation that cannot be represented by a value reference.
 - Use structured constraints when a field mapping is known. Keep a semantic requirement with status `unresolved` when it is not known.
 - Map every atomic visible requirement to the resources, bindings and constraints that implement it.
@@ -102,6 +103,7 @@ be created: choose a resource, data source, literal or external input from the p
 
 Candidate rules:
 - Prefer high-scoring candidates grounded by exact/lexical/dense matches.
+- Candidate resources are recall hints, not an exhaustive list. Derive every object explicitly required by the visible prompt even when it is absent from the candidates.
 - Treat schema-name hints as recall aids, never as hard bindings.
 - Use provenance-backed dependency candidates when their endpoints are selected.
 - A default-resource candidate is valid only when the prompt explicitly requests a default object.
@@ -158,6 +160,7 @@ Generate one complete Terraform HCL program under these checkable rules:
 6. Use nested block syntax, never object/list assignment in place of a block.
 7. Use explicit depends_on only for Graph IR `explicit_dependencies`.
 8. Do not emit input variables without defaults.
+9. Use each Graph IR instance `id` exactly as its Terraform block label.
 
 Return exactly one ```hcl code block. Do not use hidden evaluator information.
 """
@@ -192,8 +195,9 @@ Canonical task-specific Provider Contract:
 
 The Provider Contract is the implementation contract, not an optional note:
 1. Generate exactly one block for each `instance_contract`.
+   Use the `instance_contract` key exactly as the Terraform block label.
 2. Do not introduce managed resources absent from the contract.
-3. Realize every `bindings[*].expression` at its specified source assignment.
+3. Realize every `bindings[*].expression` at its specified `consumer_assignment`.
 4. Satisfy every `required_assignments` entry; preserve all `must_assign` values.
 5. Use visible-prompt values in `should_assign` when present.
 6. Never assign `forbidden_assignments`.
@@ -201,6 +205,11 @@ The Provider Contract is the implementation contract, not an optional note:
 8. Use explicit depends_on only for `explicit_dependencies`.
 9. If an item is explicitly unresolved, solve it only from the visible prompt and schema;
    do not guess hidden evaluator expectations.
+10. Never reference `var.NAME` unless a matching `variable "NAME"` block with a
+    concrete default is included in the same program. Prefer visible-prompt literals.
+11. Never use an undeclared variable as a shortcut for an
+    `unresolved_required_assignments` entry; choose a schema-valid local literal instead.
+12. Emit only provider-schema-supported resource types, arguments and nested blocks.
 
 Return one complete Terraform program in exactly one ```hcl code block.
 """
@@ -211,8 +220,10 @@ def local_repair_prompt(
 ):
     return f"""
 Repair one Terraform candidate using only the visible prompt, normalized Graph IR,
-Provider Contract, original HCL and Terraform validation/plan diagnostic below.
+Provider Contract, original HCL and the deterministic safety or Terraform diagnostic below.
 Do not use or infer OPA policy/results. Preserve the same resource instances and bindings.
+Never reference an undeclared input variable. Every referenced input variable must
+be declared in the same program with a concrete default.
 Return one complete repaired program in one ```hcl code block.
 
 Visible prompt:
