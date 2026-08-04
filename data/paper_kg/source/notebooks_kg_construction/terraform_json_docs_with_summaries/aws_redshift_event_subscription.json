@@ -1,0 +1,141 @@
+{
+  "resource": {
+    "name": "aws_redshift_event_subscription",
+    "description": "Provides a Redshift event subscription resource.",
+    "llm_summary": "The `aws_redshift_event_subscription` resource enables the creation and management of event subscriptions for Amazon Redshift, allowing users to receive notifications about cluster events via Amazon SNS. Common use cases include monitoring Redshift cluster health, tracking maintenance updates, and responding to security or operational events. Users can configure event categories, specify Redshift clusters as sources, and define SNS topics for streamlined alerting and automated workflows."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_redshift_cluster\" \"default\" {\n  cluster_identifier = \"default\"\n  database_name      = \"default\"\n\n  # ...\n}\n\nresource \"aws_sns_topic\" \"default\" {\n  name = \"redshift-events\"\n}\n\nresource \"aws_redshift_event_subscription\" \"default\" {\n  name          = \"redshift-event-sub\"\n  sns_topic_arn = aws_sns_topic.default.arn\n\n  source_type = \"cluster\"\n  source_ids  = [aws_redshift_cluster.default.id]\n\n  severity = \"INFO\"\n\n  event_categories = [\n    \"configuration\",\n    \"management\",\n    \"monitoring\",\n    \"security\",\n  ]\n\n  tags = {\n    Name = \"default\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Redshift event subscription (`aws_redshift_event_subscription`) to monitor cluster events and send notifications to an SNS topic. It showcases key arguments such as `sns_topic_arn`, `source_type`, `source_ids`, `severity`, and `event_categories`, enabling users to set up event-driven alerts for Redshift clusters with customizable filters and tagging."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "enabled",
+      "description": "(Optional) A boolean flag to enable/disable the subscription. Defaults to `true`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enabled` argument in the `aws_redshift_event_subscription` resource allows users to control whether the event subscription is active or disabled. Setting this boolean flag to `true` enables the subscription to receive notifications for specified Redshift events, while setting it to `false` disables the subscription, effectively pausing event notifications without deleting the configuration."
+    },
+    {
+      "name": "event_categories",
+      "description": "(Optional) A list of event categories for a SourceType that you want to subscribe to. See https://docs.aws.amazon.com/redshift/latest/mgmt/working-with-event-notifications.html or run `aws redshift describe-event-categories`.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `event_categories` argument in the `aws_redshift_event_subscription` resource allows users to specify a set of event categories they want to monitor for a given Redshift source type. By defining these categories, users can tailor event notifications to focus on specific types of operational or maintenance events, such as configuration changes, security alerts, or system failures, aligning the subscription with their monitoring and alerting goals."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_redshift_event_subscription` resource represents the unique identifier of the event subscription. While optional, it allows users to explicitly define or reference the subscription's ID, which can be useful for tracking, managing, or integrating the resource within larger infrastructure workflows or automation processes."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name of the Redshift event subscription.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies a unique identifier for the Redshift event subscription, allowing users to define a meaningful and recognizable name for the subscription. Setting this argument ensures the subscription can be easily referenced and managed, aligning with common user goals of organizing and tracking cloud resources effectively."
+    },
+    {
+      "name": "severity",
+      "description": "(Optional) The event severity to be published by the notification subscription. Valid options are `INFO` or `ERROR`. Default value of `INFO`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `severity` argument in the `aws_redshift_event_subscription` resource allows users to specify the level of event severity (`INFO` or `ERROR`) that triggers notifications for the subscription. By configuring this argument, users can control the type of Redshift events they want to monitor, enabling targeted alerts for informational updates or critical errors based on their operational needs."
+    },
+    {
+      "name": "sns_topic_arn",
+      "description": "(Required) The ARN of the SNS topic to send events to.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `sns_topic_arn` argument specifies the Amazon Resource Name (ARN) of the SNS topic where Redshift event notifications will be sent, enabling users to configure the destination for event alerts triggered by the `aws_redshift_event_subscription`. By setting this required argument, users can integrate Redshift event monitoring with their broader notification or alerting systems, ensuring timely updates on cluster events such as maintenance, errors, or status changes."
+    },
+    {
+      "name": "source_ids",
+      "description": "(Optional) A list of identifiers of the event sources for which events will be returned. If not specified, then all sources are included in the response. If specified, a `source_type` must also be specified.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `source_ids` argument in the `aws_redshift_event_subscription` resource allows users to specify a set of identifiers for Redshift event sources (e.g., cluster IDs) to filter which sources generate events for the subscription. By defining this argument, users can target specific resources for event monitoring, enabling more granular control over event notifications. Note that a `source_type` must also be configured when using this argument."
+    },
+    {
+      "name": "source_type",
+      "description": "(Optional) The type of source that will be generating the events. Valid options are `cluster`, `cluster-parameter-group`, `cluster-security-group`, `cluster-snapshot`, or `scheduled-action`. If not set, all sources will be subscribed to.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `source_type` argument in the `aws_redshift_event_subscription` resource allows users to specify the type of Redshift resource (e.g., `cluster`, `cluster-parameter-group`, `cluster-security-group`, `cluster-snapshot`, or `scheduled-action`) that will generate events for the subscription. By setting this argument, users can tailor event notifications to specific resource types, enabling more focused monitoring and alerting based on their operational needs."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_redshift_event_subscription` resource allows users to assign metadata in the form of key-value pairs to the subscription, enabling resource categorization, organization, and cost tracking. By configuring this argument, users can define custom tags for purposes such as identifying environments (e.g., \"dev\" or \"prod\"), associating ownership, or integrating with tagging policies, with provider-level default tags being overridden if matching keys are specified."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_redshift_event_subscription` resource allows users to define a comprehensive set of key-value tags that are applied to the event subscription, including inherited tags from the provider's default configuration. This facilitates resource organization, cost allocation, and metadata management, enabling users to categorize and track the subscription within their cloud environment effectively."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_redshift_event_subscription` resource allows users to specify the maximum duration (in string format, e.g., \"30m\" for 30 minutes) Terraform will wait for the creation of the event subscription to complete. Configuring this timeout ensures users can control the provisioning behavior, preventing long or indefinite waits during deployment and aligning resource creation with operational expectations."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block for the `aws_redshift_event_subscription` resource allows users to specify the maximum duration Terraform should wait for the deletion of the event subscription to complete. By configuring this timeout, users can control the lifecycle behavior during resource teardown, ensuring operations do not hang indefinitely or fail prematurely due to insufficient wait time."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_redshift_event_subscription` resource allows users to define the maximum duration Terraform will wait for updates to the event subscription to complete. By configuring this timeout, users can control the behavior of long-running update operations, ensuring smoother resource management and avoiding potential timeout errors during infrastructure changes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_redshift_event_subscription` resource defines customizable time limits for operations such as creating, updating, or deleting Redshift event subscriptions. By configuring this block, users can manage operation durations to prevent timeouts in long-running tasks, ensuring reliable and predictable resource provisioning and lifecycle management."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) of the Redshift event notification subscription",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "customer_aws_id",
+      "description": "The AWS customer account associated with the Redshift event notification subscription",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "description": "",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

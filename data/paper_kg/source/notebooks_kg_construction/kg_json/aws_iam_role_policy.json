@@ -1,0 +1,41 @@
+{
+    "resource": {
+        "name": "aws_iam_role_policy",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "policy",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "role",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": []
+}

@@ -1,0 +1,183 @@
+{
+  "resource": {
+    "name": "aws_db_snapshot",
+    "description": "Manages an RDS database instance snapshot. For managing RDS database cluster snapshots, see the aws_db_cluster_snapshot resource.",
+    "llm_summary": "The `aws_db_snapshot` Terraform resource enables the management of RDS database instance snapshots, providing a reliable way to back up and restore database states for disaster recovery, data migration, or point-in-time recovery. Common use cases include automating snapshot creation for lifecycle management, preserving critical data during infrastructure changes, and ensuring compliance with backup policies. Users can configure snapshot retention, automate snapshot schedules, and reference snapshots for restoring database instances to specific states."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_db_instance\" \"bar\" {\n  allocated_storage = 10\n  engine            = \"mysql\"\n  engine_version    = \"5.6.21\"\n  instance_class    = \"db.t2.micro\"\n  db_name           = \"baz\"\n  password          = \"barbarbarbar\"\n  username          = \"foo\"\n\n  maintenance_window      = \"Fri:09:00-Fri:09:30\"\n  backup_retention_period = 0\n  parameter_group_name    = \"default.mysql5.6\"\n}\n\nresource \"aws_db_snapshot\" \"test\" {\n  db_instance_identifier = aws_db_instance.bar.identifier\n  db_snapshot_identifier = \"testsnapshot1234\"\n}",
+      "llm_summary": "This example demonstrates how to create an Amazon RDS database snapshot using the `aws_db_snapshot` resource, linked to an existing `aws_db_instance`. It highlights key configurations such as specifying the `db_instance_identifier` to associate the snapshot with a database instance and defining a custom `db_snapshot_identifier` for the snapshot."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "db_instance_identifier",
+      "description": "(Required) The DB Instance Identifier from which to take the snapshot.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `db_instance_identifier` argument specifies the unique identifier of the source database instance from which the snapshot will be created, enabling users to define the origin of the database backup. By setting this required argument, users ensure the snapshot captures the state and data of the specified DB instance, supporting goals like disaster recovery, data retention, or environment replication."
+    },
+    {
+      "name": "db_snapshot_identifier",
+      "description": "(Required) The Identifier for the snapshot.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `db_snapshot_identifier` argument specifies a unique identifier for the database snapshot, allowing users to define and reference the snapshot explicitly within their AWS environment. By setting this required property, users ensure the snapshot is uniquely identifiable for operations like creation, management, and restoration, supporting common goals such as disaster recovery, database versioning, or environment replication."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_db_snapshot` resource allows users to specify the unique identifier of an existing database snapshot to reference or import into Terraform's state. This enables users to manage or interact with pre-existing snapshots, supporting workflows like restoring databases or tracking snapshot configurations within their infrastructure as code."
+    },
+    {
+      "name": "shared_accounts",
+      "description": "(Optional) List of AWS Account IDs to share the snapshot with. Use `all` to make the snapshot public.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `shared_accounts` argument in the `aws_db_snapshot` resource allows users to specify a set of AWS account IDs with which the database snapshot will be shared, enabling cross-account access to the snapshot. By configuring this argument, users can control snapshot sharing for collaboration, disaster recovery, or multi-account architectures, with the option to make the snapshot publicly accessible by using `all`."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Key-value map of resource tags. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_db_snapshot` resource allows users to define a key-value map of metadata to categorize and manage the snapshot, such as environment identifiers (e.g., `env=prod`) or ownership details. Configuring this argument helps streamline resource organization, searchability, and cost allocation, while enabling tag-based automation or governance policies within AWS."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_db_snapshot` resource allows users to define a comprehensive set of key-value tags that are applied to the database snapshot, including inherited tags from the parent resource. This enables streamlined resource organization, cost allocation, and metadata management, supporting common user goals like tagging for environment identification, compliance tracking, or billing analysis."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_db_snapshot` resource allows users to specify the maximum duration (in string format, e.g., \"30m\" for 30 minutes) Terraform should wait for the creation of a database snapshot to complete. Configuring this timeout ensures better control over resource provisioning workflows, preventing indefinite hangs or premature failures during snapshot creation."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_db_snapshot` resource allows users to define custom timeout durations for operations such as creating or deleting database snapshots. By configuring this block, users gain precise control over operation time limits, ensuring smoother management of snapshot lifecycle processes in cases of long-running tasks or specific infrastructure requirements."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "allocated_storage",
+      "description": "Specifies the allocated storage size in gigabytes (GB).",
+      "optional": false,
+      "type": "number"
+    },
+    {
+      "name": "availability_zone",
+      "description": "Specifies the name of the Availability Zone the DB instance was located in at the time of the DB snapshot.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "db_snapshot_arn",
+      "description": "The Amazon Resource Name (ARN) for the DB snapshot.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "encrypted",
+      "description": "Specifies whether the DB snapshot is encrypted.",
+      "optional": false,
+      "type": "bool"
+    },
+    {
+      "name": "engine",
+      "description": "Specifies the name of the database engine.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "engine_version",
+      "description": "Specifies the version of the database engine.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "iops",
+      "description": "Specifies the Provisioned IOPS (I/O operations per second) value of the DB instance at the time of the snapshot.",
+      "optional": false,
+      "type": "number"
+    },
+    {
+      "name": "kms_key_id",
+      "description": "The ARN for the KMS encryption key.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "license_model",
+      "description": "License model information for the restored DB instance.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "option_group_name",
+      "description": "Provides the option group name for the DB snapshot.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "port",
+      "description": "",
+      "optional": false,
+      "type": "number"
+    },
+    {
+      "name": "snapshot_type",
+      "description": "",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "source_db_snapshot_identifier",
+      "description": "The DB snapshot Arn that the DB snapshot was copied from. It only has value in case of cross customer or cross region copy.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "source_region",
+      "description": "The region that the DB snapshot was created in or copied from.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "description": "Specifies the status of this DB snapshot.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "storage_type",
+      "description": "Specifies the storage type associated with DB snapshot.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "vpc_id",
+      "description": "Provides the VPC ID associated with the DB snapshot.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

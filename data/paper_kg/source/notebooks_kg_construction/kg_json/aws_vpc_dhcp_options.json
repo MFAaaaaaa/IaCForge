@@ -1,0 +1,78 @@
+{
+    "resource": {
+        "name": "aws_vpc_dhcp_options",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "domain_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "domain_name_servers",
+            "description": "",
+            "required": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ipv6_address_preferred_lease_time",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "netbios_name_servers",
+            "description": "",
+            "required": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "netbios_node_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ntp_servers",
+            "description": "",
+            "required": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "owner_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

@@ -1,0 +1,52 @@
+[
+    {
+        "argument_path": "rule",
+        "references_output": "aws_cloudwatch_event_rule.name",
+        "target_resource_type": "aws_cloudwatch_event_rule"
+    },
+    {
+        "argument_path": "arn",
+        "references_output": "aws_kinesis_stream.arn",
+        "target_resource_type": "aws_kinesis_stream"
+    },
+    {
+        "argument_path": "arn",
+        "references_output": "aws_ssm_document.arn",
+        "target_resource_type": "aws_ssm_document"
+    },
+    {
+        "argument_path": "role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "arn",
+        "references_output": "aws_ecs_cluster.arn",
+        "target_resource_type": "aws_ecs_cluster"
+    },
+    {
+        "argument_path": "ecs_target.task_definition_arn",
+        "references_output": "aws_ecs_task_definition.arn",
+        "target_resource_type": "aws_ecs_task_definition"
+    },
+    {
+        "argument_path": "arn",
+        "references_output": "aws_api_gateway_stage.execution_arn",
+        "target_resource_type": "aws_api_gateway_stage"
+    },
+    {
+        "argument_path": "arn",
+        "references_output": "aws_lambda_function.arn",
+        "target_resource_type": "aws_lambda_function"
+    },
+    {
+        "argument_path": "arn",
+        "references_output": "aws_cloudwatch_log_group.arn",
+        "target_resource_type": "aws_cloudwatch_log_group"
+    },
+    {
+        "argument_path": "arn",
+        "references_output": "aws_appsync_graphql_api.arn",
+        "target_resource_type": "aws_appsync_graphql_api"
+    }
+]

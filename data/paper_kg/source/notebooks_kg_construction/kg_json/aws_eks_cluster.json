@@ -1,0 +1,473 @@
+{
+    "resource": {
+        "name": "aws_eks_cluster",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "bootstrap_self_managed_addons",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "enabled_cluster_log_types",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "role_arn",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "version",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "access_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "authentication_mode",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "bootstrap_cluster_creator_admin_permissions",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "compute_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "enabled",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "node_pools",
+                    "description": "",
+                    "required": false,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "node_role_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "encryption_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "resources",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "provider",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "key_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "kubernetes_network_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "ip_family",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "service_ipv4_cidr",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "service_ipv6_cidr",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "elastic_load_balancing",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "outpost_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "control_plane_instance_type",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "outpost_arns",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "control_plane_placement",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "group_name",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "remote_network_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "remote_node_networks",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "cidrs",
+                            "description": "",
+                            "required": false,
+                            "type": "set(string)"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "remote_pod_networks",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "cidrs",
+                            "description": "",
+                            "required": false,
+                            "type": "set(string)"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "storage_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "block_storage",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "upgrade_policy",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "support_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "vpc_config",
+            "description": "",
+            "cardinality": [
+                1,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "cluster_security_group_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "endpoint_private_access",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "endpoint_public_access",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "public_access_cidrs",
+                    "description": "",
+                    "required": false,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "security_group_ids",
+                    "description": "",
+                    "required": false,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "subnet_ids",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "vpc_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "zonal_shift_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "enabled",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "certificate_authority",
+            "description": "",
+            "optional": false,
+            "type": "list(object({data=string}))"
+        },
+        {
+            "name": "cluster_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "created_at",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "endpoint",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "identity",
+            "description": "",
+            "optional": false,
+            "type": "list(object({oidc=list(object({issuer=string}))}))"
+        },
+        {
+            "name": "platform_version",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "status",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

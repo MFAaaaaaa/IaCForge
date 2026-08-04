@@ -1,0 +1,7 @@
+[
+    {
+        "argument_path": "username",
+        "references_output": "aws_iam_user.name",
+        "target_resource_type": "aws_iam_user"
+    }
+]

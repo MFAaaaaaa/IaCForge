@@ -1,0 +1,101 @@
+{
+  "resource": {
+    "name": "aws_elastic_beanstalk_configuration_template",
+    "description": "Provides an Elastic Beanstalk Configuration Template, which are associated with a specific application and are used to deploy different versions of the application with the same configuration settings.",
+    "llm_summary": "The `aws_elastic_beanstalk_configuration_template` resource enables the creation and management of reusable configuration templates for AWS Elastic Beanstalk applications, streamlining the deployment of application versions with consistent settings. It is commonly used to define environment-specific configurations, such as instance types, scaling policies, logging, monitoring, and software settings, ensuring uniformity across deployments. This resource is ideal for automating application lifecycle management, simplifying updates, and maintaining best practices in multi-environment setups."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_elastic_beanstalk_application\" \"tftest\" {\n  name        = \"tf-test-name\"\n  description = \"tf-test-desc\"\n}\n\nresource \"aws_elastic_beanstalk_configuration_template\" \"tf_template\" {\n  name                = \"tf-test-template-config\"\n  application         = aws_elastic_beanstalk_application.tftest.name\n  solution_stack_name = \"64bit Amazon Linux 2015.09 v2.0.8 running Go 1.4\"\n}",
+      "llm_summary": "\"Demonstrates how to create an AWS Elastic Beanstalk configuration template using the `aws_elastic_beanstalk_configuration_template` resource, linked to an Elastic Beanstalk application via the `application` argument. Highlights the use of the `solution_stack_name` to specify the platform environment for the application.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "application",
+      "description": "\u2013 (Required) name of the application to associate with this configuration template",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `application` argument specifies the name of the Elastic Beanstalk application to associate with the configuration template, ensuring the template is tied to a specific application for managing its environment settings. This is a required parameter that enables users to define the scope of the configuration template, aligning it with the intended application for deployment and operational customization."
+    },
+    {
+      "name": "description",
+      "description": "(Optional) Short description of the Template",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument allows users to define a short, human-readable summary for the Elastic Beanstalk configuration template, providing context or metadata about its purpose or usage. This is useful for documentation and organization, helping users distinguish between multiple templates in complex deployments."
+    },
+    {
+      "name": "environment_id",
+      "description": "\u2013 (Optional) The ID of the environment used with this configuration template",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `environment_id` argument allows users to associate the configuration template with a specific Elastic Beanstalk environment by specifying its ID. This enables the template to inherit settings and properties from the referenced environment, streamlining the creation of new environments with consistent configurations or aligning the template with an existing environment's setup."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_elastic_beanstalk_configuration_template` resource specifies a unique identifier for the configuration template, typically used to reference or manage the template programmatically within Terraform or other systems. While optional, setting this argument can help users track and distinguish specific templates, aiding in resource organization and automation workflows."
+    },
+    {
+      "name": "name",
+      "description": "(Required) A unique name for this Template.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies a unique identifier for the Elastic Beanstalk configuration template, allowing users to define and distinguish this template from others within the same AWS account. Setting this argument is essential for organizing and referencing the template when configuring application environments, ensuring clarity and preventing naming conflicts."
+    },
+    {
+      "name": "solution_stack_name",
+      "description": "\u2013 (Optional) A solution stack to base your Template off of. Example stacks can be found in the Amazon API documentation",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `solution_stack_name` argument allows users to specify the pre-configured platform stack (e.g., runtime and environment) on which the Elastic Beanstalk configuration template is based, such as a specific programming language and version. Setting this argument helps define the foundational environment for application deployment, aligning with user goals like selecting compatible runtime stacks for their workloads."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "setting",
+      "description": "\u2013 (Optional) Option settings to configure the new Environment. These override specific values that are set as defaults. The format is detailed below in Option Settings",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "name",
+          "description": "(Required) A unique name for this Template.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `name` argument specifies a unique identifier for the Elastic Beanstalk configuration template, allowing users to define and distinguish this template from others within their AWS environment. By setting this argument, users ensure the template can be referenced for managing application settings, deployment configurations, and environment-specific customizations."
+        },
+        {
+          "name": "namespace",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `namespace` argument specifies the configuration namespace within AWS Elastic Beanstalk where the `setting` applies, allowing users to target specific components or features (e.g., environment variables, instance settings, or scaling options). By defining this string, users can control and customize the behavior of particular aspects of their Elastic Beanstalk environment, aligning it with application requirements or operational goals."
+        },
+        {
+          "name": "resource",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `resource` argument within the `setting` block of the `aws_elastic_beanstalk_configuration_template` resource specifies the AWS resource type or identifier that a particular configuration setting applies to. This allows users to target specific Elastic Beanstalk components (e.g., instances, load balancers, or auto-scaling groups) for fine-grained customization, enabling precise control over environment behavior and resource-specific settings."
+        },
+        {
+          "name": "value",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `value` argument in the `setting` block of the `aws_elastic_beanstalk_configuration_template` resource specifies the actual configuration parameter or property value for a given Elastic Beanstalk environment setting. This allows users to define critical environment-specific behaviors, such as enabling features, setting environment variables, or customizing application runtime settings, directly impacting the application's operational behavior and resource configuration."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `setting` configuration block within the `aws_elastic_beanstalk_configuration_template` resource allows users to define and override specific environment option settings for Elastic Beanstalk applications. It encapsulates granular configuration parameters, such as instance types, scaling policies, or logging settings, enabling precise control over the application's runtime behavior and operational characteristics. This block is essential for tailoring default environment settings to meet custom requirements and optimize application performance."
+    }
+  ],
+  "attributes": []
+}

@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "zone_id",
+        "references_output": "aws_route53_zone.id",
+        "target_resource_type": "aws_route53_zone"
+    },
+    {
+        "argument_path": "vpc_id",
+        "references_output": "aws_vpc.id",
+        "target_resource_type": "aws_vpc"
+    }
+]

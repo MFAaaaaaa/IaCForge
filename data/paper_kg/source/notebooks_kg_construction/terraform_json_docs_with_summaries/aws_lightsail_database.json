@@ -1,0 +1,230 @@
+{
+  "resource": {
+    "name": "aws_lightsail_database",
+    "description": "Provides a Lightsail Database. Amazon Lightsail is a service to provide easy virtual private servers with custom software already setup. See What is Amazon Lightsail? for more information. Lightsail is currently only supported in a limited number of AWS Regions, please see \"Regions and Availability Zones\" for more details",
+    "llm_summary": "The `aws_lightsail_database` resource enables the creation and management of Amazon Lightsail databases, offering a simplified way to deploy and operate managed databases with minimal configuration. It is ideal for use cases such as setting up scalable database backends for web applications, managing lightweight development or production environments, and quickly provisioning databases with pre-configured software. Users can configure key settings like database engine type, version, storage capacity, backup retention, and availability within supported AWS regions, making it a streamlined solution for small to medium-scale database needs."
+  },
+  "examples": [
+    {
+      "title": "Basic mysql blueprint",
+      "code": "resource \"aws_lightsail_database\" \"test\" {\n  relational_database_name = \"test\"\n  availability_zone        = \"us-east-1a\"\n  master_database_name     = \"testdatabasename\"\n  master_password          = \"testdatabasepassword\"\n  master_username          = \"test\"\n  blueprint_id             = \"mysql_8_0\"\n  bundle_id                = \"micro_1_0\"\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS Lightsail MySQL database using the `aws_lightsail_database` resource, specifying key attributes such as `blueprint_id` for MySQL 8.0, `bundle_id` for a micro instance, and essential parameters like `master_username`, `master_password`, and `availability_zone`. This example is ideal for users looking to set up a basic MySQL database with Lightsail using Terraform.\""
+    },
+    {
+      "title": "Basic postrgres blueprint",
+      "code": "resource \"aws_lightsail_database\" \"test\" {\n  relational_database_name = \"test\"\n  availability_zone        = \"us-east-1a\"\n  master_database_name     = \"testdatabasename\"\n  master_password          = \"testdatabasepassword\"\n  master_username          = \"test\"\n  blueprint_id             = \"postgres_12\"\n  bundle_id                = \"micro_1_0\"\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Lightsail database with a PostgreSQL 12 blueprint using the `aws_lightsail_database` resource. It highlights key arguments such as `relational_database_name`, `blueprint_id`, `bundle_id`, and credentials (`master_username` and `master_password`) to set up a basic, micro-sized PostgreSQL database in a specific availability zone."
+    },
+    {
+      "title": "Custom backup and maintenance windows",
+      "code": "resource \"aws_lightsail_database\" \"test\" {\n  relational_database_name     = \"test\"\n  availability_zone            = \"us-east-1a\"\n  master_database_name         = \"testdatabasename\"\n  master_password              = \"testdatabasepassword\"\n  master_username              = \"test\"\n  blueprint_id                 = \"postgres_12\"\n  bundle_id                    = \"micro_1_0\"\n  preferred_backup_window      = \"16:00-16:30\"\n  preferred_maintenance_window = \"Tue:17:00-Tue:17:30\"\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Lightsail database with custom backup and maintenance windows using the `preferred_backup_window` and `preferred_maintenance_window` arguments. It also showcases essential settings such as database blueprint, bundle size, master credentials, and availability zone for creating a PostgreSQL database instance."
+    },
+    {
+      "title": "Final Snapshots",
+      "code": "resource \"aws_lightsail_database\" \"test\" {\n  relational_database_name     = \"test\"\n  availability_zone            = \"us-east-1a\"\n  master_database_name         = \"testdatabasename\"\n  master_password              = \"testdatabasepassword\"\n  master_username              = \"test\"\n  blueprint_id                 = \"postgres_12\"\n  bundle_id                    = \"micro_1_0\"\n  preferred_backup_window      = \"16:00-16:30\"\n  preferred_maintenance_window = \"Tue:17:00-Tue:17:30\"\n  final_snapshot_name          = \"MyFinalSnapshot\"\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Lightsail database with a final snapshot upon deletion using the `final_snapshot_name` argument. It includes key settings such as database blueprint and bundle selection, backup and maintenance windows, and credentials for a PostgreSQL database."
+    },
+    {
+      "title": "Apply Immediately",
+      "code": "resource \"aws_lightsail_database\" \"test\" {\n  relational_database_name = \"test\"\n  availability_zone        = \"us-east-1a\"\n  master_database_name     = \"testdatabasename\"\n  master_password          = \"testdatabasepassword\"\n  master_username          = \"test\"\n  blueprint_id             = \"postgres_12\"\n  bundle_id                = \"micro_1_0\"\n  apply_immediately        = true\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Lightsail database with immediate application of changes using the `apply_immediately` argument. It showcases key settings such as specifying the database blueprint (`postgres_12`), bundle size (`micro_1_0`), and essential credentials like `master_username` and `master_password`."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "apply_immediately",
+      "description": "When true , applies changes immediately. When false , applies changes during the preferred maintenance window. Some changes may cause an outage.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `apply_immediately` argument in the `aws_lightsail_database` resource allows users to control whether configuration changes to the database are applied immediately or deferred to the preferred maintenance window. Setting this to `true` enables immediate application of changes, potentially causing downtime, while setting it to `false` schedules changes for a maintenance window to minimize service disruption, aligning with common goals of managing database lifecycle and availability."
+    },
+    {
+      "name": "availability_zone",
+      "description": "The Availability Zone in which to create your new database. Use the us-east-2a case-sensitive format.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `availability_zone` argument for the `aws_lightsail_database` resource allows users to specify the geographic location within a region where the database instance will be created, using a case-sensitive format (e.g., `us-east-2a`). Configuring this ensures optimal placement for latency, redundancy, or compliance with specific infrastructure requirements."
+    },
+    {
+      "name": "backup_retention_enabled",
+      "description": "When true, enables automated backup retention for your database. When false, disables automated backup retention for your database. Disabling backup retention deletes all automated database backups. Before disabling this, you may want to create a snapshot of your database.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `backup_retention_enabled` argument for the `aws_lightsail_database` resource allows users to control whether automated backups are retained for the database. Enabling this feature ensures regular backup creation for disaster recovery, while disabling it removes all automated backups, requiring users to manually create snapshots to preserve data."
+    },
+    {
+      "name": "blueprint_id",
+      "description": "(Required) The blueprint ID for your new database. A blueprint describes the major engine version of a database. You can get a list of database blueprints IDs by using the AWS CLI command: `aws lightsail get-relational-database-blueprints`",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `blueprint_id` argument specifies the database engine and major version to be used for the `aws_lightsail_database` resource, allowing users to define the foundational software stack for their Lightsail database instance. By setting this required parameter, users ensure compatibility with their application requirements and can select from available database blueprints provided by AWS, such as MySQL or PostgreSQL."
+    },
+    {
+      "name": "bundle_id",
+      "description": "(Required) The bundle ID for your new database. A bundle describes the performance specifications for your database (see list below). You can get a list of database bundle IDs by using the AWS CLI command: `aws lightsail get-relational-database-bundles`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bundle_id` argument for the `aws_lightsail_database` resource specifies the performance and capacity configuration of the database instance by selecting a predefined bundle. Setting this argument allows users to define the database's compute, memory, and storage characteristics, ensuring it meets the application's workload requirements."
+    },
+    {
+      "name": "final_snapshot_name",
+      "description": "(Required unless `skip_final_snapshot = true`) The name of the database snapshot created if skip final snapshot is false, which is the default value for that parameter.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `final_snapshot_name` argument for the `aws_lightsail_database` resource allows users to specify the name of the database snapshot that is automatically created during resource deletion if `skip_final_snapshot` is set to `false` (default behavior). This argument is essential for defining a lifecycle configuration that ensures data retention and recovery by preserving a final backup of the database before it is terminated."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_lightsail_database` resource allows users to specify a unique identifier for the Lightsail database instance, typically used to reference or manage the resource programmatically within Terraform configurations. While optional, setting this argument can help users ensure consistent identification of the database instance across workflows, enabling streamlined resource tracking and integration with other infrastructure components."
+    },
+    {
+      "name": "master_database_name",
+      "description": "(Required) The name of the master database created when the Lightsail database resource is created.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `master_database_name` argument specifies the name of the primary database that is automatically created when provisioning an `aws_lightsail_database` resource. This required parameter allows users to define the core database identifier, which is essential for organizing and accessing the database in Lightsail environments, aligning with common goals like initializing application data storage."
+    },
+    {
+      "name": "master_password",
+      "description": "(Sensitive) The password for the master user of your new database. The password can include any printable ASCII character except \"/\", \"\"\", or \"@\".",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `master_password` argument for the `aws_lightsail_database` resource allows users to define the password for the master database user, which is essential for authenticating and managing administrative access to the database. By setting this required value, users establish secure credentials for database operations, ensuring controlled access and compliance with security best practices."
+    },
+    {
+      "name": "master_username",
+      "description": "The master user name for your new database.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `master_username` argument specifies the primary administrative username for the database created with the `aws_lightsail_database` resource. By defining this required value, users establish the credentials for managing and accessing the database, enabling secure control over database operations and configurations."
+    },
+    {
+      "name": "preferred_backup_window",
+      "description": "The daily time range during which automated backups are created for your new database if automated backups are enabled. Must be in the hh24:mi-hh24:mi format. Example: `16:00-16:30`. Specified in Coordinated Universal Time (UTC).",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the daily time range in UTC during which automated backups are created for the Lightsail database, allowing users to control the scheduling of backup operations to align with maintenance windows or minimize performance impact during peak usage periods."
+    },
+    {
+      "name": "preferred_maintenance_window",
+      "description": "The weekly time range during which system maintenance can occur on your new database. Must be in the ddd:hh24:mi-ddd:hh24:mi format. Specified in Coordinated Universal Time (UTC). Example: `Tue:17:00-Tue:17:30`",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `preferred_maintenance_window` argument for the `aws_lightsail_database` resource allows users to define a specific weekly time range in UTC during which system maintenance tasks, such as updates or patches, can occur on the database. This configuration helps users control and minimize potential downtime by aligning maintenance activities with periods of low application usage."
+    },
+    {
+      "name": "publicly_accessible",
+      "description": "Specifies the accessibility options for your new database. A value of true specifies a database that is available to resources outside of your Lightsail account. A value of false specifies a database that is available only to your Lightsail resources in the same region as your database.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `publicly_accessible` argument for the `aws_lightsail_database` resource controls whether the database can be accessed externally outside of the Lightsail account or is restricted to Lightsail resources within the same region. Setting this to `true` enables external access, supporting use cases like connecting from external applications or services, while `false` ensures the database remains private to internal Lightsail resources for enhanced security."
+    },
+    {
+      "name": "relational_database_name",
+      "description": "(Required) The name to use for your new Lightsail database resource. Names be unique within each AWS Region in your Lightsail account.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `relational_database_name` argument specifies the unique name for the Lightsail database resource within a given AWS Region, allowing users to define and identify the database instance for organizational, operational, or application-specific purposes. Setting this argument ensures the database is uniquely addressable within the account, supporting common goals like resource management, environment segregation, and application connectivity."
+    },
+    {
+      "name": "skip_final_snapshot",
+      "description": "Determines whether a final database snapshot is created before your database is deleted. If true is specified, no database snapshot is created. If false is specified, a database snapshot is created before your database is deleted. You must specify the final relational database snapshot name parameter if the skip final snapshot parameter is false.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `skip_final_snapshot` argument in the `aws_lightsail_database` resource allows users to control whether a final snapshot of the database is created before deletion, enabling lifecycle management for database backups. Setting this to `true` skips snapshot creation, prioritizing faster deletion, while setting it to `false` ensures a backup is retained for recovery or archival purposes, aligning with common goals of data retention and disaster recovery."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. To create a key-only tag, use an empty string as the value.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_lightsail_database` resource allows users to assign metadata to the database in the form of key-value pairs, enabling organization, categorization, and identification of resources for purposes such as cost allocation, environment labeling, or automation workflows. By setting this argument, users can define custom tags to streamline resource management and integrate with tagging-based policies or reporting tools."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_lightsail_database` resource allows users to define a comprehensive set of key-value tags that are applied to the database instance for organizational, management, or cost allocation purposes. By setting this argument, users can ensure consistent tagging across resources, enabling streamlined resource tracking, categorization, and integration with AWS billing and governance tools."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the Lightsail instance (matches `id`).",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "ca_certificate_identifier",
+      "description": "The certificate associated with the database.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "cpu_count",
+      "description": "The number of vCPUs for the database.",
+      "optional": false,
+      "type": "number"
+    },
+    {
+      "name": "created_at",
+      "description": "The timestamp when the instance was created.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "disk_size",
+      "description": "The size of the disk for the database.",
+      "optional": false,
+      "type": "number"
+    },
+    {
+      "name": "engine",
+      "description": "The database software (for example, MySQL).",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "engine_version",
+      "description": "The database engine version (for example, 5.7.23).",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "master_endpoint_address",
+      "description": "The master endpoint fqdn for the database.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "master_endpoint_port",
+      "description": "The master endpoint network port for the database.",
+      "optional": false,
+      "type": "number"
+    },
+    {
+      "name": "ram_size",
+      "description": "The amount of RAM in GB for the database.",
+      "optional": false,
+      "type": "number"
+    },
+    {
+      "name": "secondary_availability_zone",
+      "description": "Describes the secondary Availability Zone of a high availability database. The secondary database is used for failover support of a high availability database.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "support_code",
+      "description": "The support code for the database. Include this code in your email to support when you have questions about a database in Lightsail. This code enables our support team to look up your Lightsail information more easily.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

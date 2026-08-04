@@ -1,0 +1,354 @@
+{
+    "resource": {
+        "name": "aws_lb_target_group",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "connection_termination",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "deregistration_delay",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ip_address_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "lambda_multi_value_headers_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "load_balancing_algorithm_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "load_balancing_anomaly_mitigation",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "load_balancing_cross_zone_enabled",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "port",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "preserve_client_ip",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "protocol",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "protocol_version",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "proxy_protocol_v2",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "slow_start",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "target_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "vpc_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "health_check",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "enabled",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "healthy_threshold",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "interval",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "matcher",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "path",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "port",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "protocol",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "timeout",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "unhealthy_threshold",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "stickiness",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "cookie_duration",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "cookie_name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "enabled",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "type",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "target_failover",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "on_deregistration",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "on_unhealthy",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "target_group_health",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "dns_failover",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "minimum_healthy_targets_count",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "minimum_healthy_targets_percentage",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "unhealthy_state_routing",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "minimum_healthy_targets_count",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "minimum_healthy_targets_percentage",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "target_health_state",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "enable_unhealthy_connection_termination",
+                    "description": "",
+                    "required": true,
+                    "type": "bool"
+                },
+                {
+                    "name": "unhealthy_draining_interval",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "arn_suffix",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "load_balancer_arns",
+            "description": "",
+            "optional": false,
+            "type": "set(string)"
+        }
+    ]
+}

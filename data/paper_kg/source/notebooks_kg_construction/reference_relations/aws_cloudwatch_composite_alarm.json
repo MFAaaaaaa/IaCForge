@@ -1,0 +1,37 @@
+[
+    {
+        "argument_path": "alarm_actions",
+        "references_output": "aws_sns_topic.arn",
+        "target_resource_type": "aws_sns_topic"
+    },
+    {
+        "argument_path": "ok_actions",
+        "references_output": "aws_sns_topic.arn",
+        "target_resource_type": "aws_sns_topic"
+    },
+    {
+        "argument_path": "alarm_rule",
+        "references_output": "aws_cloudwatch_metric_alarm.alarm_name",
+        "target_resource_type": "aws_cloudwatch_metric_alarm"
+    },
+    {
+        "argument_path": "actions_suppressor.alarm",
+        "references_output": "aws_cloudwatch_metric_alarm.alarm_name",
+        "target_resource_type": "aws_cloudwatch_metric_alarm"
+    },
+    {
+        "argument_path": "actions_suppressor.alarm",
+        "references_output": "aws_cloudwatch_composite_alarm.alarm_name",
+        "target_resource_type": "aws_cloudwatch_composite_alarm"
+    },
+    {
+        "argument_path": "actions_suppressor.alarm",
+        "references_output": "aws_cloudwatch_metric_alarm.arn",
+        "target_resource_type": "aws_cloudwatch_metric_alarm"
+    },
+    {
+        "argument_path": "actions_suppressor.alarm",
+        "references_output": "aws_cloudwatch_composite_alarm.arn",
+        "target_resource_type": "aws_cloudwatch_composite_alarm"
+    }
+]

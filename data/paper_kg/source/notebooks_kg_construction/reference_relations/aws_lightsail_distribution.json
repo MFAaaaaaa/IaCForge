@@ -1,0 +1,27 @@
+[
+    {
+        "argument_path": "origin.name",
+        "references_output": "aws_lightsail_bucket.name",
+        "target_resource_type": "aws_lightsail_bucket"
+    },
+    {
+        "argument_path": "origin.name",
+        "references_output": "aws_lightsail_instance.name",
+        "target_resource_type": "aws_lightsail_instance"
+    },
+    {
+        "argument_path": "origin.name",
+        "references_output": "aws_lightsail_lb.name",
+        "target_resource_type": "aws_lightsail_lb"
+    },
+    {
+        "argument_path": "origin.region_name",
+        "references_output": "aws_lightsail_bucket.region",
+        "target_resource_type": "aws_lightsail_bucket"
+    },
+    {
+        "argument_path": "origin.region_name",
+        "references_output": "data.aws_availability_zones.id",
+        "target_resource_type": "data.aws_availability_zones"
+    }
+]

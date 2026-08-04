@@ -1,0 +1,707 @@
+{
+    "resource": {
+        "name": "aws_kendra_data_source",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "index_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "language_code",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "role_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "schedule",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "type",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "s3_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "bucket_name",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "exclusion_patterns",
+                            "description": "",
+                            "required": false,
+                            "type": "set(string)"
+                        },
+                        {
+                            "name": "inclusion_patterns",
+                            "description": "",
+                            "required": false,
+                            "type": "set(string)"
+                        },
+                        {
+                            "name": "inclusion_prefixes",
+                            "description": "",
+                            "required": false,
+                            "type": "set(string)"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "access_control_list_configuration",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "key_path",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "documents_metadata_configuration",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "s3_prefix",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "web_crawler_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "crawl_depth",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "max_content_size_per_page_in_mega_bytes",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "max_links_per_page",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "max_urls_per_minute_crawl_rate",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "url_exclusion_patterns",
+                            "description": "",
+                            "required": false,
+                            "type": "set(string)"
+                        },
+                        {
+                            "name": "url_inclusion_patterns",
+                            "description": "",
+                            "required": false,
+                            "type": "set(string)"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "authentication_configuration",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [],
+                            "blocks": [
+                                {
+                                    "name": "basic_authentication",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        10
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "credentials",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "host",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "port",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        },
+                        {
+                            "name": "proxy_configuration",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "credentials",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "host",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "port",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "number"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "urls",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [],
+                            "blocks": [
+                                {
+                                    "name": "seed_url_configuration",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "seed_urls",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "set(string)"
+                                        },
+                                        {
+                                            "name": "web_crawler_mode",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "site_maps_configuration",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "site_maps",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "set(string)"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "custom_document_enrichment_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "role_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "inline_configurations",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        100
+                    ],
+                    "arguments": [
+                        {
+                            "name": "document_content_deletion",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "condition",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "condition_document_attribute_key",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "operator",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "condition_on_value",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "date_value",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "long_value",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "string_list_value",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "set(string)"
+                                        },
+                                        {
+                                            "name": "string_value",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        },
+                        {
+                            "name": "target",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "target_document_attribute_key",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "target_document_attribute_value_deletion",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "target_document_attribute_value",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "date_value",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "long_value",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "string_list_value",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "set(string)"
+                                        },
+                                        {
+                                            "name": "string_value",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "post_extraction_hook_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "lambda_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "s3_bucket",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "invocation_condition",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "condition_document_attribute_key",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "operator",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "condition_on_value",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "date_value",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "long_value",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "string_list_value",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "set(string)"
+                                        },
+                                        {
+                                            "name": "string_value",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "pre_extraction_hook_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "lambda_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "s3_bucket",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "invocation_condition",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "condition_document_attribute_key",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "operator",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "condition_on_value",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "date_value",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "long_value",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "string_list_value",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "set(string)"
+                                        },
+                                        {
+                                            "name": "string_value",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "created_at",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "data_source_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "error_message",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "status",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "updated_at",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

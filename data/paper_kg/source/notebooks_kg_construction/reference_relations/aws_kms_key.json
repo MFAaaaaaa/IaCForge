@@ -1,0 +1,17 @@
+[
+    {
+        "argument_path": "policy",
+        "references_output": "data.aws_caller_identity.current.account_id",
+        "target_resource_type": "aws_caller_identity"
+    },
+    {
+        "argument_path": "custom_key_store_id",
+        "references_output": "aws_kms_custom_key_store.id",
+        "target_resource_type": "aws_kms_custom_key_store"
+    },
+    {
+        "argument_path": "policy",
+        "references_output": "aws_iam_policy_document.json",
+        "target_resource_type": "aws_iam_policy_document"
+    }
+]

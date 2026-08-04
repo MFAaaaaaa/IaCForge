@@ -1,0 +1,39 @@
+{
+  "resource": {
+    "name": "aws_iam_role_policy_attachment",
+    "description": "Attaches a Managed IAM Policy to an IAM role The usage of this resource conflicts with the aws_iam_policy_attachment resource and will permanently show a difference if both are defined. For a given role, this resource is incompatible with using the aws_iam_role resource managed_policy_arns argument. When using that argument and this resource, both will attempt to manage the role's managed policy attachments and Terraform will show a permanent difference.",
+    "llm_summary": "The `aws_iam_role_policy_attachment` resource in Terraform enables the attachment of managed IAM policies to IAM roles, facilitating fine-grained access control and permissions management for AWS resources. Common use cases include assigning predefined policies to roles for applications, services, or users to enforce security and compliance requirements. This resource is ideal for scenarios where explicit control over policy-role associations is needed, but it should not be used alongside `aws_iam_policy_attachment` or the `managed_policy_arns` argument in `aws_iam_role` to avoid configuration conflicts."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "data \"aws_iam_policy_document\" \"assume_role\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"ec2.amazonaws.com\"]\n    }\n\n    actions = [\"sts:AssumeRole\"]\n  }\n}\n\nresource \"aws_iam_role\" \"role\" {\n  name               = \"test-role\"\n  assume_role_policy = data.aws_iam_policy_document.assume_role.json\n}\n\ndata \"aws_iam_policy_document\" \"policy\" {\n  statement {\n    effect    = \"Allow\"\n    actions   = [\"ec2:Describe*\"]\n    resources = [\"*\"]\n  }\n}\n\nresource \"aws_iam_policy\" \"policy\" {\n  name        = \"test-policy\"\n  description = \"A test policy\"\n  policy      = data.aws_iam_policy_document.policy.json\n}\n\nresource \"aws_iam_role_policy_attachment\" \"test-attach\" {\n  role       = aws_iam_role.role.name\n  policy_arn = aws_iam_policy.policy.arn\n}",
+      "llm_summary": "This example demonstrates how to attach an IAM policy to an IAM role using the `aws_iam_role_policy_attachment` resource. It showcases the creation of an IAM role with an assume role policy for EC2, a custom IAM policy granting `ec2:Describe*` permissions, and the attachment of the policy to the role, enabling users to configure role-based access control for AWS services."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_iam_role_policy_attachment` resource represents a unique identifier for the attachment between an IAM role and a policy. While optional, it can be used to explicitly define or reference the attachment's identity, aiding in resource tracking and management within Terraform configurations."
+    },
+    {
+      "name": "policy_arn",
+      "description": "(Required) - The ARN of the policy you want to apply",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `policy_arn` argument specifies the Amazon Resource Name (ARN) of the IAM policy to attach to the target IAM role, enabling users to define the permissions and access controls associated with the role. By setting this required argument, users ensure the role inherits the policy's permissions, aligning with security and access management goals in AWS environments."
+    },
+    {
+      "name": "role",
+      "description": "(Required) - The name of the IAM role to which the policy should be applied",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `role` argument specifies the name of the IAM role to which the policy will be attached, enabling users to define the association between a policy and a specific IAM role. By setting this required argument, users ensure that the role gains the permissions defined in the attached policy, supporting access control and security management within AWS environments."
+    }
+  ],
+  "blocks": [],
+  "attributes": []
+}

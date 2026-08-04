@@ -1,0 +1,72 @@
+{
+    "resource": {
+        "name": "aws_redshift_usage_limit",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "amount",
+            "description": "",
+            "required": true,
+            "type": "number"
+        },
+        {
+            "name": "breach_action",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_identifier",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "feature_type",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "limit_type",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "period",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

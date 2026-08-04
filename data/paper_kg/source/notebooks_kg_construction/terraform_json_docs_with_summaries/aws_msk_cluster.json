@@ -1,0 +1,700 @@
+{
+  "resource": {
+    "name": "aws_msk_cluster",
+    "description": "Manages an Amazon MSK cluster. This resource manages provisioned clusters. To manage a serverless Amazon MSK cluster, use the aws_msk_serverless_cluster resource.",
+    "llm_summary": "The `aws_msk_cluster` Terraform resource enables the creation and management of provisioned Amazon Managed Streaming for Apache Kafka (MSK) clusters, facilitating scalable and highly available Kafka-based messaging systems. It is commonly used for building real-time data pipelines, event streaming architectures, and integrating distributed applications with Kafka. Users can configure key aspects such as cluster size, broker instance types, storage capacity, encryption, monitoring, and networking settings to optimize performance, security, and reliability for their specific use cases."
+  },
+  "examples": [
+    {
+      "title": "Basic",
+      "code": "resource \"aws_vpc\" \"vpc\" {\n  cidr_block = \"192.168.0.0/22\"\n}\n\ndata \"aws_availability_zones\" \"azs\" {\n  state = \"available\"\n}\n\nresource \"aws_subnet\" \"subnet_az1\" {\n  availability_zone = data.aws_availability_zones.azs.names[0]\n  cidr_block        = \"192.168.0.0/24\"\n  vpc_id            = aws_vpc.vpc.id\n}\n\nresource \"aws_subnet\" \"subnet_az2\" {\n  availability_zone = data.aws_availability_zones.azs.names[1]\n  cidr_block        = \"192.168.1.0/24\"\n  vpc_id            = aws_vpc.vpc.id\n}\n\nresource \"aws_subnet\" \"subnet_az3\" {\n  availability_zone = data.aws_availability_zones.azs.names[2]\n  cidr_block        = \"192.168.2.0/24\"\n  vpc_id            = aws_vpc.vpc.id\n}\n\nresource \"aws_security_group\" \"sg\" {\n  vpc_id = aws_vpc.vpc.id\n}\n\nresource \"aws_kms_key\" \"kms\" {\n  description = \"example\"\n}\n\nresource \"aws_cloudwatch_log_group\" \"test\" {\n  name = \"msk_broker_logs\"\n}\n\nresource \"aws_s3_bucket\" \"bucket\" {\n  bucket = \"msk-broker-logs-bucket\"\n}\n\nresource \"aws_s3_bucket_acl\" \"bucket_acl\" {\n  bucket = aws_s3_bucket.bucket.id\n  acl    = \"private\"\n}\n\ndata \"aws_iam_policy_document\" \"assume_role\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"firehose.amazonaws.com\"]\n    }\n\n    actions = [\"sts:AssumeRole\"]\n  }\n}\n\nresource \"aws_iam_role\" \"firehose_role\" {\n  name               = \"firehose_test_role\"\n  assume_role_policy = data.aws_iam_policy_document.assume_role.json\n}\n\nresource \"aws_kinesis_firehose_delivery_stream\" \"test_stream\" {\n  name        = \"terraform-kinesis-firehose-msk-broker-logs-stream\"\n  destination = \"extended_s3\"\n\n  extended_s3_configuration {\n    role_arn   = aws_iam_role.firehose_role.arn\n    bucket_arn = aws_s3_bucket.bucket.arn\n  }\n\n  tags = {\n    LogDeliveryEnabled = \"placeholder\"\n  }\n\n  lifecycle {\n    ignore_changes = [\n      tags[\"LogDeliveryEnabled\"],\n    ]\n  }\n}\n\nresource \"aws_msk_cluster\" \"example\" {\n  cluster_name           = \"example\"\n  kafka_version          = \"3.2.0\"\n  number_of_broker_nodes = 3\n\n  broker_node_group_info {\n    instance_type = \"kafka.m5.large\"\n    client_subnets = [\n      aws_subnet.subnet_az1.id,\n      aws_subnet.subnet_az2.id,\n      aws_subnet.subnet_az3.id,\n    ]\n    storage_info {\n      ebs_storage_info {\n        volume_size = 1000\n      }\n    }\n    security_groups = [aws_security_group.sg.id]\n  }\n\n  encryption_info {\n    encryption_at_rest_kms_key_arn = aws_kms_key.kms.arn\n  }\n\n  open_monitoring {\n    prometheus {\n      jmx_exporter {\n        enabled_in_broker = true\n      }\n      node_exporter {\n        enabled_in_broker = true\n      }\n    }\n  }\n\n  logging_info {\n    broker_logs {\n      cloudwatch_logs {\n        enabled   = true\n        log_group = aws_cloudwatch_log_group.test.name\n      }\n      firehose {\n        enabled         = true\n        delivery_stream = aws_kinesis_firehose_delivery_stream.test_stream.name\n      }\n      s3 {\n        enabled = true\n        bucket  = aws_s3_bucket.bucket.id\n        prefix  = \"logs/msk-\"\n      }\n    }\n  }\n\n  tags = {\n    foo = \"bar\"\n  }\n}\n\noutput \"zookeeper_connect_string\" {\n  value = aws_msk_cluster.example.zookeeper_connect_string\n}\n\noutput \"bootstrap_brokers_tls\" {\n  description = \"TLS connection host:port pairs\"\n  value       = aws_msk_cluster.example.bootstrap_brokers_tls\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_msk_cluster` with encryption, monitoring, and logging enabled, using AWS resources such as VPC subnets, security groups, KMS keys, CloudWatch log groups, S3 buckets, and Kinesis Firehose delivery streams. It illustrates advanced configurations including `broker_node_group_info` for subnet and storage setup, `encryption_info` for at-rest encryption, `open_monitoring` for Prometheus integration, and `logging_info` for multi-destination broker logs."
+    },
+    {
+      "title": "With volume_throughput argument",
+      "code": "resource \"aws_msk_cluster\" \"example\" {\n  cluster_name           = \"example\"\n  kafka_version          = \"2.7.1\"\n  number_of_broker_nodes = 3\n\n  broker_node_group_info {\n    instance_type = \"kafka.m5.4xlarge\"\n    client_subnets = [\n      aws_subnet.subnet_az1.id,\n      aws_subnet.subnet_az2.id,\n      aws_subnet.subnet_az3.id,\n    ]\n    storage_info {\n      ebs_storage_info {\n        provisioned_throughput {\n          enabled           = true\n          volume_throughput = 250\n        }\n        volume_size = 1000\n      }\n    }\n    security_groups = [aws_security_group.sg.id]\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an Amazon MSK cluster with provisioned EBS storage throughput using the `volume_throughput` argument within the `provisioned_throughput` block, enabling enhanced performance for broker nodes. Includes key configurations such as specifying `instance_type`, `client_subnets`, and `security_groups` for a highly available and scalable Kafka setup.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "cluster_name",
+      "description": "(Required) Name of the MSK cluster.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `cluster_name` argument specifies the unique name of the Amazon MSK (Managed Streaming for Apache Kafka) cluster, serving as its identifier within the AWS environment. Defining this name is essential for creating and managing the cluster, enabling users to organize, reference, and distinguish Kafka clusters for specific applications, environments, or workflows."
+    },
+    {
+      "name": "enhanced_monitoring",
+      "description": "(Optional) Specify the desired enhanced MSK CloudWatch monitoring level. See Monitoring Amazon MSK with Amazon CloudWatch",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `enhanced_monitoring` argument for the `aws_msk_cluster` resource allows users to specify the level of CloudWatch monitoring for their Amazon MSK cluster, enabling detailed visibility into cluster performance and operational metrics. By configuring this argument, users can control the granularity of monitoring data, supporting goals like performance optimization, troubleshooting, and compliance with observability requirements."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_msk_cluster` resource represents the unique identifier of the MSK cluster, typically used for referencing the cluster in other resources or outputs. While not required, setting this argument allows users to explicitly define or retrieve the cluster's ID for integration, tracking, or automation purposes within their Terraform configuration."
+    },
+    {
+      "name": "kafka_version",
+      "description": "(Required) Specify the desired Kafka software version.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `kafka_version` argument for the `aws_msk_cluster` resource specifies the version of Apache Kafka software to be used in the cluster, allowing users to control compatibility with their applications and leverage specific Kafka features or improvements. Setting this argument ensures the cluster operates with the desired Kafka functionality, aligning with user goals such as maintaining version consistency across environments or utilizing features introduced in newer Kafka releases."
+    },
+    {
+      "name": "number_of_broker_nodes",
+      "description": "(Required) The desired total number of broker nodes in the kafka cluster. It must be a multiple of the number of specified client subnets.",
+      "required": true,
+      "type": "number",
+      "llm_summary": "\"Defines the total number of broker nodes in the Amazon MSK (Managed Streaming for Apache Kafka) cluster, directly impacting the cluster's capacity, scalability, and fault tolerance. This value must align with the number of client subnets, ensuring proper distribution and high availability across the network.\""
+    },
+    {
+      "name": "storage_mode",
+      "description": "(Optional) Controls storage mode for supported storage tiers. Valid values are: `LOCAL` or `TIERED`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `storage_mode` argument for the `aws_msk_cluster` resource allows users to specify the storage tier configuration for the cluster, enabling control over how data is stored and managed. By setting this argument to either `LOCAL` or `TIERED`, users can optimize storage behavior to align with performance or cost-efficiency goals, such as leveraging local storage for high-speed access or tiered storage for scalable, cost-effective data retention."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_msk_cluster` resource allows users to assign metadata in the form of key-value pairs to the MSK cluster, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling (e.g., \"dev\" or \"prod\"), or compliance tracking. When set, these tags can override provider-level default tags with matching keys, ensuring granular control over resource tagging."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_msk_cluster` resource allows users to define a comprehensive set of key-value tags that are applied to the cluster and all associated resources for organizational, billing, or management purposes. By configuring this argument, users can streamline resource categorization, enable cost allocation tracking, and simplify governance workflows across their MSK infrastructure."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "broker_node_group_info",
+      "description": "(Required) Configuration block for the broker nodes of the Kafka cluster.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "az_distribution",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `az_distribution` argument in the `broker_node_group_info` block of the `aws_msk_cluster` resource allows users to specify the strategy for distributing broker nodes across availability zones (AZs) within a region. Configuring this argument impacts the fault tolerance and availability of the Kafka cluster by defining how brokers are spread across multiple AZs, typically supporting goals like high availability and disaster recovery."
+        },
+        {
+          "name": "client_subnets",
+          "description": "",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `client_subnets` argument in the `broker_node_group_info` block of the `aws_msk_cluster` resource specifies the set of subnet IDs where the Apache Kafka broker nodes will be deployed. This configuration ensures that the brokers are hosted within the specified subnets, typically within a VPC, allowing users to control network placement, connectivity, and access to the cluster."
+        },
+        {
+          "name": "instance_type",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `instance_type` argument in the `broker_node_group_info` block of the `aws_msk_cluster` resource specifies the Amazon EC2 instance type to be used for the Apache Kafka broker nodes. By defining this argument, users control the compute capacity, memory, and networking performance of the broker nodes, directly impacting the cluster's scalability, throughput, and cost efficiency to meet workload requirements."
+        },
+        {
+          "name": "security_groups",
+          "description": "",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `security_groups` argument in the `broker_node_group_info` block of the `aws_msk_cluster` resource allows users to specify the set of security group IDs that control inbound and outbound network traffic for the broker nodes in the cluster. By defining this argument, users can enforce network-level access restrictions, ensuring secure communication and compliance with organizational security policies for the managed Kafka brokers."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "connectivity_info",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "public_access",
+              "description": "",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "type",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `type` argument within the `public_access` block of the `aws_msk_cluster` resource specifies the method by which the Amazon MSK cluster is made publicly accessible, such as through a specific connectivity option or network configuration. Setting this argument allows users to define the public access behavior of the cluster, aligning it with their networking and security requirements."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `public_access` configuration block within the `connectivity_info` context of the `aws_msk_cluster` resource manages settings that enable or restrict public network access to the Amazon MSK cluster. It allows users to define whether the cluster can be accessed over the internet, providing control over connectivity and security for public-facing use cases or ensuring restricted access for private deployments."
+            },
+            {
+              "name": "vpc_connectivity",
+              "description": "",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [],
+              "blocks": [
+                {
+                  "name": "client_authentication",
+                  "description": "(Optional) Configuration block for specifying a client authentication. See below.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "tls",
+                      "description": "",
+                      "required": false,
+                      "type": "bool",
+                      "llm_summary": "The `tls` argument within the `client_authentication` block of the `aws_msk_cluster` resource allows users to specify whether Transport Layer Security (TLS) is enabled for client authentication. Setting this argument to `true` ensures secure communication between clients and the MSK cluster by enforcing encrypted connections, aligning with common security best practices for protecting data in transit."
+                    }
+                  ],
+                  "blocks": [
+                    {
+                      "name": "sasl",
+                      "description": "",
+                      "cardinality": [
+                        0,
+                        1
+                      ],
+                      "arguments": [
+                        {
+                          "name": "iam",
+                          "description": "",
+                          "required": false,
+                          "type": "bool",
+                          "llm_summary": "The `iam` argument within the `sasl` block of the `aws_msk_cluster` resource is a boolean that enables IAM-based authentication for SASL (Simple Authentication and Security Layer). Setting this argument to `true` allows users to configure their MSK cluster to authenticate clients using AWS IAM credentials, enhancing security and simplifying access management by leveraging IAM policies."
+                        },
+                        {
+                          "name": "scram",
+                          "description": "",
+                          "required": false,
+                          "type": "bool",
+                          "llm_summary": "The `scram` argument within the `sasl` configuration of the `aws_msk_cluster` resource enables or disables SASL/SCRAM authentication for the Amazon MSK cluster. Setting this boolean to `true` allows users to configure secure client authentication using username-password credentials, enhancing the security of Kafka communications by leveraging SCRAM (Salted Challenge Response Authentication Mechanism)."
+                        }
+                      ],
+                      "blocks": [],
+                      "llm_summary": "The `sasl` configuration block within the `client_authentication` context of the `aws_msk_cluster` resource enables and manages SASL-based authentication mechanisms for Kafka clients, supporting secure communication between clients and the cluster. It encapsulates related settings for SASL protocols, such as SCRAM or IAM, allowing users to define authentication methods that enhance security and compliance for client access to the managed Kafka service."
+                    }
+                  ],
+                  "llm_summary": "The `client_authentication` configuration block within the `vpc_connectivity` context of the `aws_msk_cluster` resource defines authentication mechanisms for clients connecting to the cluster, such as SASL, TLS, or IAM-based authentication. Configuring this block ensures secure access control for client connections, enabling users to enforce specific authentication protocols and enhance the security posture of their managed Kafka cluster."
+                }
+              ],
+              "llm_summary": "The `vpc_connectivity` configuration block within the `connectivity_info` section of the `aws_msk_cluster` resource enables private network access for the Amazon Managed Streaming for Apache Kafka (MSK) cluster by defining connectivity settings specific to a VPC. It encapsulates related settings such as subnets and security groups, allowing users to securely integrate the MSK cluster with their VPC for enhanced isolation, performance, and compliance with network security requirements."
+            }
+          ],
+          "llm_summary": "The `connectivity_info` block within the `broker_node_group_info` configuration of the `aws_msk_cluster` resource defines network connectivity settings for the broker nodes, enabling control over how the cluster communicates with other resources. It encapsulates related settings such as VPC connectivity and endpoint configurations, allowing users to specify private or public access and ensure secure and efficient communication between the cluster and external systems. Configuring this block is essential for tailoring the cluster's network access to meet specific security and performance requirements."
+        },
+        {
+          "name": "storage_info",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "ebs_storage_info",
+              "description": "",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "volume_size",
+                  "description": "",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `volume_size` argument in the `ebs_storage_info` block of the `aws_msk_cluster` resource allows users to specify the size (in GiB) of the EBS volumes attached to the brokers in the Amazon MSK cluster. Configuring this parameter impacts storage capacity for message retention and throughput, enabling users to optimize cluster performance and scalability based on workload requirements."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "provisioned_throughput",
+                  "description": "",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "enabled",
+                      "description": "",
+                      "required": false,
+                      "type": "bool",
+                      "llm_summary": "The `enabled` argument within the `provisioned_throughput` block of the `aws_msk_cluster` resource allows users to specify whether provisioned throughput capacity is activated for the cluster. Setting this argument to `true` enables dedicated throughput for storage, optimizing performance for high-demand workloads, while leaving it unset or `false` defaults to standard throughput behavior."
+                    },
+                    {
+                      "name": "volume_throughput",
+                      "description": "",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `volume_throughput` argument in the `provisioned_throughput` block of the `aws_msk_cluster` resource allows users to specify the throughput capacity (in MiB/s) for the storage volumes attached to the cluster. Configuring this parameter helps optimize data transfer rates and performance for Kafka workloads, enabling users to tailor storage throughput to meet specific application demands or traffic patterns."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `provisioned_throughput` block within the `ebs_storage_info` configuration of the `aws_msk_cluster` resource defines settings to optimize and control the throughput capacity for EBS volumes used by the cluster. It enables users to specify provisioned throughput values, ensuring consistent performance for high-demand Kafka workloads, particularly in scenarios requiring predictable I/O rates for message storage and retrieval."
+                }
+              ],
+              "llm_summary": "The `ebs_storage_info` block within the `storage_info` configuration of the `aws_msk_cluster` resource defines the Amazon EBS storage settings for the cluster, including volume size and related parameters. This block enables users to customize and optimize storage capacity for Kafka brokers, ensuring sufficient disk space for message retention and high-throughput workloads."
+            }
+          ],
+          "llm_summary": "The `storage_info` configuration block within the `broker_node_group_info` of the `aws_msk_cluster` resource defines storage-related settings for the Apache Kafka broker nodes. It encapsulates parameters for managing disk storage, such as volume size and type, enabling users to optimize storage capacity and performance for their Kafka cluster. Configuring this block ensures efficient data handling and scalability for message processing workloads."
+        }
+      ],
+      "llm_summary": "The `broker_node_group_info` configuration block in the `aws_msk_cluster` resource defines the infrastructure and operational settings for the broker nodes in an Amazon MSK (Managed Streaming for Apache Kafka) cluster. It encapsulates key parameters such as instance type, storage volume size, and connectivity options, enabling users to customize the performance, capacity, and network access of Kafka brokers to meet specific workload requirements."
+    },
+    {
+      "name": "client_authentication",
+      "description": "(Optional) Configuration block for specifying a client authentication. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "unauthenticated",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `unauthenticated` argument within the `client_authentication` block of the `aws_msk_cluster` resource allows users to specify whether unauthenticated access is permitted for clients connecting to the Amazon Managed Streaming for Apache Kafka (MSK) cluster. Setting this argument to `true` enables unauthenticated client connections, which may simplify access for testing or non-secure environments but can compromise security in production scenarios."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "sasl",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "iam",
+              "description": "",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `iam` argument within the `sasl` block of the `aws_msk_cluster` resource is a boolean that enables or disables IAM-based authentication for SASL (Simple Authentication and Security Layer). When set to `true`, it configures the MSK cluster to use AWS Identity and Access Management (IAM) for client authentication, allowing users to securely manage access to the cluster using IAM policies."
+            },
+            {
+              "name": "scram",
+              "description": "",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `scram` argument within the `sasl` configuration of the `aws_msk_cluster` resource enables or disables SASL/SCRAM authentication for the Amazon MSK cluster. Setting this boolean to `true` allows users to configure secure client authentication using username-password credentials, enhancing cluster security and aligning with common goals of protecting data and access in managed Kafka environments."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `sasl` configuration block within the `client_authentication` context of the `aws_msk_cluster` resource defines settings for enabling and managing SASL (Simple Authentication and Security Layer) authentication mechanisms, such as SCRAM or IAM, for Kafka clients. Configuring this block allows users to enforce secure client authentication, ensuring controlled access to the MSK cluster and enhancing the overall security posture of the messaging system."
+        },
+        {
+          "name": "tls",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "certificate_authority_arns",
+              "description": "",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `certificate_authority_arns` argument in the `tls` context of the `aws_msk_cluster` resource allows users to specify a set of Amazon Resource Names (ARNs) for private certificate authorities (CAs) that the cluster will trust for mutual TLS authentication. Configuring this argument enables secure communication between clients and the cluster by defining trusted CAs, which is essential for enforcing encryption and verifying client identities in managed Kafka environments."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `tls` configuration block within the `client_authentication` context of the `aws_msk_cluster` resource enables Transport Layer Security (TLS) for client connections, ensuring encrypted communication between clients and the MSK cluster. It encapsulates settings related to enforcing TLS authentication, allowing users to enhance security by requiring clients to use valid certificates for access."
+        }
+      ],
+      "llm_summary": "The `client_authentication` configuration block in the `aws_msk_cluster` resource defines authentication mechanisms for clients connecting to the Amazon Managed Streaming for Apache Kafka (MSK) cluster. It encapsulates settings for enabling and managing client authentication methods, such as SASL, TLS, or IAM, ensuring secure access to the Kafka cluster and allowing users to enforce specific security protocols for data integrity and access control."
+    },
+    {
+      "name": "configuration_info",
+      "description": "(Optional) Configuration block for specifying a MSK Configuration to attach to Kafka brokers. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "arn",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `arn` argument in the `configuration_info` block of the `aws_msk_cluster` resource specifies the Amazon Resource Name (ARN) of a pre-defined MSK configuration to associate with the cluster. By setting this argument, users can define the cluster's configuration settings, such as broker properties and topic-level configurations, enabling fine-grained control over Kafka behavior and ensuring the cluster adheres to specific operational requirements."
+        },
+        {
+          "name": "revision",
+          "description": "",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `revision` argument specifies the version number of the custom MSK configuration to be applied to the Amazon MSK cluster, allowing users to control which configuration revision is used for cluster settings such as broker properties or topic configurations. Setting this argument ensures the cluster uses the desired configuration state, enabling precise management of Kafka behavior and updates."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `configuration_info` block in the `aws_msk_cluster` resource specifies the MSK Configuration to attach to Kafka brokers, enabling users to define custom Apache Kafka settings such as topic configurations, broker properties, and security settings. This block allows for fine-grained control over the cluster's behavior by associating it with a predefined MSK Configuration, ensuring consistency and compliance with specific operational or performance requirements."
+    },
+    {
+      "name": "encryption_info",
+      "description": "(Optional) Configuration block for specifying encryption. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "encryption_at_rest_kms_key_arn",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `encryption_at_rest_kms_key_arn` argument for the `aws_msk_cluster` resource within the `encryption_info` block allows users to specify the Amazon Resource Name (ARN) of an AWS Key Management Service (KMS) key to enable encryption at rest for the cluster's data storage. By configuring this argument, users can enhance data security by ensuring that all data stored within the cluster is encrypted using a custom-managed KMS key, aligning with compliance and security requirements."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "encryption_in_transit",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "client_broker",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `client_broker` argument within the `encryption_in_transit` block of the `aws_msk_cluster` resource specifies the encryption mechanism for communication between clients and brokers in the cluster. It allows users to define whether this communication uses plaintext (`PLAINTEXT`), TLS encryption (`TLS`), or both (`TLS_PLAINTEXT`), directly impacting the security and compliance of data in transit for Kafka client-broker interactions."
+            },
+            {
+              "name": "in_cluster",
+              "description": "",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `in_cluster` argument within the `encryption_in_transit` block of the `aws_msk_cluster` resource specifies whether data transmitted between brokers within the cluster is encrypted. Setting this to `true` ensures in-cluster communication is secured, aligning with best practices for data protection and compliance in distributed systems."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `encryption_in_transit` configuration block within the `encryption_info` parent for the `aws_msk_cluster` resource defines settings to secure data transmission between brokers, clients, and Apache Kafka components. It encapsulates options for enabling or customizing transport-level encryption, such as TLS protocols, ensuring compliance with security standards and protecting sensitive data during communication. Configuring this block allows users to enforce secure communication channels for their managed Kafka clusters."
+        }
+      ],
+      "llm_summary": "The `encryption_info` block in the `aws_msk_cluster` resource configures encryption settings for securing data at rest and in transit within the Amazon MSK cluster. This block enables users to define encryption mechanisms, such as specifying AWS-managed or customer-managed keys, ensuring compliance with security requirements and protecting sensitive data in Kafka workloads."
+    },
+    {
+      "name": "logging_info",
+      "description": "(Optional) Configuration block for streaming broker logs to Cloudwatch/S3/Kinesis Firehose. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "broker_logs",
+          "description": "",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "cloudwatch_logs",
+              "description": "",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "enabled",
+                  "description": "",
+                  "required": true,
+                  "type": "bool",
+                  "llm_summary": "The `enabled` argument for the `cloudwatch_logs` block in the `aws_msk_cluster` resource is a required boolean that specifies whether CloudWatch Logs integration is activated for the MSK cluster. Setting this to `true` enables the delivery of broker logs to Amazon CloudWatch Logs, allowing users to monitor, troubleshoot, and analyze Kafka cluster activity and performance."
+                },
+                {
+                  "name": "log_group",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `log_group` argument in the `cloudwatch_logs` context for the `aws_msk_cluster` resource allows users to specify the name of the CloudWatch Log Group where Amazon MSK (Managed Streaming for Apache Kafka) will send broker logs. Configuring this argument enables centralized log management and monitoring, helping users track broker activity, troubleshoot issues, and analyze Kafka performance within their AWS environment."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `cloudwatch_logs` configuration block within the `broker_logs` section of the `aws_msk_cluster` resource enables the integration of Amazon CloudWatch Logs for capturing and monitoring broker-level logs in an MSK (Managed Streaming for Apache Kafka) cluster. It defines settings such as the CloudWatch log group to which logs are sent, allowing users to centralize log management, monitor Kafka broker activity, and troubleshoot issues effectively."
+            },
+            {
+              "name": "firehose",
+              "description": "",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "delivery_stream",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `delivery_stream` argument for the `aws_msk_cluster` resource allows users to specify the Amazon Kinesis Data Firehose delivery stream used to capture and stream data from the MSK cluster to external destinations, such as S3, Redshift, or Elasticsearch. Configuring this argument enables seamless integration for real-time data processing and analytics, aligning with common goals like setting up data pipelines for storage or analysis."
+                },
+                {
+                  "name": "enabled",
+                  "description": "",
+                  "required": true,
+                  "type": "bool",
+                  "llm_summary": "The `enabled` argument for the `firehose` feature in the `aws_msk_cluster` resource is a required boolean that specifies whether the Firehose delivery stream integration is activated for the MSK cluster. Setting this argument to `true` enables the functionality to stream Kafka data to an Amazon Kinesis Data Firehose, facilitating data delivery to destinations like S3, Redshift, or Elasticsearch for analytics and storage purposes."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `firehose` configuration block within the `broker_logs` context of the `aws_msk_cluster` resource enables the setup of Amazon Kinesis Data Firehose as a destination for broker logs, facilitating centralized log delivery and analysis. It encapsulates settings related to the Firehose delivery stream, allowing users to define where and how broker logs are sent for real-time monitoring, troubleshooting, and compliance purposes. Configuring this block helps users achieve reliable log management and integration with downstream analytics or storage systems."
+            },
+            {
+              "name": "s3",
+              "description": "",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "bucket",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `bucket` argument in the `aws_msk_cluster` resource allows users to specify the name of an Amazon S3 bucket used for storing logs or other data related to the MSK cluster. Configuring this argument enables integration with S3 for purposes such as log retention, auditing, or data analysis, aligning with common goals like enhancing observability and compliance."
+                },
+                {
+                  "name": "enabled",
+                  "description": "",
+                  "required": true,
+                  "type": "bool",
+                  "llm_summary": "The `enabled` argument for the `s3` configuration in the `aws_msk_cluster` resource is a required boolean that controls whether S3 logging is activated for the cluster. Setting this argument to `true` enables the functionality to store broker logs in an S3 bucket, which is essential for monitoring, troubleshooting, and compliance purposes."
+                },
+                {
+                  "name": "prefix",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `prefix` argument in the `s3` context of the `aws_msk_cluster` resource allows users to specify a string that serves as a key prefix for S3 objects created by the cluster, enabling organized storage and logical grouping of data within the S3 bucket. By setting this argument, users can streamline data management, improve retrieval efficiency, and align S3 object naming conventions with application or environment-specific requirements."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `s3` configuration block within the `broker_logs` context of the `aws_msk_cluster` resource enables the storage of Apache Kafka broker logs in an Amazon S3 bucket, providing a scalable and durable logging solution. It encapsulates settings related to the S3 bucket destination, such as bucket name and prefix, allowing users to centralize and manage broker logs for auditing, monitoring, or compliance purposes. Configuring this block helps users achieve reliable log retention and integration with other analytics or storage workflows."
+            }
+          ],
+          "llm_summary": "The `broker_logs` configuration block within the `logging_info` context of the `aws_msk_cluster` resource defines the logging mechanisms for Amazon MSK brokers, enabling users to specify how broker-level logs are captured and stored. It encapsulates settings for log destinations such as CloudWatch Logs, S3, or Firehose, allowing users to achieve centralized log management and monitoring for troubleshooting, compliance, and performance analysis."
+        }
+      ],
+      "llm_summary": "The `logging_info` configuration block in the `aws_msk_cluster` resource enables centralized logging for Amazon MSK broker activity by streaming logs to CloudWatch, S3, or Kinesis Firehose. It encapsulates settings for defining the destination and type of log storage, helping users monitor, troubleshoot, and analyze Kafka cluster operations effectively."
+    },
+    {
+      "name": "open_monitoring",
+      "description": "(Optional) Configuration block for JMX and Node monitoring for the MSK cluster. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "prometheus",
+          "description": "",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "jmx_exporter",
+              "description": "",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "enabled_in_broker",
+                  "description": "",
+                  "required": true,
+                  "type": "bool",
+                  "llm_summary": "The `enabled_in_broker` argument for the `jmx_exporter` configuration in the `aws_msk_cluster` resource is a required boolean that specifies whether JMX Exporter is activated within the broker instances of the MSK cluster. Enabling this functionality allows users to collect and expose Java Management Extensions (JMX) metrics for monitoring and observability, typically used to integrate with tools like Prometheus for performance and health tracking of Kafka brokers."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `jmx_exporter` configuration block within the `prometheus` context of the `aws_msk_cluster` resource enables integration with Prometheus by configuring JMX metrics export from the MSK cluster. It encapsulates settings related to the JMX Exporter, such as enabling metric collection and defining parameters for monitoring Kafka performance, allowing users to set up observability and gain insights into cluster health and operational metrics."
+            },
+            {
+              "name": "node_exporter",
+              "description": "",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "enabled_in_broker",
+                  "description": "",
+                  "required": true,
+                  "type": "bool",
+                  "llm_summary": "The `enabled_in_broker` argument for the `node_exporter` feature in the `aws_msk_cluster` resource is a required boolean that specifies whether the Node Exporter metrics collection is activated on the brokers within the MSK cluster. Enabling this argument allows users to monitor broker-level system metrics, such as CPU, memory, and disk usage, which is essential for performance analysis and operational insights in Kafka clusters."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `node_exporter` configuration block within the `prometheus` context of the `aws_msk_cluster` resource enables the integration of Prometheus Node Exporter for monitoring and collecting detailed metrics from MSK cluster nodes. It encapsulates settings related to metric collection, such as enabling the exporter, configuring endpoints, and defining resource limits, allowing users to enhance observability and performance monitoring of their Kafka clusters."
+            }
+          ],
+          "llm_summary": "The `prometheus` configuration block within the `open_monitoring` context of the `aws_msk_cluster` resource enables integration with Prometheus for monitoring Apache Kafka metrics. It encapsulates settings related to exposing Kafka metrics in a format compatible with Prometheus, allowing users to set up detailed observability and performance tracking for their MSK cluster. Configuring this block helps users achieve enhanced monitoring and operational insights by leveraging Prometheus-based metric collection and visualization."
+        }
+      ],
+      "llm_summary": "The `open_monitoring` configuration block in the `aws_msk_cluster` resource enables detailed monitoring for the MSK cluster by configuring JMX and Node monitoring settings. This block allows users to integrate and manage observability features, providing insights into cluster performance and health for enhanced operational visibility and troubleshooting."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_msk_cluster` resource allows users to specify the maximum duration (in string format, e.g., \"30m\") Terraform will wait for the creation of an Amazon MSK (Managed Streaming for Apache Kafka) cluster to complete. Configuring this timeout helps users manage long-running cluster provisioning processes, ensuring predictable behavior and avoiding indefinite waits during infrastructure deployment."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_msk_cluster` resource allows users to specify the maximum duration (in string format, e.g., \"30m\") Terraform will wait for the deletion of an Amazon MSK cluster to complete. Configuring this timeout ensures users can control the lifecycle behavior during cluster removal, preventing operations from hanging indefinitely or timing out prematurely."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block of the `aws_msk_cluster` resource allows users to specify the maximum duration (as a string) Terraform will wait for an update operation on the MSK cluster to complete. Configuring this timeout ensures better control over long-running updates, helping users manage resource lifecycle operations and avoid potential timeout errors during cluster modifications."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_msk_cluster` resource defines customizable time limits for operations such as creating, updating, or deleting an Amazon Managed Streaming for Apache Kafka (MSK) cluster. By configuring this block, users can manage operation durations to prevent timeouts during lengthy cluster provisioning or modification processes, ensuring smoother lifecycle management and better control over resource deployment."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) of the MSK cluster.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "bootstrap_brokers",
+      "description": "Comma separated list of one or more hostname:port pairs of kafka brokers suitable to bootstrap connectivity to the kafka cluster. Contains a value if `encryption_info.0.encryption_in_transit.0.client_broker` is set to `PLAINTEXT` or `TLS_PLAINTEXT`. The resource sorts values alphabetically. AWS may not always return all endpoints so this value is not guaranteed to be stable across applies.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "bootstrap_brokers_public_sasl_iam",
+      "description": "One or more DNS names (or IP addresses) and SASL IAM port pairs. For example, `b-1-public.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9198,b-2-public.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9198,b-3-public.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9198`. This attribute will have a value if `encryption_info.0.encryption_in_transit.0.client_broker` is set to `TLS_PLAINTEXT` or `TLS` and `client_authentication.0.sasl.0.iam` is set to `true` and `broker_node_group_info.0.connectivity_info.0.public_access.0.type` is set to `SERVICE_PROVIDED_EIPS` and the cluster fulfill all other requirements for public access. The resource sorts the list alphabetically. AWS may not always return all endpoints so the values may not be stable across applies.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "bootstrap_brokers_public_sasl_scram",
+      "description": "One or more DNS names (or IP addresses) and SASL SCRAM port pairs. For example, `b-1-public.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9196,b-2-public.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9196,b-3-public.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9196`. This attribute will have a value if `encryption_info.0.encryption_in_transit.0.client_broker` is set to `TLS_PLAINTEXT` or `TLS` and `client_authentication.0.sasl.0.scram` is set to `true` and `broker_node_group_info.0.connectivity_info.0.public_access.0.type` is set to `SERVICE_PROVIDED_EIPS` and the cluster fulfill all other requirements for public access. The resource sorts the list alphabetically. AWS may not always return all endpoints so the values may not be stable across applies.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "bootstrap_brokers_public_tls",
+      "description": "One or more DNS names (or IP addresses) and TLS port pairs. For example, `b-1-public.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9194,b-2-public.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9194,b-3-public.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9194`. This attribute will have a value if `encryption_info.0.encryption_in_transit.0.client_broker` is set to `TLS_PLAINTEXT` or `TLS` and `broker_node_group_info.0.connectivity_info.0.public_access.0.type` is set to `SERVICE_PROVIDED_EIPS` and the cluster fulfill all other requirements for public access. The resource sorts the list alphabetically. AWS may not always return all endpoints so the values may not be stable across applies.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "bootstrap_brokers_sasl_iam",
+      "description": "One or more DNS names (or IP addresses) and SASL IAM port pairs. For example, `b-1.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9098,b-2.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9098,b-3.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9098`. This attribute will have a value if `encryption_info.0.encryption_in_transit.0.client_broker` is set to `TLS_PLAINTEXT` or `TLS` and `client_authentication.0.sasl.0.iam` is set to `true`. The resource sorts the list alphabetically. AWS may not always return all endpoints so the values may not be stable across applies.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "bootstrap_brokers_sasl_scram",
+      "description": "One or more DNS names (or IP addresses) and SASL SCRAM port pairs. For example, `b-1.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9096,b-2.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9096,b-3.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9096`. This attribute will have a value if `encryption_info.0.encryption_in_transit.0.client_broker` is set to `TLS_PLAINTEXT` or `TLS` and `client_authentication.0.sasl.0.scram` is set to `true`. The resource sorts the list alphabetically. AWS may not always return all endpoints so the values may not be stable across applies.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "bootstrap_brokers_tls",
+      "description": "One or more DNS names (or IP addresses) and TLS port pairs. For example, `b-1.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9094,b-2.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9094,b-3.exampleClusterName.abcde.c2.kafka.us-east-1.amazonaws.com:9094`. This attribute will have a value if `encryption_info.0.encryption_in_transit.0.client_broker` is set to `TLS_PLAINTEXT` or `TLS`. The resource sorts the list alphabetically. AWS may not always return all endpoints so the values may not be stable across applies.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "bootstrap_brokers_vpc_connectivity_sasl_iam",
+      "description": "A string containing one or more DNS names (or IP addresses) and SASL IAM port pairs for VPC connectivity. AWS may not always return all endpoints so the values may not be stable across applies.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "bootstrap_brokers_vpc_connectivity_sasl_scram",
+      "description": "A string containing one or more DNS names (or IP addresses) and SASL SCRAM port pairs for VPC connectivity. AWS may not always return all endpoints so the values may not be stable across applies.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "bootstrap_brokers_vpc_connectivity_tls",
+      "description": "A string containing one or more DNS names (or IP addresses) and TLS port pairs for VPC connectivity. AWS may not always return all endpoints so the values may not be stable across applies.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "cluster_uuid",
+      "description": "UUID of the MSK cluster, for use in IAM policies.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "current_version",
+      "description": "Current version of the MSK Cluster used for updates, e.g., `K13V1IB3VIYZZH`",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "zookeeper_connect_string",
+      "description": "A comma separated list of one or more hostname:port pairs to use to connect to the Apache Zookeeper cluster. The returned values are sorted alphabetically. The AWS API may not return all endpoints, so this value is not guaranteed to be stable across applies.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "zookeeper_connect_string_tls",
+      "description": "A comma separated list of one or more hostname:port pairs to use to connect to the Apache Zookeeper cluster via TLS. The returned values are sorted alphabetically. The AWS API may not return all endpoints, so this value is not guaranteed to be stable across applies.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

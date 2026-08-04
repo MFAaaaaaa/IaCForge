@@ -1,0 +1,238 @@
+{
+  "resource": {
+    "name": "aws_default_network_acl",
+    "description": "Provides a resource to manage a VPC's default network ACL. This resource can manage the default network ACL of the default or a non-default VPC. This is an advanced resource with special caveats. Please read this document in its entirety before using this resource. The aws_default_network_acl behaves differently from normal resources. Terraform does not create this resource but instead attempts to \"adopt\" it into management. Every VPC has a default network ACL that can be managed but not destroyed. When Terraform first adopts the Default Network ACL, it immediately removes all rules in the ACL. It then proceeds to create any rules specified in the configuration. This step is required so that only the rules specified in the configuration are created. This resource treats its inline rules as absolute; only the rules defined inline are created, and any additions/removals external to this resource will result in diffs being shown. For these reasons, this resource is incompatible with the aws_network_acl_rule resource. For more information about Network ACLs, see the AWS Documentation on Network ACLs.",
+    "llm_summary": "The `aws_default_network_acl` Terraform resource enables the management of a VPC's default network ACL, allowing users to customize and enforce granular inbound and outbound traffic rules for their default or non-default VPC. It is commonly used to adopt and configure the default network ACL, ensuring only explicitly defined rules are applied while removing any pre-existing or external configurations. This resource is ideal for scenarios requiring strict control over network access policies, such as securing VPC traffic flows, and supports inline rule definitions for comprehensive lifecycle management of ACL rules."
+  },
+  "examples": [
+    {
+      "title": "Basic Example",
+      "code": "resource \"aws_vpc\" \"mainvpc\" {\n  cidr_block = \"10.1.0.0/16\"\n}\n\nresource \"aws_default_network_acl\" \"default\" {\n  default_network_acl_id = aws_vpc.mainvpc.default_network_acl_id\n\n  ingress {\n    protocol   = -1\n    rule_no    = 100\n    action     = \"allow\"\n    cidr_block = \"0.0.0.0/0\"\n    from_port  = 0\n    to_port    = 0\n  }\n\n  egress {\n    protocol   = -1\n    rule_no    = 100\n    action     = \"allow\"\n    cidr_block = \"0.0.0.0/0\"\n    from_port  = 0\n    to_port    = 0\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_default_network_acl` resource to manage the default network ACL associated with an AWS VPC. It showcases the use of `ingress` and `egress` blocks to allow all traffic (`protocol = -1`, `cidr_block = \"0.0.0.0/0\"`) and highlights the use of the `default_network_acl_id` argument to reference the default ACL of a newly created VPC."
+    },
+    {
+      "title": "Example: Deny All Egress Traffic, Allow Ingress",
+      "code": "resource \"aws_vpc\" \"mainvpc\" {\n  cidr_block = \"10.1.0.0/16\"\n}\n\nresource \"aws_default_network_acl\" \"default\" {\n  default_network_acl_id = aws_vpc.mainvpc.default_network_acl_id\n\n  ingress {\n    protocol   = -1\n    rule_no    = 100\n    action     = \"allow\"\n    cidr_block = aws_default_vpc.mainvpc.cidr_block\n    from_port  = 0\n    to_port    = 0\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_default_network_acl` resource to allow all ingress traffic while denying all egress traffic by defining an ingress rule with `action = \"allow\"` and omitting egress rules. It highlights the use of the `default_network_acl_id` argument to reference the default network ACL associated with an AWS VPC."
+    },
+    {
+      "title": "Example: Deny All Traffic To Any Subnet In The Default Network ACL",
+      "code": "resource \"aws_vpc\" \"mainvpc\" {\n  cidr_block = \"10.1.0.0/16\"\n}\n\nresource \"aws_default_network_acl\" \"default\" {\n  default_network_acl_id = aws_vpc.mainvpc.default_network_acl_id\n\n  # no rules defined, deny all traffic in this ACL\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_default_network_acl` resource to deny all traffic by omitting any inbound or outbound rules, effectively creating a restrictive default network ACL for a VPC. It highlights the use of the `default_network_acl_id` argument to associate the default network ACL with a newly created VPC."
+    },
+    {
+      "title": "Managing Subnets In A Default Network ACL",
+      "code": "resource \"aws_default_network_acl\" \"default\" {\n  # ... other configuration ...\n\n  lifecycle {\n    ignore_changes = [subnet_ids]\n  }\n}",
+      "llm_summary": "\"Demonstrates how to manage subnets in an AWS default network ACL using the `aws_default_network_acl` resource, with a `lifecycle` block configured to ignore changes to `subnet_ids`, ensuring stability in dynamic subnet associations.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "default_network_acl_id",
+      "description": "(Required) Network ACL ID to manage. This attribute is exported from `aws_vpc`, or manually found via the AWS Console. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `default_network_acl_id` argument specifies the unique identifier of the default network ACL to manage within a VPC, enabling users to define and control the rules governing inbound and outbound traffic for the associated subnets. By setting this required argument, users ensure the resource targets the correct default network ACL, typically to customize or override its default behavior for enhanced network security and traffic management."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_default_network_acl` resource represents the unique identifier of the default network ACL associated with a specific VPC. While optional, it allows users to reference or manage the default network ACL explicitly, enabling operations such as importing existing resources or ensuring accurate targeting in configurations."
+    },
+    {
+      "name": "subnet_ids",
+      "description": "(Optional) List of Subnet IDs to apply the ACL to. See the notes above on Managing Subnets in the Default Network ACL",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `subnet_ids` argument for the `aws_default_network_acl` resource allows users to specify a set of Subnet IDs to associate with the default network ACL, enabling targeted control over which subnets inherit the ACL's rules. By configuring this argument, users can ensure consistent network access control policies across specific subnets within a VPC, aligning with security and compliance requirements."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_default_network_acl` resource allows users to assign metadata in the form of key-value pairs to the default network ACL, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or compliance tracking. When configured, it can override provider-level default tags, ensuring granular control over tag management specific to this resource."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_default_network_acl` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to the resource, including inherited tags from the provider's default configuration. This enables consistent tagging for resource organization, cost allocation, and governance across AWS infrastructure."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "egress",
+      "description": "(Optional) Configuration block for an egress rule. Detailed below.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "action",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `action` argument in the `egress` block of the `aws_default_network_acl` resource specifies whether outbound traffic is explicitly allowed or denied for the associated rule. By defining this argument as either `\"allow\"` or `\"deny\"`, users control the behavior of the network ACL in filtering egress traffic, enabling them to enforce security policies and regulate outbound connectivity."
+        },
+        {
+          "name": "cidr_block",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `cidr_block` argument in the `egress` context of the `aws_default_network_acl` resource allows users to specify the range of IP addresses (in CIDR notation) that are permitted for outbound traffic from the associated subnet. By defining this argument, users can control which external networks or IP ranges the subnet can communicate with, enabling precise egress traffic filtering to meet security or connectivity requirements."
+        },
+        {
+          "name": "from_port",
+          "description": "",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `from_port` argument in the `egress` context of the `aws_default_network_acl` resource specifies the starting port number for the range of outbound traffic that the network ACL rule applies to. By defining this value, users control which ports are permitted or denied for egress traffic, enabling precise configuration of security rules to meet application or compliance requirements."
+        },
+        {
+          "name": "icmp_code",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `icmp_code` argument in the `aws_default_network_acl` resource's `egress` context allows users to specify the ICMP code for outbound traffic rules, enabling fine-grained control over ICMP protocol behavior. By setting this argument, users can define specific ICMP message types for egress traffic, supporting use cases like network diagnostics or restricting certain ICMP responses."
+        },
+        {
+          "name": "icmp_type",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `icmp_type` argument in the `egress` context of the `aws_default_network_acl` resource allows users to specify the ICMP message type for outbound traffic rules. By setting this argument, users can control the type of ICMP traffic permitted to leave the network, enabling fine-grained management of network communication protocols for scenarios like diagnostics or specific application requirements."
+        },
+        {
+          "name": "ipv6_cidr_block",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `ipv6_cidr_block` argument in the `egress` context of the `aws_default_network_acl` resource allows users to specify an IPv6 CIDR block for defining outbound traffic rules. By setting this argument, users can control which IPv6 address ranges are permitted for egress traffic, enabling precise network access management and ensuring compliance with IPv6-based routing and security requirements."
+        },
+        {
+          "name": "protocol",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `protocol` argument in the `egress` block of the `aws_default_network_acl` resource specifies the network protocol (e.g., TCP, UDP, ICMP) for outbound traffic rules. By defining this argument, users control which type of traffic is allowed or denied for egress, enabling precise configuration of network security and communication behavior."
+        },
+        {
+          "name": "rule_no",
+          "description": "",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `rule_no` argument specifies the unique priority number for an egress rule in the `aws_default_network_acl` resource, determining the order in which the rule is evaluated. By setting this required value, users can control the precedence of traffic filtering rules, ensuring proper enforcement of network access policies for outbound traffic."
+        },
+        {
+          "name": "to_port",
+          "description": "",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `to_port` argument in the `egress` block of the `aws_default_network_acl` resource specifies the highest port number in the range of allowed outbound traffic for a rule. By defining this value, users control the upper boundary of the port range for egress traffic, enabling precise configuration of network access and security policies."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"egress\" configuration block within the `aws_default_network_acl` resource defines rules for outbound traffic control, specifying conditions such as protocol, port range, and destination CIDR blocks. Configuring this block enables users to enforce granular security policies for outgoing network traffic, ensuring compliance with access control requirements and optimizing network behavior."
+    },
+    {
+      "name": "ingress",
+      "description": "(Optional) Configuration block for an ingress rule. Detailed below.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "action",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `action` argument in the `ingress` block of the `aws_default_network_acl` resource specifies whether network traffic is **allowed** or **denied** for the defined ingress rule. By setting this argument to either `\"allow\"` or `\"deny\"`, users control the access behavior for incoming traffic, enabling them to enforce security policies and regulate the flow of data into their VPC."
+        },
+        {
+          "name": "cidr_block",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `cidr_block` argument in the `ingress` context of the `aws_default_network_acl` resource allows users to specify the IP address range (in CIDR notation) that is permitted to send traffic into the associated network. By defining this argument, users can control which external or internal IP ranges are allowed ingress access, enabling precise network security and traffic filtering for their AWS environment."
+        },
+        {
+          "name": "from_port",
+          "description": "",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `from_port` argument in the `ingress` block of the `aws_default_network_acl` resource specifies the starting port of the range for inbound traffic rules, allowing users to define which ports are permitted for incoming connections. By setting this value, users can control access to specific services or applications based on their port numbers, ensuring secure and targeted network traffic management."
+        },
+        {
+          "name": "icmp_code",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `icmp_code` argument in the `ingress` context of the `aws_default_network_acl` resource allows users to specify the ICMP (Internet Control Message Protocol) code for controlling network traffic rules. By setting this argument, users can define granular ICMP behavior for incoming traffic, enabling precise control over specific ICMP message types, such as error or diagnostic codes, to meet security or connectivity requirements."
+        },
+        {
+          "name": "icmp_type",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `icmp_type` argument allows users to specify the ICMP type code for an ingress rule in the default network ACL, enabling fine-grained control over the types of ICMP traffic permitted. This is typically used to define specific ICMP behavior, such as allowing ping requests (type 8) or other ICMP message types, to meet network communication or diagnostic requirements."
+        },
+        {
+          "name": "ipv6_cidr_block",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `ipv6_cidr_block` argument allows users to specify an IPv6 address range (in CIDR notation) for defining ingress rules in the default network ACL. By setting this argument, users can control which IPv6 traffic is permitted to enter the associated VPC, enabling fine-grained access control for IPv6-based resources and applications."
+        },
+        {
+          "name": "protocol",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `protocol` argument in the `ingress` block of the `aws_default_network_acl` resource specifies the network protocol (e.g., TCP, UDP, ICMP) to control the type of traffic allowed into the associated subnet. By defining this argument, users can enforce security rules tailored to specific communication protocols, ensuring only desired traffic types are permitted ingress based on their application's requirements."
+        },
+        {
+          "name": "rule_no",
+          "description": "",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `rule_no` argument specifies the unique rule number for an ingress rule in the default network ACL, determining the evaluation order of the rule relative to others. Setting this value allows users to control the priority of the rule, ensuring that traffic is allowed or denied based on the desired precedence in the ACL's rule set."
+        },
+        {
+          "name": "to_port",
+          "description": "",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `to_port` argument specifies the highest port number in the range of allowed ports for an ingress rule in the default network ACL, enabling users to define the upper boundary of permissible traffic for a specific protocol. Setting this argument ensures precise control over the port range for inbound traffic, aligning with security and access requirements."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"ingress\" configuration block within the \"aws_default_network_acl\" resource defines rules for inbound traffic control, specifying conditions such as protocol, port range, and source CIDR to manage access to a VPC's subnets. Configuring this block enables users to enforce granular security policies for incoming network traffic, ensuring compliance and protecting resources from unauthorized access."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN of the Default Network ACL",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "owner_id",
+      "description": "ID of the AWS account that owns the Default Network ACL",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "vpc_id",
+      "description": "ID of the associated VPC",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

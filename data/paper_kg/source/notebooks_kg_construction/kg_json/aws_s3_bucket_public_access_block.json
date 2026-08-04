@@ -1,0 +1,47 @@
+{
+    "resource": {
+        "name": "aws_s3_bucket_public_access_block",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "block_public_acls",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "block_public_policy",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "bucket",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ignore_public_acls",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "restrict_public_buckets",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        }
+    ],
+    "blocks": [],
+    "attributes": []
+}

@@ -1,0 +1,124 @@
+{
+    "resource": {
+        "name": "aws_kinesis_stream",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "encryption_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "enforce_consumer_deletion",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "kms_key_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "retention_period",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "shard_count",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "shard_level_metrics",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "stream_mode_details",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "stream_mode",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": []
+}

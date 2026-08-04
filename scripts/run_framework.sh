@@ -76,9 +76,8 @@ COMMON_ENV=(
   IAC_PROVIDER_CONTRACT_ROOT="$ROOT_DIR/data/leakfree_multigranular_kg/terraform_aws_5.90.0_public_kg"
   IAC_OFFLINE_PROVIDER_CONTRACT_CACHE="$ROOT_DIR/data/leakfree_multigranular_kg/offline_retrieval/provider_contract_full458.jsonl"
   IAC_ALLOW_ONLINE_KG_RETRIEVAL="${IAC_ALLOW_ONLINE_KG_RETRIEVAL:-0}"
-  IAC_USE_HCL_SKELETON="${IAC_USE_HCL_SKELETON:-0}"
-  IAC_PLANNER_MAX_CANDIDATES="${IAC_PLANNER_MAX_CANDIDATES:-8}"
-  IAC_REPAIR_UNDECLARED_VARIABLES="${IAC_REPAIR_UNDECLARED_VARIABLES:-1}"
+  IAC_KG_PROFILE="${IAC_KG_PROFILE:-clean_multigranular}"
+  IAC_KG_INJECTION_STAGE="${IAC_KG_INJECTION_STAGE:-both}"
   PYTHONUNBUFFERED=1
 )
 
@@ -127,6 +126,41 @@ case "$MODE" in
     ENHANCE_STRAT="FullKGVeriGraph"
     COMMON_ENV+=(IACFORGE_MODE=full_repair1 VERIGRAPH_PROMPT_DERIVED_SCHEMA_GROUNDING=1)
     OUTPUT_SUFFIX="-full-repair1-full${MAX_ROWS}"
+    ;;
+  paper_ir|paper_hcl|paper_both|paper_both_repair1)
+    ENHANCE_STRAT="FullKGVeriGraph"
+    KG_STAGE="${MODE#paper_}"
+    KG_STAGE="${KG_STAGE%_repair1}"
+    FRAMEWORK_MODE="full"
+    if [[ "$MODE" == "paper_both_repair1" ]]; then
+      FRAMEWORK_MODE="full_repair1"
+    fi
+    COMMON_ENV+=(
+      IACFORGE_MODE="$FRAMEWORK_MODE"
+      IAC_KG_PROFILE=paper
+      IAC_KG_INJECTION_STAGE="$KG_STAGE"
+      IAC_ALLOW_BENCHMARK_SCOPED_PAPER_KG=1
+      IAC_KG_PAPER_REPLICATION_ROOT="$ROOT_DIR/data/paper_kg/source"
+      IAC_KG_PAPER_CHROMA_DIR="$ROOT_DIR/data/paper_kg/chroma"
+      IAC_KG_PAPER_RETRIEVAL_MODE="${IAC_KG_PAPER_RETRIEVAL_MODE:-faithful_graph}"
+      VERIGRAPH_PROMPT_DERIVED_SCHEMA_GROUNDING=1
+    )
+    OUTPUT_SUFFIX="-${MODE}-full${MAX_ROWS}"
+    ;;
+  hybrid_both|hybrid_both_repair1)
+    ENHANCE_STRAT="FullKGVeriGraph"
+    FRAMEWORK_MODE="full"
+    if [[ "$MODE" == "hybrid_both_repair1" ]]; then
+      FRAMEWORK_MODE="full_repair1"
+    fi
+    COMMON_ENV+=(
+      IACFORGE_MODE="$FRAMEWORK_MODE"
+      IAC_KG_PROFILE=hybrid_cached_evidence_rebuilt_kg
+      IAC_KG_INJECTION_STAGE=both
+      IAC_HYBRID_EVIDENCE_FILE="$ROOT_DIR/data/hybrid_paper_fullkg/evidence_v1/publickg_full458.jsonl"
+      VERIGRAPH_PROMPT_DERIVED_SCHEMA_GROUNDING=1
+    )
+    OUTPUT_SUFFIX="-${MODE}-full${MAX_ROWS}"
     ;;
   ir_only)
     ENHANCE_STRAT="VeriGraph"

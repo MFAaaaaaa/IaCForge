@@ -1,0 +1,518 @@
+{
+    "resource": {
+        "name": "aws_cloudwatch_event_target",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "arn",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "event_bus_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "force_destroy",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "input",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "input_path",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "role_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "rule",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "target_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "appsync_target",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "graphql_operation",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "batch_target",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "array_size",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "job_attempts",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "job_definition",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "job_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "dead_letter_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "ecs_target",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "enable_ecs_managed_tags",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "enable_execute_command",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "group",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "launch_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "platform_version",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "propagate_tags",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "tags",
+                    "description": "",
+                    "required": false,
+                    "type": "map(string)"
+                },
+                {
+                    "name": "task_count",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "task_definition_arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "capacity_provider_strategy",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        0
+                    ],
+                    "arguments": [
+                        {
+                            "name": "base",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "capacity_provider",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "weight",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "network_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "assign_public_ip",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "security_groups",
+                            "description": "",
+                            "required": false,
+                            "type": "set(string)"
+                        },
+                        {
+                            "name": "subnets",
+                            "description": "",
+                            "required": true,
+                            "type": "set(string)"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "ordered_placement_strategy",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        5
+                    ],
+                    "arguments": [
+                        {
+                            "name": "field",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "type",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "placement_constraint",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        10
+                    ],
+                    "arguments": [
+                        {
+                            "name": "expression",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "type",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "http_target",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "header_parameters",
+                    "description": "",
+                    "required": false,
+                    "type": "map(string)"
+                },
+                {
+                    "name": "path_parameter_values",
+                    "description": "",
+                    "required": false,
+                    "type": "list(string)"
+                },
+                {
+                    "name": "query_string_parameters",
+                    "description": "",
+                    "required": false,
+                    "type": "map(string)"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "input_transformer",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "input_paths",
+                    "description": "",
+                    "required": false,
+                    "type": "map(string)"
+                },
+                {
+                    "name": "input_template",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "kinesis_target",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "partition_key_path",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "redshift_target",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "database",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "db_user",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "secrets_manager_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "sql",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "statement_name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "with_event",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "retry_policy",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "maximum_event_age_in_seconds",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "maximum_retry_attempts",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "run_command_targets",
+            "description": "",
+            "cardinality": [
+                0,
+                5
+            ],
+            "arguments": [
+                {
+                    "name": "key",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "values",
+                    "description": "",
+                    "required": true,
+                    "type": "list(string)"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "sagemaker_pipeline_target",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "pipeline_parameter_list",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        200
+                    ],
+                    "arguments": [
+                        {
+                            "name": "name",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "value",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "sqs_target",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "message_group_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": []
+}

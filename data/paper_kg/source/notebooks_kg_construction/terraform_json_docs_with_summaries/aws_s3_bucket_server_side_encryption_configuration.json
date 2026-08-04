@@ -1,0 +1,86 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_server_side_encryption_configuration",
+    "description": "Provides a S3 bucket server-side encryption configuration resource. Destroying an aws_s3_bucket_server_side_encryption_configuration resource resets the bucket to Amazon S3 bucket default encryption.",
+    "llm_summary": "Manages the server-side encryption settings for an Amazon S3 bucket, ensuring data at rest is automatically encrypted using specified encryption methods such as AWS-managed keys (SSE-S3) or customer-managed keys (SSE-KMS). Commonly used to enforce compliance with data protection policies, secure sensitive data, and simplify encryption management for cloud storage. Supports configuring default encryption settings to streamline security across all objects in the bucket."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_kms_key\" \"mykey\" {\n  description             = \"This key is used to encrypt bucket objects\"\n  deletion_window_in_days = 10\n}\n\nresource \"aws_s3_bucket\" \"mybucket\" {\n  bucket = \"mybucket\"\n}\n\nresource \"aws_s3_bucket_server_side_encryption_configuration\" \"example\" {\n  bucket = aws_s3_bucket.mybucket.id\n\n  rule {\n    apply_server_side_encryption_by_default {\n      kms_master_key_id = aws_kms_key.mykey.arn\n      sse_algorithm     = \"aws:kms\"\n    }\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure server-side encryption for an S3 bucket using the `aws_s3_bucket_server_side_encryption_configuration` resource, with AWS KMS as the encryption provider. Highlights the use of the `rule` block to apply default encryption settings, specifying the `kms_master_key_id` and `sse_algorithm` for secure object storage.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bucket",
+      "description": "(Required, Forces new resource) ID (name) of the bucket.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket` argument specifies the unique name or ID of the S3 bucket for which server-side encryption settings are being configured. By defining this required parameter, users associate the encryption configuration with a specific bucket, ensuring data stored in that bucket is protected according to the specified encryption rules."
+    },
+    {
+      "name": "expected_bucket_owner",
+      "description": "(Optional, Forces new resource) Account ID of the expected bucket owner.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `expected_bucket_owner` argument allows users to specify the AWS account ID of the anticipated owner of the S3 bucket associated with the server-side encryption configuration. This ensures that operations on the bucket are restricted to the specified account, enhancing security and preventing accidental misconfigurations or access to buckets owned by unauthorized accounts."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_s3_bucket_server_side_encryption_configuration` resource serves as an optional identifier for the encryption configuration, allowing users to uniquely reference or manage the configuration within Terraform state or workflows. While not required, setting this argument can help users organize and track specific encryption configurations, especially in complex environments with multiple resources."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "rule",
+      "description": "(Required) Set of server-side encryption configuration rules. See below. Currently, only a single rule is supported.",
+      "cardinality": [
+        1,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "bucket_key_enabled",
+          "description": "(Optional) Whether or not to use Amazon S3 Bucket Keys for SSE-KMS.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `bucket_key_enabled` argument allows users to control whether Amazon S3 Bucket Keys are utilized for server-side encryption with AWS KMS (SSE-KMS) within the encryption rule. Enabling this feature reduces the cost and improves the performance of encryption operations by leveraging a bucket-level key hierarchy, aligning with common goals of optimizing security and efficiency in S3 bucket management."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "apply_server_side_encryption_by_default",
+          "description": "(Optional) Single object for setting server-side encryption by default. See below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "kms_master_key_id",
+              "description": "(Optional) AWS KMS master key ID used for the SSE-KMS encryption. This can only be used when you set the value of `sse_algorithm` as `aws:kms`. The default `aws/s3` AWS KMS master key is used if this element is absent while the `sse_algorithm` is `aws:kms`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `kms_master_key_id` argument allows users to specify the AWS KMS key to be used for server-side encryption with SSE-KMS in an S3 bucket, enabling granular control over encryption keys for enhanced security and compliance. If omitted, the default AWS-managed KMS key (`aws/s3`) is used, making this argument essential for users who need to define custom encryption keys for sensitive data or meet specific regulatory requirements."
+            },
+            {
+              "name": "sse_algorithm",
+              "description": "(Required) Server-side encryption algorithm to use. Valid values are `AES256`, `aws:kms`, and `aws:kms:dsse`",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `sse_algorithm` argument specifies the server-side encryption algorithm to be applied by default for objects in the S3 bucket, enabling users to define the encryption method for securing data at rest. By setting this required argument to valid values such as `AES256`, `aws:kms`, or `aws:kms:dsse`, users can configure the encryption behavior to align with compliance, security, or performance requirements, ensuring sensitive data is protected automatically."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "\"Defines default server-side encryption settings for S3 bucket objects, specifying the encryption algorithm and optional KMS key to ensure data is encrypted at rest. This block enables automatic enforcement of encryption policies, enhancing data security and compliance with organizational or regulatory requirements.\""
+        }
+      ],
+      "llm_summary": "The \"rule\" configuration block within the `aws_s3_bucket_server_side_encryption_configuration` resource defines the server-side encryption settings for an S3 bucket, ensuring data is automatically encrypted at rest. It encapsulates encryption-related parameters, such as the encryption method or key management service, enabling users to enforce compliance, enhance security, and protect sensitive data stored in S3."
+    }
+  ],
+  "attributes": []
+}

@@ -1,0 +1,1958 @@
+{
+  "resource": {
+    "name": "aws_sagemaker_domain",
+    "description": "Provides a SageMaker AI Domain resource.",
+    "llm_summary": "The `aws_sagemaker_domain` Terraform resource enables the creation and management of a SageMaker Domain, which serves as a foundational environment for machine learning workflows in AWS. It is commonly used to set up secure, scalable infrastructure for data scientists and ML practitioners, including user profiles, shared storage, and access control for SageMaker Studio. Key configurations include authentication methods (such as IAM or SSO), network settings, lifecycle policies, and resource sharing, making it ideal for orchestrating collaborative AI development environments."
+  },
+  "examples": [
+    {
+      "title": "Basic usage",
+      "code": "resource \"aws_sagemaker_domain\" \"example\" {\n  domain_name = \"example\"\n  auth_mode   = \"IAM\"\n  vpc_id      = aws_vpc.example.id\n  subnet_ids  = [aws_subnet.example.id]\n\n  default_user_settings {\n    execution_role = aws_iam_role.example.arn\n  }\n}\n\nresource \"aws_iam_role\" \"example\" {\n  name               = \"example\"\n  path               = \"/\"\n  assume_role_policy = data.aws_iam_policy_document.example.json\n}\n\ndata \"aws_iam_policy_document\" \"example\" {\n  statement {\n    actions = [\"sts:AssumeRole\"]\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"sagemaker.amazonaws.com\"]\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS SageMaker Domain with IAM authentication, specifying a VPC and subnets for network isolation. It includes the setup of a default user execution role using an `aws_iam_role` resource and an `aws_iam_policy_document` to define the trust relationship for SageMaker service access."
+    },
+    {
+      "title": "Using Custom Images",
+      "code": "resource \"aws_sagemaker_image\" \"example\" {\n  image_name = \"example\"\n  role_arn   = aws_iam_role.example.arn\n}\n\nresource \"aws_sagemaker_app_image_config\" \"example\" {\n  app_image_config_name = \"example\"\n\n  kernel_gateway_image_config {\n    kernel_spec {\n      name = \"example\"\n    }\n  }\n}\n\nresource \"aws_sagemaker_image_version\" \"example\" {\n  image_name = aws_sagemaker_image.example.id\n  base_image = \"base-image\"\n}\n\nresource \"aws_sagemaker_domain\" \"example\" {\n  domain_name = \"example\"\n  auth_mode   = \"IAM\"\n  vpc_id      = aws_vpc.example.id\n  subnet_ids  = [aws_subnet.example.id]\n\n  default_user_settings {\n    execution_role = aws_iam_role.example.arn\n\n    kernel_gateway_app_settings {\n      custom_image {\n        app_image_config_name = aws_sagemaker_app_image_config.example.app_image_config_name\n        image_name            = aws_sagemaker_image_version.example.image_name\n      }\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_sagemaker_domain` with custom images for kernel gateway applications by integrating `aws_sagemaker_image`, `aws_sagemaker_app_image_config`, and `aws_sagemaker_image_version` resources. It highlights the use of the `custom_image` block within `default_user_settings` to specify a custom app image configuration and image version, enabling tailored SageMaker environments."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "app_network_access_type",
+      "description": "(Optional) Specifies the VPC used for non-EFS traffic. The default value is `PublicInternetOnly`. Valid values are `PublicInternetOnly` and `VpcOnly`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `app_network_access_type` argument for the `aws_sagemaker_domain` resource allows users to specify the network access configuration for SageMaker Studio applications, controlling whether non-EFS traffic is routed through the public internet (`PublicInternetOnly`) or a private VPC (`VpcOnly`). This setting impacts the security and connectivity of the environment, enabling users to align network access with their organization's requirements for public or private infrastructure."
+    },
+    {
+      "name": "app_security_group_management",
+      "description": "(Optional) The entity that creates and manages the required security groups for inter-app communication in `VPCOnly` mode. Valid values are `Service` and `Customer`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `app_security_group_management` argument in the `aws_sagemaker_domain` resource allows users to specify whether the security groups required for inter-application communication in `VPCOnly` mode are managed by AWS (`Service`) or manually configured by the user (`Customer`). This setting impacts the level of control over network security, enabling users to either rely on AWS-managed defaults or define custom security group configurations to meet specific compliance or networking requirements."
+    },
+    {
+      "name": "auth_mode",
+      "description": "(Required) The mode of authentication that members use to access the domain. Valid values are `IAM` and `SSO`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `auth_mode` argument in the `aws_sagemaker_domain` resource specifies the authentication method users must use to access the SageMaker domain, allowing you to control whether access is managed via AWS Identity and Access Management (IAM) or Single Sign-On (SSO). Setting this argument defines the domain's access control mechanism, aligning with organizational security policies and user management preferences."
+    },
+    {
+      "name": "domain_name",
+      "description": "(Required) The domain name.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `domain_name` argument specifies the unique name of the SageMaker Domain, serving as an identifier for the domain within the AWS environment. This is a required parameter that enables users to define and manage a centralized environment for machine learning development, including user profiles, shared resources, and security configurations."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_sagemaker_domain` resource allows users to specify a unique identifier for the SageMaker domain, typically used to reference or manage the resource programmatically within Terraform configurations. While optional, setting this argument can help ensure consistent tracking and integration of the domain across workflows or external systems."
+    },
+    {
+      "name": "kms_key_id",
+      "description": "(Optional) The AWS KMS customer managed CMK used to encrypt the EFS volume attached to the domain.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `kms_key_id` argument for the `aws_sagemaker_domain` resource allows users to specify the AWS KMS customer-managed key (CMK) used to encrypt the EFS volume attached to the SageMaker domain. By configuring this argument, users can enhance data security and compliance by defining custom encryption for storage associated with the domain."
+    },
+    {
+      "name": "subnet_ids",
+      "description": "(Required) The VPC subnets that Studio uses for communication.",
+      "required": true,
+      "type": "set(string)",
+      "llm_summary": "The `subnet_ids` argument for the `aws_sagemaker_domain` resource specifies the set of VPC subnets that Amazon SageMaker Studio will use for network communication. By defining these subnets, users control the network environment for Studio, ensuring secure and isolated connectivity within their VPC, which is essential for managing data flow and integrating with other AWS services."
+    },
+    {
+      "name": "tag_propagation",
+      "description": "(Optional) Indicates whether custom tag propagation is supported for the domain. Defaults to `DISABLED`. Valid values are: `ENABLED` and `DISABLED`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `tag_propagation` argument for the `aws_sagemaker_domain` resource allows users to control whether custom tags applied to the domain are automatically propagated to resources created within the domain. Setting this argument to `ENABLED` facilitates consistent tag management across related resources, supporting use cases like cost allocation, resource organization, and compliance tracking, while `DISABLED` prevents tag inheritance."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_sagemaker_domain` resource allows users to define a map of key-value pairs to assign metadata to the SageMaker domain, enabling resource categorization, organization, and cost tracking. By setting this argument, users can streamline management tasks such as identifying environments (e.g., \"dev\" or \"prod\"), applying governance policies, or integrating with billing and reporting workflows."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_sagemaker_domain` resource allows users to define a comprehensive set of key-value tags that are automatically merged with resource-specific tags, enabling consistent metadata management across AWS resources. By configuring this argument, users can streamline tagging for cost allocation, access control, and resource organization, aligning the SageMaker domain with broader tagging strategies in their cloud environment."
+    },
+    {
+      "name": "vpc_id",
+      "description": "(Required) The ID of the Amazon Virtual Private Cloud (VPC) that Studio uses for communication. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `vpc_id` argument specifies the ID of the Amazon Virtual Private Cloud (VPC) that SageMaker Studio uses for network communication, ensuring that all traffic between the Studio environment and other AWS services or resources remains within the defined VPC. This configuration is essential for users aiming to enforce network isolation, enhance security, and control access to resources in compliance with their organization's networking policies."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "default_space_settings",
+      "description": "(Required) The default space settings. See `default_space_settings` Block below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "execution_role",
+          "description": "(Required) The execution role for the space.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `execution_role` argument specifies the IAM role that SageMaker uses to execute actions within the default user space of the domain, such as accessing AWS resources or managing workloads. Setting this required role ensures proper permissions for running machine learning tasks and interacting with associated services, aligning with user goals of securing and enabling resource access in SageMaker environments."
+        },
+        {
+          "name": "security_groups",
+          "description": "(Optional) The security groups for the Amazon Virtual Private Cloud that the space uses for communication.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `security_groups` argument in the `default_space_settings` of the `aws_sagemaker_domain` resource allows users to specify a set of security group IDs that control network access for the Amazon Virtual Private Cloud (VPC) associated with the space. By configuring this argument, users can define inbound and outbound traffic rules to enhance security, restrict communication, and meet compliance requirements for the SageMaker environment."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "custom_file_system_config",
+          "description": "(Optional) The settings for assigning a custom file system to a user profile. Permitted users can access this file system in Amazon SageMaker AI Studio. See `custom_file_system_config` Block below.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "efs_file_system_config",
+              "description": "(Optional) The default EBS storage settings for a private space. See `efs_file_system_config` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "file_system_id",
+                  "description": "(Required) The ID of your Amazon EFS file system.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `file_system_id` argument specifies the unique identifier of an Amazon EFS file system to integrate with the SageMaker Domain's `efs_file_system_config`. By defining this ID, users enable persistent storage for SageMaker notebooks and applications, facilitating seamless data access and retention across sessions, which is essential for managing shared datasets or collaborative workflows."
+                },
+                {
+                  "name": "file_system_path",
+                  "description": "(Required) The path to the file system directory that is accessible in Amazon SageMaker AI Studio. Permitted users can access only this directory and below.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `file_system_path` argument specifies the directory path within the Amazon EFS file system that is accessible to users in SageMaker Studio, effectively defining the root directory for user access and isolating their file system interactions to this path and its subdirectories. By setting this argument, users can control the scope of file system access for SageMaker Studio environments, ensuring secure and organized data management aligned with their workflows."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `efs_file_system_config` block within the `custom_file_system_config` of the `aws_sagemaker_domain` resource defines the configuration for integrating an Amazon EFS (Elastic File System) as the default storage for private spaces in SageMaker. This block enables users to specify and manage EFS-related settings, such as file system details and mount options, providing scalable, shared storage for machine learning environments and ensuring seamless data access across users and applications."
+            }
+          ],
+          "llm_summary": "The `custom_file_system_config` block within the `default_space_settings` of the `aws_sagemaker_domain` resource enables the configuration of a custom file system for user profiles in Amazon SageMaker Studio, allowing permitted users to access shared or personalized storage for AI and ML workflows. This block encapsulates settings related to file system integration, providing users with fine-grained control over storage access and customization to support collaborative or specialized data processing needs."
+        },
+        {
+          "name": "custom_posix_user_config",
+          "description": "(Optional) Details about the POSIX identity that is used for file system operations. See `custom_posix_user_config` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "gid",
+              "description": "(Optional) The POSIX group ID.",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `gid` argument in the `custom_posix_user_config` block of the `aws_sagemaker_domain` resource allows users to specify the POSIX group ID for the SageMaker user profile's underlying file system. By setting this value, users can control group-level permissions and access for files and directories, ensuring compatibility with POSIX-compliant systems and enabling secure multi-user collaboration within SageMaker environments."
+            },
+            {
+              "name": "uid",
+              "description": "(Optional) The POSIX user ID.",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `uid` argument in the `custom_posix_user_config` block of the `aws_sagemaker_domain` resource allows users to define the POSIX user ID (UID) for the SageMaker domain's associated user profile. By specifying this numeric identifier, users can control the mapping of SageMaker user profiles to POSIX-based systems, ensuring compatibility with file permissions, access control, and identity management in environments that rely on POSIX standards."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `custom_posix_user_config` block within the `default_space_settings` of the `aws_sagemaker_domain` resource defines the POSIX identity (e.g., user ID and group ID) used for file system operations in SageMaker environments. This configuration enables precise control over file access and permissions, ensuring compatibility with POSIX-compliant systems and facilitating secure and efficient data handling for custom workloads."
+        },
+        {
+          "name": "jupyter_lab_app_settings",
+          "description": "(Optional) The settings for the JupyterLab application. See `jupyter_lab_app_settings` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "built_in_lifecycle_config_arn",
+              "description": "(Optional) The lifecycle configuration that runs before the default lifecycle configuration. It can override changes made in the default lifecycle configuration.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `built_in_lifecycle_config_arn` argument for the `jupyter_lab_app_settings` in the `aws_sagemaker_domain` resource allows users to specify the ARN of a pre-defined lifecycle configuration that executes prior to the default lifecycle configuration. This enables customization of initialization processes, such as setting environment variables or preloading dependencies, to override or augment default behaviors in JupyterLab environments."
+            },
+            {
+              "name": "lifecycle_config_arns",
+              "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configurations.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `lifecycle_config_arns` argument in the `jupyter_lab_app_settings` block of the `aws_sagemaker_domain` resource allows users to specify a set of Amazon Resource Names (ARNs) for Lifecycle Configurations that define custom behaviors or actions for JupyterLab environments, such as resource initialization, cleanup, or automation tasks. By setting this argument, users can streamline environment management, enforce consistent configurations, and optimize workflows within SageMaker JupyterLab instances."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "app_lifecycle_management",
+              "description": "(Optional) Indicates whether idle shutdown is activated for JupyterLab applications. see `app_lifecycle_management` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [],
+              "blocks": [
+                {
+                  "name": "idle_settings",
+                  "description": "(Optional) Settings related to idle shutdown of Studio applications. see `idle_settings` Block below.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "idle_timeout_in_minutes",
+                      "description": "(Optional) The time that SageMaker AI waits after the application becomes idle before shutting it down. Valid values are between `60` and `525600`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `idle_timeout_in_minutes` argument for the `idle_settings` block in the `aws_sagemaker_domain` resource allows users to define the duration (in minutes) that SageMaker waits before automatically shutting down idle applications. By configuring this timeout, users can optimize resource utilization and cost management by controlling the lifecycle of idle applications within the SageMaker environment."
+                    },
+                    {
+                      "name": "lifecycle_management",
+                      "description": "(Optional) Indicates whether idle shutdown is activated for the application type. Valid values are `ENABLED` and `DISABLED`.",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `lifecycle_management` argument in the `idle_settings` block of the `aws_sagemaker_domain` resource allows users to control whether idle shutdown is activated for SageMaker applications, enabling automated lifecycle management for resource optimization. By setting this argument to `ENABLED` or `DISABLED`, users can define the application's behavior during idle periods, helping to reduce costs and improve efficiency by shutting down unused resources."
+                    },
+                    {
+                      "name": "max_idle_timeout_in_minutes",
+                      "description": "(Optional) The maximum value in minutes that custom idle shutdown can be set to by the user. Valid values are between `60` and `525600`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `max_idle_timeout_in_minutes` argument for the `idle_settings` in the `aws_sagemaker_domain` resource allows users to define the maximum duration (in minutes) that a SageMaker environment can remain idle before shutting down, ensuring efficient resource utilization and cost management. By setting this value, users can control the upper limit for custom idle shutdown configurations, balancing operational flexibility with automated resource cleanup."
+                    },
+                    {
+                      "name": "min_idle_timeout_in_minutes",
+                      "description": "(Optional) The minimum value in minutes that custom idle shutdown can be set to by the user. Valid values are between `60` and `525600`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `min_idle_timeout_in_minutes` argument for the `idle_settings` in the `aws_sagemaker_domain` resource allows users to define the minimum allowable duration (in minutes) for custom idle shutdown settings in SageMaker environments. By configuring this value, users can enforce a lower limit on idle timeout periods, ensuring resource optimization and cost control while maintaining flexibility for user-defined idle behavior within the specified range (60 to 525600 minutes)."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `idle_settings` block in the `aws_sagemaker_domain` resource under \"app_lifecycle_management\" configures parameters for automatically shutting down idle Studio applications, optimizing resource usage and cost management. It encapsulates settings related to idle timeout behavior, enabling users to enforce lifecycle policies that prevent unnecessary resource consumption during periods of inactivity."
+                }
+              ],
+              "llm_summary": "The `app_lifecycle_management` block within the `jupyter_lab_app_settings` configuration of the `aws_sagemaker_domain` resource enables control over the lifecycle behavior of JupyterLab applications, specifically managing idle shutdown settings to optimize resource usage. By configuring this block, users can automate application shutdown during idle periods, reducing costs and improving operational efficiency in SageMaker environments."
+            },
+            {
+              "name": "code_repository",
+              "description": "(Optional) A list of Git repositories that SageMaker AI automatically displays to users for cloning in the JupyterServer application. see `code_repository` Block below.",
+              "cardinality": [
+                0,
+                10
+              ],
+              "arguments": [
+                {
+                  "name": "repository_url",
+                  "description": "(Optional) The URL of the Git repository.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `repository_url` argument for the `aws_sagemaker_domain` resource's `code_repository` configuration specifies the URL of a Git repository that serves as the source for code and artifacts used in SageMaker workflows. By setting this required argument, users can integrate version-controlled code into their SageMaker environment, enabling reproducible machine learning experiments, streamlined collaboration, and automated deployment pipelines."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `code_repository` block within the `jupyter_lab_app_settings` configuration of the `aws_sagemaker_domain` resource specifies a list of Git repositories that are automatically displayed to users in the JupyterServer application for cloning and use in their SageMaker environment. This block enables streamlined access to pre-defined code repositories, facilitating collaborative development, reproducibility, and efficient setup of machine learning workflows directly within JupyterLab."
+            },
+            {
+              "name": "custom_image",
+              "description": "(Optional) A list of custom SageMaker AI images that are configured to run as a JupyterLab app. see `custom_image` Block below.",
+              "cardinality": [
+                0,
+                200
+              ],
+              "arguments": [
+                {
+                  "name": "app_image_config_name",
+                  "description": "(Required) The name of the App Image Config.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `app_image_config_name` argument specifies the name of the App Image Config associated with a custom image in an Amazon SageMaker Domain, allowing users to define runtime configurations such as environment variables, kernel settings, or file system mappings for their applications. Setting this argument ensures the custom image is properly configured to meet specific application requirements during execution within the SageMaker environment."
+                },
+                {
+                  "name": "image_name",
+                  "description": "(Required) The name of the Custom Image.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `image_name` argument specifies the unique name of a custom image to be used within the SageMaker Domain, enabling users to define and reference a specific containerized environment for their machine learning workflows. By setting this required value, users can ensure their SageMaker notebooks or applications utilize the desired pre-configured software stack or dependencies tailored to their project needs."
+                },
+                {
+                  "name": "image_version_number",
+                  "description": "(Optional) The version number of the Custom Image.",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "\"Defines the version number of the custom image associated with the SageMaker Domain, allowing users to specify which iteration of the image to use for their machine learning environment. This enables precise control over the software stack and dependencies, supporting reproducibility and compatibility in model development workflows.\""
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `custom_image` block within the `jupyter_lab_app_settings` configuration of the `aws_sagemaker_domain` resource allows users to define a list of custom SageMaker AI images tailored for running JupyterLab applications. This block encapsulates settings for specifying custom container images, enabling users to customize the runtime environment for JupyterLab, such as pre-installed libraries, tools, or frameworks, to meet specific data science or machine learning requirements."
+            },
+            {
+              "name": "default_resource_spec",
+              "description": "(Optional) The default instance type and the Amazon Resource Name (ARN) of the SageMaker AI image created on the instance. see `default_resource_spec` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "instance_type",
+                  "description": "(Optional) The instance type that the image version runs on.. For valid values see SageMaker AI Instance Types.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `instance_type` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the compute instance type for running the associated image version. By configuring this argument, users can tailor the underlying hardware resources (e.g., CPU, GPU, memory) to match the performance requirements of their SageMaker workloads, enabling efficient execution of machine learning tasks or applications."
+                },
+                {
+                  "name": "lifecycle_config_arn",
+                  "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `lifecycle_config_arn` argument allows users to specify the Amazon Resource Name (ARN) of a SageMaker Lifecycle Configuration to associate with the default resource specification in the `aws_sagemaker_domain`. This enables the automation of custom setup or teardown scripts for resources, such as notebook instances, improving environment initialization and management workflows."
+                },
+                {
+                  "name": "sagemaker_image_arn",
+                  "description": "(Optional) The ARN of the SageMaker AI image that the image version belongs to.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_arn` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the Amazon Resource Name (ARN) of a SageMaker AI image associated with the image version to be used for the domain's default compute environment. By setting this argument, users can define the base container image for machine learning workloads, enabling customization of runtime environments for training or inference tasks."
+                },
+                {
+                  "name": "sagemaker_image_version_alias",
+                  "description": "(Optional) The SageMaker AI Image Version Alias.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_alias` argument allows users to specify a version alias for the SageMaker-provided AI image used in the `default_resource_spec` configuration of an `aws_sagemaker_domain`. By setting this value, users can control which version of the SageMaker image is utilized, enabling consistent and predictable runtime environments for their machine learning workloads."
+                },
+                {
+                  "name": "sagemaker_image_version_arn",
+                  "description": "(Optional) The ARN of the image version created on the instance.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_arn` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the Amazon Resource Name (ARN) of a specific SageMaker image version to be used for the instance. By setting this argument, users can control the runtime environment for their SageMaker domain, enabling customization of pre-configured container images for machine learning workflows, such as defining software dependencies or frameworks."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `default_resource_spec` block within the `jupyter_lab_app_settings` configuration of the `aws_sagemaker_domain` resource defines the default compute instance type and the SageMaker AI image (via its Amazon Resource Name) used for JupyterLab environments. This block enables users to customize the underlying infrastructure and runtime environment for JupyterLab applications, ensuring optimal performance and compatibility for machine learning workflows."
+            },
+            {
+              "name": "emr_settings",
+              "description": "(Optional) The configuration parameters that specify the IAM roles assumed by the execution role of SageMaker AI (assumable roles) and the cluster instances or job execution environments (execution roles or runtime roles) to manage and access resources required for running Amazon EMR clusters or Amazon EMR Serverless applications. see `emr_settings` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "assumable_role_arns",
+                  "description": "(Optional) An array of Amazon Resource Names (ARNs) of the IAM roles that the execution role of SageMaker AI can assume for performing operations or tasks related to Amazon EMR clusters or Amazon EMR Serverless applications. These roles define the permissions and access policies required when performing Amazon EMR-related operations, such as listing, connecting to, or terminating Amazon EMR clusters or Amazon EMR Serverless applications. They are typically used in cross-account access scenarios, where the Amazon EMR resources (clusters or serverless applications) are located in a different AWS account than the SageMaker AI domain.",
+                  "required": false,
+                  "type": "set(string)",
+                  "llm_summary": "The `assumable_role_arns` argument in the `emr_settings` block of the `aws_sagemaker_domain` resource allows users to specify a set of IAM role ARNs that the SageMaker execution role can assume to perform operations on Amazon EMR clusters or EMR Serverless applications. This configuration enables cross-account access and ensures SageMaker has the necessary permissions to interact with EMR resources, supporting workflows that require integration between SageMaker and EMR for data processing or machine learning tasks."
+                },
+                {
+                  "name": "execution_role_arns",
+                  "description": "(Optional) An array of Amazon Resource Names (ARNs) of the IAM roles used by the Amazon EMR cluster instances or job execution environments to access other AWS services and resources needed during the runtime of your Amazon EMR or Amazon EMR Serverless workloads, such as Amazon S3 for data access, Amazon CloudWatch for logging, or other AWS services based on the particular workload requirements.",
+                  "required": false,
+                  "type": "set(string)",
+                  "llm_summary": "The `execution_role_arns` argument in the `emr_settings` block of the `aws_sagemaker_domain` resource allows users to specify a set of IAM role ARNs that grant Amazon EMR cluster instances or job execution environments the necessary permissions to access AWS services and resources during runtime. Configuring this argument ensures seamless integration with services like Amazon S3 for data storage, Amazon CloudWatch for monitoring, and other AWS resources required for EMR workloads, aligning with workload-specific access requirements."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `emr_settings` block within the `jupyter_lab_app_settings` configuration of the `aws_sagemaker_domain` resource defines IAM role parameters for integrating Amazon EMR clusters or EMR Serverless applications with SageMaker. It encapsulates settings for execution and runtime roles, enabling secure resource access and management required for running distributed data processing or machine learning workflows in EMR environments. Configuring this block allows users to seamlessly connect SageMaker JupyterLab environments with EMR, facilitating scalable data processing and analytics."
+            }
+          ],
+          "llm_summary": "The `jupyter_lab_app_settings` block within the `default_space_settings` of the `aws_sagemaker_domain` resource configures environment-specific settings for the JupyterLab application, enabling tailored user experiences and resource management for data science workflows. This block encapsulates related configurations such as default resource limits, security settings, and application behavior, allowing users to optimize the JupyterLab environment for collaborative machine learning and analysis tasks."
+        },
+        {
+          "name": "jupyter_server_app_settings",
+          "description": "(Optional) The Jupyter server's app settings. See `jupyter_server_app_settings` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "lifecycle_config_arns",
+              "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configurations.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `lifecycle_config_arns` argument in the `jupyter_server_app_settings` block of the `aws_sagemaker_domain` resource allows users to specify a set of Amazon Resource Names (ARNs) for Lifecycle Configurations that define custom behaviors and automation for Jupyter server instances, such as startup scripts, shutdown procedures, or resource cleanup. By configuring this argument, users can streamline server management, enforce operational policies, and optimize resource utilization within their SageMaker domain environment."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "code_repository",
+              "description": "(Optional) A list of Git repositories that SageMaker AI automatically displays to users for cloning in the JupyterServer application. see `code_repository` Block below.",
+              "cardinality": [
+                0,
+                10
+              ],
+              "arguments": [
+                {
+                  "name": "repository_url",
+                  "description": "(Optional) The URL of the Git repository.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `repository_url` argument for the `aws_sagemaker_domain` resource's `code_repository` configuration specifies the URL of a Git repository that serves as the source for code and artifacts used in SageMaker workflows. By setting this required argument, users can integrate external version-controlled code repositories into their SageMaker environment, enabling streamlined access to scripts, models, or other resources essential for machine learning development and execution."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `code_repository` block within the `jupyter_server_app_settings` configuration of the `aws_sagemaker_domain` resource defines a list of Git repositories that are automatically displayed to users in the JupyterServer application, enabling seamless cloning and integration of code repositories for development and experimentation workflows. This block facilitates streamlined access to pre-configured repositories, enhancing collaboration and productivity in machine learning environments by centralizing code management within SageMaker."
+            },
+            {
+              "name": "default_resource_spec",
+              "description": "(Optional) The default instance type and the Amazon Resource Name (ARN) of the SageMaker AI image created on the instance. see `default_resource_spec` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "instance_type",
+                  "description": "(Optional) The instance type that the image version runs on.. For valid values see SageMaker AI Instance Types.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `instance_type` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the compute instance type for running the associated image version. By configuring this, users can tailor the computational capacity and cost-efficiency of the SageMaker environment to match their workload requirements, such as training models or running inference tasks."
+                },
+                {
+                  "name": "lifecycle_config_arn",
+                  "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `lifecycle_config_arn` argument allows users to specify the Amazon Resource Name (ARN) of a SageMaker Lifecycle Configuration to attach to the `default_resource_spec` within an `aws_sagemaker_domain`. This enables the customization of resource initialization and management behaviors, such as automating setup tasks, environment configurations, or maintenance routines for the associated compute resources."
+                },
+                {
+                  "name": "sagemaker_image_arn",
+                  "description": "(Optional) The ARN of the SageMaker AI image that the image version belongs to.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_arn` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the Amazon Resource Name (ARN) of a SageMaker AI image associated with the image version to be used for the domain's default compute environment. By setting this argument, users can define the base container image for machine learning workloads, enabling customization of the runtime environment for training or inference tasks within the SageMaker domain."
+                },
+                {
+                  "name": "sagemaker_image_version_alias",
+                  "description": "(Optional) The SageMaker AI Image Version Alias.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_alias` argument allows users to specify an alias for a specific version of a SageMaker AI image within the `default_resource_spec` configuration of the `aws_sagemaker_domain` resource. By setting this alias, users can streamline image version management, enabling easier reference and consistent usage of specific AI image versions across SageMaker environments."
+                },
+                {
+                  "name": "sagemaker_image_version_arn",
+                  "description": "(Optional) The ARN of the image version created on the instance.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_arn` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the Amazon Resource Name (ARN) of a specific SageMaker image version to be used for the instance. By setting this argument, users can control the runtime environment for their SageMaker domain, enabling customization of pre-configured container images for machine learning workflows, such as defining software dependencies or frameworks."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `default_resource_spec` block within the `jupyter_server_app_settings` configuration of the `aws_sagemaker_domain` resource defines the default compute instance type and SageMaker AI image ARN used for Jupyter server applications. This block enables users to specify foundational resource settings for the server environment, ensuring consistent and optimized execution of machine learning workloads in SageMaker."
+            }
+          ],
+          "llm_summary": "The `jupyter_server_app_settings` block within the `default_space_settings` of the `aws_sagemaker_domain` resource configures application-specific settings for Jupyter server environments, enabling tailored control over user workspace behavior and features. This block typically encapsulates settings related to environment customization, resource access, and application-level configurations, helping users optimize Jupyter server functionality for data science workflows within SageMaker."
+        },
+        {
+          "name": "kernel_gateway_app_settings",
+          "description": "(Optional) The kernel gateway app settings. See `kernel_gateway_app_settings` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "lifecycle_config_arns",
+              "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configurations.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `lifecycle_config_arns` argument in the `kernel_gateway_app_settings` block of the `aws_sagemaker_domain` resource allows users to specify a set of Amazon Resource Names (ARNs) for Lifecycle Configurations that define custom behaviors and actions for SageMaker notebook instances, such as startup scripts, environment initialization, or shutdown procedures. By configuring this argument, users can automate and standardize notebook lifecycle management, enhancing operational efficiency and ensuring consistent environments for data science workflows."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "custom_image",
+              "description": "(Optional) A list of custom SageMaker AI images that are configured to run as a KernelGateway app. see `custom_image` Block below.",
+              "cardinality": [
+                0,
+                200
+              ],
+              "arguments": [
+                {
+                  "name": "app_image_config_name",
+                  "description": "(Required) The name of the App Image Config.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `app_image_config_name` argument specifies the name of the App Image Config associated with a custom image in the SageMaker Domain, enabling users to define runtime settings such as environment variables, kernel configurations, or resource parameters for applications running on the image. By setting this required value, users ensure the custom image is properly configured to meet specific operational or development requirements within SageMaker."
+                },
+                {
+                  "name": "image_name",
+                  "description": "(Required) The name of the Custom Image.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `image_name` argument specifies the unique name of a custom image to be used within the SageMaker Domain, allowing users to define the specific container image for their machine learning environments. By setting this required value, users can customize the runtime environment for their notebooks, training jobs, or inference tasks, aligning it with their specific dependencies, tools, or frameworks."
+                },
+                {
+                  "name": "image_version_number",
+                  "description": "(Optional) The version number of the Custom Image.",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "\"Defines the version number of the custom image associated with the SageMaker Domain, allowing users to specify which iteration of the image to use for their machine learning environment. This enables precise control over the software stack and dependencies, supporting reproducibility and compatibility in model development workflows.\""
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `custom_image` block within the `kernel_gateway_app_settings` of the `aws_sagemaker_domain` resource allows users to define and manage a list of custom SageMaker AI images tailored for KernelGateway applications. This block encapsulates settings for specifying custom container images, enabling users to configure specialized runtime environments for their machine learning workflows, ensuring compatibility and flexibility for unique development or deployment requirements."
+            },
+            {
+              "name": "default_resource_spec",
+              "description": "(Optional) The default instance type and the Amazon Resource Name (ARN) of the SageMaker AI image created on the instance. see `default_resource_spec` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "instance_type",
+                  "description": "(Optional) The instance type that the image version runs on.. For valid values see SageMaker AI Instance Types.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `instance_type` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the compute instance type on which the image version will run, directly influencing the performance and cost of the SageMaker environment. By configuring this argument, users can tailor the underlying infrastructure to match their workload requirements, such as optimizing for training, inference, or development tasks using valid SageMaker AI instance types."
+                },
+                {
+                  "name": "lifecycle_config_arn",
+                  "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `lifecycle_config_arn` argument allows users to specify the Amazon Resource Name (ARN) of a SageMaker Lifecycle Configuration to attach to the `default_resource_spec` within an `aws_sagemaker_domain`. This enables the customization of resource initialization and management behaviors, such as automating setup tasks, environment configurations, or maintenance routines for the associated compute resources."
+                },
+                {
+                  "name": "sagemaker_image_arn",
+                  "description": "(Optional) The ARN of the SageMaker AI image that the image version belongs to.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_arn` argument allows users to specify the Amazon Resource Name (ARN) of a SageMaker-provided or custom AI image to be used within the `default_resource_spec` configuration of an `aws_sagemaker_domain`. By setting this value, users can define the specific machine learning image that will be associated with the domain's default compute resources, enabling tailored runtime environments for training, inference, or development workflows."
+                },
+                {
+                  "name": "sagemaker_image_version_alias",
+                  "description": "(Optional) The SageMaker AI Image Version Alias.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_alias` argument allows users to specify an alias for a specific version of a SageMaker AI image within the `default_resource_spec` configuration of the `aws_sagemaker_domain` resource. By setting this alias, users can streamline image version management, enabling easier reference and consistent usage of a particular image version across SageMaker environments, which is useful for maintaining reproducibility and simplifying updates in machine learning workflows."
+                },
+                {
+                  "name": "sagemaker_image_version_arn",
+                  "description": "(Optional) The ARN of the image version created on the instance.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_arn` argument allows users to specify the Amazon Resource Name (ARN) of a specific SageMaker image version to be used for the instance within the `default_resource_spec` configuration of the `aws_sagemaker_domain` resource. By setting this argument, users can control the runtime environment for their SageMaker workloads, enabling customization of pre-built or custom container images to meet specific machine learning or data processing requirements."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `default_resource_spec` block within the `kernel_gateway_app_settings` configuration of the `aws_sagemaker_domain` resource defines the default compute instance type and SageMaker AI image ARN used for kernel gateway apps. This block enables users to specify foundational environment settings for running Jupyter notebooks or similar applications, ensuring consistent resource allocation and image compatibility for machine learning workflows."
+            }
+          ],
+          "llm_summary": "The `kernel_gateway_app_settings` block within the `default_space_settings` of the `aws_sagemaker_domain` resource configures environment-specific settings for applications running in a kernel gateway, enabling customization of runtime behavior and resource access. This block typically encapsulates settings related to execution environments, permissions, and resource policies, allowing users to tailor the kernel gateway for specific machine learning workflows or interactive notebook experiences."
+        },
+        {
+          "name": "space_storage_settings",
+          "description": "(Optional) The storage settings for a private space. See `space_storage_settings` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "default_ebs_storage_settings",
+              "description": "(Optional) The default EBS storage settings for a private space. See `default_ebs_storage_settings` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "default_ebs_volume_size_in_gb",
+                  "description": "(Required) The default size of the EBS storage volume for a private space.",
+                  "required": true,
+                  "type": "number",
+                  "llm_summary": "The `default_ebs_volume_size_in_gb` argument specifies the default size (in GB) of the Amazon EBS storage volume allocated to user profiles within the SageMaker Domain's private space. By configuring this required parameter, users define the baseline storage capacity for data and workloads in the environment, ensuring sufficient resources for machine learning operations and user-specific tasks."
+                },
+                {
+                  "name": "maximum_ebs_volume_size_in_gb",
+                  "description": "(Required) The maximum size of the EBS storage volume for a private space.",
+                  "required": true,
+                  "type": "number",
+                  "llm_summary": "The `maximum_ebs_volume_size_in_gb` argument specifies the maximum allowable size (in GB) for the EBS storage volume associated with the default storage configuration of user private spaces in an Amazon SageMaker Domain. By setting this value, users can control the storage capacity available for data and workloads in private spaces, ensuring sufficient resources for their machine learning environments while adhering to organizational limits or cost constraints."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `default_ebs_storage_settings` block within the `space_storage_settings` of the `aws_sagemaker_domain` resource defines the default configuration for EBS (Elastic Block Store) volumes used in private spaces. It encapsulates settings related to storage capacity, performance, and encryption, enabling users to customize the underlying storage infrastructure for their SageMaker environments, ensuring optimal performance, security, and scalability for machine learning workloads."
+            }
+          ],
+          "llm_summary": "The `space_storage_settings` block within the `default_space_settings` of the `aws_sagemaker_domain` resource defines storage configurations for private spaces, enabling control over how data is stored and managed within the SageMaker environment. This block typically encapsulates settings related to storage types, capacity, or access policies, allowing users to optimize data handling and ensure efficient resource utilization for machine learning workflows."
+        }
+      ],
+      "llm_summary": "The `default_space_settings` block within the `aws_sagemaker_domain` resource defines the default environment configurations for user spaces in a SageMaker Domain, including settings that govern resource allocation, permissions, and workspace behavior. Configuring this block enables users to standardize and control the default operational parameters for user spaces, ensuring consistent and optimized usage of SageMaker resources across the domain."
+    },
+    {
+      "name": "default_user_settings",
+      "description": "(Required) The default user settings. See `default_user_settings` Block below.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "auto_mount_home_efs",
+          "description": "(Optional) Indicates whether auto-mounting of an EFS volume is supported for the user profile. The `DefaultAsDomain` value is only supported for user profiles. Do not use the `DefaultAsDomain` value when setting this parameter for a domain. Valid values are: `Enabled`, `Disabled`, and `DefaultAsDomain`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `auto_mount_home_efs` argument in the `default_user_settings` block of the `aws_sagemaker_domain` resource allows users to control whether an Amazon EFS (Elastic File System) volume is automatically mounted as the home directory for user profiles within the SageMaker domain. By setting this argument to `Enabled`, `Disabled`, or `DefaultAsDomain`, users can configure storage behavior for user environments, enabling persistent file storage or aligning with domain-wide defaults to support data access and collaboration workflows."
+        },
+        {
+          "name": "default_landing_uri",
+          "description": "(Optional) The default experience that the user is directed to when accessing the domain. The supported values are: `studio::`: Indicates that Studio is the default experience. This value can only be passed if StudioWebPortal is set to ENABLED. `app:JupyterServer:`: Indicates that Studio Classic is the default experience.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `default_landing_uri` argument in the `default_user_settings` block of the `aws_sagemaker_domain` resource allows users to specify the default interface or experience (e.g., Studio or Studio Classic) that a user is directed to upon accessing the SageMaker domain. By configuring this, users can tailor the initial environment to align with their preferred workflows, such as enabling Studio for advanced data science tools or Studio Classic for Jupyter-based development, depending on the domain's capabilities and user needs."
+        },
+        {
+          "name": "execution_role",
+          "description": "(Required) The execution role ARN for the user.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `execution_role` argument specifies the IAM role ARN that governs permissions for users within the `default_user_settings` of an `aws_sagemaker_domain`. By defining this role, users ensure that SageMaker can access necessary AWS resources on behalf of the user, enabling secure execution of machine learning tasks and workflows."
+        },
+        {
+          "name": "security_groups",
+          "description": "(Optional) A list of security group IDs that will be attached to the user.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `security_groups` argument in the `default_user_settings` block of the `aws_sagemaker_domain` resource allows users to specify a set of security group IDs to control network access for SageMaker user profiles. By defining this, users can enforce custom inbound and outbound traffic rules, enhancing security and ensuring compliance with organizational network policies for SageMaker environments."
+        },
+        {
+          "name": "studio_web_portal",
+          "description": "(Optional) Whether the user can access Studio. If this value is set to `DISABLED`, the user cannot access Studio, even if that is the default experience for the domain. Valid values are `ENABLED` and `DISABLED`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `studio_web_portal` argument in the `default_user_settings` block of the `aws_sagemaker_domain` resource allows users to control whether Studio access is enabled or disabled for individual users within the domain. Setting this argument to `ENABLED` grants access to the SageMaker Studio web interface, while `DISABLED` restricts access, overriding the domain's default experience. This configuration is useful for managing user permissions and tailoring access to the Studio environment based on organizational or security requirements."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "canvas_app_settings",
+          "description": "(Optional) The Canvas app settings. See `canvas_app_settings` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "direct_deploy_settings",
+              "description": "(Optional) The model deployment settings for the SageMaker AI Canvas application. See `direct_deploy_settings` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "status",
+                  "description": "(Optional)Describes whether model deployment permissions are enabled or disabled in the Canvas application. Valid values are `ENABLED` and `DISABLED`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `status` argument in the `direct_deploy_settings` block of the `aws_sagemaker_domain` resource allows users to control whether model deployment permissions are enabled or disabled within the Canvas application. Setting this argument to `ENABLED` grants deployment capabilities, supporting workflows where users need to directly deploy models, while `DISABLED` restricts this functionality, aligning with environments requiring tighter access control."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `direct_deploy_settings` block within the `canvas_app_settings` of the `aws_sagemaker_domain` resource configures model deployment parameters for the SageMaker AI Canvas application, enabling seamless deployment of machine learning models directly from the Canvas interface. This block encapsulates settings related to deployment workflows, providing users with control over how models are deployed, streamlining the transition from model creation to production."
+            },
+            {
+              "name": "emr_serverless_settings",
+              "description": "(Optional) The settings for running Amazon EMR Serverless jobs in SageMaker AI Canvas. See `emr_serverless_settings` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "execution_role_arn",
+                  "description": "(Optional) The Amazon Resource Name (ARN) of the AWS IAM role that is assumed for running Amazon EMR Serverless jobs in SageMaker AI Canvas. This role should have the necessary permissions to read and write data attached and a trust relationship with EMR Serverless.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `execution_role_arn` argument in the `emr_serverless_settings` block of the `aws_sagemaker_domain` resource allows users to specify the ARN of an IAM role that SageMaker AI Canvas assumes to execute Amazon EMR Serverless jobs. Configuring this role ensures the necessary permissions for data access and processing, enabling seamless integration and secure execution of serverless workflows within SageMaker."
+                },
+                {
+                  "name": "status",
+                  "description": "(Optional) Describes whether Amazon EMR Serverless job capabilities are enabled or disabled in the SageMaker AI Canvas application. Valid values are: `ENABLED` and `DISABLED`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `status` argument in the `emr_serverless_settings` block of the `aws_sagemaker_domain` resource allows users to enable or disable Amazon EMR Serverless job capabilities within the SageMaker AI Canvas application. By configuring this argument to `ENABLED` or `DISABLED`, users can control whether EMR Serverless integration is active, impacting the availability of serverless data processing features for AI and machine learning workflows."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `emr_serverless_settings` block within the `canvas_app_settings` of the `aws_sagemaker_domain` resource configures the integration and operational parameters for running Amazon EMR Serverless jobs in SageMaker AI Canvas. It encapsulates settings related to enabling and managing serverless data processing workflows, allowing users to seamlessly execute big data analytics tasks within the AI Canvas environment for enhanced machine learning and data preparation capabilities."
+            },
+            {
+              "name": "generative_ai_settings",
+              "description": "",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "amazon_bedrock_role_arn",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `amazon_bedrock_role_arn` argument in the `generative_ai_settings` block of the `aws_sagemaker_domain` resource allows users to specify the ARN of an IAM role that grants permissions for Amazon Bedrock integration. By setting this argument, users enable SageMaker to access Amazon Bedrock services for generative AI workflows, ensuring secure and controlled access to foundational model capabilities."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `generative_ai_settings` block within the `canvas_app_settings` configuration of the `aws_sagemaker_domain` resource enables and manages settings specific to generative AI capabilities in the Amazon SageMaker Canvas application. It encapsulates configurations related to the use of generative AI features, such as model access, resource allocation, or permissions, allowing users to tailor the application for AI-driven data analysis and content generation workflows. Configuring this block helps users activate and optimize generative AI functionalities to enhance productivity and streamline machine learning tasks within SageMaker Canvas."
+            },
+            {
+              "name": "identity_provider_oauth_settings",
+              "description": "(Optional) The settings for connecting to an external data source with OAuth. See `identity_provider_oauth_settings` Block below.",
+              "cardinality": [
+                0,
+                20
+              ],
+              "arguments": [
+                {
+                  "name": "data_source_name",
+                  "description": "(Optional) The name of the data source that you're connecting to. Canvas currently supports OAuth for Snowflake and Salesforce Data Cloud. Valid values are `SalesforceGenie` and `Snowflake`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `data_source_name` argument in the `identity_provider_oauth_settings` block of the `aws_sagemaker_domain` resource allows users to specify the external data source (e.g., `SalesforceGenie` or `Snowflake`) for which OAuth authentication is configured. Setting this argument enables seamless integration with supported data platforms, facilitating secure access to external datasets for use within SageMaker Canvas workflows."
+                },
+                {
+                  "name": "secret_arn",
+                  "description": "(Optional) The ARN of an Amazon Web Services Secrets Manager secret that stores the credentials from your identity provider, such as the client ID and secret, authorization URL, and token URL.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `secret_arn` argument specifies the Amazon Resource Name (ARN) of a Secrets Manager secret that stores OAuth credentials (e.g., client ID, client secret, authorization URL, and token URL) for the identity provider used in SageMaker Domain's authentication configuration. Setting this argument enables secure integration with an external identity provider, facilitating user authentication and access control for SageMaker resources."
+                },
+                {
+                  "name": "status",
+                  "description": "(Optional) Describes whether OAuth for a data source is enabled or disabled in the Canvas application. Valid values are `ENABLED` and `DISABLED`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `status` argument in the `identity_provider_oauth_settings` block of the `aws_sagemaker_domain` resource allows users to specify whether OAuth authentication for external data sources is enabled or disabled in the SageMaker Canvas application. By setting this argument to `ENABLED` or `DISABLED`, users can control the integration of OAuth-based identity providers, impacting the application's ability to securely access external data sources for machine learning workflows."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `identity_provider_oauth_settings` block within the `canvas_app_settings` of the `aws_sagemaker_domain` resource configures OAuth integration for connecting SageMaker Canvas to external identity providers or data sources. This block encapsulates settings required for authentication and authorization, enabling secure access to external resources and enhancing data connectivity for machine learning workflows."
+            },
+            {
+              "name": "kendra_settings",
+              "description": "(Optional) The settings for document querying. See `kendra_settings` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "status",
+                  "description": "(Optional) Describes whether the document querying feature is enabled or disabled in the Canvas application. Valid values are `ENABLED` and `DISABLED`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `status` argument in the `kendra_settings` block of the `aws_sagemaker_domain` resource allows users to control whether the document querying feature in the Canvas application is enabled or disabled. By setting this argument to `ENABLED` or `DISABLED`, users can define the availability of Kendra-powered search functionality, aligning the application's behavior with their data exploration and querying needs."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `kendra_settings` block within the `canvas_app_settings` of the `aws_sagemaker_domain` resource configures document querying capabilities by integrating Amazon Kendra for intelligent search functionality. It encapsulates settings related to query behavior and document indexing, enabling users to enhance search accuracy and relevance within SageMaker Canvas applications."
+            },
+            {
+              "name": "model_register_settings",
+              "description": "(Optional) The model registry settings for the SageMaker AI Canvas application. See `model_register_settings` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "cross_account_model_register_role_arn",
+                  "description": "(Optional) The Amazon Resource Name (ARN) of the SageMaker AI model registry account. Required only to register model versions created by a different SageMaker AI Canvas AWS account than the AWS account in which SageMaker AI model registry is set up.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "Defines the IAM role ARN required for cross-account model registration in SageMaker AI Canvas, enabling the registration of model versions created in a different AWS account than the one hosting the SageMaker model registry. This argument facilitates secure cross-account access and is essential for multi-account workflows involving AI model versioning and sharing."
+                },
+                {
+                  "name": "status",
+                  "description": "(Optional) Describes whether the integration to the model registry is enabled or disabled in the Canvas application. Valid values are `ENABLED` and `DISABLED`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `status` argument in the `model_register_settings` block of the `aws_sagemaker_domain` resource allows users to control whether integration with the model registry is enabled or disabled within the Canvas application. By setting this argument to `ENABLED` or `DISABLED`, users can define the operational state of the model registry integration, impacting the ability to register and manage machine learning models directly through Canvas, aligning with workflows for model lifecycle management."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `model_register_settings` block within the `canvas_app_settings` of the `aws_sagemaker_domain` resource configures the model registry integration for the SageMaker AI Canvas application. It enables users to manage and register machine learning models, facilitating version control, tracking, and deployment workflows, thereby streamlining the lifecycle management of models within the AI Canvas environment."
+            },
+            {
+              "name": "time_series_forecasting_settings",
+              "description": "(Optional) Time series forecast settings for the Canvas app. See `time_series_forecasting_settings` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "amazon_forecast_role_arn",
+                  "description": "(Optional) The IAM role that Canvas passes to Amazon Forecast for time series forecasting. By default, Canvas uses the execution role specified in the UserProfile that launches the Canvas app. If an execution role is not specified in the UserProfile, Canvas uses the execution role specified in the Domain that owns the UserProfile. To allow time series forecasting, this IAM role should have the AmazonSageMakerCanvasForecastAccess policy attached and forecast.amazonaws.com added in the trust relationship as a service principal.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `amazon_forecast_role_arn` argument in the `time_series_forecasting_settings` of the `aws_sagemaker_domain` resource allows users to specify an IAM role that grants Amazon Forecast access for time series forecasting operations within SageMaker Canvas. By configuring this role, users can ensure proper permissions and trust relationships for forecasting tasks, overriding default execution roles if needed, to enable seamless integration and secure functionality."
+                },
+                {
+                  "name": "status",
+                  "description": "(Optional) Describes whether time series forecasting is enabled or disabled in the Canvas app. Valid values are `ENABLED` and `DISABLED`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `status` argument in the `time_series_forecasting_settings` block of the `aws_sagemaker_domain` resource allows users to control whether the time series forecasting feature in the SageMaker Canvas app is enabled or disabled. By specifying `ENABLED` or `DISABLED`, users can configure the availability of forecasting functionality, aligning the app's behavior with their data analysis and machine learning goals."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `time_series_forecasting_settings` block within the `canvas_app_settings` of the `aws_sagemaker_domain` resource configures parameters specific to time series forecasting capabilities in the SageMaker Canvas app. It encapsulates settings that enable users to fine-tune forecasting features, supporting predictive analytics workflows by customizing how time series data is processed and modeled. Configuring this block allows users to optimize forecasting accuracy and tailor the app's behavior to meet specific business or data requirements."
+            },
+            {
+              "name": "workspace_settings",
+              "description": "(Optional) The workspace settings for the SageMaker AI Canvas application. See `workspace_settings` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "s3_artifact_path",
+                  "description": "(Optional) The Amazon S3 bucket used to store artifacts generated by Canvas. Updating the Amazon S3 location impacts existing configuration settings, and Canvas users no longer have access to their artifacts. Canvas users must log out and log back in to apply the new location.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `s3_artifact_path` argument in the `workspace_settings` block of the `aws_sagemaker_domain` resource allows users to specify the Amazon S3 bucket location for storing artifacts generated by SageMaker Canvas. Configuring this path impacts artifact accessibility for Canvas users, requiring them to log out and back in to apply changes, and is typically used to define a centralized or updated storage location for workspace-generated outputs."
+                },
+                {
+                  "name": "s3_kms_key_id",
+                  "description": "(Optional) The Amazon Web Services Key Management Service (KMS) encryption key ID that is used to encrypt artifacts generated by Canvas in the Amazon S3 bucket.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `s3_kms_key_id` argument in the `workspace_settings` block of the `aws_sagemaker_domain` resource allows users to specify the AWS KMS encryption key ID for securing artifacts generated by SageMaker Canvas in the associated S3 bucket. By configuring this argument, users can enforce data encryption at rest, aligning with security and compliance requirements for sensitive data storage."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `workspace_settings` block within the `canvas_app_settings` of the `aws_sagemaker_domain` resource configures environment-specific settings for the SageMaker AI Canvas workspace, enabling tailored control over user workspace behavior and resources. This block allows users to define parameters that optimize workspace functionality, supporting efficient collaboration and resource management for AI and machine learning tasks."
+            }
+          ],
+          "llm_summary": "The `canvas_app_settings` block within the `default_user_settings` of the `aws_sagemaker_domain` resource configures permissions and features for the SageMaker Canvas application, enabling users to manage access and functionality for low-code/no-code machine learning workflows. This block allows fine-grained control over Canvas-specific settings, helping users tailor the application experience to meet organizational requirements for data analysis and model creation."
+        },
+        {
+          "name": "code_editor_app_settings",
+          "description": "(Optional) The Code Editor application settings. See `code_editor_app_settings` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "built_in_lifecycle_config_arn",
+              "description": "(Optional) The lifecycle configuration that runs before the default lifecycle configuration. It can override changes made in the default lifecycle configuration.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "Specifies the ARN of a built-in lifecycle configuration to run before the default lifecycle configuration for the code editor application in SageMaker. This allows users to customize or override initialization behaviors, such as preloading dependencies or setting environment variables, enhancing control over the app's startup process."
+            },
+            {
+              "name": "lifecycle_config_arns",
+              "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configurations.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "Defines a set of Amazon Resource Names (ARNs) for Lifecycle Configurations associated with the code editor application in the SageMaker domain, enabling users to customize and automate environment behaviors such as resource initialization, cleanup, or runtime settings. This argument allows for streamlined management of application lifecycle tasks, aligning with user goals like optimizing workflows and maintaining consistent development environments."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "app_lifecycle_management",
+              "description": "(Optional) Indicates whether idle shutdown is activated for JupyterLab applications. see `app_lifecycle_management` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [],
+              "blocks": [
+                {
+                  "name": "idle_settings",
+                  "description": "(Optional) Settings related to idle shutdown of Studio applications. see `idle_settings` Block below.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "idle_timeout_in_minutes",
+                      "description": "(Optional) The time that SageMaker AI waits after the application becomes idle before shutting it down. Valid values are between `60` and `525600`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `idle_timeout_in_minutes` argument for the `aws_sagemaker_domain` resource under `idle_settings` allows users to define the duration (in minutes) that SageMaker waits before automatically shutting down idle applications. This configuration helps optimize resource usage and cost by controlling the application's lifecycle based on inactivity, with valid values ranging from 60 minutes to 525,600 minutes."
+                    },
+                    {
+                      "name": "lifecycle_management",
+                      "description": "(Optional) Indicates whether idle shutdown is activated for the application type. Valid values are `ENABLED` and `DISABLED`.",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `lifecycle_management` argument in the `idle_settings` block of the `aws_sagemaker_domain` resource allows users to control whether idle shutdown is activated for SageMaker application instances. By setting this argument to `ENABLED` or `DISABLED`, users can define the application's behavior for resource lifecycle management, optimizing cost and resource utilization by automatically shutting down idle instances."
+                    },
+                    {
+                      "name": "max_idle_timeout_in_minutes",
+                      "description": "(Optional) The maximum value in minutes that custom idle shutdown can be set to by the user. Valid values are between `60` and `525600`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `max_idle_timeout_in_minutes` argument for the `idle_settings` in the `aws_sagemaker_domain` resource allows users to define the maximum duration (in minutes) that a SageMaker environment can remain idle before shutting down, ensuring efficient resource utilization and cost management. By setting this value, users can control the upper limit for custom idle shutdown configurations, balancing operational flexibility with automated resource cleanup."
+                    },
+                    {
+                      "name": "min_idle_timeout_in_minutes",
+                      "description": "(Optional) The minimum value in minutes that custom idle shutdown can be set to by the user. Valid values are between `60` and `525600`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `min_idle_timeout_in_minutes` argument for the `idle_settings` in the `aws_sagemaker_domain` resource allows users to define the minimum allowable duration (in minutes) for custom idle shutdown settings in SageMaker environments. By configuring this value, users can enforce a lower limit on idle timeout periods to optimize resource utilization and cost management while ensuring compliance with operational constraints."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `idle_settings` block in the `aws_sagemaker_domain` resource under \"app_lifecycle_management\" configures parameters for automatically shutting down idle SageMaker Studio applications, optimizing resource usage and cost management. This block enables users to define idle timeout thresholds and related behaviors, providing granular control over application lifecycle policies to ensure efficient operation and prevent unnecessary resource consumption."
+                }
+              ],
+              "llm_summary": "The `app_lifecycle_management` block within the `code_editor_app_settings` of the `aws_sagemaker_domain` resource enables control over the lifecycle behavior of JupyterLab applications, specifically managing idle shutdown settings to optimize resource usage. Configuring this block allows users to automate application shutdown during inactivity, reducing costs and improving operational efficiency in SageMaker environments."
+            },
+            {
+              "name": "custom_image",
+              "description": "(Optional) A list of custom SageMaker AI images that are configured to run as a CodeEditor app. see `custom_image` Block below.",
+              "cardinality": [
+                0,
+                200
+              ],
+              "arguments": [
+                {
+                  "name": "app_image_config_name",
+                  "description": "(Required) The name of the App Image Config.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `app_image_config_name` argument specifies the name of the App Image Config associated with a custom image in the SageMaker Domain, allowing users to define runtime settings such as environment variables, kernel configurations, or resource parameters for applications running on the image. By setting this required argument, users ensure the custom image is properly configured to meet specific operational or development requirements within SageMaker."
+                },
+                {
+                  "name": "image_name",
+                  "description": "(Required) The name of the Custom Image.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `image_name` argument specifies the unique name of a custom image to be used within the SageMaker Domain, enabling users to define and reference a specific container image for their machine learning environments. By setting this required property, users can customize the runtime environment for their notebooks or training jobs, aligning it with specific dependencies, tools, or frameworks needed for their workflows."
+                },
+                {
+                  "name": "image_version_number",
+                  "description": "(Optional) The version number of the Custom Image.",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "\"Defines the specific version of a custom image to be used within the SageMaker Domain, allowing users to control the exact iteration of the image for consistency, compatibility, or feature availability in their machine learning environment.\""
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `custom_image` block within the `code_editor_app_settings` of the `aws_sagemaker_domain` resource allows users to define and manage a list of custom SageMaker AI images tailored for running CodeEditor applications. This block encapsulates settings related to specifying custom container images, enabling users to customize the development environment for AI/ML workflows, ensuring compatibility with specific tools, libraries, or runtime configurations required for their projects."
+            },
+            {
+              "name": "default_resource_spec",
+              "description": "(Optional) The default instance type and the Amazon Resource Name (ARN) of the SageMaker AI image created on the instance. see `default_resource_spec` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "instance_type",
+                  "description": "(Optional) The instance type that the image version runs on.. For valid values see SageMaker AI Instance Types.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `instance_type` argument in the `default_resource_spec` block of the `aws_sagemaker_domain` resource allows users to specify the compute instance type on which the associated image version will run. This configuration determines the underlying hardware resources (e.g., CPU, memory, GPU) allocated for the SageMaker environment, enabling users to optimize performance and cost based on their workload requirements."
+                },
+                {
+                  "name": "lifecycle_config_arn",
+                  "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `lifecycle_config_arn` argument allows users to specify the Amazon Resource Name (ARN) of a SageMaker Lifecycle Configuration to attach to the `default_resource_spec` within an `aws_sagemaker_domain`. This enables the customization of resource initialization and management behaviors, such as pre-configuring environments, automating setup tasks, or defining cleanup processes for the associated compute resources."
+                },
+                {
+                  "name": "sagemaker_image_arn",
+                  "description": "(Optional) The ARN of the SageMaker AI image that the image version belongs to.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_arn` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the Amazon Resource Name (ARN) of a SageMaker AI image associated with the image version to be used for the domain's default compute environment. By setting this argument, users can define the base container image for machine learning workloads, enabling customization of runtime environments for training, inference, or development tasks."
+                },
+                {
+                  "name": "sagemaker_image_version_alias",
+                  "description": "(Optional) The SageMaker AI Image Version Alias.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_alias` argument allows users to specify a version alias for the SageMaker-provided AI image used in the `default_resource_spec` configuration of an `aws_sagemaker_domain`. By setting this value, users can control which version of the SageMaker image is utilized, enabling consistent and predictable runtime environments for their machine learning workloads."
+                },
+                {
+                  "name": "sagemaker_image_version_arn",
+                  "description": "(Optional) The ARN of the image version created on the instance.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_arn` argument allows users to specify the Amazon Resource Name (ARN) of a specific SageMaker image version to be used for the instance within the `default_resource_spec` configuration of an `aws_sagemaker_domain`. By setting this argument, users can control the runtime environment for their SageMaker workloads, enabling customization of pre-built or custom container images to meet specific development, training, or inference requirements."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `default_resource_spec` block within the `code_editor_app_settings` of the `aws_sagemaker_domain` resource defines the default compute instance type and SageMaker AI image ARN used for the code editor environment. This configuration enables users to specify the foundational resources for the code editor's runtime environment, ensuring optimal performance and compatibility for machine learning development workflows."
+            }
+          ],
+          "llm_summary": "The `code_editor_app_settings` block within the `default_user_settings` of the `aws_sagemaker_domain` resource configures application-specific settings for the integrated code editor in SageMaker, enabling customization of the development environment for users. This block encapsulates settings related to the behavior and features of the code editor, allowing users to tailor the editor experience to optimize productivity and streamline coding workflows in machine learning projects."
+        },
+        {
+          "name": "custom_file_system_config",
+          "description": "(Optional) The settings for assigning a custom file system to a user profile. Permitted users can access this file system in Amazon SageMaker AI Studio. See `custom_file_system_config` Block below.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "efs_file_system_config",
+              "description": "(Optional) The default EBS storage settings for a private space. See `efs_file_system_config` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "file_system_id",
+                  "description": "(Required) The ID of your Amazon EFS file system.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `file_system_id` argument specifies the unique identifier of an Amazon EFS file system to be used for the `efs_file_system_config` in an AWS SageMaker Domain. By setting this required value, users enable SageMaker to integrate with the specified EFS file system for persistent storage, facilitating shared access to data and files across SageMaker notebooks and applications within the domain."
+                },
+                {
+                  "name": "file_system_path",
+                  "description": "(Required) The path to the file system directory that is accessible in Amazon SageMaker AI Studio. Permitted users can access only this directory and below.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `file_system_path` argument specifies the directory path within the Amazon EFS file system that is accessible to users in SageMaker Studio, effectively defining the scope of file system access for permitted users. By setting this required argument, users control the root directory for data storage and retrieval, ensuring secure and organized access to resources within SageMaker AI workflows."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `efs_file_system_config` block within the `custom_file_system_config` of the `aws_sagemaker_domain` resource defines the configuration for integrating an Amazon Elastic File System (EFS) as the default storage for private spaces in SageMaker. It encapsulates settings related to the EFS file system, enabling users to manage persistent, scalable, and shared storage for machine learning workloads, ensuring seamless access to data across sessions and environments. Configuring this block allows users to optimize storage for collaborative and reproducible ML workflows."
+            }
+          ],
+          "llm_summary": "The `custom_file_system_config` block within the `default_user_settings` of the `aws_sagemaker_domain` resource enables the assignment and configuration of a custom file system for user profiles in Amazon SageMaker Studio. It encapsulates settings related to file system access and integration, allowing users to define and manage storage resources for seamless data access and collaboration in AI/ML workflows. Configuring this block provides granular control over file system connectivity, enhancing data management and enabling efficient use of external storage in SageMaker environments."
+        },
+        {
+          "name": "custom_posix_user_config",
+          "description": "(Optional) Details about the POSIX identity that is used for file system operations. See `custom_posix_user_config` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "gid",
+              "description": "(Optional) The POSIX group ID.",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `gid` argument in the `custom_posix_user_config` block of the `aws_sagemaker_domain` resource allows users to specify the POSIX group ID for the SageMaker user profile's underlying file system. By setting this value, users can control group-level permissions and access for files and directories, ensuring compatibility with POSIX-compliant systems and enabling secure, multi-user collaboration within SageMaker environments."
+            },
+            {
+              "name": "uid",
+              "description": "(Optional) The POSIX user ID.",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `uid` argument in the `custom_posix_user_config` block of the `aws_sagemaker_domain` resource allows users to define the POSIX user ID (UID) for the SageMaker domain's associated user profile. By specifying this numeric identifier, users can control the mapping of SageMaker user profiles to POSIX-based systems, ensuring compatibility with file permissions, access control, and identity management in environments that rely on POSIX standards."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `custom_posix_user_config` block within the `default_user_settings` of the `aws_sagemaker_domain` resource defines the POSIX identity used for file system operations, encapsulating settings such as user ID and group ID. Configuring this block enables precise control over file access permissions and identity mapping, ensuring compatibility and security for POSIX-compliant file systems in SageMaker environments."
+        },
+        {
+          "name": "jupyter_lab_app_settings",
+          "description": "(Optional) The settings for the JupyterLab application. See `jupyter_lab_app_settings` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "built_in_lifecycle_config_arn",
+              "description": "(Optional) The lifecycle configuration that runs before the default lifecycle configuration. It can override changes made in the default lifecycle configuration.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `built_in_lifecycle_config_arn` argument for the `jupyter_lab_app_settings` in the `aws_sagemaker_domain` resource allows users to specify the ARN of a pre-defined lifecycle configuration that executes prior to the default lifecycle configuration. This enables customization of initialization processes, such as setting environment variables or preloading dependencies, to override or augment default behaviors in JupyterLab environments."
+            },
+            {
+              "name": "lifecycle_config_arns",
+              "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configurations.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `lifecycle_config_arns` argument in the `jupyter_lab_app_settings` block of the `aws_sagemaker_domain` resource allows users to specify a set of Amazon Resource Names (ARNs) for SageMaker Lifecycle Configurations. These configurations define custom scripts or actions to automate environment setup, resource initialization, or other tasks when JupyterLab instances are created or started, enabling streamlined and consistent workspace management."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "app_lifecycle_management",
+              "description": "(Optional) Indicates whether idle shutdown is activated for JupyterLab applications. see `app_lifecycle_management` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [],
+              "blocks": [
+                {
+                  "name": "idle_settings",
+                  "description": "(Optional) Settings related to idle shutdown of Studio applications. see `idle_settings` Block below.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "idle_timeout_in_minutes",
+                      "description": "(Optional) The time that SageMaker AI waits after the application becomes idle before shutting it down. Valid values are between `60` and `525600`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `idle_timeout_in_minutes` argument in the `idle_settings` block of the `aws_sagemaker_domain` resource allows users to define the duration (in minutes) that SageMaker waits before automatically shutting down idle applications. This configuration helps optimize resource usage and cost by controlling the application's lifecycle, ensuring unused resources are deallocated after a specified idle period."
+                    },
+                    {
+                      "name": "lifecycle_management",
+                      "description": "(Optional) Indicates whether idle shutdown is activated for the application type. Valid values are `ENABLED` and `DISABLED`.",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `lifecycle_management` argument in the `idle_settings` block of the `aws_sagemaker_domain` resource allows users to control whether idle shutdown is activated for SageMaker applications, enabling automated lifecycle management for resource optimization. By setting this argument to `ENABLED` or `DISABLED`, users can define the application's behavior during idle periods, helping to reduce costs and improve resource efficiency."
+                    },
+                    {
+                      "name": "max_idle_timeout_in_minutes",
+                      "description": "(Optional) The maximum value in minutes that custom idle shutdown can be set to by the user. Valid values are between `60` and `525600`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `max_idle_timeout_in_minutes` argument for the `idle_settings` in the `aws_sagemaker_domain` resource allows users to define the maximum duration (in minutes) that a SageMaker environment can remain idle before shutting down, ensuring efficient resource utilization and cost management. By setting this value, users can control the upper limit for custom idle shutdown configurations, balancing operational flexibility with automated resource cleanup."
+                    },
+                    {
+                      "name": "min_idle_timeout_in_minutes",
+                      "description": "(Optional) The minimum value in minutes that custom idle shutdown can be set to by the user. Valid values are between `60` and `525600`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "Defines the minimum allowable duration (in minutes) for custom idle shutdown settings in SageMaker Domain environments, ensuring users can specify idle timeout thresholds between 60 and 525,600 minutes. This argument helps control resource lifecycle behavior by limiting how low idle timeout values can be set, aligning with cost optimization and resource management goals."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `idle_settings` block in the `aws_sagemaker_domain` resource under \"app_lifecycle_management\" configures parameters for automatically shutting down idle Studio applications, optimizing resource usage and cost management. It encapsulates settings that enable users to define idle timeout behaviors, ensuring efficient lifecycle management of SageMaker Studio environments."
+                }
+              ],
+              "llm_summary": "The `app_lifecycle_management` block within the `jupyter_lab_app_settings` configuration of the `aws_sagemaker_domain` resource enables control over the lifecycle behavior of JupyterLab applications, specifically managing idle shutdown settings to optimize resource usage and cost. By configuring this block, users can automate application shutdown during idle periods, ensuring efficient resource management and reducing unnecessary operational overhead."
+            },
+            {
+              "name": "code_repository",
+              "description": "(Optional) A list of Git repositories that SageMaker AI automatically displays to users for cloning in the JupyterServer application. see `code_repository` Block below.",
+              "cardinality": [
+                0,
+                10
+              ],
+              "arguments": [
+                {
+                  "name": "repository_url",
+                  "description": "(Optional) The URL of the Git repository.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `repository_url` argument specifies the URL of a Git repository to integrate with the SageMaker domain's `code_repository` feature, enabling users to define the source control location for their machine learning code and workflows. By setting this required argument, users can streamline collaboration, version control, and automated deployment of code within their SageMaker environment."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `code_repository` block within the `jupyter_lab_app_settings` configuration of the `aws_sagemaker_domain` resource specifies a list of Git repositories that are automatically displayed to users in the JupyterServer application for easy cloning and access. This block enables streamlined integration of version-controlled code repositories, facilitating collaborative development and reproducible workflows in SageMaker's JupyterLab environment."
+            },
+            {
+              "name": "custom_image",
+              "description": "(Optional) A list of custom SageMaker AI images that are configured to run as a JupyterLab app. see `custom_image` Block below.",
+              "cardinality": [
+                0,
+                200
+              ],
+              "arguments": [
+                {
+                  "name": "app_image_config_name",
+                  "description": "(Required) The name of the App Image Config.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `app_image_config_name` argument specifies the name of the App Image Config associated with a custom image in the SageMaker Domain, enabling users to define runtime settings such as environment variables, kernel configurations, or resource parameters for applications running on the image. By setting this required value, users ensure the custom image is properly configured to meet specific application requirements and operational behaviors within SageMaker."
+                },
+                {
+                  "name": "image_name",
+                  "description": "(Required) The name of the Custom Image.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `image_name` argument specifies the unique name of a custom image to be used within the SageMaker Domain, allowing users to define the specific container image for their machine learning environments. By setting this required property, users can customize the runtime environment to include tailored dependencies, tools, or configurations that align with their development or training workflows."
+                },
+                {
+                  "name": "image_version_number",
+                  "description": "(Optional) The version number of the Custom Image.",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "\"Defines the version number of the custom image associated with the SageMaker Domain, allowing users to specify which iteration of the image to use for their machine learning environment. This enables precise control over the software stack and dependencies, supporting version management and reproducibility in development workflows.\""
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `custom_image` block within the `jupyter_lab_app_settings` configuration of the `aws_sagemaker_domain` resource allows users to define a list of custom SageMaker AI images tailored for running JupyterLab applications. This block encapsulates settings for specifying custom container images, enabling users to customize the runtime environment for JupyterLab, such as pre-installed libraries, tools, or frameworks, to meet specific data science or machine learning requirements."
+            },
+            {
+              "name": "default_resource_spec",
+              "description": "(Optional) The default instance type and the Amazon Resource Name (ARN) of the SageMaker AI image created on the instance. see `default_resource_spec` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "instance_type",
+                  "description": "(Optional) The instance type that the image version runs on.. For valid values see SageMaker AI Instance Types.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `instance_type` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the compute instance type on which the image version will run, directly influencing the performance and cost of the SageMaker environment. By configuring this argument, users can tailor the underlying infrastructure to match their workload requirements, such as optimizing for training, inference, or development tasks using valid SageMaker AI instance types."
+                },
+                {
+                  "name": "lifecycle_config_arn",
+                  "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `lifecycle_config_arn` argument allows users to specify the Amazon Resource Name (ARN) of a SageMaker Lifecycle Configuration to attach to the `default_resource_spec` within an `aws_sagemaker_domain`. This enables the customization of resource initialization and management behaviors, such as automating setup tasks, environment configurations, or maintenance routines for the associated compute resources."
+                },
+                {
+                  "name": "sagemaker_image_arn",
+                  "description": "(Optional) The ARN of the SageMaker AI image that the image version belongs to.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_arn` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the Amazon Resource Name (ARN) of a SageMaker AI image associated with the image version to be used for the domain's default compute environment. By setting this argument, users can define the base container image for machine learning workloads, enabling customization of runtime environments for training, inference, or development tasks within SageMaker."
+                },
+                {
+                  "name": "sagemaker_image_version_alias",
+                  "description": "(Optional) The SageMaker AI Image Version Alias.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_alias` argument allows users to specify a version alias for the SageMaker-provided AI image used in the `default_resource_spec` configuration of an `aws_sagemaker_domain`. This enables precise control over the version of the SageMaker image, ensuring compatibility and consistency for machine learning environments or workloads within the domain."
+                },
+                {
+                  "name": "sagemaker_image_version_arn",
+                  "description": "(Optional) The ARN of the image version created on the instance.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_arn` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the Amazon Resource Name (ARN) of a specific SageMaker image version to be used for the instance. By setting this argument, users can control the runtime environment for their SageMaker domain, enabling customization of pre-configured container images for machine learning workflows, such as defining software dependencies or frameworks."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `default_resource_spec` block within the `jupyter_lab_app_settings` configuration of the `aws_sagemaker_domain` resource defines the default compute instance type and SageMaker AI image ARN used for JupyterLab environments. This block enables users to specify foundational resource settings for the JupyterLab app, ensuring consistent and optimized execution environments for machine learning workflows. Configuring this block allows users to tailor the computational and image resources to meet specific performance and compatibility requirements."
+            },
+            {
+              "name": "emr_settings",
+              "description": "(Optional) The configuration parameters that specify the IAM roles assumed by the execution role of SageMaker AI (assumable roles) and the cluster instances or job execution environments (execution roles or runtime roles) to manage and access resources required for running Amazon EMR clusters or Amazon EMR Serverless applications. see `emr_settings` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "assumable_role_arns",
+                  "description": "(Optional) An array of Amazon Resource Names (ARNs) of the IAM roles that the execution role of SageMaker AI can assume for performing operations or tasks related to Amazon EMR clusters or Amazon EMR Serverless applications. These roles define the permissions and access policies required when performing Amazon EMR-related operations, such as listing, connecting to, or terminating Amazon EMR clusters or Amazon EMR Serverless applications. They are typically used in cross-account access scenarios, where the Amazon EMR resources (clusters or serverless applications) are located in a different AWS account than the SageMaker AI domain.",
+                  "required": false,
+                  "type": "set(string)",
+                  "llm_summary": "The `assumable_role_arns` argument in the `emr_settings` block of the `aws_sagemaker_domain` resource allows users to specify a set of IAM role ARNs that the SageMaker execution role can assume to perform operations on Amazon EMR clusters or EMR Serverless applications. This configuration enables cross-account access and ensures SageMaker has the necessary permissions to interact with EMR resources, supporting workflows that involve data processing or machine learning tasks integrated with EMR."
+                },
+                {
+                  "name": "execution_role_arns",
+                  "description": "(Optional) An array of Amazon Resource Names (ARNs) of the IAM roles used by the Amazon EMR cluster instances or job execution environments to access other AWS services and resources needed during the runtime of your Amazon EMR or Amazon EMR Serverless workloads, such as Amazon S3 for data access, Amazon CloudWatch for logging, or other AWS services based on the particular workload requirements.",
+                  "required": false,
+                  "type": "set(string)",
+                  "llm_summary": "The `execution_role_arns` argument in the `emr_settings` block of the `aws_sagemaker_domain` resource allows users to specify a set of IAM role ARNs that grant Amazon EMR cluster instances or job execution environments the necessary permissions to access AWS services and resources during runtime. Configuring this argument ensures seamless integration with services like Amazon S3 for data storage, Amazon CloudWatch for monitoring, and other AWS resources required for EMR workloads, aligning with typical user goals of defining secure and functional execution environments."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `emr_settings` block within the `jupyter_lab_app_settings` configuration of the `aws_sagemaker_domain` resource defines IAM role parameters for integrating Amazon EMR clusters or EMR Serverless applications with SageMaker. It encapsulates settings for assumable roles and execution/runtime roles, enabling secure and seamless access to resources required for running distributed data processing and machine learning workflows. Configuring this block allows users to manage role-based access control for EMR integration, ensuring efficient resource management and compliance in SageMaker environments."
+            }
+          ],
+          "llm_summary": "The `jupyter_lab_app_settings` block within the `default_user_settings` of the `aws_sagemaker_domain` resource configures environment-specific settings for the JupyterLab application, enabling tailored user experiences and resource management for data science workflows. This block encapsulates related configurations such as security, resource limits, and application behavior, allowing users to optimize and control JupyterLab functionality within SageMaker domains for enhanced productivity and compliance."
+        },
+        {
+          "name": "jupyter_server_app_settings",
+          "description": "(Optional) The Jupyter server's app settings. See `jupyter_server_app_settings` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "lifecycle_config_arns",
+              "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configurations.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `lifecycle_config_arns` argument in the `jupyter_server_app_settings` block of the `aws_sagemaker_domain` resource allows users to specify a set of Amazon Resource Names (ARNs) for Lifecycle Configurations that define custom behaviors or actions for Jupyter server instances, such as startup scripts, environment initialization, or resource cleanup. By setting this argument, users can automate and standardize the management of Jupyter server environments, aligning them with organizational policies or specific workflows."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "code_repository",
+              "description": "(Optional) A list of Git repositories that SageMaker AI automatically displays to users for cloning in the JupyterServer application. see `code_repository` Block below.",
+              "cardinality": [
+                0,
+                10
+              ],
+              "arguments": [
+                {
+                  "name": "repository_url",
+                  "description": "(Optional) The URL of the Git repository.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `repository_url` argument specifies the URL of a Git repository to integrate with the `code_repository` feature of the `aws_sagemaker_domain` resource. By setting this required parameter, users can define the source control location for their code, enabling seamless versioning, collaboration, and automated retrieval of scripts or models for SageMaker workflows."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `code_repository` block within the `jupyter_server_app_settings` configuration of the `aws_sagemaker_domain` resource defines a list of Git repositories that are automatically displayed to users in the JupyterServer application, enabling seamless cloning and access to pre-configured code repositories. This block facilitates streamlined collaboration and reproducibility by integrating version-controlled code repositories directly into the SageMaker environment, enhancing productivity for data scientists and developers working on machine learning projects."
+            },
+            {
+              "name": "default_resource_spec",
+              "description": "(Optional) The default instance type and the Amazon Resource Name (ARN) of the SageMaker AI image created on the instance. see `default_resource_spec` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "instance_type",
+                  "description": "(Optional) The instance type that the image version runs on.. For valid values see SageMaker AI Instance Types.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `instance_type` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the compute instance type on which the image version will run, directly influencing the performance and cost of the SageMaker environment. By configuring this argument, users can tailor the underlying infrastructure to match their workload requirements, such as optimizing for training, inference, or development tasks using valid SageMaker AI instance types."
+                },
+                {
+                  "name": "lifecycle_config_arn",
+                  "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `lifecycle_config_arn` argument allows users to specify the Amazon Resource Name (ARN) of a SageMaker Lifecycle Configuration to attach to the `default_resource_spec` within an `aws_sagemaker_domain`. This enables the customization of resource initialization and management behaviors, such as automating setup tasks, environment configurations, or maintenance routines for the associated compute resources."
+                },
+                {
+                  "name": "sagemaker_image_arn",
+                  "description": "(Optional) The ARN of the SageMaker AI image that the image version belongs to.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_arn` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the Amazon Resource Name (ARN) of a SageMaker AI image associated with the image version to be used for the domain's default compute environment. By setting this argument, users can define the base container image for machine learning workloads, enabling customization of the runtime environment for training or inference tasks."
+                },
+                {
+                  "name": "sagemaker_image_version_alias",
+                  "description": "(Optional) The SageMaker AI Image Version Alias.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_alias` argument allows users to specify a version alias for the SageMaker-provided AI image used in the `default_resource_spec` configuration of an `aws_sagemaker_domain`. This enables precise control over the version of the SageMaker image, ensuring compatibility and consistency for machine learning environments or workloads within the domain."
+                },
+                {
+                  "name": "sagemaker_image_version_arn",
+                  "description": "(Optional) The ARN of the image version created on the instance.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_arn` argument allows users to specify the Amazon Resource Name (ARN) of a specific SageMaker image version to be used for the instance within the `default_resource_spec` configuration of the `aws_sagemaker_domain` resource. By setting this argument, users can control the runtime environment for their SageMaker workloads, enabling customization of pre-built or custom container images to meet specific machine learning or data processing requirements."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `default_resource_spec` block within the `jupyter_server_app_settings` configuration of the `aws_sagemaker_domain` resource defines the default compute instance type and the SageMaker AI image ARN to be used for Jupyter server instances. This block enables users to standardize and control the environment configuration for Jupyter servers, ensuring consistent resource allocation and pre-configured AI image usage for data science and machine learning workflows."
+            }
+          ],
+          "llm_summary": "The `jupyter_server_app_settings` block within the `default_user_settings` of the `aws_sagemaker_domain` resource configures application-level settings for Jupyter server environments, enabling fine-grained control over user experience and functionality. It encapsulates related configurations such as resource limits, security policies, and environment customization, helping users tailor Jupyter server behavior to meet specific data science or machine learning workflow requirements."
+        },
+        {
+          "name": "kernel_gateway_app_settings",
+          "description": "(Optional) The kernel gateway app settings. See `kernel_gateway_app_settings` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "lifecycle_config_arns",
+              "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configurations.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `lifecycle_config_arns` argument in the `kernel_gateway_app_settings` block of the `aws_sagemaker_domain` resource allows users to specify a set of Amazon Resource Names (ARNs) for Lifecycle Configurations. These configurations define custom scripts or actions to automate the setup, maintenance, or termination of SageMaker kernel gateway apps, enabling users to tailor the environment to their specific workflows or operational requirements."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "custom_image",
+              "description": "(Optional) A list of custom SageMaker AI images that are configured to run as a KernelGateway app. see `custom_image` Block below.",
+              "cardinality": [
+                0,
+                200
+              ],
+              "arguments": [
+                {
+                  "name": "app_image_config_name",
+                  "description": "(Required) The name of the App Image Config.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `app_image_config_name` argument specifies the name of the App Image Config associated with a custom image in an Amazon SageMaker Domain, enabling users to define runtime settings such as environment variables, kernel configurations, or resource parameters for applications running on the image. By setting this required value, users ensure the custom image is properly configured to meet specific operational or development requirements within SageMaker."
+                },
+                {
+                  "name": "image_name",
+                  "description": "(Required) The name of the Custom Image.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `image_name` argument specifies the unique name of a custom image to be used within the SageMaker Domain, allowing users to define the specific container image for their machine learning environments. By setting this required property, users can customize the runtime environment to include tailored dependencies, tools, or configurations that align with their development or training workflows."
+                },
+                {
+                  "name": "image_version_number",
+                  "description": "(Optional) The version number of the Custom Image.",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `image_version_number` argument allows users to specify the version of a custom image to be used within the SageMaker Domain, enabling precise control over the software environment for training or inference tasks. By setting this argument, users can ensure compatibility with specific dependencies or features tied to a particular image version, supporting reproducibility and consistency in their machine learning workflows."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `custom_image` block within the `kernel_gateway_app_settings` configuration of the `aws_sagemaker_domain` resource defines a list of custom SageMaker AI images to be used as kernels in a KernelGateway app. This block enables users to specify tailored runtime environments for their machine learning workflows, providing control over the software stack and dependencies required for specific use cases or models."
+            },
+            {
+              "name": "default_resource_spec",
+              "description": "(Optional) The default instance type and the Amazon Resource Name (ARN) of the SageMaker AI image created on the instance. see `default_resource_spec` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "instance_type",
+                  "description": "(Optional) The instance type that the image version runs on.. For valid values see SageMaker AI Instance Types.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `instance_type` argument in the `default_resource_spec` block of the `aws_sagemaker_domain` resource allows users to specify the compute instance type on which the associated image version will run. This configuration determines the underlying hardware resources (e.g., CPU, memory, GPU) allocated for the SageMaker environment, enabling users to optimize performance and cost based on their workload requirements."
+                },
+                {
+                  "name": "lifecycle_config_arn",
+                  "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `lifecycle_config_arn` argument allows users to specify the Amazon Resource Name (ARN) of a SageMaker Lifecycle Configuration to attach to the default resource specification within an `aws_sagemaker_domain`. This enables the customization of environment initialization and runtime behavior, such as pre-configuring software, setting up dependencies, or automating tasks during the lifecycle of SageMaker resources, aligning with common goals like environment setup and operational efficiency."
+                },
+                {
+                  "name": "sagemaker_image_arn",
+                  "description": "(Optional) The ARN of the SageMaker AI image that the image version belongs to.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_arn` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the Amazon Resource Name (ARN) of a SageMaker AI image associated with the image version to be used for the domain's default compute environment. By setting this argument, users can define the base container image for machine learning workloads, enabling customization of runtime environments for training or inference tasks."
+                },
+                {
+                  "name": "sagemaker_image_version_alias",
+                  "description": "(Optional) The SageMaker AI Image Version Alias.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_alias` argument allows users to specify an alias for a specific version of a SageMaker AI image within the `default_resource_spec` configuration of the `aws_sagemaker_domain` resource. By setting this alias, users can streamline image version management, enabling easier reference and consistent usage of specific AI image versions across SageMaker environments."
+                },
+                {
+                  "name": "sagemaker_image_version_arn",
+                  "description": "(Optional) The ARN of the image version created on the instance.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_arn` argument allows users to specify the Amazon Resource Name (ARN) of a specific SageMaker image version to be used for the instance within the `default_resource_spec` configuration of an `aws_sagemaker_domain`. By setting this argument, users can control the runtime environment for their SageMaker workloads, enabling customization of pre-built or custom container images to meet specific development, training, or inference requirements."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `default_resource_spec` block within the `kernel_gateway_app_settings` configuration of the `aws_sagemaker_domain` resource defines the default compute instance type and SageMaker AI image ARN used for kernel gateway apps. This block enables users to specify foundational environment settings for running Jupyter notebooks or similar applications, ensuring consistent resource allocation and image compatibility for machine learning workflows."
+            }
+          ],
+          "llm_summary": "The `kernel_gateway_app_settings` block within the `default_user_settings` of the `aws_sagemaker_domain` resource configures environment-specific settings for kernel gateway applications in SageMaker. It encapsulates parameters related to app behavior, such as resource limits, security configurations, and runtime options, enabling users to customize and optimize the execution environment for Jupyter-based kernel gateways to support interactive data science workflows."
+        },
+        {
+          "name": "r_session_app_settings",
+          "description": "(Optional) The RSession app settings. See `r_session_app_settings` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "custom_image",
+              "description": "(Optional) A list of custom SageMaker AI images that are configured to run as a RSession app. see `custom_image` Block below.",
+              "cardinality": [
+                0,
+                200
+              ],
+              "arguments": [
+                {
+                  "name": "app_image_config_name",
+                  "description": "(Required) The name of the App Image Config.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `app_image_config_name` argument specifies the name of the App Image Config associated with a custom image in the SageMaker Domain, allowing users to define runtime settings such as environment variables, kernel configurations, or resource parameters for applications running on the image. By setting this required value, users ensure the custom image is properly configured to meet specific application requirements, enabling tailored execution environments within SageMaker."
+                },
+                {
+                  "name": "image_name",
+                  "description": "(Required) The name of the Custom Image.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `image_name` argument specifies the unique name of a custom image to be used within the SageMaker Domain, allowing users to define the specific containerized environment for their machine learning workloads. By setting this required value, users ensure the SageMaker Domain integrates the desired custom image, enabling tailored development environments or runtime configurations aligned with their project requirements."
+                },
+                {
+                  "name": "image_version_number",
+                  "description": "(Optional) The version number of the Custom Image.",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "\"Defines the version number of the custom image associated with the SageMaker Domain, allowing users to specify which iteration of the image to use for their machine learning environment. This enables precise control over the software stack and dependencies, supporting version management and reproducibility in development workflows.\""
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `custom_image` block within the `r_session_app_settings` configuration of the `aws_sagemaker_domain` resource defines a list of custom SageMaker AI images tailored for running RSession apps. This block enables users to specify and manage custom container images, allowing for precise control over the runtime environment, dependencies, and software versions used in R-based machine learning workflows."
+            },
+            {
+              "name": "default_resource_spec",
+              "description": "(Optional) The default instance type and the Amazon Resource Name (ARN) of the SageMaker AI image created on the instance. see `default_resource_spec` Block above.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "instance_type",
+                  "description": "(Optional) The instance type that the image version runs on.. For valid values see SageMaker AI Instance Types.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `instance_type` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the compute instance type on which the image version will run, directly influencing the performance and cost of the SageMaker environment. By configuring this argument, users can tailor the underlying infrastructure to match their workload requirements, such as training models or running inference, using valid SageMaker AI instance types."
+                },
+                {
+                  "name": "lifecycle_config_arn",
+                  "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `lifecycle_config_arn` argument allows users to specify the Amazon Resource Name (ARN) of a SageMaker Lifecycle Configuration to attach to the default resource specification within the `aws_sagemaker_domain`. This enables the automation of custom setup or teardown scripts for resources, such as notebook instances, ensuring consistent environment initialization or cleanup processes."
+                },
+                {
+                  "name": "sagemaker_image_arn",
+                  "description": "(Optional) The ARN of the SageMaker AI image that the image version belongs to.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_arn` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the Amazon Resource Name (ARN) of a SageMaker AI image associated with the image version to be used for the default compute environment. By setting this argument, users can define the base container image for machine learning workloads, enabling customization of runtime environments for training or inference tasks within the SageMaker domain."
+                },
+                {
+                  "name": "sagemaker_image_version_alias",
+                  "description": "(Optional) The SageMaker AI Image Version Alias.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_alias` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify a human-readable alias for a specific version of a SageMaker AI image. This enables streamlined identification and reference to image versions, simplifying the configuration and management of environments for machine learning workloads within SageMaker domains."
+                },
+                {
+                  "name": "sagemaker_image_version_arn",
+                  "description": "(Optional) The ARN of the image version created on the instance.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_arn` argument allows users to specify the Amazon Resource Name (ARN) of a specific SageMaker image version to be used for the instance within the `default_resource_spec` configuration of an `aws_sagemaker_domain`. By setting this argument, users can control the runtime environment for their SageMaker workloads, enabling customization of pre-built or custom container images to meet specific machine learning or data processing requirements."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `default_resource_spec` block within the `r_session_app_settings` configuration of the `aws_sagemaker_domain` resource defines the default compute instance type and SageMaker AI image ARN used for R session applications. This block enables users to specify foundational environment settings for running R-based workloads, ensuring consistent resource allocation and compatibility with pre-configured AI images to streamline application deployment and execution."
+            }
+          ],
+          "llm_summary": "The `r_session_app_settings` block within the `default_user_settings` of the `aws_sagemaker_domain` resource configures environment-specific settings for RStudio-based RSession applications in SageMaker. It enables users to define and customize application behavior, such as resource limits, security configurations, or runtime parameters, providing granular control over the RSession app experience for SageMaker users."
+        },
+        {
+          "name": "r_studio_server_pro_app_settings",
+          "description": "(Optional) A collection of settings that configure user interaction with the RStudioServerPro app. See `r_studio_server_pro_app_settings` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "access_status",
+              "description": "(Optional) Indicates whether the current user has access to the RStudioServerPro app. Valid values are `ENABLED` and `DISABLED`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `access_status` argument in the `r_studio_server_pro_app_settings` block of the `aws_sagemaker_domain` resource allows users to control whether the current user has access to the RStudio Server Pro application. By setting this argument to `ENABLED` or `DISABLED`, users can define access permissions, aligning with common goals of managing user access and application availability within SageMaker environments."
+            },
+            {
+              "name": "user_group",
+              "description": "(Optional) The level of permissions that the user has within the RStudioServerPro app. This value defaults to `R_STUDIO_USER`. The `R_STUDIO_ADMIN` value allows the user access to the RStudio Administrative Dashboard. Valid values are `R_STUDIO_USER` and `R_STUDIO_ADMIN`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `user_group` argument in the `r_studio_server_pro_app_settings` block of the `aws_sagemaker_domain` resource allows users to specify the permission level for accessing features within the RStudio Server Pro application. By setting this argument to either `R_STUDIO_USER` (default) or `R_STUDIO_ADMIN`, users can control whether the assigned user has standard access or administrative privileges, including access to the RStudio Administrative Dashboard, enabling tailored role-based access management for the application."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `r_studio_server_pro_app_settings` block within the `default_user_settings` of the `aws_sagemaker_domain` resource configures user-specific interaction settings for the RStudio Server Pro application. It encapsulates a collection of parameters that enable fine-grained control over the app's behavior and environment, helping users optimize their experience and workflows within SageMaker by tailoring features such as resource access, security, and application preferences."
+        },
+        {
+          "name": "sharing_settings",
+          "description": "(Optional) The sharing settings. See `sharing_settings` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "notebook_output_option",
+              "description": "(Optional) Whether to include the notebook cell output when sharing the notebook. The default is `Disabled`. Valid values are `Allowed` and `Disabled`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `notebook_output_option` argument in the `sharing_settings` block of the `aws_sagemaker_domain` resource allows users to control whether the output of notebook cells is included when sharing SageMaker notebooks. By setting this to `Allowed` or `Disabled` (default), users can define the visibility of notebook outputs, aligning with collaboration or data-sharing requirements."
+            },
+            {
+              "name": "s3_kms_key_id",
+              "description": "(Optional) When `notebook_output_option` is Allowed, the AWS Key Management Service (KMS) encryption key ID used to encrypt the notebook cell output in the Amazon S3 bucket.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `s3_kms_key_id` argument in the `sharing_settings` block of the `aws_sagemaker_domain` resource allows users to specify the AWS KMS encryption key ID for securing notebook cell output stored in an Amazon S3 bucket when `notebook_output_option` is set to `Allowed`. By configuring this argument, users can enforce encryption for sensitive data, aligning with security and compliance requirements for data protection in shared SageMaker environments."
+            },
+            {
+              "name": "s3_output_path",
+              "description": "(Optional) When `notebook_output_option` is Allowed, the Amazon S3 bucket used to save the notebook cell output.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `s3_output_path` argument in the `sharing_settings` block of the `aws_sagemaker_domain` resource specifies the Amazon S3 bucket location where notebook cell outputs are saved when `notebook_output_option` is set to `Allowed`. This allows users to configure a centralized storage path for sharing and persisting notebook results, supporting collaboration and data retention goals."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `sharing_settings` block within the `default_user_settings` of the `aws_sagemaker_domain` resource configures options for sharing resources and collaboration in SageMaker environments. It encapsulates settings that manage how users can share notebooks, datasets, or other artifacts, enabling streamlined collaboration and controlled access within the domain. Configuring this block helps users define sharing policies to enhance team productivity while maintaining security and governance."
+        },
+        {
+          "name": "space_storage_settings",
+          "description": "(Optional) The storage settings for a private space. See `space_storage_settings` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "default_ebs_storage_settings",
+              "description": "(Optional) The default EBS storage settings for a private space. See `default_ebs_storage_settings` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "default_ebs_volume_size_in_gb",
+                  "description": "(Required) The default size of the EBS storage volume for a private space.",
+                  "required": true,
+                  "type": "number",
+                  "llm_summary": "The `default_ebs_volume_size_in_gb` argument specifies the default storage capacity (in GB) for the EBS volumes attached to private spaces within the SageMaker domain. By configuring this required parameter, users define the baseline disk size for data storage and processing in private environments, ensuring sufficient capacity for machine learning workloads and resource allocation."
+                },
+                {
+                  "name": "maximum_ebs_volume_size_in_gb",
+                  "description": "(Required) The maximum size of the EBS storage volume for a private space.",
+                  "required": true,
+                  "type": "number",
+                  "llm_summary": "The `maximum_ebs_volume_size_in_gb` argument in the `default_ebs_storage_settings` of the `aws_sagemaker_domain` resource specifies the maximum allowable size (in GB) for the EBS storage volume attached to private spaces within the domain. By defining this value, users control the storage capacity available for data and workloads in private spaces, ensuring sufficient resources for machine learning tasks while adhering to storage limits."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `default_ebs_storage_settings` block within the `space_storage_settings` of the `aws_sagemaker_domain` resource defines the default configuration for EBS volumes used in private spaces, enabling control over storage capacity and performance settings. By configuring this block, users can optimize storage resources for machine learning workloads, ensuring efficient and scalable data handling within SageMaker environments."
+            }
+          ],
+          "llm_summary": "The `space_storage_settings` block within the `default_user_settings` of the `aws_sagemaker_domain` resource configures storage options for private user spaces, enabling control over how data is stored and managed in SageMaker environments. This block encapsulates settings related to storage infrastructure, allowing users to optimize data handling for private workspaces, ensuring efficient and secure storage tailored to their machine learning workflows."
+        },
+        {
+          "name": "studio_web_portal_settings",
+          "description": "(Optional) The Studio Web Portal settings. See `studio_web_portal_settings` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "hidden_app_types",
+              "description": "(Optional) The Applications supported in Studio that are hidden from the Studio left navigation pane.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `hidden_app_types` argument in the `studio_web_portal_settings` block of the `aws_sagemaker_domain` resource allows users to specify a set of application types in Amazon SageMaker Studio that should be hidden from the Studio's left navigation pane. This configuration helps streamline the user interface by removing access to unnecessary or irrelevant applications, aligning the Studio environment with specific workflows or organizational policies."
+            },
+            {
+              "name": "hidden_instance_types",
+              "description": "(Optional) The instance types you are hiding from the Studio user interface.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `hidden_instance_types` argument in the `studio_web_portal_settings` block of the `aws_sagemaker_domain` resource allows users to specify a set of instance types to exclude from visibility in the SageMaker Studio user interface. This configuration helps streamline the user experience by restricting access to certain compute options, aligning with organizational policies or cost management goals."
+            },
+            {
+              "name": "hidden_ml_tools",
+              "description": "(Optional) The machine learning tools that are hidden from the Studio left navigation pane.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `hidden_ml_tools` argument in the `studio_web_portal_settings` block of the `aws_sagemaker_domain` resource allows users to specify a set of machine learning tools to hide from the Studio's left navigation pane. This configuration helps customize the user interface by restricting access to certain tools, aligning the Studio environment with specific user roles, workflows, or compliance requirements."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `studio_web_portal_settings` block within the `default_user_settings` of the `aws_sagemaker_domain` resource configures options for the SageMaker Studio Web Portal, enabling customization of user access and interface settings for the Studio environment. This block encapsulates settings related to the web-based portal experience, allowing users to tailor the Studio interface to meet specific operational or accessibility requirements, enhancing usability and workflow efficiency."
+        },
+        {
+          "name": "tensor_board_app_settings",
+          "description": "(Optional) The TensorBoard app settings. See `tensor_board_app_settings` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "default_resource_spec",
+              "description": "(Optional) The default instance type and the Amazon Resource Name (ARN) of the SageMaker AI image created on the instance. see `default_resource_spec` Block below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "instance_type",
+                  "description": "(Optional) The instance type that the image version runs on.. For valid values see SageMaker AI Instance Types.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `instance_type` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the compute instance type on which the image version will run, directly influencing the performance and cost of the SageMaker environment. By configuring this argument, users can tailor the underlying infrastructure to match their workload requirements, such as optimizing for training, inference, or development tasks using SageMaker AI instance types."
+                },
+                {
+                  "name": "lifecycle_config_arn",
+                  "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `lifecycle_config_arn` argument allows users to specify the Amazon Resource Name (ARN) of a SageMaker Lifecycle Configuration to attach to the `default_resource_spec` within an `aws_sagemaker_domain`. This enables the customization of resource initialization and management behaviors, such as automating setup tasks, environment configurations, or maintenance routines for the associated compute resources."
+                },
+                {
+                  "name": "sagemaker_image_arn",
+                  "description": "(Optional) The ARN of the SageMaker AI image that the image version belongs to.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_arn` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the Amazon Resource Name (ARN) of a SageMaker AI image associated with the image version to be used for the domain's default compute environment. By setting this argument, users can define the base container image for machine learning workloads, enabling customization of the runtime environment for training or inference tasks within the SageMaker domain."
+                },
+                {
+                  "name": "sagemaker_image_version_alias",
+                  "description": "(Optional) The SageMaker AI Image Version Alias.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_alias` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify an alias for a specific version of a SageMaker AI image. This enables streamlined reference to image versions, simplifying environment configuration and ensuring consistency when deploying or managing machine learning workloads within SageMaker domains."
+                },
+                {
+                  "name": "sagemaker_image_version_arn",
+                  "description": "(Optional) The ARN of the image version created on the instance.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_arn` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the Amazon Resource Name (ARN) of a specific SageMaker image version to be used for the instance. By setting this argument, users can control the runtime environment for their SageMaker domain, enabling customization of pre-configured container images for machine learning workflows, such as defining software dependencies or frameworks."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `default_resource_spec` block within the `tensor_board_app_settings` configuration of the `aws_sagemaker_domain` resource defines the default compute instance type and SageMaker AI image ARN used for TensorBoard applications. This block enables users to specify foundational environment settings for running TensorBoard, ensuring consistent resource allocation and compatibility with AI workloads. Configuring this block helps users optimize performance and streamline the deployment of TensorBoard within SageMaker domains."
+            }
+          ],
+          "llm_summary": "The `tensor_board_app_settings` block within the `default_user_settings` of the `aws_sagemaker_domain` resource configures TensorBoard application-specific settings for SageMaker users. It enables the customization of TensorBoard environments, facilitating the visualization and debugging of machine learning model training processes, and provides control over related configurations to enhance user productivity and experiment tracking."
+        }
+      ],
+      "llm_summary": "The `default_user_settings` block in the `aws_sagemaker_domain` resource defines default configurations for user environments within the SageMaker domain, including permissions, security settings, and resource limits. By configuring this block, users can enforce consistent policies and resource constraints across all user profiles, ensuring secure and standardized access to machine learning resources and tools."
+    },
+    {
+      "name": "domain_settings",
+      "description": "(Optional) The domain settings. See `domain_settings` Block below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "execution_role_identity_config",
+          "description": "(Optional) The configuration for attaching a SageMaker AI user profile name to the execution role as a sts:SourceIdentity key AWS Docs. Valid values are `USER_PROFILE_NAME` and `DISABLED`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `execution_role_identity_config` argument in the `domain_settings` of the `aws_sagemaker_domain` resource allows users to control whether the SageMaker execution role includes the AI user profile name as an `sts:SourceIdentity` key. Setting this argument to `USER_PROFILE_NAME` enables enhanced traceability by associating actions with specific user profiles, while `DISABLED` prevents this association, offering flexibility in identity management for compliance or operational needs."
+        },
+        {
+          "name": "security_group_ids",
+          "description": "(Optional) The security groups for the Amazon Virtual Private Cloud that the Domain uses for communication between Domain-level apps and user apps.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `security_group_ids` argument in the `domain_settings` of the `aws_sagemaker_domain` resource allows users to specify the security groups associated with the Amazon VPC used by the SageMaker Domain. This configuration controls network-level access and communication between Domain-level applications and user applications, enabling users to enforce custom security rules and isolate traffic for enhanced security and compliance."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "docker_settings",
+          "description": "(Optional) A collection of settings that configure the domain\u2019s Docker interaction. see `docker_settings` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "enable_docker_access",
+              "description": "(Optional) Indicates whether the domain can access Docker. Valid values are `ENABLED` and `DISABLED`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `enable_docker_access` argument in the `docker_settings` of the `aws_sagemaker_domain` resource allows users to control whether the SageMaker domain has permission to access Docker functionality. Setting this to `ENABLED` enables Docker-based workflows, such as custom container usage for training or inference, while `DISABLED` restricts this access, aligning with security or compliance requirements."
+            },
+            {
+              "name": "vpc_only_trusted_accounts",
+              "description": "(Optional) The list of Amazon Web Services accounts that are trusted when the domain is created in VPC-only mode.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "Defines a set of AWS account IDs that are trusted to access the SageMaker domain when operating in VPC-only mode, ensuring controlled and secure cross-account access. This argument allows users to specify trusted accounts for enhanced security and compliance, aligning with common goals of restricting access to sensitive resources within a private network."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `docker_settings` block within the `domain_settings` of the `aws_sagemaker_domain` resource configures Docker-related interactions for the SageMaker domain, enabling fine-grained control over container behavior and execution environments. It encapsulates settings related to Docker runtime, such as image management, container configurations, and resource allocation, helping users optimize and customize the execution of machine learning workloads in containerized environments."
+        },
+        {
+          "name": "r_studio_server_pro_domain_settings",
+          "description": "(Optional) A collection of settings that configure the RStudioServerPro Domain-level app. see `r_studio_server_pro_domain_settings` Block below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "domain_execution_role_arn",
+              "description": "(Required) The ARN of the execution role for the RStudioServerPro Domain-level app.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `domain_execution_role_arn` argument specifies the Amazon Resource Name (ARN) of the IAM role that governs permissions for the RStudio Server Pro domain-level application within the SageMaker domain. By setting this required argument, users define the role responsible for managing access to AWS resources, enabling secure execution of tasks and operations within the RStudio environment."
+            },
+            {
+              "name": "r_studio_connect_url",
+              "description": "(Optional) A URL pointing to an RStudio Connect server.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `r_studio_connect_url` argument allows users to specify the URL of an RStudio Connect server within the `r_studio_server_pro_domain_settings` configuration for the `aws_sagemaker_domain` resource. By setting this argument, users can integrate their RStudio Server Pro environment with an external RStudio Connect instance, enabling seamless publishing and sharing of data products, reports, and analyses directly from SageMaker."
+            },
+            {
+              "name": "r_studio_package_manager_url",
+              "description": "(Optional) A URL pointing to an RStudio Package Manager server.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `r_studio_package_manager_url` argument allows users to specify the URL of an RStudio Package Manager server within the `r_studio_server_pro_domain_settings` configuration for the `aws_sagemaker_domain` resource. By setting this argument, users can integrate a centralized package management system for RStudio, enabling streamlined access to curated R packages and dependencies, which supports reproducible workflows and efficient environment management."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "default_resource_spec",
+              "description": "(Optional) The default instance type and the Amazon Resource Name (ARN) of the SageMaker AI image created on the instance. see `default_resource_spec` Block above.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "instance_type",
+                  "description": "(Optional) The instance type that the image version runs on.. For valid values see SageMaker AI Instance Types.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `instance_type` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the compute instance type on which the image version will run, directly influencing the performance and cost of the SageMaker environment. By configuring this argument, users can tailor the underlying infrastructure to match their workload requirements, such as training models or running inference, using valid SageMaker AI instance types."
+                },
+                {
+                  "name": "lifecycle_config_arn",
+                  "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `lifecycle_config_arn` argument allows users to specify the Amazon Resource Name (ARN) of a SageMaker Lifecycle Configuration to attach to the default resource specification within an `aws_sagemaker_domain`. This enables the customization of environment initialization and runtime behavior, such as pre-configuring software, setting up dependencies, or automating tasks during the lifecycle of SageMaker resources, aligning with common goals like environment management and operational efficiency."
+                },
+                {
+                  "name": "sagemaker_image_arn",
+                  "description": "(Optional) The ARN of the SageMaker AI image that the image version belongs to.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_arn` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify the Amazon Resource Name (ARN) of a SageMaker AI image associated with the image version to be used for the domain's default compute environment. By setting this argument, users can define the base container image for machine learning workloads, enabling customization of runtime environments for training, inference, or development tasks within SageMaker."
+                },
+                {
+                  "name": "sagemaker_image_version_alias",
+                  "description": "(Optional) The SageMaker AI Image Version Alias.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_alias` argument in the `default_resource_spec` of the `aws_sagemaker_domain` resource allows users to specify a human-readable alias for a specific version of a SageMaker AI image. This enables streamlined reference to image versions, simplifying environment configuration and ensuring consistency when deploying or managing machine learning workloads."
+                },
+                {
+                  "name": "sagemaker_image_version_arn",
+                  "description": "(Optional) The ARN of the image version created on the instance.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `sagemaker_image_version_arn` argument allows users to specify the Amazon Resource Name (ARN) of a specific SageMaker image version to be used for the instance within the `default_resource_spec` configuration of an `aws_sagemaker_domain`. By setting this argument, users can control the runtime environment for their SageMaker workloads, enabling customization of pre-built or custom container images to meet specific development, training, or inference requirements."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `default_resource_spec` block within the `r_studio_server_pro_domain_settings` configuration of the `aws_sagemaker_domain` resource defines the default compute instance type and SageMaker AI image ARN used for RStudio Server Pro environments. This block enables users to specify foundational resource settings for the domain, ensuring consistent and optimized execution environments for data science workloads. Configuring this block allows users to tailor the default infrastructure for their RStudio Server Pro instances, aligning with performance and cost requirements."
+            }
+          ],
+          "llm_summary": "The `r_studio_server_pro_domain_settings` block within the `domain_settings` of the `aws_sagemaker_domain` resource configures domain-level settings specific to the RStudio Server Pro application. It encapsulates parameters for managing the environment and operational behavior of RStudio Server Pro, enabling users to tailor the app's functionality for data science workflows, such as resource allocation, user access, and integration with SageMaker features."
+        }
+      ],
+      "llm_summary": "The `domain_settings` block within the `aws_sagemaker_domain` resource configures advanced domain-level options for a SageMaker domain, enabling customization of user environments and security settings. It encapsulates related configurations such as default user settings, execution role policies, and resource access controls, allowing users to tailor the domain's behavior and permissions to meet specific organizational requirements for machine learning workflows."
+    },
+    {
+      "name": "retention_policy",
+      "description": "(Optional) The retention policy for this domain, which specifies whether resources will be retained after the Domain is deleted. By default, all resources are retained. See `retention_policy` Block below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "home_efs_file_system",
+          "description": "(Optional) The retention policy for data stored on an Amazon Elastic File System (EFS) volume. Valid values are `Retain` or `Delete`. Default value is `Retain`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `home_efs_file_system` argument in the `retention_policy` context of the `aws_sagemaker_domain` resource allows users to define the lifecycle behavior for data stored on the Amazon EFS volume associated with SageMaker user home directories. By specifying `Retain` or `Delete`, users can control whether the EFS data persists after the SageMaker domain is deleted, enabling configuration of data retention policies to align with compliance or cleanup requirements."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `retention_policy` block in the `aws_sagemaker_domain` resource defines lifecycle rules for managing resource retention when the domain is deleted, allowing users to specify whether associated resources (e.g., user profiles, apps) are retained or removed. Configuring this block provides granular control over resource cleanup, ensuring alignment with organizational policies for data retention and cost management."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) assigned by AWS to this Domain.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "home_efs_file_system_id",
+      "description": "The ID of the Amazon Elastic File System (EFS) managed by this Domain.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "security_group_id_for_domain_boundary",
+      "description": "The ID of the security group that authorizes traffic between the RSessionGateway apps and the RStudioServerPro app.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "single_sign_on_application_arn",
+      "description": "The ARN of the application managed by SageMaker AI in IAM Identity Center. This value is only returned for domains created after September 19, 2023.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "single_sign_on_managed_application_instance_id",
+      "description": "The SSO managed application instance ID.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "url",
+      "description": "The domain's URL.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

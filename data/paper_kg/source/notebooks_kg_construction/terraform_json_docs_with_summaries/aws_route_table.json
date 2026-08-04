@@ -1,0 +1,112 @@
+{
+  "resource": {
+    "name": "aws_route_table",
+    "description": "Provides a resource to create a VPC routing table. Terraform currently provides both a standalone Route resource and a Route Table resource with routes defined in-line. At this time you cannot use a Route Table with in-line routes in conjunction with any Route resources. Doing so will cause a conflict of rule settings and will overwrite rules. The AWS API is very forgiving with these two attributes and the aws_route_table resource can be created with a NAT ID specified as a Gateway ID attribute. This will lead to a permanent diff between your configuration and statefile, as the API returns the correct parameters in the returned route table. If you're experiencing constant diffs in your aws_route_table resources, the first thing to check is whether or not you're specifying a NAT ID instead of a Gateway ID, or vice-versa. If the propagating_vgws argument is present, it's not supported to also define route propagations using aws_vpn_gateway_route_propagation, since this resource will delete any propagating gateways not explicitly listed in propagating_vgws. Omit this argument when defining route propagation using the separate resource.",
+    "llm_summary": "The `aws_route_table` Terraform resource enables the creation and management of VPC route tables, which define routing rules for directing network traffic within an AWS Virtual Private Cloud (VPC). It is commonly used for configuring custom routes to integrate resources like NAT gateways, VPNs, and internet gateways, as well as managing route propagations for hybrid cloud setups. Users can define routes in-line or separately, control gateway associations, and handle advanced configurations like propagating virtual gateways, ensuring flexible and scalable network traffic management."
+  },
+  "examples": [
+    {
+      "title": "Basic example",
+      "code": "resource \"aws_route_table\" \"example\" {\n  vpc_id = aws_vpc.example.id\n\n  route {\n    cidr_block = \"10.0.1.0/24\"\n    gateway_id = aws_internet_gateway.example.id\n  }\n\n  route {\n    ipv6_cidr_block        = \"::/0\"\n    egress_only_gateway_id = aws_egress_only_internet_gateway.example.id\n  }\n\n  tags = {\n    Name = \"example\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_route_table` resource with routes for both IPv4 and IPv6 traffic in a VPC. It showcases the use of the `route` block to define a CIDR block with an internet gateway and an IPv6 CIDR block with an egress-only internet gateway, along with tagging the route table for identification."
+    },
+    {
+      "title": "Adopting an existing local route",
+      "code": "resource \"aws_vpc\" \"test\" {\n  cidr_block = \"10.1.0.0/16\"\n}\n\nresource \"aws_route_table\" \"test\" {\n  vpc_id = aws_vpc.test.id\n\n  # since this is exactly the route AWS will create, the route will be adopted\n  route {\n    cidr_block = \"10.1.0.0/16\"\n    gateway_id = \"local\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to adopt an existing local route in an AWS route table by defining a `route` block with `cidr_block` matching the VPC's CIDR and `gateway_id` set to `local`. Highlights the configuration of the `aws_route_table` resource within a VPC to align with default AWS routing behavior.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_route_table` resource represents the unique identifier of the route table, allowing users to reference or retrieve an existing route table within their AWS infrastructure. While not required, specifying this argument is typically used for data sources or outputs to enable integration with other resources or workflows that depend on the route table's identity."
+    },
+    {
+      "name": "propagating_vgws",
+      "description": "(Optional) A list of virtual gateways for propagation.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `propagating_vgws` argument in the `aws_route_table` resource allows users to specify a set of virtual private gateways (VGWs) for route propagation, enabling automatic updates to the route table with routes from the specified VGWs. This configuration is typically used to streamline connectivity between on-premises networks and AWS resources in a hybrid cloud setup, reducing the need for manual route management."
+    },
+    {
+      "name": "route",
+      "description": "(Optional) A list of route objects. Their keys are documented below. This argument is processed in attribute-as-blocks mode. This means that omitting this argument is interpreted as ignoring any existing routes. To remove all managed routes an empty list should be specified. See the example above.",
+      "required": false,
+      "type": "set(object({carrier_gateway_id=string,cidr_block=string,core_network_arn=string,destination_prefix_list_id=string,egress_only_gateway_id=string,gateway_id=string,ipv6_cidr_block=string,local_gateway_id=string,nat_gateway_id=string,network_interface_id=string,transit_gateway_id=string,vpc_endpoint_id=string,vpc_peering_connection_id=string}))",
+      "llm_summary": "The `route` argument in the `aws_route_table` resource allows users to define and manage individual routing rules within a VPC route table. By specifying destination targets (e.g., CIDR blocks, gateways, or network interfaces) and their corresponding next-hop resources, this argument enables users to control traffic flow and connectivity between subnets, external networks, and AWS services. Configuring this argument is essential for achieving custom routing behavior, such as directing traffic to NAT gateways, peering connections, or transit gateways, to meet specific networking requirements."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_route_table` resource allows users to assign metadata in the form of key-value pairs to the route table, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or automation workflows. When configured, it can override provider-level default tags, ensuring granular control over tag definitions specific to this resource."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_route_table` resource allows users to define a comprehensive set of key-value tags that are automatically merged with inherited tags from the provider or parent resources. This enables consistent tagging across AWS resources for purposes such as cost allocation, resource organization, and environment identification, aligning with common user goals like enforcing tagging policies and improving resource discoverability."
+    },
+    {
+      "name": "vpc_id",
+      "description": "(Required) The VPC ID.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `vpc_id` argument specifies the ID of the VPC to which the route table belongs, enabling users to associate the route table with a specific network environment. By defining this required parameter, users ensure that the route table is integrated into the desired VPC, facilitating the configuration of routing rules for traffic within that VPC."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_route_table` resource allows users to specify the maximum duration (as a string, e.g., \"10m\") Terraform will wait for the creation of a route table to complete. Configuring this timeout helps users manage long-running operations and ensures predictable behavior in infrastructure provisioning workflows, especially in cases where network or resource constraints may delay creation."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block for the `aws_route_table` resource allows users to specify the maximum duration (as a string, e.g., \"5m\" for 5 minutes) Terraform will wait for the deletion of the route table to complete. Configuring this argument helps users manage resource lifecycle operations by ensuring Terraform does not timeout prematurely during the deletion process, which is particularly useful in environments with slower API responses or complex dependencies."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_route_table` resource allows users to specify the maximum duration (as a string, e.g., \"30m\") Terraform will wait for updates to the route table to complete. Configuring this argument helps ensure smoother resource management by preventing operations from timing out prematurely during updates, aligning with user-defined expectations for resource lifecycle behavior."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_route_table` resource allows users to define custom timeout durations for create, update, and delete operations, ensuring precise control over the lifecycle management of the route table. By configuring this block, users can optimize resource provisioning and handle long-running operations more effectively, reducing the risk of timeouts during infrastructure changes."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the route table.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "owner_id",
+      "description": "The ID of the AWS account that owns the route table.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

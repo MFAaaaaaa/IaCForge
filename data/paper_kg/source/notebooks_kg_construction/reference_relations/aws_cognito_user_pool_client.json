@@ -1,0 +1,22 @@
+[
+    {
+        "argument_path": "user_pool_id",
+        "references_output": "aws_cognito_user_pool.id",
+        "target_resource_type": "aws_cognito_user_pool"
+    },
+    {
+        "argument_path": "analytics_configuration.application_id",
+        "references_output": "aws_pinpoint_app.application_id",
+        "target_resource_type": "aws_pinpoint_app"
+    },
+    {
+        "argument_path": "analytics_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "supported_identity_providers",
+        "references_output": "aws_cognito_identity_provider.provider_name",
+        "target_resource_type": "aws_cognito_identity_provider"
+    }
+]

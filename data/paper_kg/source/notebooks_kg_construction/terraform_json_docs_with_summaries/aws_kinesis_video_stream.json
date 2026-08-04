@@ -1,0 +1,127 @@
+{
+  "resource": {
+    "name": "aws_kinesis_video_stream",
+    "description": "Provides a Kinesis Video Stream resource. Amazon Kinesis Video Streams makes it easy to securely stream video from connected devices to AWS for analytics, machine learning (ML), playback, and other processing. For more details, see the Amazon Kinesis Documentation.",
+    "llm_summary": "The `aws_kinesis_video_stream` resource enables the creation and management of secure, scalable video streams for ingesting, storing, and processing video data from connected devices in AWS. Common use cases include real-time video analytics, machine learning integration, playback, and event-driven processing for IoT or surveillance systems. Users can configure stream lifecycle settings, encryption, retention policies, and access control to optimize video data handling and ensure compliance with security and performance requirements."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_kinesis_video_stream\" \"default\" {\n  name                    = \"terraform-kinesis-video-stream\"\n  data_retention_in_hours = 1\n  device_name             = \"kinesis-video-device-name\"\n  media_type              = \"video/h264\"\n\n  tags = {\n    Name = \"terraform-kinesis-video-stream\"\n  }\n}",
+      "llm_summary": "\"Demonstrates the basic configuration of an AWS Kinesis Video Stream resource, including setting the stream name, data retention period, device name, and media type. Highlights how to define tags for resource identification and manage video stream properties for H.264 media.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "data_retention_in_hours",
+      "description": "\u2013 (Optional) The number of hours that you want to retain the data in the stream. Kinesis Video Streams retains the data in a data store that is associated with the stream. The default value is `0`, indicating that the stream does not persist data.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `data_retention_in_hours` argument for the `aws_kinesis_video_stream` resource allows users to define the duration, in hours, for which video data is retained in the associated data store before it is deleted. Configuring this argument enables users to control the stream's data persistence behavior, supporting use cases like video analytics or compliance with retention policies, with a default value of `0` indicating no data persistence."
+    },
+    {
+      "name": "device_name",
+      "description": "(Optional) The name of the device that is writing to the stream. In the current implementation, Kinesis Video Streams does not use this name.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `device_name` argument allows users to optionally specify the name of the device writing to the Kinesis Video Stream, providing metadata for identifying the source of the video data. While this name is not actively utilized by Kinesis Video Streams in its current implementation, it can serve as a descriptive label for organizational or tracking purposes."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_kinesis_video_stream` resource allows users to specify a unique identifier for the video stream, typically used to reference the stream within Terraform configurations and outputs. While optional, setting this argument can help users manage and track the resource programmatically, aligning with common goals like resource identification and integration with other infrastructure components."
+    },
+    {
+      "name": "kms_key_id",
+      "description": "(Optional) The ID of the AWS Key Management Service (AWS KMS) key that you want Kinesis Video Streams to use to encrypt stream data. If no key ID is specified, the default, Kinesis Video-managed key (`aws/kinesisvideo`) is used.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `kms_key_id` argument allows users to specify the AWS KMS key used to encrypt the data in a Kinesis Video Stream, enabling control over the encryption mechanism for enhanced security and compliance. If omitted, the stream defaults to using the Kinesis Video-managed key (`aws/kinesisvideo`), making this argument essential for users who need to enforce custom encryption policies or integrate with their organization's KMS setup."
+    },
+    {
+      "name": "media_type",
+      "description": "(Optional) The media type of the stream. Consumers of the stream can use this information when processing the stream. For more information about media types, see Media Types. If you choose to specify the MediaType, see Naming Requirements for guidelines.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `media_type` argument for the `aws_kinesis_video_stream` resource allows users to specify the format or encoding of the video stream's media content, enabling consumers to process the stream appropriately based on its type (e.g., video codecs or container formats). Setting this argument helps define the stream's compatibility and ensures adherence to naming and format requirements for seamless integration with downstream applications or services."
+    },
+    {
+      "name": "name",
+      "description": "(Required) A name to identify the stream. This is unique to the AWS account and region the Stream is created in.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies a unique identifier for the Kinesis Video Stream within the AWS account and region, allowing users to define a distinct and recognizable name for the stream. This is essential for managing and referencing the stream in workflows, integrations, and monitoring, ensuring clarity and avoiding naming conflicts in multi-stream environments."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_kinesis_video_stream` resource allows users to assign metadata in the form of key-value pairs to the video stream, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or compliance tracking. When configured, these tags can override provider-level default tags, ensuring granular control over resource tagging for specific use cases."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_kinesis_video_stream` resource allows users to define a comprehensive set of key-value tags that are applied to the video stream for organizational, management, or cost allocation purposes. By setting this argument, users can ensure consistent tagging across resources, enabling streamlined resource tracking, billing analysis, and compliance with tagging policies."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_kinesis_video_stream` resource allows users to specify the maximum duration (in string format, e.g., \"5m\" for 5 minutes) Terraform will wait for the creation of a Kinesis Video Stream before timing out. Configuring this argument helps users manage resource provisioning timeframes, ensuring alignment with deployment expectations and avoiding unnecessary delays or failures during infrastructure creation."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block for the `aws_kinesis_video_stream` resource allows users to specify the maximum duration (as a string) Terraform will wait for the deletion of the Kinesis video stream resource to complete. Configuring this argument helps manage resource lifecycle operations by ensuring deletion processes do not exceed the defined timeout, aligning with user goals for predictable and efficient infrastructure management."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_kinesis_video_stream` resource allows users to define the maximum duration (as a string) Terraform will wait for updates to the video stream resource to complete. Configuring this timeout ensures smoother management of resource lifecycle operations, preventing prolonged or stalled updates during infrastructure changes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_kinesis_video_stream` resource allows users to define custom timeout durations for operations such as creating, updating, or deleting a Kinesis Video Stream. By configuring this block, users gain precise control over operation time limits, ensuring smoother management of resource lifecycle actions and preventing potential delays or failures in time-sensitive workflows."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) specifying the Stream (same as `id`)",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "creation_time",
+      "description": "A time stamp that indicates when the stream was created.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "version",
+      "description": "The version of the stream.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+    "resource": {
+        "name": "aws_redshift_snapshot_schedule_association",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "cluster_identifier",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "schedule_identifier",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": []
+}

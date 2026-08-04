@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "group",
+        "references_output": "aws_iam_group.name",
+        "target_resource_type": "aws_iam_group"
+    },
+    {
+        "argument_path": "policy_arn",
+        "references_output": "aws_iam_policy.arn",
+        "target_resource_type": "aws_iam_policy"
+    }
+]

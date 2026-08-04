@@ -1,0 +1,206 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_notification",
+    "description": "Manages a S3 Bucket Notification Configuration. For additional information, see the Configuring S3 Event Notifications section in the Amazon S3 Developer Guide. S3 Buckets only support a single notification configuration resource. Declaring multiple aws_s3_bucket_notification resources to the same S3 Bucket will cause a perpetual difference in configuration. This resource will overwrite any existing event notifications configured for the S3 bucket it's associated with. See the example \"Trigger multiple Lambda functions\" for an option of how to configure multiple triggers within this resource. This resource cannot be used with S3 directory buckets.",
+    "llm_summary": "The `aws_s3_bucket_notification` Terraform resource manages the configuration of event notifications for an Amazon S3 bucket, enabling automated responses to bucket events such as object creation, deletion, or updates. Common use cases include triggering AWS Lambda functions, sending messages to Amazon SNS topics, or publishing events to Amazon SQS queues based on specific S3 actions. This resource supports configuring multiple event triggers within a single notification setup but overwrites any pre-existing configurations, making it ideal for centralized and streamlined event-driven workflows in cloud architectures."
+  },
+  "examples": [
+    {
+      "title": "Add notification configuration to SNS Topic",
+      "code": "data \"aws_iam_policy_document\" \"topic\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"s3.amazonaws.com\"]\n    }\n\n    actions   = [\"SNS:Publish\"]\n    resources = [\"arn:aws:sns:*:*:s3-event-notification-topic\"]\n\n    condition {\n      test     = \"ArnLike\"\n      variable = \"aws:SourceArn\"\n      values   = [aws_s3_bucket.bucket.arn]\n    }\n  }\n}\nresource \"aws_sns_topic\" \"topic\" {\n  name   = \"s3-event-notification-topic\"\n  policy = data.aws_iam_policy_document.topic.json\n}\n\nresource \"aws_s3_bucket\" \"bucket\" {\n  bucket = \"your-bucket-name\"\n}\n\nresource \"aws_s3_bucket_notification\" \"bucket_notification\" {\n  bucket = aws_s3_bucket.bucket.id\n\n  topic {\n    topic_arn     = aws_sns_topic.topic.arn\n    events        = [\"s3:ObjectCreated:*\"]\n    filter_suffix = \".log\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an S3 bucket notification to publish events to an SNS topic using the `aws_s3_bucket_notification` resource, with a filter for `.log` file suffixes and `s3:ObjectCreated:*` events. Includes IAM policy setup to grant S3 permissions to publish to the SNS topic, showcasing integration between S3 and SNS for event-driven workflows.\""
+    },
+    {
+      "title": "Add notification configuration to SQS Queue",
+      "code": "data \"aws_iam_policy_document\" \"queue\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"*\"\n      identifiers = [\"*\"]\n    }\n\n    actions   = [\"sqs:SendMessage\"]\n    resources = [\"arn:aws:sqs:*:*:s3-event-notification-queue\"]\n\n    condition {\n      test     = \"ArnEquals\"\n      variable = \"aws:SourceArn\"\n      values   = [aws_s3_bucket.bucket.arn]\n    }\n  }\n}\n\nresource \"aws_sqs_queue\" \"queue\" {\n  name   = \"s3-event-notification-queue\"\n  policy = data.aws_iam_policy_document.queue.json\n}\n\nresource \"aws_s3_bucket\" \"bucket\" {\n  bucket = \"your-bucket-name\"\n}\n\nresource \"aws_s3_bucket_notification\" \"bucket_notification\" {\n  bucket = aws_s3_bucket.bucket.id\n\n  queue {\n    queue_arn     = aws_sqs_queue.queue.arn\n    events        = [\"s3:ObjectCreated:*\"]\n    filter_suffix = \".log\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an S3 bucket notification to send event messages to an SQS queue using the `aws_s3_bucket_notification` resource. Highlights key configurations such as the `queue` block with `events` for `s3:ObjectCreated:*` and a `filter_suffix` for `.log`, along with an IAM policy allowing S3 to send messages to the SQS queue.\""
+    },
+    {
+      "title": "Add notification configuration to Lambda Function",
+      "code": "data \"aws_iam_policy_document\" \"assume_role\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"lambda.amazonaws.com\"]\n    }\n\n    actions = [\"sts:AssumeRole\"]\n  }\n}\n\nresource \"aws_iam_role\" \"iam_for_lambda\" {\n  name               = \"iam_for_lambda\"\n  assume_role_policy = data.aws_iam_policy_document.assume_role.json\n}\n\nresource \"aws_lambda_permission\" \"allow_bucket\" {\n  statement_id  = \"AllowExecutionFromS3Bucket\"\n  action        = \"lambda:InvokeFunction\"\n  function_name = aws_lambda_function.func.arn\n  principal     = \"s3.amazonaws.com\"\n  source_arn    = aws_s3_bucket.bucket.arn\n}\n\nresource \"aws_lambda_function\" \"func\" {\n  filename      = \"your-function.zip\"\n  function_name = \"example_lambda_name\"\n  role          = aws_iam_role.iam_for_lambda.arn\n  handler       = \"exports.example\"\n  runtime       = \"nodejs20.x\"\n}\n\nresource \"aws_s3_bucket\" \"bucket\" {\n  bucket = \"your-bucket-name\"\n}\n\nresource \"aws_s3_bucket_notification\" \"bucket_notification\" {\n  bucket = aws_s3_bucket.bucket.id\n\n  lambda_function {\n    lambda_function_arn = aws_lambda_function.func.arn\n    events              = [\"s3:ObjectCreated:*\"]\n    filter_prefix       = \"AWSLogs/\"\n    filter_suffix       = \".log\"\n  }\n\n  depends_on = [aws_lambda_permission.allow_bucket]\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_s3_bucket_notification` resource to trigger an AWS Lambda function when objects are created in an S3 bucket, using event filters for specific prefixes and suffixes. It includes key configurations such as setting up Lambda permissions (`aws_lambda_permission`), an IAM role for the Lambda function, and defining notification events with `lambda_function` blocks."
+    },
+    {
+      "title": "Trigger multiple Lambda functions",
+      "code": "data \"aws_iam_policy_document\" \"assume_role\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"lambda.amazonaws.com\"]\n    }\n\n    actions = [\"sts:AssumeRole\"]\n  }\n}\n\nresource \"aws_iam_role\" \"iam_for_lambda\" {\n  name               = \"iam_for_lambda\"\n  assume_role_policy = data.aws_iam_policy_document.assume_role.json\n}\n\nresource \"aws_lambda_permission\" \"allow_bucket1\" {\n  statement_id  = \"AllowExecutionFromS3Bucket1\"\n  action        = \"lambda:InvokeFunction\"\n  function_name = aws_lambda_function.func1.arn\n  principal     = \"s3.amazonaws.com\"\n  source_arn    = aws_s3_bucket.bucket.arn\n}\n\nresource \"aws_lambda_function\" \"func1\" {\n  filename      = \"your-function1.zip\"\n  function_name = \"example_lambda_name1\"\n  role          = aws_iam_role.iam_for_lambda.arn\n  handler       = \"exports.example\"\n  runtime       = \"nodejs20.x\"\n}\n\nresource \"aws_lambda_permission\" \"allow_bucket2\" {\n  statement_id  = \"AllowExecutionFromS3Bucket2\"\n  action        = \"lambda:InvokeFunction\"\n  function_name = aws_lambda_function.func2.arn\n  principal     = \"s3.amazonaws.com\"\n  source_arn    = aws_s3_bucket.bucket.arn\n}\n\nresource \"aws_lambda_function\" \"func2\" {\n  filename      = \"your-function2.zip\"\n  function_name = \"example_lambda_name2\"\n  role          = aws_iam_role.iam_for_lambda.arn\n  handler       = \"exports.example\"\n}\n\nresource \"aws_s3_bucket\" \"bucket\" {\n  bucket = \"your-bucket-name\"\n}\n\nresource \"aws_s3_bucket_notification\" \"bucket_notification\" {\n  bucket = aws_s3_bucket.bucket.id\n\n  lambda_function {\n    lambda_function_arn = aws_lambda_function.func1.arn\n    events              = [\"s3:ObjectCreated:*\"]\n    filter_prefix       = \"AWSLogs/\"\n    filter_suffix       = \".log\"\n  }\n\n  lambda_function {\n    lambda_function_arn = aws_lambda_function.func2.arn\n    events              = [\"s3:ObjectCreated:*\"]\n    filter_prefix       = \"OtherLogs/\"\n    filter_suffix       = \".log\"\n  }\n\n  depends_on = [\n    aws_lambda_permission.allow_bucket1,\n    aws_lambda_permission.allow_bucket2,\n  ]\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_s3_bucket_notification` resource to trigger multiple Lambda functions based on specific S3 object creation events, using filters for prefixes and suffixes. It showcases the use of `lambda_function` blocks with event filtering, `aws_lambda_permission` for S3 invocation permissions, and IAM roles to enable Lambda execution."
+    },
+    {
+      "title": "Add multiple notification configurations to SQS Queue",
+      "code": "data \"aws_iam_policy_document\" \"queue\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"*\"\n      identifiers = [\"*\"]\n    }\n\n    actions   = [\"sqs:SendMessage\"]\n    resources = [\"arn:aws:sqs:*:*:s3-event-notification-queue\"]\n\n    condition {\n      test     = \"ArnEquals\"\n      variable = \"aws:SourceArn\"\n      values   = [aws_s3_bucket.bucket.arn]\n    }\n  }\n}\n\nresource \"aws_sqs_queue\" \"queue\" {\n  name   = \"s3-event-notification-queue\"\n  policy = data.aws_iam_policy_document.queue.json\n}\n\nresource \"aws_s3_bucket\" \"bucket\" {\n  bucket = \"your-bucket-name\"\n}\n\nresource \"aws_s3_bucket_notification\" \"bucket_notification\" {\n  bucket = aws_s3_bucket.bucket.id\n\n  queue {\n    id            = \"image-upload-event\"\n    queue_arn     = aws_sqs_queue.queue.arn\n    events        = [\"s3:ObjectCreated:*\"]\n    filter_prefix = \"images/\"\n  }\n\n  queue {\n    id            = \"video-upload-event\"\n    queue_arn     = aws_sqs_queue.queue.arn\n    events        = [\"s3:ObjectCreated:*\"]\n    filter_prefix = \"videos/\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_s3_bucket_notification` resource to add multiple SQS queue notification configurations for an S3 bucket, using event filters like `filter_prefix` to target specific object types (e.g., images and videos). It also illustrates the use of an IAM policy document to grant SQS permissions for receiving S3 event notifications."
+    },
+    {
+      "title": "Emit events to EventBridge",
+      "code": "resource \"aws_s3_bucket\" \"bucket\" {\n  bucket = \"your-bucket-name\"\n}\n\nresource \"aws_s3_bucket_notification\" \"bucket_notification\" {\n  bucket      = aws_s3_bucket.bucket.id\n  eventbridge = true\n}",
+      "llm_summary": "\"Demonstrates how to configure an S3 bucket to emit events directly to Amazon EventBridge using the `aws_s3_bucket_notification` resource with the `eventbridge` argument set to `true`. This example enables seamless event-driven workflows by linking S3 bucket events to EventBridge without additional targets or configurations.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bucket",
+      "description": "(Required) Name of the bucket for notification configuration. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket` argument specifies the name of the S3 bucket where the notification configuration will be applied. By setting this required parameter, users define the target bucket for enabling event-driven workflows, such as triggering Lambda functions, SQS queues, or SNS topics based on specific S3 events."
+    },
+    {
+      "name": "eventbridge",
+      "description": "(Optional) Whether to enable Amazon EventBridge notifications. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `eventbridge` argument in the `aws_s3_bucket_notification` resource allows users to enable integration with Amazon EventBridge for S3 bucket event notifications. When set to `true`, it configures the bucket to automatically send event data to EventBridge, enabling advanced event-driven workflows and centralized event management without requiring additional notification configurations like SNS or Lambda."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_s3_bucket_notification` resource is an optional identifier that allows users to define a unique string for the notification configuration. While not required, setting this argument can help users manage and reference the resource more effectively, particularly in complex Terraform configurations or when integrating with other resources."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "lambda_function",
+      "description": "(Optional, Multiple) Used to configure notifications to a Lambda Function. See below.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "events",
+          "description": "(Required) Event for which to send notifications.",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `events` argument specifies the S3 bucket events (e.g., `s3:ObjectCreated:*`, `s3:ObjectRemoved:*`) that trigger notifications to the associated Lambda function. By defining this argument, users configure which bucket activities will invoke the Lambda function, enabling automated responses to specific object-level changes or actions within the bucket."
+        },
+        {
+          "name": "filter_prefix",
+          "description": "(Optional) Object key name prefix.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `filter_prefix` argument allows users to define a key name prefix for S3 objects that will trigger the associated Lambda function in an `aws_s3_bucket_notification` configuration. By specifying this prefix, users can filter events to only invoke the Lambda function for objects with keys that start with the given string, enabling targeted and efficient event processing based on object naming patterns."
+        },
+        {
+          "name": "filter_suffix",
+          "description": "(Optional) Object key name suffix.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `filter_suffix` argument allows users to specify a string that defines a suffix pattern for object key names in S3, enabling targeted filtering of events that trigger the associated Lambda function. By setting this argument, users can ensure the Lambda function is invoked only for objects with keys ending in the specified suffix, supporting use cases like processing specific file types (e.g., `.log` or `.csv`) or categorizing event triggers based on object naming conventions."
+        },
+        {
+          "name": "id",
+          "description": "(Optional) Unique identifier for each of the notification configurations.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `id` argument for the `lambda_function` configuration in the `aws_s3_bucket_notification` resource allows users to define a unique identifier for the notification setup, enabling precise differentiation between multiple notification configurations within the same S3 bucket. By specifying this optional string, users can manage and organize distinct Lambda function triggers, ensuring clarity and avoiding conflicts in complex event-driven architectures."
+        },
+        {
+          "name": "lambda_function_arn",
+          "description": "(Required) Lambda function ARN.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `lambda_function_arn` argument specifies the Amazon Resource Name (ARN) of a Lambda function to be invoked in response to S3 bucket events, enabling event-driven processing workflows. By configuring this argument, users can link an S3 bucket to a specific Lambda function, automating tasks such as data transformation, logging, or custom processing triggered by object-level events."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `lambda_function` configuration block within the `aws_s3_bucket_notification` resource enables the setup of event-driven notifications from an S3 bucket to an AWS Lambda function. It encapsulates settings for specifying the Lambda function ARN and defining the triggering events (e.g., object creation or deletion), allowing users to automate serverless workflows by invoking Lambda functions in response to S3 bucket activity."
+    },
+    {
+      "name": "queue",
+      "description": "(Optional) Notification configuration to SQS Queue. See below.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "events",
+          "description": "(Required) Specifies event for which to send notifications.",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `events` argument in the `aws_s3_bucket_notification` resource allows users to specify the S3 bucket event types (e.g., `s3:ObjectCreated:*`, `s3:ObjectRemoved:*`) that trigger notifications to the associated SQS queue. By defining this argument, users can control which bucket activities generate notifications, enabling event-driven workflows or integrations with downstream systems."
+        },
+        {
+          "name": "filter_prefix",
+          "description": "(Optional) Object key name prefix.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `filter_prefix` argument allows users to specify a string prefix that filters S3 object keys, ensuring that notifications sent to the configured queue are triggered only for objects whose keys begin with the defined prefix. This enables targeted event handling, helping users optimize workflows by narrowing the scope of S3 events processed by the queue."
+        },
+        {
+          "name": "filter_suffix",
+          "description": "(Optional) Object key name suffix.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `filter_suffix` argument allows users to specify a string suffix for object key names, enabling targeted filtering of S3 events sent to the associated queue. By configuring this argument, users can ensure that notifications are triggered only for objects with keys ending in the specified suffix, supporting use cases like processing specific file types or categorizing event workflows."
+        },
+        {
+          "name": "id",
+          "description": "(Optional) Unique identifier for each of the notification configurations.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `id` argument for the `queue` configuration in the `aws_s3_bucket_notification` resource allows users to define a unique identifier for each notification configuration associated with an SQS queue. This helps distinguish multiple queue-based notifications within the same S3 bucket, ensuring precise management and tracking of event triggers."
+        },
+        {
+          "name": "queue_arn",
+          "description": "(Required) SQS queue ARN.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `queue_arn` argument specifies the Amazon Resource Name (ARN) of the SQS queue to which S3 bucket event notifications will be sent, enabling users to configure event-driven workflows by linking S3 bucket actions (e.g., object creation or deletion) to an SQS queue. This is essential for integrating S3 with downstream systems or processes that rely on message-based communication for automation or data processing."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `queue` configuration block within the `aws_s3_bucket_notification` resource enables the setup of S3 event notifications to an Amazon SQS queue, allowing users to define how specific bucket events (e.g., object creation or deletion) trigger messages sent to the queue. This block encapsulates settings related to event types, queue ARNs, and filtering rules, providing users with granular control over event-driven workflows and integrations with SQS for reliable message processing."
+    },
+    {
+      "name": "topic",
+      "description": "(Optional) Notification configuration to SNS Topic. See below.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "events",
+          "description": "(Required) Event for which to send notifications.",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `events` argument in the `aws_s3_bucket_notification` resource specifies the set of S3 bucket events (e.g., `s3:ObjectCreated:*`, `s3:ObjectRemoved:*`) that trigger notifications to the associated SNS topic. By defining this argument, users can control which bucket activities generate notifications, enabling event-driven workflows or integrations with other services based on specific S3 operations."
+        },
+        {
+          "name": "filter_prefix",
+          "description": "(Optional) Object key name prefix.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `filter_prefix` argument allows users to specify a string prefix to filter S3 object keys, ensuring that notifications for the associated topic are triggered only for objects whose keys begin with the defined prefix. This enables targeted event handling, such as processing specific subsets of objects within a bucket, aligning with common goals like optimizing workflows or integrating selective data pipelines."
+        },
+        {
+          "name": "filter_suffix",
+          "description": "(Optional) Object key name suffix.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `filter_suffix` argument for the `aws_s3_bucket_notification` resource allows users to specify a string that defines a suffix pattern for object key names, enabling targeted filtering of S3 events. By setting this argument, users can ensure that notifications to the associated topic are triggered only for objects with keys ending in the specified suffix, supporting use cases like monitoring specific file types or naming conventions."
+        },
+        {
+          "name": "id",
+          "description": "(Optional) Unique identifier for each of the notification configurations.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `id` argument for the `topic` configuration in the `aws_s3_bucket_notification` resource allows users to define a unique identifier for each notification setup targeting an SNS topic. This helps distinguish and manage multiple notification configurations within the same S3 bucket, ensuring clarity and control when specifying event-driven workflows or integrations with external systems."
+        },
+        {
+          "name": "topic_arn",
+          "description": "(Required) SNS topic ARN.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `topic_arn` argument specifies the Amazon Resource Name (ARN) of an SNS topic to which S3 bucket event notifications will be sent, enabling users to configure automated messaging workflows triggered by bucket events. By defining this required parameter, users can integrate their S3 bucket with SNS for real-time event-driven communication, supporting use cases like alerting, logging, or triggering downstream processes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `topic` configuration block within the `aws_s3_bucket_notification` resource enables the setup of Amazon SNS topic notifications for an S3 bucket, allowing users to define event triggers that send messages to specified SNS topics. This block encapsulates settings related to event types and topic ARNs, helping users achieve automated workflows or real-time alerts by integrating S3 bucket events with SNS for downstream processing or notifications."
+    }
+  ],
+  "attributes": []
+}

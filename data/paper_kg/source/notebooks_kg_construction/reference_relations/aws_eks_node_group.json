@@ -1,0 +1,42 @@
+[
+    {
+        "argument_path": "cluster_name",
+        "references_output": "aws_eks_cluster.name",
+        "target_resource_type": "aws_eks_cluster"
+    },
+    {
+        "argument_path": "version",
+        "references_output": "aws_eks_cluster.version",
+        "target_resource_type": "aws_eks_cluster"
+    },
+    {
+        "argument_path": "node_role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "subnet_ids",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "release_version",
+        "references_output": "data.aws_ssm_parameter.value",
+        "target_resource_type": "aws_ssm_parameter"
+    },
+    {
+        "argument_path": "launch_template.id",
+        "references_output": "aws_launch_template.id",
+        "target_resource_type": "aws_launch_template"
+    },
+    {
+        "argument_path": "launch_template.name",
+        "references_output": "aws_launch_template.name",
+        "target_resource_type": "aws_launch_template"
+    },
+    {
+        "argument_path": "remote_access.source_security_group_ids",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    }
+]

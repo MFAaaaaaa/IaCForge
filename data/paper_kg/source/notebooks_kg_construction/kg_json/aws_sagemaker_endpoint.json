@@ -1,0 +1,252 @@
+{
+    "resource": {
+        "name": "aws_sagemaker_endpoint",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "endpoint_config_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "deployment_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "auto_rollback_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "alarms",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                10
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "alarm_name",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "blue_green_update_policy",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "maximum_execution_timeout_in_seconds",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "termination_wait_in_seconds",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "traffic_routing_configuration",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "wait_interval_in_seconds",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "number"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "canary_size",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "type",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "value",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "linear_step_size",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "type",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "value",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "rolling_update_policy",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "maximum_execution_timeout_in_seconds",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "wait_interval_in_seconds",
+                            "description": "",
+                            "required": true,
+                            "type": "number"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "maximum_batch_size",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "value",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "number"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "rollback_maximum_batch_size",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "value",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "number"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

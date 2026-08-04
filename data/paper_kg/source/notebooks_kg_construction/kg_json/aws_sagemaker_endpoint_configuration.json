@@ -1,0 +1,570 @@
+{
+    "resource": {
+        "name": "aws_sagemaker_endpoint_configuration",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "kms_key_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "async_inference_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "client_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "max_concurrent_invocations_per_instance",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "output_config",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "kms_key_id",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "s3_failure_path",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "s3_output_path",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "notification_config",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "error_topic",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "include_inference_response_in",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "set(string)"
+                                },
+                                {
+                                    "name": "success_topic",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "data_capture_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "destination_s3_uri",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "enable_capture",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "initial_sampling_percentage",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                },
+                {
+                    "name": "kms_key_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "capture_content_type_header",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "csv_content_types",
+                            "description": "",
+                            "required": false,
+                            "type": "set(string)"
+                        },
+                        {
+                            "name": "json_content_types",
+                            "description": "",
+                            "required": false,
+                            "type": "set(string)"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "capture_options",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        2
+                    ],
+                    "arguments": [
+                        {
+                            "name": "capture_mode",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "production_variants",
+            "description": "",
+            "cardinality": [
+                1,
+                10
+            ],
+            "arguments": [
+                {
+                    "name": "accelerator_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "container_startup_health_check_timeout_in_seconds",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "enable_ssm_access",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "inference_ami_version",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "initial_instance_count",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "initial_variant_weight",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "instance_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "model_data_download_timeout_in_seconds",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "model_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "variant_name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "volume_size_in_gb",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "core_dump_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "destination_s3_uri",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "kms_key_id",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "managed_instance_scaling",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "max_instance_count",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "min_instance_count",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "status",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "routing_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        0
+                    ],
+                    "arguments": [
+                        {
+                            "name": "routing_strategy",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "serverless_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "max_concurrency",
+                            "description": "",
+                            "required": true,
+                            "type": "number"
+                        },
+                        {
+                            "name": "memory_size_in_mb",
+                            "description": "",
+                            "required": true,
+                            "type": "number"
+                        },
+                        {
+                            "name": "provisioned_concurrency",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "shadow_production_variants",
+            "description": "",
+            "cardinality": [
+                0,
+                10
+            ],
+            "arguments": [
+                {
+                    "name": "accelerator_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "container_startup_health_check_timeout_in_seconds",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "enable_ssm_access",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "inference_ami_version",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "initial_instance_count",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "initial_variant_weight",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "instance_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "model_data_download_timeout_in_seconds",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "model_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "variant_name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "volume_size_in_gb",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "core_dump_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "destination_s3_uri",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "kms_key_id",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "managed_instance_scaling",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "max_instance_count",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "min_instance_count",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "status",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "routing_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        0
+                    ],
+                    "arguments": [
+                        {
+                            "name": "routing_strategy",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "serverless_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "max_concurrency",
+                            "description": "",
+                            "required": true,
+                            "type": "number"
+                        },
+                        {
+                            "name": "memory_size_in_mb",
+                            "description": "",
+                            "required": true,
+                            "type": "number"
+                        },
+                        {
+                            "name": "provisioned_concurrency",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

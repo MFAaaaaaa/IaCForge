@@ -1,0 +1,92 @@
+{
+  "resource": {
+    "name": "aws_dynamodb_global_table",
+    "description": "Manages DynamoDB Global Tables V1 (version 2017.11.29). These are layered on top of existing DynamoDB Tables. To instead manage DynamoDB Global Tables V2 (version 2019.11.21), use the aws_dynamodb_table resource replica configuration block. Note: There are many restrictions before you can properly create DynamoDB Global Tables in multiple regions. See the AWS DynamoDB Global Table Requirements for more information.",
+    "llm_summary": "The `aws_dynamodb_global_table` Terraform resource manages the creation and configuration of DynamoDB Global Tables V1 (version 2017.11.29), enabling multi-region replication for globally distributed, highly available NoSQL databases. It is commonly used to set up cross-region data synchronization for applications requiring low-latency access and disaster recovery across multiple AWS regions. This resource allows users to layer global table functionality on existing DynamoDB tables, with configurations focused on replication, regional availability, and compliance with AWS DynamoDB Global Table requirements."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "provider \"aws\" {\n  alias  = \"us-east-1\"\n  region = \"us-east-1\"\n}\n\nprovider \"aws\" {\n  alias  = \"us-west-2\"\n  region = \"us-west-2\"\n}\n\nresource \"aws_dynamodb_table\" \"us-east-1\" {\n  provider = aws.us-east-1\n\n  hash_key         = \"myAttribute\"\n  name             = \"myTable\"\n  stream_enabled   = true\n  stream_view_type = \"NEW_AND_OLD_IMAGES\"\n  read_capacity    = 1\n  write_capacity   = 1\n\n  attribute {\n    name = \"myAttribute\"\n    type = \"S\"\n  }\n}\n\nresource \"aws_dynamodb_table\" \"us-west-2\" {\n  provider = aws.us-west-2\n\n  hash_key         = \"myAttribute\"\n  name             = \"myTable\"\n  stream_enabled   = true\n  stream_view_type = \"NEW_AND_OLD_IMAGES\"\n  read_capacity    = 1\n  write_capacity   = 1\n\n  attribute {\n    name = \"myAttribute\"\n    type = \"S\"\n  }\n}\n\nresource \"aws_dynamodb_global_table\" \"myTable\" {\n  depends_on = [\n    aws_dynamodb_table.us-east-1,\n    aws_dynamodb_table.us-west-2,\n  ]\n  provider = aws.us-east-1\n\n  name = \"myTable\"\n\n  replica {\n    region_name = \"us-east-1\"\n  }\n\n  replica {\n    region_name = \"us-west-2\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_dynamodb_global_table` resource to create a globally replicated DynamoDB table across multiple AWS regions (`us-east-1` and `us-west-2`). It showcases the use of `replica` blocks to define regional replicas and highlights dependencies on regional `aws_dynamodb_table` resources with stream settings enabled for global replication."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_dynamodb_global_table` resource allows users to specify a unique identifier for the global table, enabling precise management and referencing of the resource within Terraform configurations. While optional, setting this argument can help ensure consistency across deployments and facilitate resource tracking in multi-environment setups."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name of the global table. Must match underlying DynamoDB Table names in all regions.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies the unique identifier for the global DynamoDB table, ensuring consistency across all underlying regional tables. By defining this required property, users establish the table's shared identity, enabling cross-region replication and seamless global data synchronization."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "replica",
+      "description": "(Required) Underlying DynamoDB Table. At least 1 replica must be defined. See below.",
+      "cardinality": [
+        1,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "region_name",
+          "description": "(Required) AWS region name of replica DynamoDB TableE.g., `us-east-1`",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `region_name` argument specifies the AWS region where a replica of the DynamoDB Global Table will be created, enabling multi-region replication for improved data availability, disaster recovery, and low-latency access. This required parameter ensures the table is replicated in the desired region to meet geographic or compliance requirements."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `replica` configuration block in the `aws_dynamodb_global_table` resource defines the underlying DynamoDB tables in multiple AWS regions, enabling global replication and high availability. It encapsulates settings for specifying at least one regional replica, ensuring data consistency and fault tolerance across geographically distributed environments. Configuring this block allows users to achieve seamless multi-region replication for their DynamoDB Global Table, supporting disaster recovery and low-latency access for global applications."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_dynamodb_global_table` resource allows users to specify the maximum duration (in string format, e.g., \"10m\" for 10 minutes) Terraform will wait for the creation of a global DynamoDB table to complete. Configuring this timeout ensures users can control the operation's lifecycle, preventing indefinite waits and enabling better handling of long-running or stalled resource creation processes."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block for the `aws_dynamodb_global_table` resource allows users to specify the maximum duration (as a string, e.g., \"5m\" for 5 minutes) Terraform will wait for the deletion of a global DynamoDB table to complete. Configuring this timeout ensures users can control the lifecycle behavior during resource teardown, preventing operations from hanging indefinitely or timing out prematurely."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_dynamodb_global_table` resource allows users to specify the maximum duration (as a string, e.g., \"30m\") Terraform will wait for updates to the global table configuration to complete. Configuring this timeout ensures users can control how long Terraform waits for potentially lengthy update operations, helping to manage deployment workflows and avoid premature failures during resource modifications."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_dynamodb_global_table` resource allows users to define custom time limits for operations related to the creation, update, and deletion of global DynamoDB tables. This block provides fine-grained control over operation durations, helping users manage long-running processes and avoid unexpected timeouts in their infrastructure workflows."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the DynamoDB Global Table",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

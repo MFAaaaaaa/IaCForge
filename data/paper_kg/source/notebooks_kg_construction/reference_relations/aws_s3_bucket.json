@@ -1,0 +1,27 @@
+[
+    {
+        "argument_path": "logging.target_bucket",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "replication_configuration.role",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "replication_configuration.rules.destination.bucket",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "replication_configuration.rules.destination.replica_kms_key_id",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "server_side_encryption_configuration.rule.apply_server_side_encryption_by_default.kms_master_key_id",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    }
+]

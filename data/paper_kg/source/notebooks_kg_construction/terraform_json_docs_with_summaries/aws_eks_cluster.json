@@ -1,0 +1,549 @@
+{
+  "resource": {
+    "name": "aws_eks_cluster",
+    "description": "Manages an EKS Cluster. Hands-on: For an example of aws_eks_cluster in use, follow the Provision an EKS Cluster tutorial on HashiCorp Learn.",
+    "llm_summary": "The `aws_eks_cluster` Terraform resource enables the creation and management of Amazon Elastic Kubernetes Service (EKS) clusters, providing a scalable and secure platform for running containerized applications. It is commonly used for setting up Kubernetes orchestration in AWS, integrating workloads with IAM roles, VPC networking, and enabling features like logging, monitoring, and auto-scaling. Users can configure cluster lifecycle settings, control plane logging, version upgrades, and network policies to optimize performance and security for their Kubernetes environments."
+  },
+  "examples": [
+    {
+      "title": "EKS Cluster",
+      "code": "resource \"aws_eks_cluster\" \"example\" {\n  name = \"example\"\n\n  access_config {\n    authentication_mode = \"API\"\n  }\n\n  role_arn = aws_iam_role.example.arn\n  version  = \"1.31\"\n\n  vpc_config {\n    subnet_ids = [\n      aws_subnet.az1.id,\n      aws_subnet.az2.id,\n      aws_subnet.az3.id,\n    ]\n  }\n\n  # Ensure that IAM Role permissions are created before and deleted\n  # after EKS Cluster handling. Otherwise, EKS will not be able to\n  # properly delete EKS managed EC2 infrastructure such as Security Groups.\n  depends_on = [\n    aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy,\n  ]\n}\n\nresource \"aws_iam_role\" \"cluster\" {\n  name = \"eks-cluster-example\"\n  assume_role_policy = jsonencode({\n    Version = \"2012-10-17\"\n    Statement = [\n      {\n        Action = [\n          \"sts:AssumeRole\",\n          \"sts:TagSession\"\n        ]\n        Effect = \"Allow\"\n        Principal = {\n          Service = \"eks.amazonaws.com\"\n        }\n      },\n    ]\n  })\n}\n\nresource \"aws_iam_role_policy_attachment\" \"cluster_AmazonEKSClusterPolicy\" {\n  policy_arn = \"arn:aws:iam::aws:policy/AmazonEKSClusterPolicy\"\n  role       = aws_iam_role.cluster.name\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS EKS cluster using the `aws_eks_cluster` resource, including VPC subnet integration via the `vpc_config` block, API-based authentication, and IAM role setup with the `aws_iam_role` and `aws_iam_role_policy_attachment` resources to ensure proper permissions. It highlights dependency management with `depends_on` to handle IAM role policies for seamless cluster creation and deletion."
+    },
+    {
+      "title": "EKS Cluster with EKS Auto Mode",
+      "code": "resource \"aws_eks_cluster\" \"example\" {\n  name = \"example\"\n\n  access_config {\n    authentication_mode = \"API\"\n  }\n\n  role_arn = aws_iam_role.cluster.arn\n  version  = \"1.31\"\n\n  bootstrap_self_managed_addons = false\n\n  compute_config {\n    enabled       = true\n    node_pools    = [\"general-purpose\"]\n    node_role_arn = aws_iam_role.node.arn\n  }\n\n  kubernetes_network_config {\n    elastic_load_balancing {\n      enabled = true\n    }\n  }\n\n  storage_config {\n    block_storage {\n      enabled = true\n    }\n  }\n\n  vpc_config {\n    endpoint_private_access = true\n    endpoint_public_access  = true\n\n    subnet_ids = [\n      aws_subnet.az1.id,\n      aws_subnet.az2.id,\n      aws_subnet.az3.id,\n    ]\n  }\n\n  # Ensure that IAM Role permissions are created before and deleted\n  # after EKS Cluster handling. Otherwise, EKS will not be able to\n  # properly delete EKS managed EC2 infrastructure such as Security Groups.\n  depends_on = [\n    aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy,\n    aws_iam_role_policy_attachment.cluster_AmazonEKSComputePolicy,\n    aws_iam_role_policy_attachment.cluster_AmazonEKSBlockStoragePolicy,\n    aws_iam_role_policy_attachment.cluster_AmazonEKSLoadBalancingPolicy,\n    aws_iam_role_policy_attachment.cluster_AmazonEKSNetworkingPolicy,\n  ]\n}\n\nresource \"aws_iam_role\" \"node\" {\n  name = \"eks-auto-node-example\"\n  assume_role_policy = jsonencode({\n    Version = \"2012-10-17\"\n    Statement = [\n      {\n        Action = [\"sts:AssumeRole\"]\n        Effect = \"Allow\"\n        Principal = {\n          Service = \"ec2.amazonaws.com\"\n        }\n      },\n    ]\n  })\n}\n\nresource \"aws_iam_role_policy_attachment\" \"node_AmazonEKSWorkerNodeMinimalPolicy\" {\n  policy_arn = \"arn:aws:iam::aws:policy/AmazonEKSWorkerNodeMinimalPolicy\"\n  role       = aws_iam_role.node.name\n}\n\nresource \"aws_iam_role_policy_attachment\" \"node_AmazonEC2ContainerRegistryPullOnly\" {\n  policy_arn = \"arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPullOnly\"\n  role       = aws_iam_role.node.name\n}\n\nresource \"aws_iam_role\" \"cluster\" {\n  name = \"eks-cluster-example\"\n  assume_role_policy = jsonencode({\n    Version = \"2012-10-17\"\n    Statement = [\n      {\n        Action = [\n          \"sts:AssumeRole\",\n          \"sts:TagSession\"\n        ]\n        Effect = \"Allow\"\n        Principal = {\n          Service = \"eks.amazonaws.com\"\n        }\n      },\n    ]\n  })\n}\n\nresource \"aws_iam_role_policy_attachment\" \"cluster_AmazonEKSClusterPolicy\" {\n  policy_arn = \"arn:aws:iam::aws:policy/AmazonEKSClusterPolicy\"\n  role       = aws_iam_role.cluster.name\n}\n\nresource \"aws_iam_role_policy_attachment\" \"cluster_AmazonEKSComputePolicy\" {\n  policy_arn = \"arn:aws:iam::aws:policy/AmazonEKSComputePolicy\"\n  role       = aws_iam_role.cluster.name\n}\n\nresource \"aws_iam_role_policy_attachment\" \"cluster_AmazonEKSBlockStoragePolicy\" {\n  policy_arn = \"arn:aws:iam::aws:policy/AmazonEKSBlockStoragePolicy\"\n  role       = aws_iam_role.cluster.name\n}\n\nresource \"aws_iam_role_policy_attachment\" \"cluster_AmazonEKSLoadBalancingPolicy\" {\n  policy_arn = \"arn:aws:iam::aws:policy/AmazonEKSLoadBalancingPolicy\"\n  role       = aws_iam_role.cluster.name\n}\n\nresource \"aws_iam_role_policy_attachment\" \"cluster_AmazonEKSNetworkingPolicy\" {\n  policy_arn = \"arn:aws:iam::aws:policy/AmazonEKSNetworkingPolicy\"\n  role       = aws_iam_role.cluster.name\n}",
+      "llm_summary": "This example demonstrates how to configure an Amazon EKS cluster (`aws_eks_cluster`) with EKS Auto Mode, including self-managed node pools, API-based authentication, and advanced network, storage, and load balancing settings. It showcases the use of IAM roles and policy attachments for both the cluster and worker nodes, ensuring proper permissions for EKS-managed infrastructure and features like private/public VPC access, block storage, and Elastic Load Balancing."
+    },
+    {
+      "title": "EKS Cluster with EKS Hybrid Nodes",
+      "code": "resource \"aws_eks_cluster\" \"example\" {\n  name = \"example\"\n\n  access_config {\n    authentication_mode = \"API\"\n  }\n\n  role_arn = aws_iam_role.cluster.arn\n  version  = \"1.31\"\n\n  remote_network_config {\n    remote_node_networks {\n      cidrs = [\"172.16.0.0/18\"]\n    }\n    remote_pod_networks {\n      cidrs = [\"172.16.64.0/18\"]\n    }\n  }\n\n  vpc_config {\n    endpoint_private_access = true\n    endpoint_public_access  = true\n\n    subnet_ids = [\n      aws_subnet.az1.id,\n      aws_subnet.az2.id,\n      aws_subnet.az3.id,\n    ]\n  }\n\n  # Ensure that IAM Role permissions are created before and deleted\n  # after EKS Cluster handling. Otherwise, EKS will not be able to\n  # properly delete EKS managed EC2 infrastructure such as Security Groups.\n  depends_on = [\n    aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy,\n  ]\n}\n\nresource \"aws_iam_role\" \"cluster\" {\n  name = \"eks-cluster-example\"\n  assume_role_policy = jsonencode({\n    Version = \"2012-10-17\"\n    Statement = [\n      {\n        Action = [\n          \"sts:AssumeRole\",\n          \"sts:TagSession\"\n        ]\n        Effect = \"Allow\"\n        Principal = {\n          Service = \"eks.amazonaws.com\"\n        }\n      },\n    ]\n  })\n}\n\nresource \"aws_iam_role_policy_attachment\" \"cluster_AmazonEKSClusterPolicy\" {\n  policy_arn = \"arn:aws:iam::aws:policy/AmazonEKSClusterPolicy\"\n  role       = aws_iam_role.cluster.name\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS EKS cluster (`aws_eks_cluster`) with hybrid networking for remote nodes and pods, using the `remote_network_config` block to define CIDR ranges. It also showcases IAM role setup with policy attachments for EKS permissions and VPC configuration with both private and public endpoint access across multiple subnets."
+    },
+    {
+      "title": "Local EKS Cluster on AWS Outpost",
+      "code": "resource \"aws_eks_cluster\" \"example\" {\n  name = \"example\"\n\n  access_config {\n    authentication_mode = \"CONFIG_MAP\"\n  }\n\n  role_arn = aws_iam_role.example.arn\n  version  = \"1.31\"\n\n  vpc_config {\n    endpoint_private_access = true\n    endpoint_public_access  = false\n\n    subnet_ids = [\n      aws_subnet.az1.id,\n      aws_subnet.az2.id,\n      aws_subnet.az3.id,\n    ]\n  }\n\n  outpost_config {\n    control_plane_instance_type = \"m5.large\"\n    outpost_arns                = [data.aws_outposts_outpost.example.arn]\n  }\n\n  # Ensure that IAM Role permissions are created before and deleted\n  # after EKS Cluster handling. Otherwise, EKS will not be able to\n  # properly delete EKS managed EC2 infrastructure such as Security Groups.\n  depends_on = [\n    aws_iam_role_policy_attachment.cluster_AmazonEKSLocalOutpostClusterPolicy,\n  ]\n}\n\ndata \"aws_outposts_outpost\" \"example\" {\n  name = \"example\"\n}\n\nresource \"aws_iam_role\" \"cluster\" {\n  name = \"eks-cluster-example\"\n  assume_role_policy = jsonencode({\n    Version = \"2012-10-17\"\n    Statement = [\n      {\n        Action = [\n          \"sts:AssumeRole\",\n          \"sts:TagSession\"\n        ]\n        Effect = \"Allow\"\n        Principal = {\n          Service = [\n            \"eks.amazonaws.com\",\n            \"ec2.amazonaws.com\"\n          ]\n        }\n      },\n    ]\n  })\n}\n\nresource \"aws_iam_role_policy_attachment\" \"cluster_AmazonEKSLocalOutpostClusterPolicy\" {\n  policy_arn = \"arn:aws:iam::aws:policy/AmazonEKSLocalOutpostClusterPolicy\"\n  role       = aws_iam_role.cluster.name\n}",
+      "llm_summary": "This example demonstrates how to configure an Amazon EKS cluster on AWS Outposts using the `aws_eks_cluster` resource, showcasing the `outpost_config` block for deploying the control plane on Outposts hardware and enabling private endpoint access via the `vpc_config` block. It also includes IAM role setup and policy attachment to ensure proper permissions for EKS-managed infrastructure, providing a complete configuration for running Kubernetes workloads locally on AWS Outposts."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bootstrap_self_managed_addons",
+      "description": "(Optional) Install default unmanaged add-ons, such as `aws-cni`, `kube-proxy`, and CoreDNS during cluster creation. If `false`, you must manually install desired add-ons. Changing this value will force a new cluster to be created. Defaults to `true`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "Controls whether default unmanaged add-ons (e.g., `aws-cni`, `kube-proxy`, CoreDNS) are automatically installed during EKS cluster creation. Setting this to `true` simplifies initial cluster setup by pre-installing these add-ons, while `false` requires manual installation, offering greater customization; changes to this value will recreate the cluster."
+    },
+    {
+      "name": "enabled_cluster_log_types",
+      "description": "(Optional) List of the desired control plane logging to enable. For more information, see Amazon EKS Control Plane Logging.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `enabled_cluster_log_types` argument for the `aws_eks_cluster` resource allows users to specify which control plane log types (e.g., API server, audit, authenticator) should be enabled for their Amazon EKS cluster. Configuring this argument helps users monitor and troubleshoot cluster operations by enabling detailed logging for critical components, aligning with common goals like enhancing observability and security."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_eks_cluster` resource represents the unique identifier of the EKS cluster, typically used to reference the cluster in other resources or outputs. While optional, it allows users to retrieve or interact with the cluster programmatically, supporting workflows like dependency management, resource linking, or external integrations."
+    },
+    {
+      "name": "name",
+      "description": "\u2013 (Required) Name of the cluster. Must be between 1-100 characters in length. Must begin with an alphanumeric character, and must only contain alphanumeric characters, dashes and underscores (`^[0-9A-Za-z][A-Za-z0-9\\-_]*$`).",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies the unique, user-defined identifier for the EKS cluster, serving as its primary reference within AWS and Terraform configurations. Setting this required value ensures the cluster is distinguishable, adheres to naming constraints, and aligns with organizational naming conventions for managing Kubernetes workloads."
+    },
+    {
+      "name": "role_arn",
+      "description": "(Required) ARN of the IAM role that provides permissions for the Kubernetes control plane to make calls to AWS API operations on your behalf. Ensure the resource configuration includes explicit dependencies on the IAM Role permissions by adding `depends_on` if using the `aws_iam_role_policy` resource or `aws_iam_role_policy_attachment` resource, otherwise EKS cannot delete EKS managed EC2 infrastructure such as Security Groups on EKS Cluster deletion.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `role_arn` argument specifies the Amazon Resource Name (ARN) of the IAM role that grants the Kubernetes control plane permissions to interact with AWS services on behalf of the EKS cluster. Setting this argument is essential for enabling core cluster functionality, such as managing EKS-managed resources like EC2 infrastructure and security groups, and ensuring proper API access for cluster operations."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Key-value map of resource tags. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_eks_cluster` resource allows users to define a key-value map of resource tags, enabling the categorization, organization, and identification of the EKS cluster for purposes such as cost allocation, environment labeling, or operational management. When set, these tags can override provider-level default tags, ensuring granular control over tagging behavior specific to the cluster."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_eks_cluster` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to all resources associated with the EKS cluster, ensuring consistent metadata and enabling streamlined resource organization, cost allocation, and access management. By setting this argument, users can centralize tagging across the cluster and its related resources, aligning with common goals like enforcing tagging policies or simplifying resource tracking."
+    },
+    {
+      "name": "version",
+      "description": "\u2013 (Optional) Desired Kubernetes master version. If you do not specify a value, the latest available version at resource creation is used and no upgrades will occur except those automatically triggered by EKS. The value must be configured and increased to upgrade the version when desired. Downgrades are not supported by EKS.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `version` argument for the `aws_eks_cluster` resource allows users to specify the desired Kubernetes master version for the EKS cluster, enabling control over the cluster's runtime environment and upgrade strategy. By setting this argument, users can define the initial Kubernetes version at creation and manage version upgrades explicitly, ensuring compatibility with workloads while avoiding automatic downgrades or unexpected updates."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "access_config",
+      "description": "(Optional) Configuration block for the access config associated with your cluster, see Amazon EKS Access Entries. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "authentication_mode",
+          "description": "(Optional) The authentication mode for the cluster. Valid values are `CONFIG_MAP`, `API` or `API_AND_CONFIG_MAP`",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `authentication_mode` argument in the `access_config` block of the `aws_eks_cluster` resource allows users to specify how Kubernetes API authentication is managed for the cluster. By setting this argument to `CONFIG_MAP`, `API`, or `API_AND_CONFIG_MAP`, users can control whether authentication relies on the Kubernetes `aws-auth` ConfigMap, the EKS API, or both, enabling flexibility in access control and integration with IAM roles for cluster access."
+        },
+        {
+          "name": "bootstrap_cluster_creator_admin_permissions",
+          "description": "(Optional) Whether or not to bootstrap the access config values to the cluster. Default is `false`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "Controls whether administrative permissions are automatically granted to the cluster creator during the initial setup of the EKS cluster's access configuration. Enabling this (`true`) simplifies access management by bootstrapping admin-level permissions for the creator, aligning with common user goals of streamlining IAM role assignments during cluster creation."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `access_config` block in the `aws_eks_cluster` resource defines settings for managing access to the Amazon EKS cluster, including permissions and connectivity configurations. By configuring this block, users can control how external entities interact with the cluster, ensuring secure and streamlined access for administrative and operational purposes."
+    },
+    {
+      "name": "compute_config",
+      "description": "(Optional) Configuration block with compute configuration for EKS Auto Mode. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enabled",
+          "description": "(Optional) Request to enable or disable the compute capability on your EKS Auto Mode cluster. If the compute capability is enabled, EKS Auto Mode will create and delete EC2 Managed Instances in your Amazon Web Services account.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument in the `compute_config` block of the `aws_eks_cluster` resource allows users to control whether the compute capability for EKS Auto Mode is activated. When set to `true`, it enables EKS Auto Mode to dynamically manage EC2 Managed Instances in the user's AWS account, automating instance creation and deletion to support cluster workloads. This argument is useful for configuring automated compute resource management, aligning with goals like simplifying infrastructure scaling and reducing manual intervention."
+        },
+        {
+          "name": "node_pools",
+          "description": "(Optional) Configuration for node pools that defines the compute resources for your EKS Auto Mode cluster. Valid options are `general-purpose` and `system`.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `node_pools` argument in the `compute_config` of the `aws_eks_cluster` resource allows users to define the types of compute resources allocated for their EKS Auto Mode cluster by specifying node pool configurations, such as `general-purpose` or `system`. This enables users to tailor the cluster's workload capacity and operational behavior to meet specific application or system requirements, supporting common goals like optimizing resource utilization and ensuring workload separation."
+        },
+        {
+          "name": "node_role_arn",
+          "description": "(Optional) The ARN of the IAM Role EKS will assign to EC2 Managed Instances in your EKS Auto Mode cluster. This value cannot be changed after the compute capability of EKS Auto Mode is enabled..",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `node_role_arn` argument in the `compute_config` of the `aws_eks_cluster` resource allows users to specify the ARN of the IAM role that EKS assigns to EC2 instances managed in Auto Mode. This role governs permissions for the compute nodes, enabling them to interact with AWS services securely, and is critical for defining the operational capabilities of the cluster's managed nodes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `compute_config` block within the `aws_eks_cluster` resource defines compute-related settings for EKS Auto Mode, enabling automated scaling and management of compute resources for Kubernetes workloads. It encapsulates configurations that optimize resource allocation and performance, helping users achieve efficient and scalable cluster operations without manual intervention."
+    },
+    {
+      "name": "encryption_config",
+      "description": "(Optional) Configuration block with encryption configuration for the cluster. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "resources",
+          "description": "(Required) List of strings with resources to be encrypted. Valid values: `secrets`.",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `resources` argument in the `encryption_config` block of the `aws_eks_cluster` resource specifies the set of resource types, such as `secrets`, that should be encrypted using the cluster's encryption provider. By defining this argument, users ensure sensitive data within the specified resource types is protected, aligning with security best practices and compliance requirements for Kubernetes workloads."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "provider",
+          "description": "(Required) Configuration block with provider for encryption. Detailed below.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "key_arn",
+              "description": "(Required) ARN of the Key Management Service (KMS) customer master key (CMK). The CMK must be symmetric, created in the same region as the cluster, and if the CMK was created in a different account, the user must have access to the CMK. For more information, see Allowing Users in Other Accounts to Use a CMK in the AWS Key Management Service Developer Guide.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `key_arn` argument for the `aws_eks_cluster` resource specifies the Amazon Resource Name (ARN) of a symmetric AWS Key Management Service (KMS) customer master key (CMK) used to encrypt Kubernetes secrets within the EKS cluster. By defining this argument, users enable enhanced security for sensitive data in the cluster, ensuring compliance with encryption requirements and cross-account access control if applicable."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The \"provider\" configuration block within the \"encryption_config\" of the \"aws_eks_cluster\" resource specifies the encryption provider responsible for managing the encryption keys used to secure Kubernetes secrets. It encapsulates settings related to the integration with external key management services, such as AWS KMS, enabling users to enforce data protection and compliance requirements by defining how encryption is handled for sensitive cluster data."
+        }
+      ],
+      "llm_summary": "The `encryption_config` block in the `aws_eks_cluster` resource enables encryption for Kubernetes secrets within the cluster, enhancing security by managing encryption settings. It encapsulates configurations related to the encryption provider and associated resources, such as AWS KMS keys, allowing users to enforce data protection and compliance requirements for sensitive information stored in the cluster."
+    },
+    {
+      "name": "kubernetes_network_config",
+      "description": "(Optional) Configuration block with kubernetes network configuration for the cluster. Detailed below. If removed, Terraform will only perform drift detection if a configuration value is provided.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "ip_family",
+          "description": "(Optional) The IP family used to assign Kubernetes pod and service addresses. Valid values are `ipv4` (default) and `ipv6`. You can only specify an IP family when you create a cluster, changing this value will force a new cluster to be created. elastic_load_balancing - (Optional) Configuration block with elastic load balancing configuration for the cluster. Detailed below. service_ipv4_cidr - (Optional) The CIDR block to assign Kubernetes pod and service IP addresses from. If you don't specify a block, Kubernetes assigns addresses from either the 10.100.0.0/16 or 172.20.0.0/16 CIDR blocks. We recommend that you specify a block that does not overlap with resources in other networks that are peered or connected to your VPC. You can only specify a custom CIDR block when you create a cluster, changing this value will force a new cluster to be created. The block must meet the following requirements: - Within one of the following private IP address blocks: 10.0.0.0/8, 172.16.0.0/12, or 192.168.0.0/16. - Doesn't overlap with any CIDR block assigned to the VPC that you selected for VPC. - Between /24 and /12. Within one of the following private IP address blocks: 10.0.0.0/8, 172.16.0.0/12, or 192.168.0.0/16. Doesn't overlap with any CIDR block assigned to the VPC that you selected for VPC. Between /24 and /12. service_ipv6_cidr - (Computed) The CIDR block that Kubernetes pod and service IP addresses are assigned from if you specify ipv6 for ip_family when you create the cluster. Kubernetes assigns service addresses from the unique local address range (fc00::/7) because you can't specify a custom IPv6 CIDR block when you create the cluster. ip_family - (Optional) The IP family used to assign Kubernetes pod and service addresses. Valid values are ipv4 (default) and ipv6. You can only specify an IP family when you create a cluster, changing this value will force a new cluster to be created.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `ip_family` argument in the `kubernetes_network_config` block of the `aws_eks_cluster` resource allows users to specify the IP address family (`ipv4` or `ipv6`) for Kubernetes pod and service networking within the cluster. Setting this argument determines the protocol used for assigning IP addresses, impacting compatibility with workloads and network configurations, and requires creating a new cluster if changed."
+        },
+        {
+          "name": "service_ipv4_cidr",
+          "description": "(Optional) The CIDR block to assign Kubernetes pod and service IP addresses from. If you don't specify a block, Kubernetes assigns addresses from either the 10.100.0.0/16 or 172.20.0.0/16 CIDR blocks. We recommend that you specify a block that does not overlap with resources in other networks that are peered or connected to your VPC. You can only specify a custom CIDR block when you create a cluster, changing this value will force a new cluster to be created. The block must meet the following requirements: Within one of the following private IP address blocks: 10.0.0.0/8, 172.16.0.0/12, or 192.168.0.0/16. Doesn't overlap with any CIDR block assigned to the VPC that you selected for VPC. Between /24 and /12. - Within one of the following private IP address blocks: 10.0.0.0/8, 172.16.0.0/12, or 192.168.0.0/16. - Doesn't overlap with any CIDR block assigned to the VPC that you selected for VPC. - Between /24 and /12.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `service_ipv4_cidr` argument in the `kubernetes_network_config` of the `aws_eks_cluster` resource allows users to define a custom CIDR block for Kubernetes pod and service IP addresses, ensuring network segmentation and avoiding IP address conflicts with other peered or connected VPCs. Configuring this argument enables precise control over the cluster's network allocation, supports compliance with private IP ranges, and requires careful planning as changes force cluster recreation."
+        },
+        {
+          "name": "service_ipv6_cidr",
+          "description": "(Computed) The CIDR block that Kubernetes pod and service IP addresses are assigned from if you specify `ipv6` for `ip_family` when you create the cluster. Kubernetes assigns service addresses from the unique local address range (fc00::/7) because you can't specify a custom IPv6 CIDR block when you create the cluster.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `service_ipv6_cidr` argument in the `kubernetes_network_config` of the `aws_eks_cluster` resource allows users to define the IPv6 CIDR block from which Kubernetes assigns service IP addresses when the cluster is configured with an IPv6 `ip_family`. This setting ensures that service IPs are allocated from the unique local address range (`fc00::/7`), enabling IPv6 networking for Kubernetes services within the cluster."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "elastic_load_balancing",
+          "description": "(Optional) Configuration block with elastic load balancing configuration for the cluster. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "enabled",
+              "description": "(Optional) Indicates if the load balancing capability is enabled on your EKS Auto Mode cluster. If the load balancing capability is enabled, EKS Auto Mode will create and delete load balancers in your Amazon Web Services account.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `enabled` argument for the `elastic_load_balancing` feature in the `aws_eks_cluster` resource allows users to control whether EKS Auto Mode dynamically manages load balancers in their AWS account. Setting this argument to `true` enables automatic creation and deletion of load balancers, streamlining traffic distribution and scaling for workloads running on the cluster, aligning with common goals of simplifying infrastructure management and ensuring high availability."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `elastic_load_balancing` configuration block within the `kubernetes_network_config` of the `aws_eks_cluster` resource enables the management of Elastic Load Balancing settings for the cluster's networking. It encapsulates related settings that control how load balancers interact with Kubernetes workloads, ensuring efficient traffic distribution and integration with EKS-managed services. Configuring this block allows users to optimize network performance and scalability for their Kubernetes applications by tailoring load balancing behavior to their specific requirements."
+        }
+      ],
+      "llm_summary": "The `kubernetes_network_config` block within the `aws_eks_cluster` resource defines network-related settings for Kubernetes clusters, such as customizing the IP address allocation for pods and services. Configuring this block allows users to optimize cluster networking, ensuring compatibility with specific VPC setups or addressing requirements for scalable and efficient communication within the cluster."
+    },
+    {
+      "name": "outpost_config",
+      "description": "(Optional) Configuration block representing the configuration of your local Amazon EKS cluster on an AWS Outpost. This block isn't available for creating Amazon EKS clusters on the AWS cloud.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "control_plane_instance_type",
+          "description": "(Required) The Amazon EC2 instance type that you want to use for your local Amazon EKS cluster on Outposts. The instance type that you specify is used for all Kubernetes control plane instances. The instance type can't be changed after cluster creation. Choose an instance type based on the number of nodes that your cluster will have. If your cluster will have: 1\u201320 nodes, then we recommend specifying a large instance type. 21\u2013100 nodes, then we recommend specifying an xlarge instance type. 101\u2013250 nodes, then we recommend specifying a 2xlarge instance type. For a list of the available Amazon EC2 instance types, see Compute and storage in AWS Outposts rack features The control plane is not automatically scaled by Amazon EKS. - 1\u201320 nodes, then we recommend specifying a large instance type. - 21\u2013100 nodes, then we recommend specifying an xlarge instance type. - 101\u2013250 nodes, then we recommend specifying a 2xlarge instance type.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `control_plane_instance_type` argument specifies the Amazon EC2 instance type used for all Kubernetes control plane nodes in an Amazon EKS cluster deployed on AWS Outposts. This required configuration directly impacts the cluster's scalability and performance, as it determines the compute capacity for managing workloads based on the expected number of worker nodes (e.g., large for 1\u201320 nodes, xlarge for 21\u2013100 nodes, 2xlarge for 101\u2013250 nodes)."
+        },
+        {
+          "name": "outpost_arns",
+          "description": "(Required) The ARN of the Outpost that you want to use for your local Amazon EKS cluster on Outposts. This argument is a list of arns, but only a single Outpost ARN is supported currently. control_plane_instance_type - (Required) The Amazon EC2 instance type that you want to use for your local Amazon EKS cluster on Outposts. The instance type that you specify is used for all Kubernetes control plane instances. The instance type can't be changed after cluster creation. Choose an instance type based on the number of nodes that your cluster will have. If your cluster will have: - 1\u201320 nodes, then we recommend specifying a large instance type. - 21\u2013100 nodes, then we recommend specifying an xlarge instance type. - 101\u2013250 nodes, then we recommend specifying a 2xlarge instance type. 1\u201320 nodes, then we recommend specifying a large instance type. 21\u2013100 nodes, then we recommend specifying an xlarge instance type. 101\u2013250 nodes, then we recommend specifying a 2xlarge instance type. For a list of the available Amazon EC2 instance types, see Compute and storage in AWS Outposts rack features The control plane is not automatically scaled by Amazon EKS. control_plane_placement - (Optional) An object representing the placement configuration for all the control plane instances of your local Amazon EKS cluster on AWS Outpost. The control_plane_placement configuration block supports the following arguments:",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `outpost_arns` argument in the `outpost_config` block of the `aws_eks_cluster` resource specifies the Amazon Resource Name (ARN) of the AWS Outpost where the EKS cluster's control plane will be deployed. By setting this required argument, users define the physical location for their local Kubernetes control plane, enabling the cluster to operate on Outposts for low-latency, on-premises workloads while maintaining integration with AWS services."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "control_plane_placement",
+          "description": "(Optional) An object representing the placement configuration for all the control plane instances of your local Amazon EKS cluster on AWS Outpost. The `control_plane_placement` configuration block supports the following arguments: `group_name` - (Required) The name of the placement group for the Kubernetes control plane instances. This setting can't be changed after cluster creation.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "group_name",
+              "description": "(Required) The name of the placement group for the Kubernetes control plane instances. This setting can't be changed after cluster creation. outpost_arns - (Required) The ARN of the Outpost that you want to use for your local Amazon EKS cluster on Outposts. This argument is a list of arns, but only a single Outpost ARN is supported currently.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `group_name` argument specifies the name of the placement group for the Kubernetes control plane instances in an Amazon EKS cluster, ensuring optimized instance placement for performance and availability. This configuration is critical for defining the physical placement strategy of control plane instances and cannot be modified after cluster creation, aligning with user goals of achieving reliable and efficient cluster operation."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `control_plane_placement` block within the `outpost_config` of the `aws_eks_cluster` resource defines the placement group configuration for Kubernetes control plane instances on AWS Outposts. By specifying the required `group_name`, this block ensures precise control over the physical placement of control plane instances, optimizing performance and resource locality for EKS clusters deployed in Outpost environments."
+        }
+      ],
+      "llm_summary": "The `outpost_config` block in the `aws_eks_cluster` resource defines the configuration settings required to deploy and manage an Amazon EKS cluster on AWS Outposts, enabling localized Kubernetes workloads. It encapsulates settings specific to Outposts infrastructure, allowing users to tailor cluster deployment for edge computing scenarios and achieve low-latency, on-premises processing."
+    },
+    {
+      "name": "remote_network_config",
+      "description": "(Optional) Configuration block with remote network configuration for EKS Hybrid Nodes. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "remote_node_networks",
+          "description": "(Optional) Configuration block with remote node network configuration for EKS Hybrid Nodes. Detailed below.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "cidrs",
+              "description": "(Required) List of network CIDRs that can contain hybrid nodes.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `cidrs` argument in the `remote_node_networks` context of the `aws_eks_cluster` resource allows users to specify a set of network CIDR blocks that define the permissible IP ranges for hybrid nodes connecting to the EKS cluster. Configuring this argument ensures secure and controlled network access for remote or on-premises nodes, aligning with user goals of managing hybrid cloud environments and network segmentation."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `remote_node_networks` configuration block within the `remote_network_config` of the `aws_eks_cluster` resource defines network settings for EKS Hybrid Nodes, enabling connectivity and integration with remote node networks. It encapsulates parameters related to network topology and routing, allowing users to customize how hybrid nodes interact with external or on-premises networks, ensuring seamless communication and operational consistency in hybrid cloud environments."
+        },
+        {
+          "name": "remote_pod_networks",
+          "description": "(Optional) Configuration block with remote pod network configuration for EKS Hybrid Nodes. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "cidrs",
+              "description": "(Required) List of network CIDRs that can contain pods that run Kubernetes webhooks on hybrid nodes.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `cidrs` argument in the `remote_pod_networks` context of the `aws_eks_cluster` resource allows users to define a set of network CIDR ranges that can host Kubernetes pods running webhooks on hybrid nodes. By specifying these CIDRs, users enable secure and controlled communication between remote pod networks and the EKS cluster, ensuring compatibility with hybrid or multi-network Kubernetes deployments."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `remote_pod_networks` configuration block within the `remote_network_config` of the `aws_eks_cluster` resource defines settings for enabling and managing remote pod networking in EKS Hybrid Nodes. It encapsulates parameters related to network connectivity and routing for pods across hybrid environments, allowing users to establish seamless communication between Kubernetes workloads in remote or on-premises networks and the EKS cluster. Configuring this block facilitates hybrid cloud deployments by ensuring consistent pod networking across distributed infrastructures."
+        }
+      ],
+      "llm_summary": "The `remote_network_config` block within the `aws_eks_cluster` resource defines settings for remote network connectivity, enabling EKS Hybrid Nodes to integrate with external networks. It encapsulates configurations related to network access and connectivity, allowing users to establish and manage hybrid cloud environments by connecting Kubernetes workloads to remote infrastructure."
+    },
+    {
+      "name": "storage_config",
+      "description": "(Optional) Configuration block with storage configuration for EKS Auto Mode. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "block_storage",
+          "description": "(Optional) Configuration block with block storage configuration for the cluster. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "enabled",
+              "description": "(Optional) Indicates if the block storage capability is enabled on your EKS Auto Mode cluster. If the block storage capability is enabled, EKS Auto Mode will create and delete block storage volumes in your Amazon Web Services account.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `enabled` argument for the `block_storage` capability in the `aws_eks_cluster` resource allows users to control whether EKS Auto Mode automatically provisions and manages block storage volumes in their AWS account. Setting this argument to `true` enables automated creation and deletion of block storage resources, simplifying storage management for workloads running on the cluster."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `block_storage` configuration block within the `storage_config` of the `aws_eks_cluster` resource defines settings for managing persistent block storage associated with the cluster. It encapsulates related parameters to optimize storage performance, durability, and integration with workloads, enabling users to configure storage options tailored to their application needs, such as volume types, encryption, or capacity planning."
+        }
+      ],
+      "llm_summary": "The `storage_config` block within the `aws_eks_cluster` resource defines storage settings for EKS Auto Mode, enabling users to configure how data is managed and stored for Kubernetes workloads. This block encapsulates related settings for optimizing storage behavior, providing control over storage allocation and performance to support efficient cluster operations."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_eks_cluster` resource allows users to specify the maximum duration (as a string) Terraform will wait for the creation of an Amazon EKS cluster to complete. By configuring this timeout, users can control the behavior of long-running cluster provisioning processes, ensuring Terraform either waits for completion or fails gracefully if the operation exceeds the defined time limit."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_eks_cluster` resource allows users to specify the maximum duration (as a string) Terraform should wait for the deletion of an EKS cluster to complete. By configuring this argument, users can control the timeout behavior for cluster teardown operations, ensuring alignment with their infrastructure management expectations and preventing prolonged or indefinite waits during resource destruction."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block of the `aws_eks_cluster` resource allows users to specify the maximum duration (in string format, e.g., \"30m\") Terraform will wait for an EKS cluster update operation to complete. Configuring this timeout ensures users can control how long Terraform should wait before timing out during cluster updates, aligning with operational requirements for managing cluster lifecycle changes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_eks_cluster` resource allows users to define custom timeout durations for specific operations, such as creating, updating, or deleting an EKS cluster. By configuring this block, users can ensure better control over operation time limits, accommodating longer-running processes or avoiding premature failures in environments with complex dependencies."
+    },
+    {
+      "name": "upgrade_policy",
+      "description": "(Optional) Configuration block for the support policy to use for the cluster.  See upgrade_policy for details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "support_type",
+          "description": "(Optional) Support type to use for the cluster. If the cluster is set to `EXTENDED`, it will enter extended support at the end of standard support. If the cluster is set to `STANDARD`, it will be automatically upgraded at the end of standard support. Valid values are `EXTENDED`, `STANDARD`",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `support_type` argument in the `upgrade_policy` of the `aws_eks_cluster` resource allows users to define the cluster's support lifecycle behavior at the end of standard support. Setting this argument to `EXTENDED` enables extended support for the cluster, while `STANDARD` ensures automatic upgrades to maintain compatibility and security. This configuration helps users manage upgrade strategies and long-term maintenance for their EKS clusters."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `upgrade_policy` configuration block in the `aws_eks_cluster` resource defines the support policy for managing cluster upgrades, including rules and settings that govern how updates are applied to the EKS cluster. Configuring this block enables users to control the upgrade process, ensuring compatibility and stability during version transitions, which is critical for maintaining operational continuity and adhering to organizational policies."
+    },
+    {
+      "name": "vpc_config",
+      "description": "(Required) Configuration block for the VPC associated with your cluster. Amazon EKS VPC resources have specific requirements to work properly with Kubernetes. For more information, see Cluster VPC Considerations and Cluster Security Group Considerations in the Amazon EKS User Guide. Detailed below. Also contains attributes detailed in the Attributes section.  The following arguments are optional:",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "cluster_security_group_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `cluster_security_group_id` argument in the `vpc_config` block of the `aws_eks_cluster` resource allows users to specify the ID of the security group that controls network access to the EKS cluster's control plane. By setting this argument, users can define custom inbound and outbound traffic rules for the cluster, enhancing security and ensuring compliance with specific network access requirements."
+        },
+        {
+          "name": "endpoint_private_access",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `endpoint_private_access` argument in the `vpc_config` block of the `aws_eks_cluster` resource controls whether the Amazon EKS cluster's Kubernetes API server endpoint is accessible privately within the VPC. Setting this to `true` enables private access, ensuring that the API server can only be reached from within the VPC, which enhances security by restricting external access."
+        },
+        {
+          "name": "endpoint_public_access",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `endpoint_public_access` argument in the `vpc_config` block of the `aws_eks_cluster` resource controls whether the Amazon EKS cluster's API server endpoint is accessible over the public internet. Setting this boolean to `true` enables public access to the API server, which is useful for external management or integration, while setting it to `false` restricts access to private VPC endpoints, enhancing security by limiting exposure."
+        },
+        {
+          "name": "public_access_cidrs",
+          "description": "",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `public_access_cidrs` argument in the `vpc_config` block of the `aws_eks_cluster` resource allows users to define a set of CIDR blocks that are permitted to access the EKS cluster's public endpoint. By configuring this, users can restrict or control which IP ranges can connect to the cluster over the public network, enhancing security and aligning access with specific network policies."
+        },
+        {
+          "name": "security_group_ids",
+          "description": "",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `security_group_ids` argument in the `vpc_config` block of the `aws_eks_cluster` resource allows users to specify a set of security groups to control network traffic for the Amazon EKS cluster's resources within the VPC. By defining these security group IDs, users can enforce custom inbound and outbound rules, enhancing network security and ensuring compliance with organizational policies for cluster communication and access."
+        },
+        {
+          "name": "subnet_ids",
+          "description": "",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `subnet_ids` argument in the `vpc_config` block of the `aws_eks_cluster` resource specifies the set of subnet IDs within the VPC where the EKS cluster's network resources, such as worker nodes and load balancers, will be deployed. By defining this argument, users ensure proper network isolation and connectivity for the cluster, aligning with common goals like securing workloads and enabling communication between cluster components."
+        },
+        {
+          "name": "vpc_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `vpc_id` argument in the `vpc_config` block of the `aws_eks_cluster` resource allows users to specify the ID of the VPC where the EKS cluster will be deployed. By setting this argument, users can control the network environment for the cluster, ensuring it integrates with their existing VPC infrastructure for security, connectivity, and resource isolation."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `vpc_config` block in the `aws_eks_cluster` resource defines the networking configuration for the Amazon EKS cluster, including VPC, subnets, and security groups, ensuring compatibility with Kubernetes networking requirements. It encapsulates settings for controlling cluster connectivity, security, and routing, enabling users to customize the VPC environment to meet specific operational and security needs for their EKS workloads."
+    },
+    {
+      "name": "zonal_shift_config",
+      "description": "(Optional) Configuration block with zonal shift configuration for the cluster. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enabled",
+          "description": "(Optional) Whether zonal shift is enabled for the cluster.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument in the `zonal_shift_config` for the `aws_eks_cluster` resource allows users to control whether zonal shift functionality is activated for the cluster, enabling dynamic traffic rerouting to mitigate disruptions in specific availability zones. Setting this argument to `true` helps ensure high availability and resilience by allowing the cluster to respond to zone-level failures or maintenance events."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `zonal_shift_config` block within the `aws_eks_cluster` resource enables configuration for managing zonal shift settings, which are used to control traffic routing and availability during disruptions or maintenance in specific availability zones. This block encapsulates settings related to failover and resilience, allowing users to optimize cluster reliability and ensure high availability by dynamically shifting workloads across zones."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN of the cluster.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "certificate_authority",
+      "description": "Attribute block containing `certificate-authority-data` for your cluster. Detailed below.",
+      "optional": false,
+      "type": "list(object({data=string}))"
+    },
+    {
+      "name": "cluster_id",
+      "description": "The ID of your local Amazon EKS cluster on the AWS Outpost. This attribute isn't available for an AWS EKS cluster on AWS cloud.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "created_at",
+      "description": "Unix epoch timestamp in seconds for when the cluster was created.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "endpoint",
+      "description": "Endpoint for your Kubernetes API server.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "identity",
+      "description": "Attribute block containing identity provider information for your cluster. Only available on Kubernetes version 1.13 and 1.14 clusters created or upgraded on or after September 3, 2019. Detailed below.",
+      "optional": false,
+      "type": "list(object({oidc=list(object({issuer=string}))}))"
+    },
+    {
+      "name": "platform_version",
+      "description": "Platform version for the cluster.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "description": "Status of the EKS cluster. One of `CREATING`, `ACTIVE`, `DELETING`, `FAILED`.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

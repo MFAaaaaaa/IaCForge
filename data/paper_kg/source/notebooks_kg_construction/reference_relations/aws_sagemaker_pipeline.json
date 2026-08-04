@@ -1,0 +1,22 @@
+[
+    {
+        "argument_path": "role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "pipeline_definition_s3_location.bucket",
+        "references_output": "aws_s3_bucket.bucket",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "pipeline_definition_s3_location.object_key",
+        "references_output": "aws_s3_object.key",
+        "target_resource_type": "aws_s3_object"
+    },
+    {
+        "argument_path": "pipeline_definition_s3_location.version_id",
+        "references_output": "aws_s3_object.version_id",
+        "target_resource_type": "aws_s3_object"
+    }
+]

@@ -1,0 +1,22 @@
+[
+    {
+        "argument_path": "child_healthchecks",
+        "references_output": "aws_route53_health_check.id",
+        "target_resource_type": "aws_route53_health_check"
+    },
+    {
+        "argument_path": "cloudwatch_alarm_name",
+        "references_output": "aws_cloudwatch_metric_alarm.alarm_name",
+        "target_resource_type": "aws_cloudwatch_metric_alarm"
+    },
+    {
+        "argument_path": "triggers.threshold",
+        "references_output": "aws_cloudwatch_metric_alarm.threshold",
+        "target_resource_type": "aws_cloudwatch_metric_alarm"
+    },
+    {
+        "argument_path": "routing_control_arn",
+        "references_output": "aws_route53_recovery_control_config.routing_control_arn",
+        "target_resource_type": "aws_route53_recovery_control_config"
+    }
+]

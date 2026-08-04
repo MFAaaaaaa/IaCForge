@@ -1,0 +1,84 @@
+{
+  "resource": {
+    "name": "aws_lambda_invocation",
+    "description": "Use this resource to invoke a lambda function. The lambda function is invoked with the RequestResponse invocation type. By default this resource only invokes the function when the arguments call for a create or replace. In other words, after an initial invocation on apply, if the arguments do not change, a subsequent apply does not invoke the function again. To dynamically invoke the function, see the triggers example below. To always invoke a function on each apply, see the aws_lambda_invocation data source. To invoke the lambda function when the terraform resource is updated and deleted, see the CRUD Lifecycle Scope example below. If you get a KMSAccessDeniedException: Lambda was unable to decrypt the environment variables because KMS access was denied error when invoking an aws_lambda_function with environment variables, the IAM role associated with the function may have been deleted and recreated after the function was created. You can fix the problem two ways: 1) updating the function's role to another role and then updating it back again to the recreated role, or 2) by using Terraform to taint the function and apply your configuration again to recreate the function. (When you create a function, Lambda grants permissions on the KMS key to the function's IAM role. If the IAM role is recreated, the grant is no longer valid. Changing the function's role or recreating the function causes Lambda to update the grant.)",
+    "llm_summary": "The `aws_lambda_invocation` Terraform resource enables the invocation of AWS Lambda functions using the `RequestResponse` invocation type, allowing users to execute serverless workloads directly within their infrastructure configurations. Common use cases include triggering Lambda functions dynamically during resource creation, updates, or deletions, integrating event-driven workflows, and automating function execution based on specific lifecycle triggers. This resource supports advanced configurations such as conditional invocation, lifecycle scope management (CRUD operations), and troubleshooting KMS-related IAM role issues for Lambda functions with encrypted environment variables."
+  },
+  "examples": [
+    {
+      "title": "Basic Example",
+      "code": "resource \"aws_lambda_invocation\" \"example\" {\n  function_name = aws_lambda_function.lambda_function_test.function_name\n\n  input = jsonencode({\n    key1 = \"value1\"\n    key2 = \"value2\"\n  })\n}\n\noutput \"result_entry\" {\n  value = jsondecode(aws_lambda_invocation.example.result)[\"key1\"]\n}",
+      "llm_summary": "This example demonstrates how to use the `aws_lambda_invocation` resource to invoke an AWS Lambda function with a JSON-encoded input payload and retrieve specific values from the invocation result. It highlights the configuration of the `function_name` and `input` arguments, as well as decoding the result using `jsondecode` for further processing."
+    },
+    {
+      "title": "Dynamic Invocation Example Using Triggers",
+      "code": "resource \"aws_lambda_invocation\" \"example\" {\n  function_name = aws_lambda_function.lambda_function_test.function_name\n\n  triggers = {\n    redeployment = sha1(jsonencode([\n      aws_lambda_function.example.environment\n    ]))\n  }\n\n  input = jsonencode({\n    key1 = \"value1\"\n    key2 = \"value2\"\n  })\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_lambda_invocation` resource to dynamically invoke a Lambda function with input data, using a `triggers` block to automatically redeploy based on changes to the function's environment. It showcases the use of the `triggers` argument for dependency tracking and the `input` argument to pass JSON-encoded payloads to the Lambda function."
+    },
+    {
+      "title": "CRUD Lifecycle Scope",
+      "code": "resource \"aws_lambda_invocation\" \"example\" {\n  function_name = aws_lambda_function.lambda_function_test.function_name\n\n  input = jsonencode({\n    key1 = \"value1\"\n    key2 = \"value2\"\n  })\n\n  lifecycle_scope = \"CRUD\"\n}",
+      "llm_summary": "\"Demonstrates how to configure the `aws_lambda_invocation` resource to invoke a Lambda function with a JSON-encoded input payload and a `lifecycle_scope` set to `CRUD`, showcasing how to manage invocation behavior tied to create, read, update, and delete operations.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "function_name",
+      "description": "(Required) Name of the lambda function.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `function_name` argument specifies the name of the AWS Lambda function to be invoked, enabling users to target and execute a specific function within their cloud environment. By defining this required parameter, users ensure the resource interacts with the intended Lambda function, supporting workflows like event-driven processing, automation, or API integrations."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_lambda_invocation` resource allows users to define a unique identifier for the invocation instance, which can be used to reference or distinguish this specific invocation within Terraform configurations or workflows. While optional, setting this argument can help users manage and track Lambda invocation resources, especially in scenarios involving complex deployments or integrations."
+    },
+    {
+      "name": "input",
+      "description": "(Required) JSON payload to the lambda function. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `input` argument specifies the JSON payload sent to the AWS Lambda function during invocation, allowing users to define the data or parameters the function processes. This is essential for customizing the function's behavior and achieving specific outcomes based on the provided input, such as triggering workflows, processing events, or returning computed results."
+    },
+    {
+      "name": "lifecycle_scope",
+      "description": "(Optional) Lifecycle scope of the resource to manage. Valid values are `CREATE_ONLY` and `CRUD`. Defaults to `CREATE_ONLY`. `CREATE_ONLY` will invoke the function only on creation or replacement. `CRUD` will invoke the function on each lifecycle event, and augment the input JSON payload with additional lifecycle information.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `lifecycle_scope` argument in the `aws_lambda_invocation` resource defines when the Lambda function is invoked during the resource's lifecycle, allowing users to control whether the function is triggered only during creation/replacement (`CREATE_ONLY`) or during all lifecycle events (`CRUD`). This configuration enables users to tailor the invocation behavior to their desired automation needs, such as initializing resources or responding to updates and deletions."
+    },
+    {
+      "name": "qualifier",
+      "description": "(Optional) Qualifier (i.e., version) of the lambda function. Defaults to `$LATEST`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `qualifier` argument in the `aws_lambda_invocation` resource allows users to specify the version or alias of the Lambda function to invoke, providing control over which specific deployment of the function is executed. By setting this argument, users can target a stable version (e.g., `v1`) or use the default `$LATEST` version for testing and development, enabling precise management of function behavior across different environments or stages."
+    },
+    {
+      "name": "terraform_key",
+      "description": "(Optional) The JSON key used to store lifecycle information in the input JSON payload. Defaults to `tf`. This additional key is only included when `lifecycle_scope` is set to `CRUD`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `terraform_key` argument in the `aws_lambda_invocation` resource allows users to define a custom JSON key for storing lifecycle-related metadata in the input payload when the `lifecycle_scope` is set to `CRUD`. By specifying this key, users can control how Terraform-specific lifecycle information is embedded in the Lambda invocation request, enabling better integration and tracking of resource operations."
+    },
+    {
+      "name": "triggers",
+      "description": "(Optional) Map of arbitrary keys and values that, when changed, will trigger a re-invocation. To force a re-invocation without changing these keys/values, use the `terraform taint` command.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `triggers` argument in the `aws_lambda_invocation` resource allows users to define a map of arbitrary key-value pairs that act as change triggers for re-invoking the Lambda function. By configuring this argument, users can control the invocation lifecycle, ensuring the function is re-executed when specific external conditions or metadata change, supporting workflows that depend on dynamic inputs or state updates."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "result",
+      "description": "String result of the lambda function invocation.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

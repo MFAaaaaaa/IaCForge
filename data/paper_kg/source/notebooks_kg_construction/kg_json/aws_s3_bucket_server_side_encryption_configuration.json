@@ -1,0 +1,71 @@
+{
+    "resource": {
+        "name": "aws_s3_bucket_server_side_encryption_configuration",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "bucket",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "expected_bucket_owner",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "rule",
+            "description": "",
+            "cardinality": [
+                1,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "bucket_key_enabled",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "apply_server_side_encryption_by_default",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "kms_master_key_id",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "sse_algorithm",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        }
+    ],
+    "attributes": []
+}

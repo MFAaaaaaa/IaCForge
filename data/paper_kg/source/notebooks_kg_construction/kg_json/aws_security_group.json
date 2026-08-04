@@ -1,0 +1,108 @@
+{
+    "resource": {
+        "name": "aws_security_group",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "egress",
+            "description": "",
+            "required": false,
+            "type": "set(object({cidr_blocks=list(string),description=string,from_port=number,ipv6_cidr_blocks=list(string),prefix_list_ids=list(string),protocol=string,security_groups=set(string),self=bool,to_port=number}))"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ingress",
+            "description": "",
+            "required": false,
+            "type": "set(object({cidr_blocks=list(string),description=string,from_port=number,ipv6_cidr_blocks=list(string),prefix_list_ids=list(string),protocol=string,security_groups=set(string),self=bool,to_port=number}))"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "revoke_rules_on_delete",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "vpc_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "owner_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

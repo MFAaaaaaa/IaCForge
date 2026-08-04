@@ -1,0 +1,54 @@
+{
+    "resource": {
+        "name": "aws_iam_user_ssh_key",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "encoding",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "public_key",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "status",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "username",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "fingerprint",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "ssh_public_key_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

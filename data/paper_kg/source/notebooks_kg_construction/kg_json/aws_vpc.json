@@ -1,0 +1,150 @@
+{
+    "resource": {
+        "name": "aws_vpc",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "assign_generated_ipv6_cidr_block",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "cidr_block",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "enable_dns_hostnames",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "enable_dns_support",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "enable_network_address_usage_metrics",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "instance_tenancy",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ipv4_ipam_pool_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ipv4_netmask_length",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "ipv6_cidr_block",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ipv6_cidr_block_network_border_group",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ipv6_ipam_pool_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ipv6_netmask_length",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "default_network_acl_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "default_route_table_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "default_security_group_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "dhcp_options_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "ipv6_association_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "main_route_table_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "owner_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

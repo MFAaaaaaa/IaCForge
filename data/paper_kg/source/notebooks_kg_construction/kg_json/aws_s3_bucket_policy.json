@@ -1,0 +1,29 @@
+{
+    "resource": {
+        "name": "aws_s3_bucket_policy",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "bucket",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "policy",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": []
+}

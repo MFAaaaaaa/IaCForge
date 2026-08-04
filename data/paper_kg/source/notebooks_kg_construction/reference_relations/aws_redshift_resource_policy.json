@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "resource_arn",
+        "references_output": "aws_redshift_cluster.cluster_namespace_arn",
+        "target_resource_type": "aws_redshift_cluster"
+    },
+    {
+        "argument_path": "policy.Statement.Resource",
+        "references_output": "aws_redshift_cluster.cluster_namespace_arn",
+        "target_resource_type": "aws_redshift_cluster"
+    }
+]

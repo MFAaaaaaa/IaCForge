@@ -1,0 +1,32 @@
+[
+    {
+        "argument_path": "role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "members.alias_id",
+        "references_output": "aws_lexv2models_bot_alias.id",
+        "target_resource_type": "aws_lexv2models_bot_alias"
+    },
+    {
+        "argument_path": "members.alias_name",
+        "references_output": "aws_lexv2models_bot_alias.name",
+        "target_resource_type": "aws_lexv2models_bot_alias"
+    },
+    {
+        "argument_path": "members.id",
+        "references_output": "aws_lexv2models_bot.id",
+        "target_resource_type": "aws_lexv2models_bot"
+    },
+    {
+        "argument_path": "members.name",
+        "references_output": "aws_lexv2models_bot.name",
+        "target_resource_type": "aws_lexv2models_bot"
+    },
+    {
+        "argument_path": "members.version",
+        "references_output": "aws_lexv2models_bot.version",
+        "target_resource_type": "aws_lexv2models_bot"
+    }
+]

@@ -1,0 +1,153 @@
+{
+    "resource": {
+        "name": "aws_s3_bucket_notification",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "bucket",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "eventbridge",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "lambda_function",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "events",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "filter_prefix",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter_suffix",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "lambda_function_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "queue",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "events",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "filter_prefix",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter_suffix",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "queue_arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "topic",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "events",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "filter_prefix",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "filter_suffix",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "topic_arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": []
+}

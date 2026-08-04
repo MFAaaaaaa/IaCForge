@@ -1,0 +1,156 @@
+{
+  "resource": {
+    "name": "aws_nat_gateway",
+    "description": "Provides a resource to create a VPC NAT Gateway.",
+    "llm_summary": "The `aws_nat_gateway` Terraform resource enables the creation and management of a VPC NAT Gateway, facilitating secure outbound internet access for resources in private subnets. Common use cases include configuring private subnet connectivity to external services, ensuring high availability for outbound traffic, and optimizing network routing in AWS environments. Users can define key settings such as allocation of Elastic IPs, subnet associations, and lifecycle management to streamline network infrastructure and support scalable, fault-tolerant architectures."
+  },
+  "examples": [
+    {
+      "title": "Public NAT",
+      "code": "resource \"aws_nat_gateway\" \"example\" {\n  allocation_id = aws_eip.example.id\n  subnet_id     = aws_subnet.example.id\n\n  tags = {\n    Name = \"gw NAT\"\n  }\n\n  # To ensure proper ordering, it is recommended to add an explicit dependency\n  # on the Internet Gateway for the VPC.\n  depends_on = [aws_internet_gateway.example]\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS NAT Gateway with an Elastic IP and associate it with a specific subnet, including tagging for identification and ensuring proper dependency management with an Internet Gateway using the `depends_on` argument.\""
+    },
+    {
+      "title": "Public NAT with Secondary Private IP Addresses",
+      "code": "resource \"aws_nat_gateway\" \"example\" {\n  allocation_id                  = aws_eip.example.id\n  subnet_id                      = aws_subnet.example.id\n  secondary_allocation_ids       = [aws_eip.secondary.id]\n  secondary_private_ip_addresses = [\"10.0.1.5\"]\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS NAT Gateway with a secondary Elastic IP allocation and a secondary private IP address for advanced network routing. It highlights the use of the `secondary_allocation_ids` and `secondary_private_ip_addresses` arguments to enable multi-IP configurations for enhanced flexibility in managing outbound traffic."
+    },
+    {
+      "title": "Private NAT",
+      "code": "resource \"aws_nat_gateway\" \"example\" {\n  connectivity_type = \"private\"\n  subnet_id         = aws_subnet.example.id\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS NAT Gateway with private connectivity using the `connectivity_type` argument, enabling outbound internet access for resources in a private subnet. This example highlights the use of the `subnet_id` parameter to associate the NAT Gateway with a specific subnet.\""
+    },
+    {
+      "title": "Private NAT with Secondary Private IP Addresses",
+      "code": "resource \"aws_nat_gateway\" \"example\" {\n  connectivity_type                  = \"private\"\n  subnet_id                          = aws_subnet.example.id\n  secondary_private_ip_address_count = 7\n}",
+      "llm_summary": "\"Demonstrates how to configure a private AWS NAT Gateway with the `connectivity_type` set to `private` and allocate multiple secondary private IP addresses using the `secondary_private_ip_address_count` argument, enabling advanced private network routing within a specified subnet.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "allocation_id",
+      "description": "(Optional) The Allocation ID of the Elastic IP address for the NAT Gateway. Required for `connectivity_type` of `public`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `allocation_id` argument allows users to specify the Allocation ID of an Elastic IP address to associate with the NAT Gateway, enabling public connectivity when the `connectivity_type` is set to `public`. This configuration is essential for routing outbound traffic from private subnets to the internet via a static public IP."
+    },
+    {
+      "name": "connectivity_type",
+      "description": "(Optional) Connectivity type for the NAT Gateway. Valid values are `private` and `public`. Defaults to `public`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `connectivity_type` argument for the `aws_nat_gateway` resource allows users to specify whether the NAT Gateway operates with `public` or `private` connectivity. This controls how the gateway interacts with external networks, where `public` enables internet access via an Elastic IP and `private` restricts connectivity to internal VPC resources, aligning with user goals for network isolation or external communication."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_nat_gateway` resource represents the unique identifier of the NAT Gateway. While not required for configuration, it is typically used for referencing an existing NAT Gateway in Terraform-managed infrastructure or for outputs and dependencies in other resources, enabling users to track or integrate the NAT Gateway within their cloud architecture."
+    },
+    {
+      "name": "private_ip",
+      "description": "(Optional) The private IPv4 address to assign to the NAT Gateway. If you don't provide an address, a private IPv4 address will be automatically assigned.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `private_ip` argument for the `aws_nat_gateway` resource allows users to specify a custom private IPv4 address for the NAT Gateway, enabling precise control over its network configuration within a VPC. If omitted, the NAT Gateway automatically receives an assigned private IPv4 address, making this argument useful for scenarios requiring deterministic IP addressing for integration with other resources or compliance with specific networking requirements."
+    },
+    {
+      "name": "secondary_allocation_ids",
+      "description": "(Optional) A list of secondary allocation EIP IDs for this NAT Gateway.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "\"Configures additional Elastic IP (EIP) allocation IDs for the NAT Gateway, enabling support for multiple IP addresses to handle higher traffic volumes or provide redundancy. This argument is useful for optimizing network performance and ensuring failover capabilities in scenarios requiring enhanced availability or scalability.\""
+    },
+    {
+      "name": "secondary_private_ip_address_count",
+      "description": "(Optional) [Private NAT Gateway only] The number of secondary private IPv4 addresses you want to assign to the NAT Gateway.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "\"Configures the number of secondary private IPv4 addresses assigned to a Private NAT Gateway, enabling users to scale IP address allocation for handling additional network traffic or supporting specific routing requirements within a VPC.\""
+    },
+    {
+      "name": "secondary_private_ip_addresses",
+      "description": "(Optional) A list of secondary private IPv4 addresses to assign to the NAT Gateway.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `secondary_private_ip_addresses` argument for the `aws_nat_gateway` resource allows users to specify a set of additional private IPv4 addresses to be assigned to the NAT Gateway. This enables advanced network configurations, such as supporting multiple private IPs for routing or handling specific traffic flows, aligning with scenarios that require enhanced IP address management within a VPC."
+    },
+    {
+      "name": "subnet_id",
+      "description": "(Required) The Subnet ID of the subnet in which to place the NAT Gateway.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `subnet_id` argument specifies the ID of the subnet where the NAT Gateway will be deployed, allowing users to control the network placement and connectivity of the gateway within their VPC. By defining this required parameter, users ensure the NAT Gateway is provisioned in the desired subnet to facilitate outbound internet access for resources in private subnets."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_nat_gateway` resource allows users to assign metadata in the form of key-value pairs to the NAT Gateway, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or compliance tracking. When configured, it can override provider-level default tags, ensuring granular control over tagging specific to this resource."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_nat_gateway` resource allows users to define a comprehensive set of key-value tags that are automatically merged with resource-specific tags, enabling consistent metadata management across AWS resources. By configuring this argument, users can streamline tagging for purposes like cost allocation, resource organization, or environment identification, ensuring alignment with broader tagging strategies."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_nat_gateway` resource allows users to specify the maximum duration (as a string, e.g., \"10m\") Terraform will wait for the NAT Gateway creation process to complete. Configuring this timeout ensures users can control deployment behavior in cases where the resource creation might take longer than expected, helping to avoid unnecessary errors or interruptions during infrastructure provisioning."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_nat_gateway` resource allows users to specify the maximum duration (as a string) Terraform should wait for the NAT Gateway deletion process to complete. By configuring this timeout, users can control the lifecycle behavior during resource destruction, ensuring operations do not hang indefinitely or fail prematurely due to insufficient wait time."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_nat_gateway` resource allows users to specify the maximum duration (in string format, e.g., \"30m\") Terraform will wait for an update operation on the NAT Gateway to complete. Configuring this timeout ensures users can control the behavior of long-running updates, aligning resource provisioning with operational requirements and preventing unnecessary failures due to default timeout limits."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_nat_gateway` resource allows users to define custom time limits for specific operations, such as creating or deleting a NAT Gateway. This block provides fine-grained control over operation durations, helping users manage resource provisioning and avoid potential timeout errors in their infrastructure workflows."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "association_id",
+      "description": "The association ID of the Elastic IP address that's associated with the NAT Gateway. Only available when `connectivity_type` is `public`.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "network_interface_id",
+      "description": "The ID of the network interface associated with the NAT Gateway.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "public_ip",
+      "description": "The Elastic IP address associated with the NAT Gateway.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

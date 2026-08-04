@@ -1,0 +1,306 @@
+{
+    "resource": {
+        "name": "aws_eks_node_group",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "ami_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "capacity_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "disk_size",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "force_update_version",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "instance_types",
+            "description": "",
+            "required": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "labels",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "node_group_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "node_group_name_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "node_role_arn",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "release_version",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "subnet_ids",
+            "description": "",
+            "required": true,
+            "type": "set(string)"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "version",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "launch_template",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "version",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "node_repair_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "enabled",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "remote_access",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "ec2_ssh_key",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "source_security_group_ids",
+                    "description": "",
+                    "required": false,
+                    "type": "set(string)"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "scaling_config",
+            "description": "",
+            "cardinality": [
+                1,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "desired_size",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                },
+                {
+                    "name": "max_size",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                },
+                {
+                    "name": "min_size",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "taint",
+            "description": "",
+            "cardinality": [
+                0,
+                50
+            ],
+            "arguments": [
+                {
+                    "name": "effect",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "key",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "update_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "max_unavailable",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "max_unavailable_percentage",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "resources",
+            "description": "",
+            "optional": false,
+            "type": "list(object({autoscaling_groups=list(object({name=string})),remote_access_security_group_id=string}))"
+        },
+        {
+            "name": "status",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

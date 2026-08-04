@@ -1,0 +1,27 @@
+[
+    {
+        "argument_path": "role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "vpc_config.subnet_ids",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "compute_config.node_role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "encryption_config.provider.key_arn",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "outpost_config.outpost_arns",
+        "references_output": "data.aws_outposts_outpost.arn",
+        "target_resource_type": "data.aws_outposts_outpost"
+    }
+]

@@ -1,0 +1,167 @@
+{
+    "resource": {
+        "name": "aws_s3_bucket_inventory",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "bucket",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "included_object_versions",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "optional_fields",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "destination",
+            "description": "",
+            "cardinality": [
+                1,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "bucket",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "account_id",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "bucket_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "format",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "encryption",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [],
+                            "blocks": [
+                                {
+                                    "name": "sse_kms",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "key_id",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "sse_s3",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "filter",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "prefix",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "schedule",
+            "description": "",
+            "cardinality": [
+                1,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "frequency",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": []
+}

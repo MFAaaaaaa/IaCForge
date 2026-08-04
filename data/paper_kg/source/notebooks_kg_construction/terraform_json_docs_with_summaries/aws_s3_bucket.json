@@ -1,0 +1,877 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket",
+    "description": "Provides a S3 bucket resource. This resource provides functionality for managing S3 general purpose buckets in an AWS Partition. To manage Amazon S3 Express directory buckets, use the aws_directory_bucket resource. To manage S3 on Outposts, use the aws_s3control_bucket resource. Object Lock can be enabled by using the object_lock_enable attribute or by using the aws_s3_bucket_object_lock_configuration resource. Please note, that by using the resource, Object Lock can be enabled/disabled without destroying and recreating the bucket.",
+    "llm_summary": "The `aws_s3_bucket` resource enables the creation and management of Amazon S3 general-purpose buckets, providing a foundation for scalable object storage in AWS. It supports configurations for common use cases such as data storage, backup, static website hosting, and enabling Object Lock for compliance and data immutability. Key features include lifecycle rules for automated data management, versioning, server-side encryption, logging, and fine-grained access control, making it a versatile solution for secure and efficient cloud storage."
+  },
+  "examples": [
+    {
+      "title": "Private Bucket With Tags",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"my-tf-test-bucket\"\n\n  tags = {\n    Name        = \"My bucket\"\n    Environment = \"Dev\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to create a private AWS S3 bucket with custom tags using the `aws_s3_bucket` resource in Terraform. It highlights the use of the `tags` block to assign metadata such as `Name` and `Environment` to the bucket for organizational and identification purposes."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "acceleration_status",
+      "description": "(Optional, Deprecated) Sets the accelerate configuration of an existing bucket. Can be `Enabled` or `Suspended`. Cannot be used in `cn-north-1` or `us-gov-west-1`. Terraform will only perform drift detection if a configuration value is provided. Use the resource `aws_s3_bucket_accelerate_configuration` instead.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `acceleration_status` argument allows users to control the transfer acceleration feature of an S3 bucket, enabling faster data transfers to and from the bucket when set to `Enabled`. This argument is deprecated and should be replaced with the `aws_s3_bucket_accelerate_configuration` resource for managing acceleration settings, as it is limited in certain regions (`cn-north-1` and `us-gov-west-1`) and only supports drift detection when explicitly configured."
+    },
+    {
+      "name": "acl",
+      "description": "(Optional, Deprecated) The canned ACL to apply. Valid values are `private`, `public-read`, `public-read-write`, `aws-exec-read`, `authenticated-read`, and `log-delivery-write`. Defaults to `private`. Conflicts with `grant`. Terraform will only perform drift detection if a configuration value is provided. Use the resource `aws_s3_bucket_acl` instead.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `acl` argument in the `aws_s3_bucket` resource allows users to specify a predefined access control list (ACL) to manage the bucket's permissions, such as read, write, or delivery access for specific user groups or entities. While deprecated, setting this argument impacts the bucket's accessibility by applying canned permissions like `private` or `public-read`, aligning with common goals of controlling access levels; however, users are encouraged to use the `aws_s3_bucket_acl` resource for more granular permission management."
+    },
+    {
+      "name": "bucket",
+      "description": "(Optional, Forces new resource) Name of the bucket. If omitted, Terraform will assign a random, unique name. Must be lowercase and less than or equal to 63 characters in length. A full list of bucket naming rules may be found here. The name must not be in the format `[bucket_name]--[azid]--x-s3`. Use the `aws_s3_directory_bucket` resource to manage S3 Express buckets.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `bucket` argument allows users to specify a custom name for the S3 bucket, enabling precise control over its identification and alignment with naming conventions or organizational standards. If omitted, Terraform generates a unique name, but setting this argument is essential for predictable bucket naming, especially in scenarios requiring integration with other resources or adherence to specific naming policies."
+    },
+    {
+      "name": "bucket_prefix",
+      "description": "(Optional, Forces new resource) Creates a unique bucket name beginning with the specified prefix. Conflicts with `bucket`. Must be lowercase and less than or equal to 37 characters in length. A full list of bucket naming rules may be found here.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `bucket_prefix` argument in the `aws_s3_bucket` resource allows users to define a unique, automatically generated S3 bucket name that begins with a specified prefix, enabling dynamic bucket creation without manually specifying a full name. This is particularly useful for scenarios requiring programmatic bucket naming, such as creating environment-specific or ephemeral buckets, while adhering to AWS naming constraints."
+    },
+    {
+      "name": "force_destroy",
+      "description": "(Optional, Default:`false`) Boolean that indicates all objects (including any locked objects) should be deleted from the bucket when the bucket is destroyed so that the bucket can be destroyed without error. These objects are not recoverable. This only deletes objects when the bucket is destroyed, not when setting this parameter to `true`. Once this parameter is set to `true`, there must be a successful `terraform apply` run before a destroy is required to update this value in the resource state. Without a successful `terraform apply` after this parameter is set, this flag will have no effect. If setting this field in the same operation that would require replacing the bucket or destroying the bucket, this flag will not work. Additionally when importing a bucket, a successful `terraform apply` is required to set this value in state before it will take effect on a destroy operation.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `force_destroy` argument for the `aws_s3_bucket` resource controls whether all objects, including locked or versioned objects, are automatically deleted when the bucket is destroyed, ensuring the bucket can be removed without errors. This is useful for managing bucket lifecycle operations in scenarios where users need to clean up all contents during resource destruction, but it requires a successful `terraform apply` to take effect and does not impact objects during regular updates."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_s3_bucket` resource allows users to specify a unique identifier for the S3 bucket, typically used to reference the bucket within Terraform configurations or outputs. While optional, setting this argument can help streamline resource management and integration with other Terraform resources by providing a consistent and predictable identifier for the bucket."
+    },
+    {
+      "name": "object_lock_enabled",
+      "description": "(Optional, Forces new resource) Indicates whether this bucket has an Object Lock configuration enabled. Valid values are `true` or `false`. This argument is not supported in all regions or partitions.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `object_lock_enabled` argument for the `aws_s3_bucket` resource allows users to enable Object Lock functionality on the bucket, which provides advanced data protection by preventing object deletion or modification for a specified retention period. This feature is commonly used to enforce compliance, data immutability, or regulatory requirements, but its availability may vary by region or partition."
+    },
+    {
+      "name": "policy",
+      "description": "(Optional, Deprecated) Valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a `terraform plan`. In this case, please make sure you use the verbose/specific version of the policy. For more information about building AWS IAM policy documents with Terraform, see the AWS IAM Policy Document Guide. Terraform will only perform drift detection if a configuration value is provided. Use the resource `aws_s3_bucket_policy` instead.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `policy` argument allows users to define a JSON-formatted bucket policy that specifies access permissions and controls for the S3 bucket, enabling fine-grained management of who can access the bucket and how. While deprecated in favor of the `aws_s3_bucket_policy` resource, setting this argument directly can help configure IAM-based access rules, though users should ensure the policy is specific to avoid constant drift detection during Terraform operations."
+    },
+    {
+      "name": "request_payer",
+      "description": "(Optional, Deprecated) Specifies who should bear the cost of Amazon S3 data transfer. Can be either `BucketOwner` or `Requester`. By default, the owner of the S3 bucket would incur the costs of any data transfer. See Requester Pays Buckets developer guide for more information. Terraform will only perform drift detection if a configuration value is provided. Use the resource `aws_s3_bucket_request_payment_configuration` instead.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `request_payer` argument for the `aws_s3_bucket` resource allows users to specify the cost allocation model for data transfer operations, determining whether the bucket owner (`BucketOwner`) or the requester (`Requester`) bears the associated costs. This argument supports configuring \"Requester Pays\" functionality, which is useful for scenarios where external users or systems access the bucket and are responsible for their own data transfer expenses. Note that this argument is deprecated, and users should use the `aws_s3_bucket_request_payment_configuration` resource instead for managing this behavior."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of tags to assign to the bucket. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level. The following arguments are deprecated, and will be removed in a future major version:",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_s3_bucket` resource allows users to define a map of key-value pairs to assign metadata tags to the S3 bucket, enabling categorization, organization, and identification of resources for purposes such as cost allocation, environment labeling, or compliance tracking. When set, these tags can override provider-level default tags with matching keys, offering granular control over resource tagging."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_s3_bucket` resource allows users to define a comprehensive set of key-value tags inherited from both user-defined tags and provider-level default tags, enabling consistent metadata management and resource categorization. This facilitates common goals such as cost allocation, environment identification, and compliance tracking across AWS resources."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "cors_rule",
+      "description": "(Optional, Deprecated) Rule of Cross-Origin Resource Sharing. See CORS rule below for details. Terraform will only perform drift detection if a configuration value is provided. Use the resource `aws_s3_bucket_cors_configuration` instead.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "allowed_headers",
+          "description": "(Optional) List of headers allowed.",
+          "required": false,
+          "type": "list(string)",
+          "llm_summary": "The `allowed_headers` argument in the `cors_rule` block of the `aws_s3_bucket` resource specifies a list of HTTP headers that can be included in cross-origin requests to the S3 bucket. By configuring this argument, users control which headers are permitted during CORS preflight checks, enabling fine-grained access for applications that require specific headers in their requests, such as custom authentication or metadata."
+        },
+        {
+          "name": "allowed_methods",
+          "description": "(Required) One or more HTTP methods that you allow the origin to execute. Can be `GET`, `PUT`, `POST`, `DELETE` or `HEAD`.",
+          "required": true,
+          "type": "list(string)",
+          "llm_summary": "The `allowed_methods` argument in the `cors_rule` block of the `aws_s3_bucket` resource specifies the HTTP methods (`GET`, `PUT`, `POST`, `DELETE`, `HEAD`) that are permitted for cross-origin requests to the S3 bucket. By defining this list, users control which operations external origins can perform on the bucket, enabling fine-grained access for use cases like web applications or APIs that interact with S3 resources."
+        },
+        {
+          "name": "allowed_origins",
+          "description": "(Required) One or more origins you want customers to be able to access the bucket from.",
+          "required": true,
+          "type": "list(string)",
+          "llm_summary": "The `allowed_origins` argument in the `cors_rule` block of the `aws_s3_bucket` resource specifies the list of origins (domains) permitted to make cross-origin requests to the S3 bucket. By defining this argument, users control which external web applications or services can access the bucket's resources via CORS, enabling secure and tailored integration with client-side applications or APIs."
+        },
+        {
+          "name": "expose_headers",
+          "description": "(Optional) One or more headers in the response that you want customers to be able to access from their applications (for example, from a JavaScript `XMLHttpRequest` object).",
+          "required": false,
+          "type": "list(string)",
+          "llm_summary": "The `expose_headers` argument in the `cors_rule` block of the `aws_s3_bucket` resource allows users to specify a list of response headers that client applications, such as JavaScript `XMLHttpRequest` objects, can access when interacting with the S3 bucket. Configuring this argument enables fine-grained control over which headers are exposed to clients, supporting cross-origin resource sharing (CORS) and enhancing compatibility with web applications that require access to specific response metadata."
+        },
+        {
+          "name": "max_age_seconds",
+          "description": "(Optional) Specifies time in seconds that browser can cache the response for a preflight request.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "\"max_age_seconds\" in the \"cors_rule\" block of the \"aws_s3_bucket\" resource allows users to define the duration (in seconds) that a browser can cache the response for a preflight CORS request. Configuring this argument helps optimize client-side performance by reducing the frequency of preflight requests, aligning with caching strategies for cross-origin resource sharing."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `cors_rule` configuration block in the `aws_s3_bucket` resource defines Cross-Origin Resource Sharing (CORS) rules, enabling control over how resources in the S3 bucket can be accessed by external origins. It encapsulates settings related to HTTP methods, allowed origins, and headers, helping users configure access policies for web applications interacting with the bucket. Note that this block is deprecated, and users should use the `aws_s3_bucket_cors_configuration` resource for managing CORS settings."
+    },
+    {
+      "name": "grant",
+      "description": "(Optional, Deprecated) An ACL policy grant. See Grant below for details. Conflicts with `acl`. Terraform will only perform drift detection if a configuration value is provided. Use the resource `aws_s3_bucket_acl` instead.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "id",
+          "description": "(Optional) Canonical user id to grant for. Used only when `type` is `CanonicalUser`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `id` argument in the `grant` block of the `aws_s3_bucket` resource allows users to specify the canonical user ID for granting permissions when the `type` is set to `CanonicalUser`. By defining this argument, users can assign access rights to a specific AWS account or user, enabling fine-grained control over bucket-level permissions for secure and targeted access management."
+        },
+        {
+          "name": "permissions",
+          "description": "(Required) List of permissions to apply for grantee. Valid values are `READ`, `WRITE`, `READ_ACP`, `WRITE_ACP`, `FULL_CONTROL`.",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `permissions` argument in the `grant` block of the `aws_s3_bucket` resource specifies the access levels (e.g., `READ`, `WRITE`, `FULL_CONTROL`) granted to a designated grantee for the bucket or its objects. By configuring this argument, users can define fine-grained access control to meet security and sharing requirements, ensuring appropriate permissions are applied for specific use cases like data sharing or collaboration."
+        },
+        {
+          "name": "type",
+          "description": "(Required) Type of grantee to apply for. Valid values are `CanonicalUser` and `Group`. `AmazonCustomerByEmail` is not supported.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument in the `grant` block of the `aws_s3_bucket` resource specifies the category of grantee to whom access permissions are applied, allowing users to define whether the grantee is a `CanonicalUser` (specific AWS account) or a `Group` (predefined AWS group). Setting this argument ensures precise control over access delegation, aligning with common goals like managing bucket-level permissions for specific entities or groups."
+        },
+        {
+          "name": "uri",
+          "description": "(Optional) Uri address to grant for. Used only when `type` is `Group`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `uri` argument in the `grant` block of the `aws_s3_bucket` resource allows users to specify the URI of an AWS predefined group (e.g., `http://acs.amazonaws.com/groups/s3/LogDelivery`) to grant permissions. This enables users to define access control for specific AWS service groups, facilitating common use cases like granting log delivery or other predefined group access to the S3 bucket."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `grant` configuration block in the `aws_s3_bucket` resource defines fine-grained access control policies for granting permissions to specific AWS principals or groups. It encapsulates settings related to access control lists (ACLs) but is deprecated in favor of using the `aws_s3_bucket_acl` resource for managing bucket permissions. Configuring this block allows users to specify detailed access grants, but it is recommended to use alternative methods for better compatibility and drift detection."
+    },
+    {
+      "name": "lifecycle_rule",
+      "description": "(Optional, Deprecated) Configuration of object lifecycle management. See Lifecycle Rule below for details. Terraform will only perform drift detection if a configuration value is provided. Use the resource `aws_s3_bucket_lifecycle_configuration` instead.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "abort_incomplete_multipart_upload_days",
+          "description": "(Optional) Specifies the number of days after initiating a multipart upload when the multipart upload must be completed.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "Defines the number of days after initiating a multipart upload when incomplete uploads are automatically aborted, helping to manage storage costs and enforce lifecycle policies by cleaning up unused or abandoned multipart uploads in the S3 bucket."
+        },
+        {
+          "name": "enabled",
+          "description": "(Required) Specifies lifecycle rule status.",
+          "required": true,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument in the `lifecycle_rule` block of the `aws_s3_bucket` resource is a required boolean that specifies whether the lifecycle rule is active. Setting this argument to `true` ensures the rule is applied to manage object lifecycles, such as transitioning storage classes or expiring objects, aligning with user-defined data retention and cost optimization goals."
+        },
+        {
+          "name": "id",
+          "description": "(Optional) Unique identifier for the rule. Must be less than or equal to 255 characters in length.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `id` argument in the `lifecycle_rule` block of the `aws_s3_bucket` resource allows users to define a unique identifier for the lifecycle rule, enabling clear differentiation and management of multiple rules within the same bucket. While optional, setting this string (up to 255 characters) helps users organize and reference specific rules, supporting use cases like fine-grained lifecycle management for objects in the bucket."
+        },
+        {
+          "name": "prefix",
+          "description": "(Optional) Object key prefix identifying one or more objects to which the rule applies.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `prefix` argument in the `lifecycle_rule` of the `aws_s3_bucket` resource allows users to define an object key prefix to target specific objects within the bucket for lifecycle management. By setting this argument, users can apply lifecycle rules\u2014such as transitioning storage classes or expiring objects\u2014only to objects whose keys begin with the specified prefix, enabling granular control over retention and storage optimization policies."
+        },
+        {
+          "name": "tags",
+          "description": "(Optional) Specifies object tags key and value.",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `tags` argument within the `lifecycle_rule` of an `aws_s3_bucket` allows users to define a map of key-value pairs that specify object tags used to filter which objects the lifecycle rule applies to. By setting this argument, users can target specific objects for lifecycle actions (e.g., transitioning storage classes or expiring objects) based on their tags, enabling fine-grained control over bucket lifecycle management."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "expiration",
+          "description": "(Optional) Specifies a period in the object's expire. See Expiration below for details.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "date",
+              "description": "(Optional) Specifies the date after which you want the corresponding action to take effect.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `date` argument in the `expiration` context of the `aws_s3_bucket` resource allows users to specify an exact timestamp (in string format) after which an object lifecycle action, such as deletion or transition, will take effect. This enables precise control over object lifecycle management, supporting goals like automating data retention policies or optimizing storage costs by defining expiration schedules."
+            },
+            {
+              "name": "days",
+              "description": "(Optional) Specifies the number of days after object creation when the specific rule action takes effect.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `days` argument in the `expiration` context of the `aws_s3_bucket` resource allows users to define the number of days after an object's creation when the lifecycle expiration rule is triggered. This enables automated object management by specifying retention periods, helping users optimize storage costs and enforce data lifecycle policies."
+            },
+            {
+              "name": "expired_object_delete_marker",
+              "description": "(Optional) On a versioned bucket (versioning-enabled or versioning-suspended bucket), you can add this element in the lifecycle configuration to direct Amazon S3 to delete expired object delete markers. This cannot be specified with Days or Date in a Lifecycle Expiration Policy.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `expired_object_delete_marker` argument in the `expiration` configuration of the `aws_s3_bucket` resource allows users to control whether Amazon S3 automatically deletes expired object delete markers in versioned buckets. This is typically used to optimize lifecycle management by removing unnecessary markers, ensuring cleaner bucket storage and reducing clutter in versioning-enabled or versioning-suspended buckets."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The \"expiration\" configuration block within the \"lifecycle_rule\" of the \"aws_s3_bucket\" resource defines rules for automatically expiring objects based on a specified time period or date. This block enables users to manage object lifecycle policies by automating data retention and cleanup, helping optimize storage costs and ensure compliance with data retention policies."
+        },
+        {
+          "name": "noncurrent_version_expiration",
+          "description": "(Optional) Specifies when noncurrent object versions expire. See Noncurrent Version Expiration below for details.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "days",
+              "description": "(Required) Specifies the number of days noncurrent object versions expire.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `days` argument in the `noncurrent_version_expiration` block of the `aws_s3_bucket` resource allows users to define the number of days after which noncurrent (previous) versions of objects in the S3 bucket are automatically deleted. This argument is typically used to configure lifecycle rules for optimizing storage costs and managing object version retention in line with compliance or operational requirements."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `noncurrent_version_expiration` block within the `lifecycle_rule` of the `aws_s3_bucket` resource defines rules for automatically expiring noncurrent object versions, enabling efficient version management and storage cost optimization. By configuring this block, users can enforce retention policies for outdated object versions, ensuring compliance with data lifecycle requirements and reducing unnecessary storage usage."
+        },
+        {
+          "name": "noncurrent_version_transition",
+          "description": "(Optional) Specifies when noncurrent object versions transitions. See Noncurrent Version Transition below for details.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "days",
+              "description": "(Required) Specifies the number of days noncurrent object versions transition.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `days` argument in the `noncurrent_version_transition` block of the `aws_s3_bucket` resource specifies the number of days after an object becomes noncurrent (i.e., a previous version due to updates) before it transitions to a different storage class. This allows users to define lifecycle rules for optimizing storage costs by automating the movement of noncurrent object versions to more cost-effective storage tiers."
+            },
+            {
+              "name": "storage_class",
+              "description": "(Required) Specifies the Amazon S3 storage class to which you want the object to transition.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `storage_class` argument in the `noncurrent_version_transition` block of the `aws_s3_bucket` resource specifies the Amazon S3 storage class (e.g., `GLACIER`, `STANDARD_IA`) to which noncurrent object versions are transitioned. This enables users to define lifecycle rules for cost optimization by automatically moving noncurrent versions of objects to a lower-cost storage tier."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `noncurrent_version_transition` block within the `lifecycle_rule` of the `aws_s3_bucket` resource defines rules for transitioning noncurrent object versions to a different storage class after a specified time period. This configuration enables users to optimize storage costs and manage the lifecycle of noncurrent versions by automating their movement to more cost-effective storage tiers, supporting efficient versioning and retention strategies."
+        },
+        {
+          "name": "transition",
+          "description": "(Optional) Specifies a period in the object's transitions. See Transition below for details.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "date",
+              "description": "(Optional) Specifies the date after which you want the corresponding action to take effect.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "\"Defines the specific calendar date when the transition action for an S3 bucket's object lifecycle begins, allowing users to schedule the movement of objects to a different storage class. This argument supports lifecycle management goals by enabling precise control over when storage transitions occur.\""
+            },
+            {
+              "name": "days",
+              "description": "(Optional) Specifies the number of days after object creation when the specific rule action takes effect.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `days` argument in the `transition` block of the `aws_s3_bucket` resource allows users to define the number of days after an object's creation when a lifecycle transition action, such as moving the object to a different storage class, takes effect. This enables users to configure automated storage optimization and cost management by specifying when objects should transition to more cost-efficient storage tiers."
+            },
+            {
+              "name": "storage_class",
+              "description": "(Required) Specifies the Amazon S3 storage class to which you want the object to transition.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `storage_class` argument in the `transition` block of the `aws_s3_bucket` resource specifies the target Amazon S3 storage class to which objects will transition as part of a lifecycle configuration. By defining this value, users can control cost optimization and data management by automatically moving objects to storage classes like `STANDARD_IA`, `GLACIER`, or `ONEZONE_IA` based on their access patterns or retention requirements."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The \"transition\" block within the \"lifecycle_rule\" configuration of the \"aws_s3_bucket\" resource defines rules for transitioning objects between storage classes based on their age or other criteria. It enables users to optimize storage costs by automating the movement of objects to more cost-effective storage tiers, such as transitioning from \"STANDARD\" to \"GLACIER\" after a specified period."
+        }
+      ],
+      "llm_summary": "The `lifecycle_rule` block in the `aws_s3_bucket` resource enables the management of object lifecycle policies, such as transitioning objects to different storage classes or expiring them after a specified duration. It encapsulates settings for automating data retention and storage optimization, helping users implement cost-effective and compliant data management strategies. Note that this block is deprecated, and users are encouraged to use the `aws_s3_bucket_lifecycle_configuration` resource for more robust lifecycle management."
+    },
+    {
+      "name": "logging",
+      "description": "(Optional, Deprecated) Configuration of S3 bucket logging parameters. See Logging below for details. Terraform will only perform drift detection if a configuration value is provided. Use the resource `aws_s3_bucket_logging` instead.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "target_bucket",
+          "description": "(Required) Name of the bucket that will receive the log objects.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `target_bucket` argument specifies the destination S3 bucket where access logs for the current bucket will be stored, enabling centralized logging for monitoring and auditing purposes. By configuring this required parameter, users can define the logging behavior to track requests and operations on the bucket, supporting compliance, security, and operational insights."
+        },
+        {
+          "name": "target_prefix",
+          "description": "(Optional) To specify a key prefix for log objects.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `target_prefix` argument in the `logging` configuration of the `aws_s3_bucket` resource allows users to define a custom key prefix for log object names stored in the target S3 bucket. By setting this argument, users can organize and categorize log files with a specific naming structure, enabling easier identification, retrieval, and management of logging data for auditing or monitoring purposes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"logging\" configuration block in the `aws_s3_bucket` resource enables the setup of server access logging for the S3 bucket, allowing users to capture detailed logs of requests made to the bucket for auditing and monitoring purposes. It encapsulates settings related to log delivery, such as specifying the target bucket and prefix for log storage, but is deprecated in favor of using the standalone `aws_s3_bucket_logging` resource for more robust drift detection and management."
+    },
+    {
+      "name": "object_lock_configuration",
+      "description": "(Optional, Deprecated) Configuration of S3 object locking. See Object Lock Configuration below for details. Terraform wil only perform drift detection if a configuration value is provided. Use the `object_lock_enabled` parameter and the resource `aws_s3_bucket_object_lock_configuration` instead.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "object_lock_enabled",
+          "description": "(Optional, Deprecated) Indicates whether this bucket has an Object Lock configuration enabled. Valid value is `Enabled`. Use the top-level argument `object_lock_enabled` instead.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `object_lock_enabled` argument within the `object_lock_configuration` block of the `aws_s3_bucket` resource allows users to specify whether Object Lock functionality is enabled for the bucket, ensuring data immutability and protection against accidental deletion or modification. Setting this argument to `Enabled` activates Object Lock, which is commonly used to enforce compliance requirements, retention policies, or legal holds for stored objects. Note that this argument is deprecated in favor of the top-level `object_lock_enabled` argument."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "rule",
+          "description": "(Optional) Object Lock rule in place for this bucket (documented below).",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "default_retention",
+              "description": "(Required) Default retention period that you want to apply to new objects placed in this bucket (documented below).",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "days",
+                  "description": "(Optional) Number of days that you want to specify for the default retention period.",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `days` argument in the `default_retention` block of the `aws_s3_bucket` resource allows users to define the default retention period for objects in the bucket, measured in days. By specifying this value, users can enforce data retention policies to automatically retain objects for a set duration, supporting compliance, governance, or archival requirements."
+                },
+                {
+                  "name": "mode",
+                  "description": "(Required) Default Object Lock retention mode you want to apply to new objects placed in this bucket. Valid values are `GOVERNANCE` and `COMPLIANCE`.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `mode` argument in the `default_retention` block of the `aws_s3_bucket` resource specifies the default Object Lock retention mode (`GOVERNANCE` or `COMPLIANCE`) to enforce on new objects stored in the bucket. This configuration ensures regulatory or governance compliance by controlling whether objects can be deleted or modified during their retention period, aligning with common data protection and audit requirements."
+                },
+                {
+                  "name": "years",
+                  "description": "(Optional) Number of years that you want to specify for the default retention period.",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `years` argument in the `default_retention` block of the `aws_s3_bucket` resource allows users to define the default retention period for objects in the bucket in terms of years. By specifying this value, users can enforce long-term data retention policies, ensuring objects are retained for the configured duration before they can be deleted or modified, supporting compliance and archival goals."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `default_retention` block within the `rule` configuration of the `aws_s3_bucket` resource defines the default retention period for new objects added to the bucket, enabling automated enforcement of data retention policies. This block is essential for managing object lifecycle rules, ensuring compliance with data governance requirements by specifying how long objects should be retained before deletion or archival."
+            }
+          ],
+          "llm_summary": "The `rule` block within the `object_lock_configuration` of the `aws_s3_bucket` resource defines the Object Lock rule for the bucket, enabling the configuration of retention policies to protect objects from being deleted or overwritten for a specified duration. This block is essential for enforcing compliance and data protection requirements by managing retention settings, such as governance or compliance modes, to ensure immutability and regulatory adherence."
+        }
+      ],
+      "llm_summary": "The `object_lock_configuration` block in the `aws_s3_bucket` resource enables the management of S3 object locking settings, which are used to enforce data retention policies and prevent object deletion or modification for a specified duration. This block encapsulates related settings for configuring object lock behavior, such as retention modes and periods, but is deprecated in favor of using the `object_lock_enabled` parameter and the standalone `aws_s3_bucket_object_lock_configuration` resource for more granular control."
+    },
+    {
+      "name": "replication_configuration",
+      "description": "(Optional, Deprecated) Configuration of replication configuration. See Replication Configuration below for details. Terraform will only perform drift detection if a configuration value is provided. Use the resource `aws_s3_bucket_replication_configuration` instead.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "role",
+          "description": "(Required) ARN of the IAM role for Amazon S3 to assume when replicating the objects.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `role` argument in the `replication_configuration` of the `aws_s3_bucket` resource specifies the ARN of the IAM role that Amazon S3 assumes to perform object replication across buckets. By defining this role, users enable and control the permissions required for replication operations, ensuring secure and automated data transfer between source and destination buckets in compliance with the configured replication rules."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "rules",
+          "description": "(Required) Specifies the rules managing the replication (documented below).",
+          "cardinality": [
+            1,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "delete_marker_replication_status",
+              "description": "(Optional) Whether delete markers are replicated. The only valid value is `Enabled`. To disable, omit this argument. This argument is only valid with V2 replication configurations (i.e., when `filter` is used).",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `delete_marker_replication_status` argument in the `rules` block of the `aws_s3_bucket` resource allows users to control whether delete markers are replicated across buckets in V2 replication configurations. Setting this argument to `Enabled` ensures that delete markers are propagated to destination buckets, supporting use cases like maintaining consistent object deletion states across replicated environments."
+            },
+            {
+              "name": "id",
+              "description": "(Optional) Unique identifier for the rule. Must be less than or equal to 255 characters in length.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `id` argument in the `rules` block of the `aws_s3_bucket` resource allows users to define a unique identifier for a specific lifecycle rule within the bucket. This identifier, which must be 255 characters or fewer, helps distinguish and manage individual rules, enabling precise control over lifecycle configurations such as object expiration or transition policies."
+            },
+            {
+              "name": "prefix",
+              "description": "(Optional, Conflicts with `filter`) Object keyname prefix identifying one or more objects to which the rule applies. Must be less than or equal to 1024 characters in length.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `prefix` argument in the `rules` block of the `aws_s3_bucket` resource allows users to define an object keyname prefix to target specific objects within the bucket for rule application, such as lifecycle policies or replication configurations. By setting this argument, users can scope rules to apply only to objects with keys that start with the specified prefix, enabling granular control over bucket management and optimizing resource behavior for specific subsets of data."
+            },
+            {
+              "name": "priority",
+              "description": "(Optional) Priority associated with the rule. Priority should only be set if `filter` is configured. If not provided, defaults to `0`. Priority must be unique between multiple rules.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `priority` argument in the `rules` block of the `aws_s3_bucket` resource allows users to define the execution order of multiple bucket rules by assigning a unique numerical value to each rule. This ensures predictable rule evaluation when `filter` is configured, enabling users to control how rules are applied to specific objects or conditions within the bucket."
+            },
+            {
+              "name": "status",
+              "description": "(Required) Status of the rule. Either `Enabled` or `Disabled`. The rule is ignored if status is not Enabled.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `status` argument in the `rules` block of the `aws_s3_bucket` resource specifies whether a rule is active (`Enabled`) or inactive (`Disabled`). Setting this argument determines if the associated rule, such as lifecycle or replication configurations, is applied to the bucket, allowing users to control the operational behavior of S3 bucket management policies."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "destination",
+              "description": "(Required) Specifies the destination for the rule (documented below).",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "account_id",
+                  "description": "(Optional) Account ID to use for overriding the object owner on replication. Must be used in conjunction with `access_control_translation` override configuration.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `account_id` argument in the `destination` configuration of the `aws_s3_bucket` resource allows users to specify the AWS Account ID that will own replicated objects when overriding the object owner during cross-account S3 replication. This is typically used in conjunction with `access_control_translation` to ensure proper ownership transfer, enabling seamless replication workflows across accounts while maintaining access control consistency."
+                },
+                {
+                  "name": "bucket",
+                  "description": "(Required) ARN of the S3 bucket where you want Amazon S3 to store replicas of the object identified by the rule.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "Specifies the ARN of the target S3 bucket where replicated objects will be stored, enabling cross-region or same-region replication as defined by the rule. This argument is essential for configuring the destination of replicated data, supporting use cases like disaster recovery, compliance, or data redundancy."
+                },
+                {
+                  "name": "replica_kms_key_id",
+                  "description": "(Optional) Destination KMS encryption key ARN for SSE-KMS replication. Must be used in conjunction with `sse_kms_encrypted_objects` source selection criteria.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `replica_kms_key_id` argument allows users to specify the ARN of a KMS encryption key to secure replicated objects in the destination S3 bucket using server-side encryption with AWS KMS (SSE-KMS). By configuring this, users can enforce encryption for replicated data, aligning with compliance and security requirements, especially when used alongside `sse_kms_encrypted_objects` for source selection criteria."
+                },
+                {
+                  "name": "storage_class",
+                  "description": "(Optional) The storage class used to store the object. By default, Amazon S3 uses the storage class of the source object to create the object replica.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `storage_class` argument allows users to specify the Amazon S3 storage class for objects replicated to the destination bucket, enabling control over cost and performance characteristics such as durability, availability, and retrieval speed. By setting this argument, users can override the default storage class inherited from the source object to optimize for specific use cases like archival, infrequent access, or high-performance storage."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "access_control_translation",
+                  "description": "(Optional) Specifies the overrides to use for object owners on replication (documented below). Must be used in conjunction with `account_id` owner override configuration.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "owner",
+                      "description": "(Required) Specifies the replica ownership. For default and valid values, see PUT bucket replication in the Amazon S3 API Reference. The only valid value is `Destination`.",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `owner` argument in the `access_control_translation` block of the `aws_s3_bucket` resource specifies the replica ownership for objects replicated to a destination bucket in an S3 replication configuration. By setting this required argument to `Destination`, users ensure that ownership of replicated objects is transferred to the destination account, aligning with cross-account replication use cases and compliance requirements."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "\"Defines owner override settings for replicated objects within the destination configuration of an S3 bucket, enabling control over object ownership during replication. This block is used to specify how ownership is translated, ensuring compliance with account-specific requirements when replicating data across AWS accounts.\""
+                },
+                {
+                  "name": "metrics",
+                  "description": "(Optional) Enables replication metrics (required for S3 RTC) (documented below).",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "minutes",
+                      "description": "(Optional) Threshold within which objects are to be replicated. The only valid value is `15`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `minutes` argument in the `metrics` context of the `aws_s3_bucket` resource specifies the replication threshold for objects, allowing users to define the time window (fixed at 15 minutes) within which replication metrics are tracked. Configuring this argument helps monitor and optimize replication performance, aligning with user goals of ensuring timely and efficient data replication across S3 buckets."
+                    },
+                    {
+                      "name": "status",
+                      "description": "(Optional) Status of replication metrics. Either `Enabled` or `Disabled`.",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `status` argument in the `metrics` context of the `aws_s3_bucket` resource allows users to control whether replication metrics for the bucket are enabled or disabled. By setting this argument to `Enabled` or `Disabled`, users can define the visibility and tracking of replication performance, supporting goals like monitoring replication efficiency and troubleshooting replication issues."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `metrics` configuration block within the `destination` context of the `aws_s3_bucket` resource enables replication metrics, which are essential for monitoring and ensuring compliance with S3 Replication Time Control (RTC). It encapsulates settings related to tracking replication performance, allowing users to measure and optimize the efficiency and reliability of data replication between S3 buckets. Configuring this block helps achieve detailed visibility into replication operations, ensuring timely and accurate data transfer for critical workloads."
+                },
+                {
+                  "name": "replication_time",
+                  "description": "(Optional) Enables S3 Replication Time Control (S3 RTC) (documented below).",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "minutes",
+                      "description": "(Optional) Threshold within which objects are to be replicated. The only valid value is `15`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `minutes` argument for the `replication_time` configuration in the `aws_s3_bucket` resource specifies the replication SLA threshold, defining the maximum time (in minutes) within which objects must be replicated to the destination bucket. Setting this argument ensures compliance with the 15-minute replication guarantee, enabling users to meet strict data replication performance requirements for disaster recovery or cross-region redundancy."
+                    },
+                    {
+                      "name": "status",
+                      "description": "(Optional) Status of RTC. Either `Enabled` or `Disabled`.",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `status` argument in the `replication_time` configuration of the `aws_s3_bucket` resource allows users to specify whether Replication Time Control (RTC) is active (`Enabled`) or inactive (`Disabled`). Setting this argument determines if RTC guarantees predictable replication times for objects, which is critical for compliance or performance-focused use cases requiring strict replication SLAs."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `replication_time` block within the `destination` configuration of the `aws_s3_bucket` resource enables and manages S3 Replication Time Control (S3 RTC), which ensures predictable replication performance for objects between source and destination buckets. It encapsulates settings related to replication time metrics and guarantees, allowing users to achieve compliance and meet strict SLA requirements for data replication timelines."
+                }
+              ],
+              "llm_summary": "The \"destination\" configuration block within the \"rules\" context of the `aws_s3_bucket` resource defines where objects affected by the rule should be redirected or replicated, enabling advanced management of data workflows. It encapsulates settings related to specifying target locations, such as another S3 bucket or storage system, and is essential for implementing features like cross-region replication or redirection for compliance, backup, or disaster recovery purposes."
+            },
+            {
+              "name": "filter",
+              "description": "(Optional, Conflicts with `prefix`) Filter that identifies subset of objects to which the replication rule applies (documented below).",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "prefix",
+                  "description": "(Optional) Object keyname prefix that identifies subset of objects to which the rule applies. Must be less than or equal to 1024 characters in length.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `prefix` argument in the `filter` block of the `aws_s3_bucket` resource allows users to specify a string that defines an object keyname prefix, enabling targeted filtering of S3 objects for rules such as lifecycle policies or event notifications. By setting this argument, users can apply configurations to a specific subset of objects within the bucket, streamlining management and ensuring precise control over resource behavior."
+                },
+                {
+                  "name": "tags",
+                  "description": "(Optional) A map of tags that identifies subset of objects to which the rule applies. The rule applies only to objects having all the tags in its tagset.",
+                  "required": false,
+                  "type": "map(string)",
+                  "llm_summary": "The `tags` argument within the `filter` block of the `aws_s3_bucket` resource allows users to define a map of key-value pairs that specify object tags used to identify a subset of objects for rule application. By setting this argument, users can target specific objects in the bucket based on their tagset, enabling granular control over behaviors like lifecycle policies, replication rules, or access configurations tied to tagged objects."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `filter` block within the `rules` configuration of the `aws_s3_bucket` resource defines criteria to target a specific subset of objects for a replication rule, enabling fine-grained control over which objects are replicated. By specifying filters such as tags or object key prefixes, this block allows users to optimize replication behavior by applying rules only to relevant objects, avoiding unnecessary replication of unrelated data."
+            },
+            {
+              "name": "source_selection_criteria",
+              "description": "(Optional) Specifies special object selection criteria (documented below).",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [],
+              "blocks": [
+                {
+                  "name": "sse_kms_encrypted_objects",
+                  "description": "(Optional) Match SSE-KMS encrypted objects (documented below). If specified, `replica_kms_key_id` in `destination` must be specified as well.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "enabled",
+                      "description": "(Required) Boolean which indicates if this criteria is enabled.",
+                      "required": true,
+                      "type": "bool",
+                      "llm_summary": "The `enabled` argument for the `sse_kms_encrypted_objects` configuration in the `aws_s3_bucket` resource specifies whether server-side encryption using AWS Key Management Service (KMS) is enforced for objects stored in the bucket. Setting this argument to `true` ensures that all objects are encrypted with KMS keys, aligning with security best practices and compliance requirements for sensitive data."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `sse_kms_encrypted_objects` block within the `source_selection_criteria` of the `aws_s3_bucket` resource enables filtering of objects encrypted with AWS Key Management Service (SSE-KMS) for replication purposes. It ensures that only SSE-KMS encrypted objects are selected as replication sources, requiring the `replica_kms_key_id` in the destination configuration to securely manage encryption during replication. This block provides fine-grained control over replication criteria, enhancing security and compliance for encrypted data."
+                }
+              ],
+              "llm_summary": "The `source_selection_criteria` block within the `rules` configuration of the `aws_s3_bucket` resource defines specific object selection criteria for applying S3 bucket rules, such as replication or lifecycle policies. This block enables fine-grained control by filtering objects based on attributes like S3 object tags or encryption status, ensuring that rules target only the desired subset of objects to meet compliance, performance, or data management goals."
+            }
+          ],
+          "llm_summary": "The \"rules\" configuration block within the \"replication_configuration\" of the \"aws_s3_bucket\" resource defines the policies and conditions for managing S3 bucket replication, including specifying source and destination buckets, filtering objects, and enabling replication for specific prefixes or tags. Configuring this block allows users to automate cross-region or same-region replication, ensuring data redundancy, compliance, and disaster recovery."
+        }
+      ],
+      "llm_summary": "The `replication_configuration` block in the `aws_s3_bucket` resource defines settings for replicating objects between S3 buckets, enabling cross-region or same-region replication to enhance data durability, availability, or compliance. While deprecated in favor of the standalone `aws_s3_bucket_replication_configuration` resource, this block encapsulates replication rules, destinations, and permissions, allowing users to configure automated object replication for disaster recovery, data synchronization, or regulatory requirements."
+    },
+    {
+      "name": "server_side_encryption_configuration",
+      "description": "(Optional, Deprecated) Configuration of server-side encryption configuration. See Server Side Encryption Configuration below for details. Terraform will only perform drift detection if a configuration value is provided. Use the resource `aws_s3_bucket_server_side_encryption_configuration` instead.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "rule",
+          "description": "(Required) Single object for server-side encryption by default configuration. (documented below)  The rule configuration block supports the following arguments:",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "bucket_key_enabled",
+              "description": "(Optional) Whether or not to use Amazon S3 Bucket Keys for SSE-KMS. The apply_server_side_encryption_by_default configuration block supports the following arguments:",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `bucket_key_enabled` argument in the `rule` block of the `aws_s3_bucket` resource allows users to control whether Amazon S3 Bucket Keys are used for server-side encryption with AWS KMS (SSE-KMS). Enabling this feature optimizes encryption performance and reduces the cost of KMS requests by leveraging bucket-level keys for managing object encryption."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "apply_server_side_encryption_by_default",
+              "description": "(Required) Single object for setting server-side encryption by default. (documented below)",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "kms_master_key_id",
+                  "description": "(Optional) AWS KMS master key ID used for the SSE-KMS encryption. This can only be used when you set the value of `sse_algorithm` as `aws:kms`. The default `aws/s3` AWS KMS master key is used if this element is absent while the `sse_algorithm` is `aws:kms`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `kms_master_key_id` argument allows users to specify the AWS KMS master key ID for server-side encryption using SSE-KMS within the `apply_server_side_encryption_by_default` configuration of an S3 bucket. By setting this argument, users can define a custom KMS key to encrypt objects, enabling fine-grained control over encryption keys and meeting compliance or security requirements; if omitted, the default `aws/s3` KMS key is used."
+                },
+                {
+                  "name": "sse_algorithm",
+                  "description": "(Required) Server-side encryption algorithm to use. Valid values are `AES256` and `aws:kms`",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `sse_algorithm` argument specifies the server-side encryption algorithm to be applied by default for objects stored in the S3 bucket, ensuring data at rest is encrypted. By setting this required parameter to either `AES256` or `aws:kms`, users can enforce encryption standards to meet security and compliance requirements."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `apply_server_side_encryption_by_default` block within the `rule` configuration of the `aws_s3_bucket` resource enforces default server-side encryption settings for objects stored in the bucket. It ensures that all objects are automatically encrypted at rest using the specified encryption method and key, enhancing data security and compliance with encryption policies."
+            }
+          ],
+          "llm_summary": "The \"rule\" configuration block within the \"server_side_encryption_configuration\" of the \"aws_s3_bucket\" resource defines the default server-side encryption behavior for objects stored in the bucket. It encapsulates settings related to encryption methods and keys, enabling users to enforce automatic encryption of all objects at rest, ensuring compliance with security and data protection requirements."
+        }
+      ],
+      "llm_summary": "The `server_side_encryption_configuration` block in the `aws_s3_bucket` resource defines settings for managing server-side encryption (SSE) to protect data at rest within the S3 bucket. This block encapsulates encryption-related configurations, such as specifying default encryption mechanisms (e.g., SSE-S3, SSE-KMS), ensuring compliance with security policies and regulatory requirements. While deprecated in favor of the standalone `aws_s3_bucket_server_side_encryption_configuration` resource, it allows users to enforce encryption for all objects stored in the bucket, enhancing data security and mitigating unauthorized access risks."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_s3_bucket` resource allows users to specify the maximum duration (in string format, e.g., \"10m\" for 10 minutes) Terraform will wait for the creation of an S3 bucket to complete. Configuring this timeout ensures predictable behavior during provisioning, especially in environments where bucket creation may experience delays due to network or service constraints."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_s3_bucket` resource allows users to specify the maximum duration (as a string, e.g., \"5m\" for 5 minutes) Terraform will wait for the deletion of the S3 bucket to complete. Configuring this timeout is useful for managing long-running delete operations, ensuring Terraform does not prematurely fail during resource cleanup in scenarios like bucket versioning or large object counts."
+        },
+        {
+          "name": "read",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `read` argument within the `timeouts` block of the `aws_s3_bucket` resource allows users to specify the maximum duration (as a string) Terraform will wait for the read operation to complete when retrieving the bucket's state or metadata. Configuring this timeout ensures smoother workflows by preventing long-running operations from stalling or failing due to default timeout limits, aligning with user goals of reliable resource management and state synchronization."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_s3_bucket` resource allows users to specify the maximum duration (as a string) Terraform should wait for an S3 bucket update operation to complete. By configuring this timeout, users can ensure smoother management of long-running updates, aligning resource provisioning with operational requirements and avoiding premature failures during bucket modifications."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_s3_bucket` resource allows users to define custom timeout durations for create, update, and delete operations on the S3 bucket. This block provides fine-grained control over operation time limits, ensuring smoother management of long-running tasks or preventing premature failures in environments with slower API responses."
+    },
+    {
+      "name": "versioning",
+      "description": "(Optional, Deprecated) Configuration of the S3 bucket versioning state. See Versioning below for details. Terraform will only perform drift detection if a configuration value is provided. Use the resource `aws_s3_bucket_versioning` instead.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enabled",
+          "description": "(Optional) Enable versioning. Once you version-enable a bucket, it can never return to an unversioned state. You can, however, suspend versioning on that bucket.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument for the `versioning` configuration in the `aws_s3_bucket` resource allows users to control whether versioning is activated for the bucket. Enabling this feature ensures that all object modifications and deletions are tracked, supporting use cases like data recovery, audit trails, and compliance, but once activated, the bucket cannot revert to an unversioned state."
+        },
+        {
+          "name": "mfa_delete",
+          "description": "(Optional) Enable MFA delete for either `Change the versioning state of your bucket` or `Permanently delete an object version`. Default is `false`. This cannot be used to toggle this setting but is available to allow managed buckets to reflect the state in AWS",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `mfa_delete` argument in the `versioning` configuration of the `aws_s3_bucket` resource allows users to specify whether Multi-Factor Authentication (MFA) is required to perform sensitive actions, such as changing the bucket's versioning state or permanently deleting object versions. Setting this to `true` enhances security by enforcing MFA for these operations, aligning with user goals of protecting critical data and preventing accidental or unauthorized changes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"versioning\" configuration block in the `aws_s3_bucket` resource manages the state of versioning for an S3 bucket, enabling the ability to preserve, retrieve, and restore multiple versions of objects. While deprecated in favor of the `aws_s3_bucket_versioning` resource, it encapsulates settings related to versioning state, helping users achieve object-level data protection and recovery for their bucket."
+    },
+    {
+      "name": "website",
+      "description": "(Optional, Deprecated) Configuration of the S3 bucket website. See Website below for details. Terraform will only perform drift detection if a configuration value is provided. Use the resource `aws_s3_bucket_website_configuration` instead.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "error_document",
+          "description": "(Optional) Absolute path to the document to return in case of a 4XX error.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `error_document` argument allows users to specify the path to a custom error page that will be returned when a 4XX client error occurs on the S3 bucket's static website hosting. This enables the configuration of user-friendly error handling, improving the end-user experience by directing them to a tailored error document instead of a default error response."
+        },
+        {
+          "name": "index_document",
+          "description": "(Required, unless using `redirect_all_requests_to`) Amazon S3 returns this index document when requests are made to the root domain or any of the subfolders.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `index_document` argument for the `aws_s3_bucket` resource's `website` configuration specifies the default HTML file (e.g., `index.html`) that Amazon S3 should serve when requests are made to the root domain or subfolders of the bucket. This enables users to define the entry point for their static website, ensuring proper navigation and user experience for web visitors."
+        },
+        {
+          "name": "redirect_all_requests_to",
+          "description": "(Optional) Hostname to redirect all website requests for this bucket to. Hostname can optionally be prefixed with a protocol (`http://` or `https://`) to use when redirecting requests. The default is the protocol that is used in the original request.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `redirect_all_requests_to` argument in the `aws_s3_bucket` resource's `website` context allows users to configure a global redirection for all incoming website requests to a specified hostname. By setting this argument, users can define the target domain or URL (optionally with a protocol like `http://` or `https://`) to which all traffic to the S3 bucket's website endpoint will be redirected, enabling seamless domain forwarding or migration scenarios."
+        },
+        {
+          "name": "routing_rules",
+          "description": "(Optional) JSON array containing routing rules describing redirect behavior and when redirects are applied.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `routing_rules` argument for the `aws_s3_bucket` resource's `website` configuration allows users to define custom redirect behavior through a JSON array of rules, specifying conditions and actions for redirecting requests to different URLs or objects. This enables fine-grained control over website routing, such as handling 404 errors, redirecting traffic based on object key patterns, or implementing SEO-friendly URL structures."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"website\" configuration block in the `aws_s3_bucket` resource enables the setup of static website hosting directly on an S3 bucket by defining related settings such as index and error document paths. While deprecated, it allows users to configure basic website functionality within the bucket, facilitating the delivery of static content without requiring a separate web server. For advanced or drift-detection use cases, the `aws_s3_bucket_website_configuration` resource is recommended."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN of the bucket. Will be of format `arn:aws:s3:::bucketname`.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "bucket_domain_name",
+      "description": "Bucket domain name. Will be of format `bucketname.s3.amazonaws.com`.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "bucket_regional_domain_name",
+      "description": "The bucket region-specific domain name. The bucket domain name including the region name. Please refer to the S3 endpoints reference for format. Note: AWS CloudFront allows specifying an S3 region-specific endpoint when creating an S3 origin. This will prevent redirect issues from CloudFront to the S3 Origin URL. For more information, see the Virtual Hosted-Style Requests for Other Regions section in the AWS S3 User Guide.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "hosted_zone_id",
+      "description": "Route 53 Hosted Zone ID for this bucket's region.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "region",
+      "description": "AWS region this bucket resides in.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "website_domain",
+      "description": "(Deprecated) Domain of the website endpoint, if the bucket is configured with a website. If not, this will be an empty string. This is used to create Route 53 alias records. Use the resource `aws_s3_bucket_website_configuration` instead.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "website_endpoint",
+      "description": "(Deprecated) Website endpoint, if the bucket is configured with a website. If not, this will be an empty string. Use the resource `aws_s3_bucket_website_configuration` instead.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

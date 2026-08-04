@@ -1,0 +1,97 @@
+{
+  "resource": {
+    "name": "aws_lightsail_bucket",
+    "description": "Provides a lightsail bucket.",
+    "llm_summary": "The `aws_lightsail_bucket` Terraform resource enables the creation and management of Lightsail object storage buckets, designed for simplified cloud storage within AWS Lightsail. It is commonly used for hosting static assets, backups, or application data in a cost-effective and developer-friendly environment. Users can configure bucket properties such as access control, lifecycle rules for automated data management, and integration with Lightsail instances or external services for seamless application workflows."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_lightsail_bucket\" \"test\" {\n  name      = \"mytestbucket\"\n  bundle_id = \"small_1_0\"\n}",
+      "llm_summary": "\"Demonstrates the basic setup of an AWS Lightsail bucket using the `aws_lightsail_bucket` resource, specifying the bucket name (`name`) and selecting a predefined bundle (`bundle_id`) for storage and performance configuration. This example is ideal for users looking to create a simple Lightsail bucket with minimal configuration.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bundle_id",
+      "description": "(Required) - The ID of the bundle to use for the bucket. A bucket bundle specifies the monthly cost, storage space, and data transfer quota for a bucket. Use the get-bucket-bundles cli command to get a list of bundle IDs that you can specify.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bundle_id` argument for the `aws_lightsail_bucket` resource specifies the pricing and performance configuration for the bucket, including its monthly cost, storage capacity, and data transfer limits. By setting this required parameter, users define the resource's operational tier, aligning it with their budget and usage requirements to optimize cost and scalability."
+    },
+    {
+      "name": "force_delete",
+      "description": "(Optional) - Force Delete non-empty buckets using `terraform destroy`. AWS by default will not delete an s3 bucket which is not empty, to prevent losing bucket data and affecting other resources in lightsail. If `force_delete` is set to `true` the bucket will be deleted even when not empty.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `force_delete` argument for the `aws_lightsail_bucket` resource allows users to control whether non-empty buckets are forcibly deleted during a `terraform destroy` operation. By setting this to `true`, users can override AWS's default safeguard against deleting buckets with existing data, enabling automated cleanup of bucket contents to support lifecycle management or resource decommissioning workflows."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_lightsail_bucket` resource allows users to specify a unique identifier for the Lightsail bucket, typically used to reference or manage the bucket within Terraform configurations and workflows. While optional, setting this argument can help ensure consistent identification of the resource across operations, supporting tasks like state management or integration with other resources."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name for the bucket.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies the unique identifier for the Lightsail bucket, allowing users to define a human-readable and distinct name for the bucket. This is a required parameter that serves as the primary reference for managing and interacting with the bucket, aligning with common user goals like organizing resources and ensuring clear identification within the AWS Lightsail environment."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. To create a key-only tag, use an empty string as the value. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_lightsail_bucket` resource allows users to assign metadata in the form of key-value pairs to the bucket, enabling resource organization, categorization, and cost allocation. By defining tags, users can manage and track resources effectively, with the ability to override provider-level default tags for more granular control."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_lightsail_bucket` resource allows users to define a comprehensive set of key-value tags that are applied to the bucket for organizational, management, or cost allocation purposes. By setting this argument, users can ensure consistent tagging across resources, enabling streamlined resource tracking, billing analysis, and compliance with tagging policies."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the lightsail bucket.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "availability_zone",
+      "description": "The resource Availability Zone. Follows the format us-east-2a (case-sensitive).",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "created_at",
+      "description": "The timestamp when the bucket was created.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "region",
+      "description": "The Amazon Web Services Region name.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "support_code",
+      "description": "The support code for the resource. Include this code in your email to support when you have questions about a resource in Lightsail. This code enables our support team to look up your Lightsail information more easily.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "url",
+      "description": "",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

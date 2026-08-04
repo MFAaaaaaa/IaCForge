@@ -1,0 +1,79 @@
+{
+  "resource": {
+    "name": "aws_lightsail_disk",
+    "description": "Provides a Lightsail Disk resource.",
+    "llm_summary": "The `aws_lightsail_disk` Terraform resource enables the creation and management of Lightsail block storage disks, providing scalable and cost-effective storage for Lightsail instances. Common use cases include attaching additional storage to Lightsail virtual servers, configuring disk size and performance, and managing disk lifecycle settings such as backups and encryption. This resource is ideal for users seeking simplified cloud storage solutions with customizable capacity and integration into Lightsail-based applications."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "data \"aws_availability_zones\" \"available\" {\n  state = \"available\"\n\n  filter {\n    name   = \"opt-in-status\"\n    values = [\"opt-in-not-required\"]\n  }\n}\n\nresource \"aws_lightsail_disk\" \"test\" {\n  name              = \"test\"\n  size_in_gb        = 8\n  availability_zone = data.aws_availability_zones.available.names[0]\n}",
+      "llm_summary": "\"Demonstrates the basic configuration of an `aws_lightsail_disk` resource, including setting its name, size in GB, and associating it with an availability zone dynamically retrieved using the `aws_availability_zones` data source filtered by opt-in status. This example highlights how to integrate data sources for dynamic resource provisioning in Lightsail.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "availability_zone",
+      "description": "(Required) The Availability Zone in which to create your disk.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "\"Defines the specific Availability Zone where the Lightsail disk will be created, ensuring the disk is provisioned in a geographically localized zone to optimize performance, redundancy, and compatibility with other resources in the same zone.\""
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_lightsail_disk` resource represents the unique identifier of the Lightsail disk. While not required, it is typically used to reference the disk in other resources or outputs, enabling users to manage dependencies and relationships within their Terraform configuration."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name of the disk.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_lightsail_disk` resource specifies the unique identifier for the Lightsail disk, allowing users to define a meaningful and recognizable name for the disk. This name is critical for resource management, as it enables users to reference and organize disks within their Lightsail environment effectively, supporting common goals like resource identification and operational clarity."
+    },
+    {
+      "name": "size_in_gb",
+      "description": "(Required) The size of the disk in GB.",
+      "required": true,
+      "type": "number",
+      "llm_summary": "The `size_in_gb` argument for the `aws_lightsail_disk` resource specifies the storage capacity of the Lightsail disk in gigabytes, allowing users to define the disk size based on their application's data storage needs. Setting this value directly impacts the disk's ability to handle workloads, making it essential for configuring scalable and cost-effective storage solutions in Lightsail environments."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. To create a key-only tag, use an empty string as the value. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_lightsail_disk` resource allows users to assign metadata in the form of key-value pairs to the disk, enabling organization, categorization, and identification of resources for purposes such as cost allocation, environment labeling, or automation workflows. By configuring this argument, users can define custom tags or override provider-level default tags, ensuring granular control over resource tagging for better management and integration with tagging-based policies or tools."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_lightsail_disk` resource allows users to define a comprehensive set of key-value tags (as a `map(string)`) that are applied to the Lightsail disk for organizational, management, or cost allocation purposes. By setting this argument, users can ensure consistent tagging across resources, enabling streamlined resource tracking, categorization, and integration with AWS billing and governance tools."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the Lightsail disk.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "created_at",
+      "description": "The timestamp when the disk was created.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "support_code",
+      "description": "The support code for the disk. Include this code in your email to support when you have questions about a disk in Lightsail. This code enables our support team to look up your Lightsail information more easily.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

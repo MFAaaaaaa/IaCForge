@@ -1,0 +1,423 @@
+{
+    "resource": {
+        "name": "aws_sagemaker_model",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "enable_network_isolation",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "execution_role_arn",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "container",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "container_hostname",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "environment",
+                    "description": "",
+                    "required": false,
+                    "type": "map(string)"
+                },
+                {
+                    "name": "image",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "inference_specification_name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "mode",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "model_data_url",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "model_package_name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "image_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "repository_access_mode",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "repository_auth_config",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "repository_credentials_provider_arn",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "model_data_source",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "s3_data_source",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                0
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "compression_type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "s3_data_type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "s3_uri",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "model_access_config",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "accept_eula",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "bool"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "multi_model_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "model_cache_setting",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "inference_execution_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "mode",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "primary_container",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "container_hostname",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "environment",
+                    "description": "",
+                    "required": false,
+                    "type": "map(string)"
+                },
+                {
+                    "name": "image",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "inference_specification_name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "mode",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "model_data_url",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "model_package_name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "image_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "repository_access_mode",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "repository_auth_config",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "repository_credentials_provider_arn",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "model_data_source",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "s3_data_source",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                0
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "compression_type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "s3_data_type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "s3_uri",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "model_access_config",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "accept_eula",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "bool"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "multi_model_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "model_cache_setting",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "vpc_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "security_group_ids",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "subnets",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

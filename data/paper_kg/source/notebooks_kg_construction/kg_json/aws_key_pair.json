@@ -1,0 +1,72 @@
+{
+    "resource": {
+        "name": "aws_key_pair",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "key_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "key_name_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "public_key",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "fingerprint",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "key_pair_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "key_type",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

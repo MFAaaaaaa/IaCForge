@@ -1,0 +1,96 @@
+{
+    "resource": {
+        "name": "aws_cloudwatch_event_rule",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "event_bus_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "event_pattern",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "force_destroy",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "is_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "role_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "schedule_expression",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "state",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

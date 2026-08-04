@@ -1,0 +1,42 @@
+{
+  "copied_docs": 1724,
+  "dataset_csv": null,
+  "edges": 3514,
+  "kg_shape": {
+    "entities": [
+      "Resource",
+      "Argument",
+      "Block",
+      "Attribute",
+      "Example"
+    ],
+    "relationships": [
+      "HAS_ARGUMENT",
+      "HAS_BLOCK",
+      "EXPORTS_ATTRIBUTE",
+      "HAS_EXAMPLE",
+      "REFERENCES"
+    ]
+  },
+  "leakage_policy": "Public Terraform AWS provider v5.90.0 docs/schema only. No IaC-Eval Resource, Intent, Rego intent, Reference output, validation result, plan result, OPA result, or repair trace is used.",
+  "missing_docs": [
+    "aws_account_region",
+    "aws_alb",
+    "aws_alb_listener",
+    "aws_alb_listener_certificate",
+    "aws_alb_listener_rule",
+    "aws_alb_target_group",
+    "aws_alb_target_group_attachment",
+    "aws_ec2_image_block_public_access",
+    "aws_pinpoint_email_template",
+    "aws_rds_custom_db_engine_version",
+    "aws_securityhub_configuration_policy_association"
+  ],
+  "missing_schema": [],
+  "provider_source": "/tmp/terraform-provider-aws-5.90.0",
+  "provider_version": "5.90.0",
+  "records": 1735,
+  "schema_json": "/tmp/aws-provider-schema-5.90.0.json",
+  "source": "Terraform AWS provider official documentation and provider schema",
+  "target_types": 1735
+}

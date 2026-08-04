@@ -1,0 +1,74 @@
+{
+  "resource": {
+    "name": "aws_neptune_subnet_group",
+    "description": "Provides an Neptune subnet group resource.",
+    "llm_summary": "The `aws_neptune_subnet_group` Terraform resource enables the creation and management of subnet groups specifically for Amazon Neptune, a fully managed graph database service. It is commonly used to define the network boundaries for Neptune clusters, ensuring database instances are deployed within specified subnets in a VPC for enhanced security and connectivity. Users can configure subnet group settings to optimize database accessibility, support high availability, and integrate Neptune with other AWS services in a controlled network environment."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_neptune_subnet_group\" \"default\" {\n  name       = \"main\"\n  subnet_ids = [aws_subnet.frontend.id, aws_subnet.backend.id]\n\n  tags = {\n    Name = \"My neptune subnet group\"\n  }\n}",
+      "llm_summary": "\"Demonstrates the basic configuration of an `aws_neptune_subnet_group` resource by specifying a name, associating multiple subnet IDs, and applying tags for identification. This example shows how to set up a Neptune subnet group to define the subnets used by an Amazon Neptune database within a VPC.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "description",
+      "description": "(Optional) The description of the neptune subnet group. Defaults to \"Managed by Terraform\".",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_neptune_subnet_group` resource allows users to define a human-readable description for the Neptune subnet group, providing context or metadata about its purpose or usage. While optional, setting this argument can help users document the subnet group's role within their infrastructure, improving clarity and maintainability."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_neptune_subnet_group` resource allows users to specify a unique identifier for the subnet group, enabling precise referencing and management within Terraform configurations. While optional, setting this argument ensures consistent identification of the resource, which is particularly useful for tracking, updates, and integrations with other dependent resources or modules."
+    },
+    {
+      "name": "name",
+      "description": "(Optional, Forces new resource) The name of the neptune subnet group. If omitted, Terraform will assign a random, unique name.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_neptune_subnet_group` resource allows users to define a custom, human-readable identifier for the Neptune subnet group, facilitating easier management and organization of database networking resources. If omitted, Terraform generates a unique name automatically, but specifying this argument is useful for aligning with naming conventions or distinguishing resources in multi-environment setups."
+    },
+    {
+      "name": "name_prefix",
+      "description": "(Optional, Forces new resource) Creates a unique name beginning with the specified prefix. Conflicts with `name`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name_prefix` argument for the `aws_neptune_subnet_group` resource allows users to define a custom prefix for the automatically generated name of the subnet group, ensuring uniqueness while simplifying naming conventions. This is particularly useful for managing resources across environments or projects, as it enables dynamic name generation without manual specification, but it cannot be used alongside the `name` argument."
+    },
+    {
+      "name": "subnet_ids",
+      "description": "(Required) A list of VPC subnet IDs.",
+      "required": true,
+      "type": "set(string)",
+      "llm_summary": "The `subnet_ids` argument for the `aws_neptune_subnet_group` resource specifies the set of VPC subnet IDs where the Neptune database instances will be deployed. By defining this argument, users control the network placement of the database within specific subnets, ensuring connectivity, security, and compliance with their VPC architecture."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_neptune_subnet_group` resource allows users to assign metadata in the form of key-value pairs to the subnet group, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or automation workflows. When configured, it can override provider-level default tags, ensuring granular control over tagging specific to this resource."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_neptune_subnet_group` resource allows users to define a comprehensive set of key-value tags that are automatically merged with resource-specific tags, enabling consistent metadata management across AWS resources. By setting this argument, users can streamline tagging for purposes like cost allocation, resource organization, or environment identification, ensuring uniform tagging across related infrastructure components."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the neptune subnet group.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

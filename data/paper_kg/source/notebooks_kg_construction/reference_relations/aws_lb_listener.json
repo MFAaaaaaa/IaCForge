@@ -1,0 +1,37 @@
+[
+    {
+        "argument_path": "load_balancer_arn",
+        "references_output": "aws_lb.arn",
+        "target_resource_type": "aws_lb"
+    },
+    {
+        "argument_path": "default_action.target_group_arn",
+        "references_output": "aws_lb_target_group.arn",
+        "target_resource_type": "aws_lb_target_group"
+    },
+    {
+        "argument_path": "default_action.authenticate_cognito.user_pool_arn",
+        "references_output": "aws_cognito_user_pool.arn",
+        "target_resource_type": "aws_cognito_user_pool"
+    },
+    {
+        "argument_path": "default_action.authenticate_cognito.user_pool_client_id",
+        "references_output": "aws_cognito_user_pool_client.id",
+        "target_resource_type": "aws_cognito_user_pool_client"
+    },
+    {
+        "argument_path": "default_action.authenticate_cognito.user_pool_domain",
+        "references_output": "aws_cognito_user_pool_domain.domain",
+        "target_resource_type": "aws_cognito_user_pool_domain"
+    },
+    {
+        "argument_path": "default_action.forward.target_group.arn",
+        "references_output": "aws_lb_target_group.arn",
+        "target_resource_type": "aws_lb_target_group"
+    },
+    {
+        "argument_path": "mutual_authentication.trust_store_arn",
+        "references_output": "aws_elbv2_trust_store.arn",
+        "target_resource_type": "aws_elbv2_trust_store"
+    }
+]

@@ -1,0 +1,39 @@
+{
+  "resource": {
+    "name": "aws_vpc_dhcp_options_association",
+    "description": "Provides a VPC DHCP Options Association resource.",
+    "llm_summary": "The `aws_vpc_dhcp_options_association` resource enables the association of custom DHCP options sets with an Amazon VPC, allowing users to manage network configuration settings such as DNS servers, domain names, and NTP servers for instances within the VPC. Common use cases include customizing DNS resolution for private or hybrid cloud environments, enforcing specific network settings across VPCs, and integrating with on-premises infrastructure. This resource is essential for configuring advanced networking features and ensuring consistent DHCP behavior across cloud deployments."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_vpc_dhcp_options_association\" \"dns_resolver\" {\n  vpc_id          = aws_vpc.foo.id\n  dhcp_options_id = aws_vpc_dhcp_options.foo.id\n}",
+      "llm_summary": "\"Demonstrates how to associate a VPC with specific DHCP options using the `aws_vpc_dhcp_options_association` resource, showcasing the use of the `vpc_id` and `dhcp_options_id` arguments to configure custom DNS and network settings for a VPC.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "dhcp_options_id",
+      "description": "(Required) The ID of the DHCP Options Set to associate to the VPC.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `dhcp_options_id` argument specifies the ID of the DHCP Options Set to associate with a VPC, enabling the configuration of network settings such as DNS servers, domain names, and NTP servers for instances within the VPC. By setting this required argument, users can customize and control key networking behaviors to align with their environment's requirements."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_vpc_dhcp_options_association` resource represents the unique identifier of the association between a VPC and DHCP options. While optional, it is typically used to reference or manage the association explicitly, enabling users to track or interact with the resource in Terraform configurations or workflows."
+    },
+    {
+      "name": "vpc_id",
+      "description": "(Required) The ID of the VPC to which we would like to associate a DHCP Options Set.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `vpc_id` argument specifies the ID of the VPC to associate with a DHCP Options Set, enabling the configuration of custom DHCP settings such as domain name servers, NTP servers, and domain search lists for resources within the VPC. This is essential for tailoring network behavior and ensuring consistent connectivity and name resolution across the VPC environment."
+    }
+  ],
+  "blocks": [],
+  "attributes": []
+}

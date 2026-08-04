@@ -1,0 +1,176 @@
+{
+  "resource": {
+    "name": "aws_kms_key",
+    "description": "Manages a single-Region or multi-Region primary KMS key. KMS Key Policy can be configured in either the standalone resource aws_kms_key_policy or with the parameter policy in this resource. Configuring with both will cause inconsistencies and may overwrite configuration.",
+    "llm_summary": "The `aws_kms_key` Terraform resource enables the creation and management of single-Region or multi-Region primary AWS KMS keys, essential for encrypting and securing sensitive data across cloud services. It supports configuring key policies either directly within the resource or through the standalone `aws_kms_key_policy`, allowing users to define access control and permissions for encryption workflows. Common use cases include securing application data, managing encryption keys for compliance, and integrating with services like S3, EBS, or RDS for automated encryption."
+  },
+  "examples": [
+    {
+      "title": "Symmetric Encryption KMS Key",
+      "code": "data \"aws_caller_identity\" \"current\" {}\n\nresource \"aws_kms_key\" \"example\" {\n  description             = \"An example symmetric encryption KMS key\"\n  enable_key_rotation     = true\n  deletion_window_in_days = 20\n  policy = jsonencode({\n    Version = \"2012-10-17\"\n    Id      = \"key-default-1\"\n    Statement = [\n      {\n        Sid    = \"Enable IAM User Permissions\"\n        Effect = \"Allow\"\n        Principal = {\n          AWS = \"arn:aws:iam::${data.aws_caller_identity.current.account_id}:root\"\n        },\n        Action   = \"kms:*\"\n        Resource = \"*\"\n      },\n      {\n        Sid    = \"Allow administration of the key\"\n        Effect = \"Allow\"\n        Principal = {\n          AWS = \"arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/Alice\"\n        },\n        Action = [\n          \"kms:ReplicateKey\",\n          \"kms:Create*\",\n          \"kms:Describe*\",\n          \"kms:Enable*\",\n          \"kms:List*\",\n          \"kms:Put*\",\n          \"kms:Update*\",\n          \"kms:Revoke*\",\n          \"kms:Disable*\",\n          \"kms:Get*\",\n          \"kms:Delete*\",\n          \"kms:ScheduleKeyDeletion\",\n          \"kms:CancelKeyDeletion\"\n        ],\n        Resource = \"*\"\n      },\n      {\n        Sid    = \"Allow use of the key\"\n        Effect = \"Allow\"\n        Principal = {\n          AWS = \"arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/Bob\"\n        },\n        Action = [\n          \"kms:DescribeKey\",\n          \"kms:Encrypt\",\n          \"kms:Decrypt\",\n          \"kms:ReEncrypt*\",\n          \"kms:GenerateDataKey\",\n          \"kms:GenerateDataKeyWithoutPlaintext\"\n        ],\n        Resource = \"*\"\n      }\n    ]\n  })\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS KMS symmetric encryption key with key rotation enabled, a custom deletion window, and a detailed IAM policy granting specific administrative and usage permissions to multiple principals. Highlights the use of `jsonencode` for defining complex policies and dynamic references to the current AWS account ID.\""
+    },
+    {
+      "title": "Symmetric Encryption KMS Key With Standalone Policy Resource",
+      "code": "data \"aws_caller_identity\" \"current\" {}\n\nresource \"aws_kms_key\" \"example\" {\n  description             = \"An example symmetric encryption KMS key\"\n  enable_key_rotation     = true\n  deletion_window_in_days = 20\n}\n\nresource \"aws_kms_key_policy\" \"example\" {\n  key_id = aws_kms_key.example.id\n  policy = jsonencode({\n    Version = \"2012-10-17\"\n    Id      = \"key-default-1\"\n    Statement = [\n      {\n        Sid    = \"Enable IAM User Permissions\"\n        Effect = \"Allow\"\n        Principal = {\n          AWS = \"arn:aws:iam::${data.aws_caller_identity.current.account_id}:root\"\n        },\n        Action   = \"kms:*\"\n        Resource = \"*\"\n      }\n    ]\n  })\n}",
+      "llm_summary": "This example demonstrates how to create an AWS KMS symmetric encryption key with key rotation enabled and a standalone key policy resource. It illustrates configuring the `aws_kms_key` resource with `enable_key_rotation` and `deletion_window_in_days`, alongside a custom `aws_kms_key_policy` that grants full permissions to the account root user using a JSON-encoded policy."
+    },
+    {
+      "title": "Asymmetric KMS Key",
+      "code": "data \"aws_caller_identity\" \"current\" {}\n\nresource \"aws_kms_key\" \"example\" {\n  description              = \"RSA-3072 asymmetric KMS key for signing and verification\"\n  customer_master_key_spec = \"RSA_3072\"\n  key_usage                = \"SIGN_VERIFY\"\n  enable_key_rotation      = false\n  policy = jsonencode({\n    Version = \"2012-10-17\"\n    Id      = \"key-default-1\"\n    Statement = [\n      {\n        Sid    = \"Enable IAM User Permissions\"\n        Effect = \"Allow\"\n        Principal = {\n          AWS = \"arn:aws:iam::${data.aws_caller_identity.current.account_id}:root\"\n        },\n        Action   = \"kms:*\"\n        Resource = \"*\"\n      },\n      {\n        Sid    = \"Allow administration of the key\"\n        Effect = \"Allow\"\n        Principal = {\n          AWS = \"arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/Admin\"\n        },\n        Action = [\n          \"kms:Create*\",\n          \"kms:Describe*\",\n          \"kms:Enable*\",\n          \"kms:List*\",\n          \"kms:Put*\",\n          \"kms:Update*\",\n          \"kms:Revoke*\",\n          \"kms:Disable*\",\n          \"kms:Get*\",\n          \"kms:Delete*\",\n          \"kms:ScheduleKeyDeletion\",\n          \"kms:CancelKeyDeletion\"\n        ],\n        Resource = \"*\"\n      },\n      {\n        Sid    = \"Allow use of the key\"\n        Effect = \"Allow\"\n        Principal = {\n          AWS = \"arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/Developer\"\n        },\n        Action = [\n          \"kms:Sign\",\n          \"kms:Verify\",\n          \"kms:DescribeKey\"\n        ],\n        Resource = \"*\"\n      }\n    ]\n  })\n}",
+      "llm_summary": "This example demonstrates how to configure an asymmetric AWS KMS key with RSA-3072 for signing and verification using the `aws_kms_key` resource. It includes a custom IAM policy to define granular permissions for administration and usage, showcasing key arguments like `customer_master_key_spec`, `key_usage`, and `policy` for advanced access control and cryptographic operations."
+    },
+    {
+      "title": "HMAC KMS key",
+      "code": "data \"aws_caller_identity\" \"current\" {}\n\nresource \"aws_kms_key\" \"example\" {\n  description              = \"HMAC_384 key for tokens\"\n  customer_master_key_spec = \"HMAC_384\"\n  key_usage                = \"GENERATE_VERIFY_MAC\"\n  enable_key_rotation      = false\n  policy = jsonencode({\n    Version = \"2012-10-17\"\n    Id      = \"key-default-1\"\n    Statement = [\n      {\n        Sid    = \"Enable IAM User Permissions\"\n        Effect = \"Allow\"\n        Principal = {\n          AWS = \"arn:aws:iam::${data.aws_caller_identity.current.account_id}:root\"\n        },\n        Action   = \"kms:*\"\n        Resource = \"*\"\n      },\n      {\n        Sid    = \"Allow administration of the key\"\n        Effect = \"Allow\"\n        Principal = {\n          AWS = \"arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/Admin\"\n        },\n        Action = [\n          \"kms:Create*\",\n          \"kms:Describe*\",\n          \"kms:Enable*\",\n          \"kms:List*\",\n          \"kms:Put*\",\n          \"kms:Update*\",\n          \"kms:Revoke*\",\n          \"kms:Disable*\",\n          \"kms:Get*\",\n          \"kms:Delete*\",\n          \"kms:ScheduleKeyDeletion\",\n          \"kms:CancelKeyDeletion\"\n        ],\n        Resource = \"*\"\n      },\n      {\n        Sid    = \"Allow use of the key\"\n        Effect = \"Allow\"\n        Principal = {\n          AWS = \"arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/Developer\"\n        },\n        Action = [\n          \"kms:GenerateMac\",\n          \"kms:VerifyMac\",\n          \"kms:DescribeKey\"\n        ],\n        Resource = \"*\"\n      }\n    ]\n  })\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS KMS key with the `HMAC_384` customer master key spec for token generation and verification, using the `aws_kms_key` resource. It includes a custom IAM policy to define granular permissions for administrative roles and developer roles, showcasing key usage for `GENERATE_VERIFY_MAC` and advanced policy configurations."
+    },
+    {
+      "title": "Multi-Region Primary Key",
+      "code": "data \"aws_caller_identity\" \"current\" {}\n\nresource \"aws_kms_key\" \"example\" {\n  description             = \"An example multi-Region primary key\"\n  multi_region            = true\n  enable_key_rotation     = true\n  deletion_window_in_days = 10\n  policy = jsonencode({\n    Version = \"2012-10-17\"\n    Id      = \"key-default-1\"\n    Statement = [\n      {\n        Sid    = \"Enable IAM User Permissions\"\n        Effect = \"Allow\"\n        Principal = {\n          AWS = \"arn:aws:iam::${data.aws_caller_identity.current.account_id}:root\"\n        },\n        Action   = \"kms:*\"\n        Resource = \"*\"\n      },\n      {\n        Sid    = \"Allow administration of the key\"\n        Effect = \"Allow\"\n        Principal = {\n          AWS = \"arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/Alice\"\n        },\n        Action = [\n          \"kms:ReplicateKey\",\n          \"kms:Create*\",\n          \"kms:Describe*\",\n          \"kms:Enable*\",\n          \"kms:List*\",\n          \"kms:Put*\",\n          \"kms:Update*\",\n          \"kms:Revoke*\",\n          \"kms:Disable*\",\n          \"kms:Get*\",\n          \"kms:Delete*\",\n          \"kms:ScheduleKeyDeletion\",\n          \"kms:CancelKeyDeletion\"\n        ],\n        Resource = \"*\"\n      },\n      {\n        Sid    = \"Allow use of the key\"\n        Effect = \"Allow\"\n        Principal = {\n          AWS = \"arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/Bob\"\n        },\n        Action = [\n          \"kms:DescribeKey\",\n          \"kms:Encrypt\",\n          \"kms:Decrypt\",\n          \"kms:ReEncrypt*\",\n          \"kms:GenerateDataKey\",\n          \"kms:GenerateDataKeyWithoutPlaintext\"\n        ],\n        Resource = \"*\"\n      }\n    ]\n  })\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS KMS multi-Region primary key with key rotation enabled, a custom deletion window, and a detailed IAM policy for granular access control. It illustrates the use of the `multi_region` argument and `policy` block to define permissions for administrative and usage roles, enabling secure and scalable key management across regions."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bypass_policy_lockout_safety_check",
+      "description": "(Optional) A flag to indicate whether to bypass the key policy lockout safety check. Setting this value to true increases the risk that the KMS key becomes unmanageable. Do not set this value to true indiscriminately. For more information, refer to the scenario in the Default Key Policy section in the AWS Key Management Service Developer Guide. The default value is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `bypass_policy_lockout_safety_check` argument for the `aws_kms_key` resource allows users to control whether the key policy lockout safety check is bypassed, enabling modifications to the key policy that could potentially make the KMS key unmanageable. Setting this to `true` is typically used in advanced scenarios but increases the risk of losing administrative access to the key, making it critical for users to exercise caution and understand the implications."
+    },
+    {
+      "name": "custom_key_store_id",
+      "description": "(Optional) ID of the KMS Custom Key Store where the key will be stored instead of KMS (eg CloudHSM).",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `custom_key_store_id` argument allows users to specify the ID of a KMS Custom Key Store, such as CloudHSM, where the encryption key will be stored instead of the default AWS KMS-managed storage. Configuring this argument enables enhanced control over key storage, typically to meet compliance, security, or regulatory requirements by leveraging dedicated hardware-backed key management solutions."
+    },
+    {
+      "name": "customer_master_key_spec",
+      "description": "(Optional) Specifies whether the key contains a symmetric key or an asymmetric key pair and the encryption algorithms or signing algorithms that the key supports. Valid values: `SYMMETRIC_DEFAULT`, `RSA_2048`, `RSA_3072`, `RSA_4096`, `HMAC_256`, `ECC_NIST_P256`, `ECC_NIST_P384`, `ECC_NIST_P521`, or `ECC_SECG_P256K1`. Defaults to `SYMMETRIC_DEFAULT`. For help with choosing a key spec, see the AWS KMS Developer Guide.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `customer_master_key_spec` argument for the `aws_kms_key` resource allows users to define the cryptographic configuration of the KMS key, specifying whether it is symmetric or asymmetric and the supported encryption or signing algorithms (e.g., `SYMMETRIC_DEFAULT`, `RSA_2048`, `ECC_NIST_P256`). By setting this argument, users can tailor the key's functionality to meet specific security requirements, such as enabling symmetric encryption for general-purpose use or asymmetric key pairs for advanced cryptographic operations like digital signatures."
+    },
+    {
+      "name": "deletion_window_in_days",
+      "description": "(Optional) The waiting period, specified in number of days. After the waiting period ends, AWS KMS deletes the KMS key. If you specify a value, it must be between `7` and `30`, inclusive. If you do not specify a value, it defaults to `30`. If the KMS key is a multi-Region primary key with replicas, the waiting period begins when the last of its replica keys is deleted. Otherwise, the waiting period begins immediately.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `deletion_window_in_days` argument for the `aws_kms_key` resource allows users to define the waiting period (7\u201330 days) before AWS KMS permanently deletes a key after a deletion request. This configuration is critical for managing the lifecycle of encryption keys, providing a safeguard to prevent accidental deletion and ensuring compliance with retention policies or recovery needs."
+    },
+    {
+      "name": "description",
+      "description": "(Optional) The description of the key as viewed in AWS console.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_kms_key` resource allows users to define a human-readable summary or label for the KMS key, as displayed in the AWS Management Console. Setting this argument helps users document the key's purpose or context, improving clarity and organization when managing multiple keys in their environment."
+    },
+    {
+      "name": "enable_key_rotation",
+      "description": "(Optional, required to be enabled if `rotation_period_in_days` is specified) Specifies whether key rotation is enabled. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_key_rotation` argument for the `aws_kms_key` resource allows users to control whether automatic cryptographic key rotation is enabled for the KMS key. Enabling this feature enhances security by periodically rotating the key material, aligning with best practices for managing sensitive encryption keys."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_kms_key` resource represents the unique identifier of the KMS key, typically used to reference an existing key managed by AWS Key Management Service. While optional, setting this argument allows users to specify or retrieve the key's ID for integration with other resources, enabling secure encryption and decryption workflows tied to the specified key."
+    },
+    {
+      "name": "is_enabled",
+      "description": "(Optional) Specifies whether the key is enabled. Defaults to `true`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `is_enabled` argument for the `aws_kms_key` resource allows users to control whether the KMS key is active and operational. By setting this boolean value, users can enable or disable the key, impacting its availability for encryption, decryption, and other cryptographic operations, which is essential for managing key lifecycle and access in secure environments."
+    },
+    {
+      "name": "key_usage",
+      "description": "(Optional) Specifies the intended use of the key. Valid values: `ENCRYPT_DECRYPT`, `SIGN_VERIFY`, or `GENERATE_VERIFY_MAC`. Defaults to `ENCRYPT_DECRYPT`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `key_usage` argument for the `aws_kms_key` resource specifies the primary cryptographic purpose of the KMS key, allowing users to define whether the key will be used for encryption and decryption (`ENCRYPT_DECRYPT`), signing and verification (`SIGN_VERIFY`), or generating and verifying MACs (`GENERATE_VERIFY_MAC`). This configuration determines the key's functionality and aligns it with the intended use case, such as securing data, validating digital signatures, or ensuring message integrity."
+    },
+    {
+      "name": "multi_region",
+      "description": "(Optional) Indicates whether the KMS key is a multi-Region (`true`) or regional (`false`) key. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `multi_region` argument for the `aws_kms_key` resource allows users to specify whether the KMS key is a multi-Region key (`true`) or a regional key (`false`). Configuring this argument enables cross-region encryption capabilities for global workloads or restricts the key's usage to a specific AWS region, aligning with user goals like ensuring data sovereignty or supporting multi-region architectures."
+    },
+    {
+      "name": "policy",
+      "description": "(Optional) A valid policy JSON document. Although this is a key policy, not an IAM policy, an `aws_iam_policy_document`, in the form that designates a principal, can be used. For more information about building policy documents with Terraform, see the AWS IAM Policy Document Guide. Note: All KMS keys must have a key policy. If a key policy is not specified, AWS gives the KMS key a default key policy that gives all principals in the owning account unlimited access to all KMS operations for the key. This default key policy effectively delegates all access control to IAM policies and KMS grants.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `policy` argument for the `aws_kms_key` resource allows users to define a custom key policy as a JSON document, specifying granular access control for the KMS key. By setting this argument, users can override the default key policy provided by AWS, enabling precise management of permissions and delegating access to IAM roles, users, or services according to their security and compliance requirements."
+    },
+    {
+      "name": "rotation_period_in_days",
+      "description": "(Optional) Custom period of time between each rotation date. Must be a number between 90 and 2560 (inclusive).",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `rotation_period_in_days` argument for the `aws_kms_key` resource allows users to define the custom interval, in days, between automatic key rotations, enhancing security by periodically updating the cryptographic material. By specifying a value between 90 and 2560, users can align key rotation schedules with compliance requirements or organizational policies, ensuring secure and managed lifecycle practices for encryption keys."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the object. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_kms_key` resource allows users to assign metadata in the form of key-value pairs to the KMS key, enabling organization, categorization, and identification of the resource for purposes such as cost allocation, environment labeling, or compliance tracking. When configured, these tags can override provider-level default tags, ensuring granular control over resource-specific tagging."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_kms_key` resource allows users to define a comprehensive set of key-value tags that are automatically propagated across the resource and its related entities, enabling consistent metadata management for organization, cost allocation, and resource categorization. By setting this argument, users can ensure uniform tagging across the KMS key and associated resources, supporting common goals like tracking environments, ownership, or compliance requirements."
+    },
+    {
+      "name": "xks_key_id",
+      "description": "(Optional) Identifies the external key that serves as key material for the KMS key in an external key store.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `xks_key_id` argument for the `aws_kms_key` resource allows users to specify the identifier of an external key that provides the cryptographic material for the KMS key in an external key store. By setting this argument, users can integrate and manage external key material, enabling advanced use cases such as hybrid cryptographic workflows or compliance with external key management policies."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_kms_key` resource allows users to specify the maximum duration (in string format, e.g., \"5m\" for 5 minutes) Terraform will wait for the creation of a KMS key to complete. By configuring this timeout, users can control the behavior of resource provisioning to ensure it aligns with their operational requirements, such as handling delays in key creation or avoiding indefinite waits during infrastructure deployment."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_kms_key` resource allows users to define custom time limits for operations related to the creation, update, and deletion of KMS keys. By configuring this block, users can manage operation durations to prevent long-running tasks or adapt timeout settings to align with specific infrastructure requirements, ensuring smoother lifecycle management of encryption keys."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) of the key.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "key_id",
+      "description": "The globally unique identifier for the key.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

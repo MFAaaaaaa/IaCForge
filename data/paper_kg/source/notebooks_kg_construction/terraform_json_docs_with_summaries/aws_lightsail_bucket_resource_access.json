@@ -1,0 +1,39 @@
+{
+  "resource": {
+    "name": "aws_lightsail_bucket_resource_access",
+    "description": "Provides a lightsail resource access to a bucket.",
+    "llm_summary": "\"Enables Lightsail resources to access and interact with an Amazon Lightsail bucket, facilitating seamless integration between compute instances and storage. Common use cases include configuring Lightsail instances to read, write, or manage bucket data for web applications, backups, or content delivery workflows. Supports resource-level permissions and access control, ensuring secure and efficient data operations within Lightsail environments.\""
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_lightsail_bucket\" \"test\" {\n  name      = \"mytestbucket\"\n  bundle_id = \"small_1_0\"\n}\n\nresource \"aws_lightsail_instance\" \"test\" {\n  name              = \"mytestinstance\"\n  availability_zone = \"us-east-1b\"\n  blueprint_id      = \"amazon_linux_2\"\n  bundle_id         = \"nano_3_0\"\n}\n\nresource \"aws_lightsail_bucket_resource_access\" \"test\" {\n  bucket_name   = aws_lightsail_bucket_resource_access.test.id\n  resource_name = aws_lightsail_instance.id\n}",
+      "llm_summary": "This example demonstrates how to configure resource access between an AWS Lightsail bucket and an AWS Lightsail instance using the `aws_lightsail_bucket_resource_access` resource. It showcases the setup of a Lightsail bucket (`aws_lightsail_bucket`) and instance (`aws_lightsail_instance`), and establishes access permissions by linking the bucket to the instance via the `bucket_name` and `resource_name` arguments."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bucket_name",
+      "description": "(Required) The name of the bucket to grant access to.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket_name` argument specifies the name of the Lightsail bucket to which resource access permissions will be granted, enabling the configuration of access control for the bucket. By defining this required parameter, users ensure that the resource access settings are applied to the intended bucket, supporting common goals like managing data access and integration with other AWS services."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_lightsail_bucket_resource_access` resource allows users to specify a unique identifier for the resource access configuration associated with an Amazon Lightsail bucket. While optional, setting this argument can help users manage and reference the resource access configuration explicitly, enabling better organization and tracking within their Terraform-managed infrastructure."
+    },
+    {
+      "name": "resource_name",
+      "description": "(Required) The name of the resource to be granted bucket access.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `resource_name` argument in the `aws_lightsail_bucket_resource_access` resource specifies the name of the Lightsail resource (e.g., instance or container) that will be granted access to the associated bucket. By defining this argument, users enable the resource to interact with the bucket, facilitating common use cases such as storing or retrieving data for applications hosted on Lightsail."
+    }
+  ],
+  "blocks": [],
+  "attributes": []
+}

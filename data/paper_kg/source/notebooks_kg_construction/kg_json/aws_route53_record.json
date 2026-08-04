@@ -1,0 +1,264 @@
+{
+    "resource": {
+        "name": "aws_route53_record",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "allow_overwrite",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "health_check_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "multivalue_answer_routing_policy",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "records",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "set_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ttl",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "type",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "zone_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "alias",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "evaluate_target_health",
+                    "description": "",
+                    "required": true,
+                    "type": "bool"
+                },
+                {
+                    "name": "name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "zone_id",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "cidr_routing_policy",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "collection_id",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "location_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "failover_routing_policy",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "type",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "geolocation_routing_policy",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "continent",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "country",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "subdivision",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "geoproximity_routing_policy",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "aws_region",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "bias",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "local_zone_group",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "coordinates",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        0
+                    ],
+                    "arguments": [
+                        {
+                            "name": "latitude",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "longitude",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "latency_routing_policy",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "region",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "weighted_routing_policy",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "weight",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "fqdn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

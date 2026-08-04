@@ -1,0 +1,66 @@
+{
+    "resource": {
+        "name": "aws_redshift_endpoint_authorization",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "account",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "cluster_identifier",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "force_delete",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "vpc_ids",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "allowed_all_vpcs",
+            "description": "",
+            "optional": false,
+            "type": "bool"
+        },
+        {
+            "name": "endpoint_count",
+            "description": "",
+            "optional": false,
+            "type": "number"
+        },
+        {
+            "name": "grantee",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "grantor",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

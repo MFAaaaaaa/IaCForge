@@ -1,0 +1,304 @@
+{
+    "resource": {
+        "name": "aws_ami",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "architecture",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "boot_mode",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "deprecation_time",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ena_support",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "image_location",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "imds_support",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "kernel_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "ramdisk_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "root_device_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "sriov_net_support",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tpm_support",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "uefi_data",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "virtualization_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "ebs_block_device",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "delete_on_termination",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "device_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "encrypted",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "iops",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "outpost_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "snapshot_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "throughput",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "volume_size",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "volume_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "ephemeral_block_device",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "device_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "virtual_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "hypervisor",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "image_owner_alias",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "image_type",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "manage_ebs_snapshots",
+            "description": "",
+            "optional": false,
+            "type": "bool"
+        },
+        {
+            "name": "owner_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "platform",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "platform_details",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "public",
+            "description": "",
+            "optional": false,
+            "type": "bool"
+        },
+        {
+            "name": "root_snapshot_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "usage_operation",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

@@ -1,0 +1,62 @@
+[
+    {
+        "argument_path": "db_subnet_group_name",
+        "references_output": "aws_db_subnet_group.name",
+        "target_resource_type": "aws_db_subnet_group"
+    },
+    {
+        "argument_path": "kms_key_id",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "parameter_group_name",
+        "references_output": "aws_db_parameter_group.name",
+        "target_resource_type": "aws_db_parameter_group"
+    },
+    {
+        "argument_path": "replicate_source_db",
+        "references_output": "aws_db_instance.identifier",
+        "target_resource_type": "aws_db_instance"
+    },
+    {
+        "argument_path": "replicate_source_db",
+        "references_output": "aws_db_instance.arn",
+        "target_resource_type": "aws_db_instance"
+    },
+    {
+        "argument_path": "monitoring_role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "domain_auth_secret_arn",
+        "references_output": "aws_secretsmanager_secret.arn",
+        "target_resource_type": "aws_secretsmanager_secret"
+    },
+    {
+        "argument_path": "master_user_secret_kms_key_id",
+        "references_output": "aws_kms_key.key_id",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "restore_to_point_in_time.source_db_instance_identifier",
+        "references_output": "aws_db_instance.identifier",
+        "target_resource_type": "aws_db_instance"
+    },
+    {
+        "argument_path": "restore_to_point_in_time.source_db_instance_automated_backups_arn",
+        "references_output": "aws_db_instance.arn",
+        "target_resource_type": "aws_db_instance"
+    },
+    {
+        "argument_path": "restore_to_point_in_time.source_dbi_resource_id",
+        "references_output": "aws_db_instance.resource_id",
+        "target_resource_type": "aws_db_instance"
+    },
+    {
+        "argument_path": "s3_import.ingestion_role",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    }
+]

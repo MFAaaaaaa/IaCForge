@@ -1,0 +1,187 @@
+{
+  "resource": {
+    "name": "aws_lightsail_instance",
+    "description": "Provides a Lightsail Instance. Amazon Lightsail is a service to provide easy virtual private servers with custom software already setup. See What is Amazon Lightsail? for more information. Lightsail is currently only supported in a limited number of AWS Regions, please see \"Regions and Availability Zones in Amazon Lightsail\" for more details",
+    "llm_summary": "The `aws_lightsail_instance` Terraform resource enables the creation and management of Amazon Lightsail virtual private servers, designed for simplicity and pre-configured software setups. It is ideal for use cases such as deploying lightweight applications, hosting websites, or running development environments with minimal infrastructure complexity. Users can configure instance types, networking settings, storage options, and automated lifecycle management, making it a streamlined solution for small-scale cloud workloads in supported AWS regions."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "# Create a new GitLab Lightsail Instance\nresource \"aws_lightsail_instance\" \"gitlab_test\" {\n  name              = \"custom_gitlab\"\n  availability_zone = \"us-east-1b\"\n  blueprint_id      = \"amazon_linux_2\"\n  bundle_id         = \"nano_3_0\"\n  key_pair_name     = \"some_key_name\"\n  tags = {\n    foo = \"bar\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Lightsail instance using Terraform, specifying key attributes such as `name`, `availability_zone`, `blueprint_id`, `bundle_id`, and `key_pair_name`. It illustrates basic usage, including tagging the instance with custom metadata, making it suitable for deploying lightweight workloads like a GitLab server."
+    },
+    {
+      "title": "Example With User Data",
+      "code": "resource \"aws_lightsail_instance\" \"custom\" {\n  name              = \"custom\"\n  availability_zone = \"us-east-1b\"\n  blueprint_id      = \"amazon_linux_2\"\n  bundle_id         = \"nano_3_0\"\n  user_data         = \"sudo yum install -y httpd && sudo systemctl start httpd && sudo systemctl enable httpd && echo '<h1>Deployed via Terraform</h1>' | sudo tee /var/www/html/index.html\"\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_lightsail_instance` with custom `user_data` to automate software installation and web server setup. This example showcases the use of the `user_data` argument to provision an Apache HTTP server, enable it on startup, and deploy a custom HTML page.\""
+    },
+    {
+      "title": "Enable Auto Snapshots",
+      "code": "resource \"aws_lightsail_instance\" \"test\" {\n  name              = \"custom_instance\"\n  availability_zone = \"us-east-1b\"\n  blueprint_id      = \"amazon_linux_2\"\n  bundle_id         = \"nano_3_0\"\n  add_on {\n    type          = \"AutoSnapshot\"\n    snapshot_time = \"06:00\"\n    status        = \"Enabled\"\n  }\n  tags = {\n    foo = \"bar\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to enable and configure the AutoSnapshot add-on for an AWS Lightsail instance using the `aws_lightsail_instance` resource. It showcases the use of the `add_on` block to set the snapshot time and enable automatic daily snapshots, along with basic instance settings like `blueprint_id`, `bundle_id`, and tagging."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "availability_zone",
+      "description": "(Required) The Availability Zone in which to create your instance. A list of available zones can be obtained using the AWS CLI command: `aws lightsail get-regions --include-availability-zones`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `availability_zone` argument for the `aws_lightsail_instance` resource allows users to specify the exact Availability Zone within a region where the Lightsail instance will be created. By defining this, users can control the geographic placement of their instance to optimize latency, ensure redundancy, or align with compliance requirements, supporting common goals like workload distribution and disaster recovery planning."
+    },
+    {
+      "name": "blueprint_id",
+      "description": "(Required) The ID for a virtual private server image. A list of available blueprint IDs can be obtained using the AWS CLI command: `aws lightsail get-blueprints`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `blueprint_id` argument specifies the ID of the virtual private server image (blueprint) to be used for provisioning the Lightsail instance, allowing users to define the operating system and preconfigured software stack for their instance. By setting this required parameter, users can tailor the instance to meet specific application or environment requirements, such as selecting a Linux distribution or a prebuilt development environment."
+    },
+    {
+      "name": "bundle_id",
+      "description": "(Required) The bundle of specification information. A list of available bundle IDs can be obtained using the AWS CLI command: `aws lightsail get-bundles`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bundle_id` argument for the `aws_lightsail_instance` resource specifies the predefined hardware and performance configuration (e.g., CPU, RAM, disk size) for the instance. By setting this required value, users define the resource's capacity and pricing tier, aligning the instance's specifications with their application's requirements and budget."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_lightsail_instance` resource allows users to specify a unique identifier for the Lightsail instance, typically used to reference or manage the instance programmatically within Terraform configurations. While optional, setting this argument can help ensure consistent identification of the resource across operations, supporting workflows like state management or integration with other resources."
+    },
+    {
+      "name": "ip_address_type",
+      "description": "(Optional) The IP address type of the Lightsail Instance. Valid Values: `dualstack`, `ipv4`, and `ipv6`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ip_address_type` argument for the `aws_lightsail_instance` resource allows users to specify the type of IP addressing for the instance, enabling configuration of network compatibility and connectivity. By setting this argument to `dualstack`, `ipv4`, or `ipv6`, users can control whether the instance supports IPv4-only, IPv6-only, or both protocols, aligning with their application's networking requirements and ensuring compatibility with modern or legacy systems."
+    },
+    {
+      "name": "key_pair_name",
+      "description": "(Optional) The name of your key pair. Created in the Lightsail console (cannot use `aws_key_pair` at this time)",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `key_pair_name` argument allows users to specify the name of an existing Lightsail key pair to enable SSH access to the `aws_lightsail_instance`. By setting this argument, users can control secure remote access to the instance, aligning with common goals like managing administrative access and configuring authentication mechanisms."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name of the Lightsail Instance. Names must be unique within each AWS Region in your Lightsail account.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_lightsail_instance` resource allows users to define a unique identifier for the Lightsail instance within a specific AWS Region, ensuring proper resource management and differentiation. By setting this required property, users establish a distinct reference for the instance, which is critical for organizing, accessing, and managing Lightsail resources in their account."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. To create a key-only tag, use an empty string as the value. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_lightsail_instance` resource allows users to assign metadata in the form of key-value pairs to the instance, enabling organization, categorization, and identification of resources for purposes such as cost allocation, environment labeling, or automation workflows. By configuring this argument, users can define custom tags or override provider-level default tags, ensuring resource tagging aligns with specific project or organizational requirements."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_lightsail_instance` resource allows users to define a comprehensive set of key-value tags that are applied to the instance for organizational, management, or automation purposes. By setting this argument, users can ensure consistent tagging across resources, enabling streamlined resource categorization, cost tracking, and integration with tagging-based policies or workflows."
+    },
+    {
+      "name": "user_data",
+      "description": "(Optional) Single lined launch script as a string to configure server with additional user data",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `user_data` argument for the `aws_lightsail_instance` resource allows users to specify a launch script as a single-line string to automate instance configuration during startup. This is commonly used to set environment variables, install software, or execute initialization tasks, enabling streamlined server provisioning and customization."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "add_on",
+      "description": "(Optional) The add-on configuration for the instance. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "snapshot_time",
+          "description": "(Required) The daily time when an automatic snapshot will be created. Must be in HH:00 format, and in an hourly increment and specified in Coordinated Universal Time (UTC). The snapshot will be automatically created between the time specified and up to 45 minutes after.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `snapshot_time` argument for the `add_on` configuration in the `aws_lightsail_instance` resource specifies the daily UTC time (in HH:00 format) when automatic snapshots of the instance will be created. This allows users to define a consistent backup schedule, ensuring data protection and recovery by automating snapshot creation within a specified time window."
+        },
+        {
+          "name": "status",
+          "description": "(Required) The status of the add-on. Valid Values: `Enabled`, `Disabled`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `status` argument for the `add_on` in the `aws_lightsail_instance` resource allows users to control whether a specific add-on feature is active or inactive by specifying its operational state (`Enabled` or `Disabled`). Setting this argument directly impacts the functionality of the add-on, enabling or disabling its behavior to align with the user's desired configuration for the Lightsail instance."
+        },
+        {
+          "name": "type",
+          "description": "(Required) The add-on type. There is currently only one valid type `AutoSnapshot`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument for the `add_on` block in the `aws_lightsail_instance` resource specifies the functionality or feature of the add-on to enable, with the required value `AutoSnapshot` configuring automatic snapshot creation for instance backups. This allows users to automate data protection and recovery processes, aligning with common goals of ensuring instance durability and simplifying backup management."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `add_on` configuration block for the `aws_lightsail_instance` resource enables the setup and management of optional add-on features for the instance, such as performance optimization or enhanced functionality. It encapsulates related settings for specific add-ons, allowing users to customize and extend the capabilities of their Lightsail instance to meet specialized requirements, such as enabling caching or monitoring tools."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the Lightsail instance (matches `id`).",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "cpu_count",
+      "description": "The number of vCPUs the instance has.",
+      "optional": false,
+      "type": "number"
+    },
+    {
+      "name": "created_at",
+      "description": "The timestamp when the instance was created.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "ipv6_addresses",
+      "description": "List of IPv6 addresses for the Lightsail instance.",
+      "optional": false,
+      "type": "list(string)"
+    },
+    {
+      "name": "is_static_ip",
+      "description": "A Boolean value indicating whether this instance has a static IP assigned to it.",
+      "optional": false,
+      "type": "bool"
+    },
+    {
+      "name": "private_ip_address",
+      "description": "The private IP address of the instance.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "public_ip_address",
+      "description": "The public IP address of the instance.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "ram_size",
+      "description": "The amount of RAM in GB on the instance (e.g., 1.0).",
+      "optional": false,
+      "type": "number"
+    },
+    {
+      "name": "username",
+      "description": "The user name for connecting to the instance (e.g., ec2-user).",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

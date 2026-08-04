@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "user_pool_id",
+        "references_output": "aws_cognito_user_pool.id",
+        "target_resource_type": "aws_cognito_user_pool"
+    },
+    {
+        "argument_path": "certificate_arn",
+        "references_output": "aws_acm_certificate.arn",
+        "target_resource_type": "aws_acm_certificate"
+    }
+]

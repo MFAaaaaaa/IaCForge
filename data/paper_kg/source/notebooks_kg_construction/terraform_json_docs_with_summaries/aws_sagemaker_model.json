@@ -1,0 +1,483 @@
+{
+  "resource": {
+    "name": "aws_sagemaker_model",
+    "description": "Provides a SageMaker AI model resource.",
+    "llm_summary": "The `aws_sagemaker_model` Terraform resource enables the creation and management of machine learning models in AWS SageMaker, facilitating the deployment of AI/ML workflows. It is commonly used for configuring model artifacts, specifying container images for inference, and integrating with IAM roles for secure execution. This resource supports key configurations such as lifecycle management, versioning, and source integration, making it ideal for automating model deployment pipelines and scaling predictive analytics in production environments."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_sagemaker_model\" \"example\" {\n  name               = \"my-model\"\n  execution_role_arn = aws_iam_role.example.arn\n\n  primary_container {\n    image = data.aws_sagemaker_prebuilt_ecr_image.test.registry_path\n  }\n}\n\nresource \"aws_iam_role\" \"example\" {\n  assume_role_policy = data.aws_iam_policy_document.assume_role.json\n}\n\ndata \"aws_iam_policy_document\" \"assume_role\" {\n  statement {\n    actions = [\"sts:AssumeRole\"]\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"sagemaker.amazonaws.com\"]\n    }\n  }\n}\n\ndata \"aws_sagemaker_prebuilt_ecr_image\" \"test\" {\n  repository_name = \"kmeans\"\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_sagemaker_model` resource with a prebuilt Amazon SageMaker container image and an IAM role for execution. It highlights the use of the `primary_container` block to specify the model's container image and the `aws_iam_role` resource with an assume role policy for SageMaker service access."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "enable_network_isolation",
+      "description": "(Optional) - Isolates the model container. No inbound or outbound network calls can be made to or from the model container.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_network_isolation` argument for the `aws_sagemaker_model` resource allows users to control whether the model container is isolated from external network access. When set to `true`, it restricts all inbound and outbound network calls to enhance security and ensure the model operates in a fully isolated environment, which is particularly useful for sensitive workloads or compliance requirements."
+    },
+    {
+      "name": "execution_role_arn",
+      "description": "(Required) A role that SageMaker AI can assume to access model artifacts and docker images for deployment.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `execution_role_arn` argument specifies the IAM role that SageMaker assumes to access model artifacts and Docker images during deployment, ensuring the necessary permissions for secure and seamless model execution. By defining this role, users enable SageMaker to interact with resources like S3 buckets and ECR repositories, a critical step for deploying machine learning models in production environments."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_sagemaker_model` resource allows users to specify a unique identifier for the SageMaker model, typically used to reference the model within Terraform configurations or other dependent resources. While optional, setting this argument can help ensure consistent identification and tracking of the model across infrastructure workflows."
+    },
+    {
+      "name": "name",
+      "description": "(Optional) The name of the model (must be unique). If omitted, Terraform will assign a random, unique name.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_sagemaker_model` resource allows users to define a unique identifier for the model, enabling clear differentiation and management of multiple models within the AWS environment. If omitted, Terraform automatically generates a random, unique name, simplifying deployment for users who do not require a custom naming convention."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level. The primary_container and container block both support:",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_sagemaker_model` resource allows users to assign key-value metadata to the model for organizational, management, or automation purposes, such as categorizing resources by environment, cost center, or project. Configuring this argument helps streamline resource tracking, enables tag-based access control, and integrates with tagging policies or workflows, while allowing provider-level default tags to be overridden for greater customization."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_sagemaker_model` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to all resources associated with the SageMaker model. This facilitates consistent tagging for resource organization, cost allocation, and access management across the AWS environment."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "container",
+      "description": "(Optional) -  Specifies containers in the inference pipeline. If not specified, the `primary_container` argument is required. Fields are documented below.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "container_hostname",
+          "description": "(Optional) The DNS host name for the container.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `container_hostname` argument allows users to specify a custom DNS hostname for the container within the SageMaker model, enabling precise control over how the container is identified and accessed in the network. This is particularly useful for scenarios requiring consistent or recognizable hostnames, such as multi-container deployments or integrations with other services."
+        },
+        {
+          "name": "environment",
+          "description": "(Optional) Environment variables for the Docker container. A list of key value pairs.",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `environment` argument for the `aws_sagemaker_model` resource allows users to define key-value pairs as environment variables for the Docker container running the model. This enables customization of runtime behavior, such as configuring application settings, passing secrets, or specifying dependencies, to tailor the container's execution environment to specific use cases."
+        },
+        {
+          "name": "image",
+          "description": "(Optional) The registry path where the inference code image is stored in Amazon ECR.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `image` argument specifies the Amazon ECR registry path for the container image that holds the inference code for the SageMaker model, allowing users to define the runtime environment for model deployment. By setting this argument, users can control the execution environment for their machine learning model, ensuring compatibility with custom code or pre-built inference logic."
+        },
+        {
+          "name": "inference_specification_name",
+          "description": "(Optional) The inference specification name in the model package version.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `inference_specification_name` argument allows users to specify the name of the inference specification associated with a model package version in the container configuration for an AWS SageMaker model. By setting this argument, users can define the pre-configured inference environment, including supported algorithms and model artifacts, enabling streamlined deployment and compatibility for specific machine learning workflows."
+        },
+        {
+          "name": "mode",
+          "description": "(Optional) The container hosts value `SingleModel/MultiModel`. The default value is `SingleModel`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `mode` argument specifies whether the container in the SageMaker model hosts a single model (`SingleModel`) or multiple models (`MultiModel`), allowing users to control the deployment strategy and resource utilization for their machine learning workloads. This configuration impacts how models are managed and served within the container, aligning with user goals like optimizing scalability and cost efficiency."
+        },
+        {
+          "name": "model_data_url",
+          "description": "(Optional) The URL for the S3 location where model artifacts are stored.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `model_data_url` argument allows users to specify the S3 location of the model artifacts that the SageMaker container will use during deployment. By configuring this URL, users define the source of pre-trained model data, enabling the container to load and serve the model for inference or training tasks."
+        },
+        {
+          "name": "model_package_name",
+          "description": "(Optional) The Amazon Resource Name (ARN) of the model package to use to create the model.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `model_package_name` argument allows users to specify the Amazon Resource Name (ARN) of a pre-existing model package to be used within the container configuration of an AWS SageMaker model. By setting this argument, users can streamline model deployment by referencing a packaged model artifact, enabling reuse and consistency across machine learning workflows."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "image_config",
+          "description": "(Optional) Specifies whether the model container is in Amazon ECR or a private Docker registry accessible from your Amazon Virtual Private Cloud (VPC). For more information see Using a Private Docker Registry for Real-Time Inference Containers. see Image Config.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "repository_access_mode",
+              "description": "(Required) Specifies whether the model container is in Amazon ECR or a private Docker registry accessible from your Amazon Virtual Private Cloud (VPC). Allowed values are: `Platform` and `Vpc`.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `repository_access_mode` argument in the `image_config` block of the `aws_sagemaker_model` resource specifies how the model container image is accessed, allowing users to define whether the image is stored in Amazon ECR (`Platform`) or a private Docker registry accessible via their VPC (`Vpc`). This configuration determines the source and network access method for the container image, enabling users to align model deployment with their security and infrastructure requirements."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "repository_auth_config",
+              "description": "(Optional) Specifies an authentication configuration for the private docker registry where your model image is hosted. Specify a value for this property only if you specified Vpc as the value for the RepositoryAccessMode field, and the private Docker registry where the model image is hosted requires authentication. see Repository Auth Config.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "repository_credentials_provider_arn",
+                  "description": "(Required) The Amazon Resource Name (ARN) of an AWS Lambda function that provides credentials to authenticate to the private Docker registry where your model image is hosted. For information about how to create an AWS Lambda function, see Create a Lambda function with the console in the AWS Lambda Developer Guide.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `repository_credentials_provider_arn` argument specifies the ARN of an AWS Lambda function responsible for providing authentication credentials to access a private Docker registry hosting the model image. By configuring this, users enable secure integration between SageMaker and private repositories, ensuring the model image can be retrieved for deployment while maintaining controlled access."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `repository_auth_config` block within the `image_config` of the `aws_sagemaker_model` resource configures authentication settings for accessing a private Docker registry hosting the model image. It encapsulates credentials required for authenticated access when the `RepositoryAccessMode` is set to `Vpc`, enabling secure integration with private repositories that require authentication. This block ensures seamless deployment of models from protected image sources in a controlled and secure environment."
+            }
+          ],
+          "llm_summary": "The `image_config` block within the `container` configuration of the `aws_sagemaker_model` resource specifies the source and accessibility of the model container image, enabling users to define whether it resides in Amazon ECR or a private Docker registry accessible via their VPC. This block facilitates secure and flexible container image management, allowing users to integrate custom inference environments for real-time machine learning workflows."
+        },
+        {
+          "name": "model_data_source",
+          "description": "(Optional) The location of model data to deploy. Use this for uncompressed model deployment. For information about how to deploy an uncompressed model, see Deploying uncompressed models in the AWS SageMaker AI Developer Guide.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "s3_data_source",
+              "description": "(Required) The S3 location of model data to deploy.",
+              "cardinality": [
+                1,
+                0
+              ],
+              "arguments": [
+                {
+                  "name": "compression_type",
+                  "description": "(Required) How the model data is prepared. Allowed values are: `None` and `Gzip`.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `compression_type` argument for the `s3_data_source` in the `aws_sagemaker_model` resource specifies how the model data stored in S3 is compressed, allowing users to define whether the data is uncompressed (`None`) or compressed using Gzip (`Gzip`). This configuration ensures SageMaker can correctly interpret and process the input data during model training or inference, aligning with user goals of optimizing data handling and compatibility."
+                },
+                {
+                  "name": "s3_data_type",
+                  "description": "(Required) The type of model data to deploy. Allowed values are: `S3Object` and `S3Prefix`.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `s3_data_type` argument for the `aws_sagemaker_model` resource specifies the format of the S3 data source used for deploying the model, allowing users to define whether the data is a single object (`S3Object`) or a collection of objects under a prefix (`S3Prefix`). This configuration determines how SageMaker accesses and interprets the model data in S3, directly impacting the deployment process and ensuring compatibility with the expected data structure."
+                },
+                {
+                  "name": "s3_uri",
+                  "description": "(Required) The S3 path of model data to deploy.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `s3_uri` argument specifies the Amazon S3 path to the model data that SageMaker will use for deployment, enabling users to define the source location of pre-trained model artifacts. By setting this required parameter, users ensure SageMaker can access the necessary data for creating and hosting machine learning models, aligning with common goals like configuring data sources for inference workflows."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "model_access_config",
+                  "description": "(Optional) Specifies the access configuration file for the ML model. You can explicitly accept the model end-user license agreement (EULA) within the [`model_access_config` configuration block]. see Model Access Config.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "accept_eula",
+                      "description": "(Required) Specifies agreement to the model end-user license agreement (EULA). The AcceptEula value must be explicitly defined as `true` in order to accept the EULA that this model requires. You are responsible for reviewing and complying with any applicable license terms and making sure they are acceptable for your use case before downloading or using a model.",
+                      "required": true,
+                      "type": "bool",
+                      "llm_summary": "The `accept_eula` argument in the `model_access_config` block of the `aws_sagemaker_model` resource explicitly defines user agreement to the model's End-User License Agreement (EULA), which is required to access and use the model. Setting this argument to `true` ensures compliance with licensing terms, enabling the download and deployment of the model while affirming the user's responsibility to review and accept applicable legal conditions."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `model_access_config` block within the `aws_sagemaker_model` resource specifies access-related settings for the ML model, including explicit acceptance of the model's end-user license agreement (EULA). This configuration enables users to manage compliance and permissions for accessing model artifacts stored in the `s3_data_source`, ensuring proper authorization and adherence to licensing requirements."
+                }
+              ],
+              "llm_summary": "The `s3_data_source` block within the `model_data_source` configuration of the `aws_sagemaker_model` resource specifies the S3 location of the model data to be deployed, enabling SageMaker to access and utilize pre-trained model artifacts stored in S3. This block encapsulates settings related to the source of model data, ensuring seamless integration between SageMaker and S3 for efficient model deployment workflows. Configuring this block allows users to define the exact S3 path for their model artifacts, facilitating reproducible and scalable machine learning deployments."
+            }
+          ],
+          "llm_summary": "\"Defines the source location for uncompressed model data within the container configuration of an AWS SageMaker model, enabling deployment of pre-trained models stored in S3 or other supported sources. This block facilitates precise control over model artifacts, ensuring compatibility with SageMaker's deployment workflows for uncompressed models.\""
+        },
+        {
+          "name": "multi_model_config",
+          "description": "(Optional) Specifies additional configuration for multi-model endpoints. see Multi Model Config.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "model_cache_setting",
+              "description": "(Optional) Whether to cache models for a multi-model endpoint. By default, multi-model endpoints cache models so that a model does not have to be loaded into memory each time it is invoked. Some use cases do not benefit from model caching. For example, if an endpoint hosts a large number of models that are each invoked infrequently, the endpoint might perform better if you disable model caching. To disable model caching, set the value of this parameter to `Disabled`. Allowed values are: `Enabled` and `Disabled`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `model_cache_setting` argument in the `multi_model_config` of the `aws_sagemaker_model` resource allows users to control whether models are cached for a multi-model endpoint. By configuring this setting (`Enabled` or `Disabled`), users can optimize endpoint performance based on their use case, such as improving invocation speed with caching or reducing memory overhead for endpoints hosting a large number of infrequently used models."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `multi_model_config` block within the `container` configuration of the `aws_sagemaker_model` resource enables advanced setup for multi-model endpoints, allowing efficient management of multiple models hosted within a single container. It encapsulates settings related to optimizing model loading and serving, helping users achieve scalable and cost-effective deployment of machine learning models by reducing resource overhead and improving endpoint performance."
+        }
+      ],
+      "llm_summary": "The `container` configuration block in the `aws_sagemaker_model` resource defines the settings for individual containers within an inference pipeline, enabling multi-container model deployment for advanced machine learning workflows. It encapsulates parameters related to container properties, such as image details, environment variables, and model data sources, allowing users to orchestrate complex inference processes by specifying multiple containers instead of relying solely on a single `primary_container`."
+    },
+    {
+      "name": "inference_execution_config",
+      "description": "(Optional) Specifies details of how containers in a multi-container endpoint are called. see Inference Execution Config.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "mode",
+          "description": "(Optional) The container hosts value `SingleModel/MultiModel`. The default value is `SingleModel`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `mode` argument in the `inference_execution_config` block of the `aws_sagemaker_model` resource specifies whether the container hosting the model operates in `SingleModel` or `MultiModel` mode. This setting determines the deployment strategy, allowing users to configure the model container for either hosting a single model (simpler deployments) or multiple models (optimized resource sharing for multi-model endpoints), aligning with common goals like scaling inference workloads efficiently."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `inference_execution_config` block in the `aws_sagemaker_model` resource defines how containers in a multi-container endpoint are invoked during inference, enabling precise control over execution behavior. This configuration encapsulates settings related to container invocation strategies, helping users optimize model deployment workflows and ensure efficient handling of multi-container inference scenarios."
+    },
+    {
+      "name": "primary_container",
+      "description": "(Optional) The primary docker image containing inference code that is used when the model is deployed for predictions.  If not specified, the `container` argument is required. Fields are documented below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "container_hostname",
+          "description": "(Optional) The DNS host name for the container.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `container_hostname` argument for the `primary_container` in the `aws_sagemaker_model` resource allows users to specify a custom DNS hostname for the container running the model. This configuration can help define a unique and recognizable network identity for the container, facilitating easier communication and integration within distributed systems or multi-container environments."
+        },
+        {
+          "name": "environment",
+          "description": "(Optional) Environment variables for the Docker container. A list of key value pairs.",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `environment` argument for the `primary_container` in the `aws_sagemaker_model` resource allows users to define environment variables as key-value pairs for the Docker container running the model. This configuration enables users to customize runtime behavior, such as setting application-specific parameters, paths, or secrets, to optimize the container's execution environment for their machine learning workloads."
+        },
+        {
+          "name": "image",
+          "description": "(Optional) The registry path where the inference code image is stored in Amazon ECR.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `image` argument in the `primary_container` block of the `aws_sagemaker_model` resource allows users to specify the Amazon ECR registry path for the container image that contains the inference code. By setting this argument, users define the runtime environment for model deployment, enabling SageMaker to execute predictions using the specified image."
+        },
+        {
+          "name": "inference_specification_name",
+          "description": "(Optional) The inference specification name in the model package version.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `inference_specification_name` argument allows users to specify the name of the inference specification associated with a model package version in the `primary_container` of an AWS SageMaker model. By setting this argument, users can define the pre-configured inference environment and behavior for the model, enabling streamlined deployment and compatibility with specific runtime requirements or container configurations."
+        },
+        {
+          "name": "mode",
+          "description": "(Optional) The container hosts value `SingleModel/MultiModel`. The default value is `SingleModel`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `mode` argument in the `primary_container` of the `aws_sagemaker_model` resource specifies whether the container hosts a single model (`SingleModel`) or multiple models (`MultiModel`). This configuration determines the deployment strategy for the container, enabling users to optimize model hosting for either simplicity or scalability based on their use case."
+        },
+        {
+          "name": "model_data_url",
+          "description": "(Optional) The URL for the S3 location where model artifacts are stored.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `model_data_url` argument in the `primary_container` block of the `aws_sagemaker_model` resource allows users to specify the S3 URL where the model artifacts are stored, enabling SageMaker to access and load the trained model data for deployment. Configuring this argument is essential for linking the model container to its associated data, supporting common user goals like deploying machine learning models with pre-trained artifacts."
+        },
+        {
+          "name": "model_package_name",
+          "description": "(Optional) The Amazon Resource Name (ARN) of the model package to use to create the model.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `model_package_name` argument specifies the Amazon Resource Name (ARN) of a pre-approved SageMaker model package to be used as the primary container for deploying the model. By setting this argument, users can streamline model deployment by leveraging pre-built or pre-trained models, aligning with common goals like reusing standardized model artifacts and simplifying the creation of SageMaker models."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "image_config",
+          "description": "(Optional) Specifies whether the model container is in Amazon ECR or a private Docker registry accessible from your Amazon Virtual Private Cloud (VPC). For more information see Using a Private Docker Registry for Real-Time Inference Containers. see Image Config.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "repository_access_mode",
+              "description": "(Required) Specifies whether the model container is in Amazon ECR or a private Docker registry accessible from your Amazon Virtual Private Cloud (VPC). Allowed values are: `Platform` and `Vpc`.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `repository_access_mode` argument in the `image_config` block of the `aws_sagemaker_model` resource specifies how the model container image is accessed, allowing users to define whether the image is stored in Amazon ECR (`Platform`) or a private Docker registry accessible via their VPC (`Vpc`). This configuration impacts the connectivity and security model for retrieving the container image, enabling users to align with their infrastructure requirements and access control policies."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "repository_auth_config",
+              "description": "(Optional) Specifies an authentication configuration for the private docker registry where your model image is hosted. Specify a value for this property only if you specified Vpc as the value for the RepositoryAccessMode field, and the private Docker registry where the model image is hosted requires authentication. see Repository Auth Config.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "repository_credentials_provider_arn",
+                  "description": "(Required) The Amazon Resource Name (ARN) of an AWS Lambda function that provides credentials to authenticate to the private Docker registry where your model image is hosted. For information about how to create an AWS Lambda function, see Create a Lambda function with the console in the AWS Lambda Developer Guide.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `repository_credentials_provider_arn` argument specifies the ARN of an AWS Lambda function that supplies authentication credentials for accessing a private Docker registry hosting the model image. By configuring this, users enable secure integration with private repositories, ensuring the SageMaker model can retrieve container images required for deployment."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `repository_auth_config` block within the `image_config` of the `aws_sagemaker_model` resource specifies authentication settings for accessing a private Docker registry hosting the model image. It encapsulates credentials required for secure access when the `RepositoryAccessMode` is set to `Vpc`, enabling users to integrate private, authenticated repositories for model deployment in SageMaker."
+            }
+          ],
+          "llm_summary": "\"Configures the container image source for the SageMaker model, specifying whether it resides in Amazon ECR or a private Docker registry accessible via VPC. This block enables users to define the image repository type, facilitating secure and controlled deployment of inference containers for real-time machine learning tasks.\""
+        },
+        {
+          "name": "model_data_source",
+          "description": "(Optional) The location of model data to deploy. Use this for uncompressed model deployment. For information about how to deploy an uncompressed model, see Deploying uncompressed models in the AWS SageMaker AI Developer Guide.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "s3_data_source",
+              "description": "(Required) The S3 location of model data to deploy.",
+              "cardinality": [
+                1,
+                0
+              ],
+              "arguments": [
+                {
+                  "name": "compression_type",
+                  "description": "(Required) How the model data is prepared. Allowed values are: `None` and `Gzip`.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `compression_type` argument for the `s3_data_source` in the `aws_sagemaker_model` resource specifies how the model data stored in S3 is compressed, allowing users to define whether the data is uncompressed (`None`) or compressed using Gzip (`Gzip`). This configuration ensures SageMaker can correctly interpret and process the input data during model training or inference, aligning with user goals of optimizing data handling and compatibility."
+                },
+                {
+                  "name": "s3_data_type",
+                  "description": "(Required) The type of model data to deploy. Allowed values are: `S3Object` and `S3Prefix`.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `s3_data_type` argument specifies the format of the S3 data source for the model being deployed in SageMaker, allowing users to define whether the data is a single object (`S3Object`) or a collection of objects under a prefix (`S3Prefix`). This configuration determines how SageMaker accesses and interprets the model data stored in S3, directly impacting the deployment process and ensuring compatibility with the expected data structure."
+                },
+                {
+                  "name": "s3_uri",
+                  "description": "(Required) The S3 path of model data to deploy.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `s3_uri` argument specifies the Amazon S3 path to the model data that SageMaker will deploy, serving as the primary data source for the model. By defining this required parameter, users ensure that SageMaker can access the pre-trained model artifacts stored in S3, enabling the deployment of machine learning models for inference."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "model_access_config",
+                  "description": "(Optional) Specifies the access configuration file for the ML model. You can explicitly accept the model end-user license agreement (EULA) within the [`model_access_config` configuration block]. see Model Access Config.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "accept_eula",
+                      "description": "(Required) Specifies agreement to the model end-user license agreement (EULA). The AcceptEula value must be explicitly defined as `true` in order to accept the EULA that this model requires. You are responsible for reviewing and complying with any applicable license terms and making sure they are acceptable for your use case before downloading or using a model.",
+                      "required": true,
+                      "type": "bool",
+                      "llm_summary": "The `accept_eula` argument in the `model_access_config` of the `aws_sagemaker_model` resource explicitly defines user agreement to the model's end-user license agreement (EULA), which is required to access and use the model. Setting this argument to `true` ensures compliance with licensing terms, enabling the download and deployment of the model while affirming the user's responsibility to review and accept applicable legal conditions."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `model_access_config` block in the `aws_sagemaker_model` resource specifies access-related settings for the ML model, including explicit acceptance of the model's end-user license agreement (EULA). This configuration ensures compliance with licensing requirements and facilitates secure integration of the model with an S3 data source, enabling users to manage access permissions and legal agreements for deploying and utilizing the model effectively."
+                }
+              ],
+              "llm_summary": "The `s3_data_source` block within the `model_data_source` configuration of the `aws_sagemaker_model` resource specifies the S3 location of the model data to be deployed, enabling SageMaker to access and utilize pre-trained model artifacts stored in S3. This block encapsulates settings related to the source of model data, ensuring seamless integration with S3 for efficient deployment and versioning of machine learning models. Configuring this block allows users to define the exact S3 path for their model artifacts, facilitating streamlined model deployment workflows in SageMaker."
+            }
+          ],
+          "llm_summary": "The `model_data_source` block within the `primary_container` of the `aws_sagemaker_model` resource specifies the location of uncompressed model data for deployment, enabling users to define the source of artifacts used in SageMaker model inference. Configuring this block allows precise control over the input data source, facilitating streamlined deployment of uncompressed models as outlined in the AWS SageMaker AI Developer Guide."
+        },
+        {
+          "name": "multi_model_config",
+          "description": "(Optional) Specifies additional configuration for multi-model endpoints. see Multi Model Config.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "model_cache_setting",
+              "description": "(Optional) Whether to cache models for a multi-model endpoint. By default, multi-model endpoints cache models so that a model does not have to be loaded into memory each time it is invoked. Some use cases do not benefit from model caching. For example, if an endpoint hosts a large number of models that are each invoked infrequently, the endpoint might perform better if you disable model caching. To disable model caching, set the value of this parameter to `Disabled`. Allowed values are: `Enabled` and `Disabled`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `model_cache_setting` argument in the `multi_model_config` of the `aws_sagemaker_model` resource allows users to control whether models are cached for a multi-model endpoint. By configuring this setting (`Enabled` or `Disabled`), users can optimize endpoint performance based on their use case, such as enabling caching for frequent model invocations or disabling it to improve efficiency when hosting a large number of infrequently used models."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `multi_model_config` block within the `primary_container` of the `aws_sagemaker_model` resource enables configuration for multi-model endpoints, allowing efficient management of multiple models hosted within a single container. It encapsulates settings related to optimizing model loading and runtime behavior, helping users streamline resource utilization and scale machine learning workloads dynamically."
+        }
+      ],
+      "llm_summary": "The `primary_container` block in the `aws_sagemaker_model` resource specifies the primary Docker image containing inference code for deploying the model to make predictions. It encapsulates settings related to the container's configuration, such as the image source and runtime details, enabling users to define the core environment for model inference and execution. Configuring this block ensures the model is properly packaged and ready for deployment, streamlining the prediction workflow in SageMaker."
+    },
+    {
+      "name": "vpc_config",
+      "description": "(Optional) - Specifies the VPC that you want your model to connect to. VpcConfig is used in hosting services and in batch transform.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "security_group_ids",
+          "description": "",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `security_group_ids` argument in the `vpc_config` block of the `aws_sagemaker_model` resource allows users to specify the set of security groups that control inbound and outbound network traffic for the SageMaker model when deployed within a VPC. By defining this argument, users can enforce network access restrictions, enhance security, and ensure the model operates within a controlled environment aligned with organizational policies."
+        },
+        {
+          "name": "subnets",
+          "description": "",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `subnets` argument in the `vpc_config` block of the `aws_sagemaker_model` resource specifies the set of subnet IDs within a VPC where the SageMaker model's network interfaces will be deployed. This ensures the model has access to the specified subnets for secure communication, typically enabling integration with private resources like databases or other services within the VPC."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `vpc_config` block in the `aws_sagemaker_model` resource specifies the VPC settings to enable secure network connectivity for the model, such as private access to resources like databases or data stores. It encapsulates configurations related to VPC integration, including subnets and security groups, and is essential for hosting services or batch transform jobs that require controlled network environments."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) assigned by AWS to this model.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

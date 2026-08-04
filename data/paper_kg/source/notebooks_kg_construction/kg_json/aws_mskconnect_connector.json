@@ -1,0 +1,440 @@
+{
+    "resource": {
+        "name": "aws_mskconnect_connector",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "connector_configuration",
+            "description": "",
+            "required": true,
+            "type": "map(string)"
+        },
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "kafkaconnect_version",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "service_execution_role_arn",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "capacity",
+            "description": "",
+            "cardinality": [
+                1,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "autoscaling",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "max_worker_count",
+                            "description": "",
+                            "required": true,
+                            "type": "number"
+                        },
+                        {
+                            "name": "mcu_count",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "min_worker_count",
+                            "description": "",
+                            "required": true,
+                            "type": "number"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "scale_in_policy",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "cpu_utilization_percentage",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "scale_out_policy",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "cpu_utilization_percentage",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "provisioned_capacity",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "mcu_count",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "worker_count",
+                            "description": "",
+                            "required": true,
+                            "type": "number"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "kafka_cluster",
+            "description": "",
+            "cardinality": [
+                1,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "apache_kafka_cluster",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "bootstrap_servers",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "vpc",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "security_groups",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "set(string)"
+                                },
+                                {
+                                    "name": "subnets",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "set(string)"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "kafka_cluster_client_authentication",
+            "description": "",
+            "cardinality": [
+                1,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "authentication_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "kafka_cluster_encryption_in_transit",
+            "description": "",
+            "cardinality": [
+                1,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "encryption_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "log_delivery",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "worker_log_delivery",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "cloudwatch_logs",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "enabled",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "log_group",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "firehose",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "delivery_stream",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "enabled",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "bool"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "s3",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "bucket",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "enabled",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "prefix",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "plugin",
+            "description": "",
+            "cardinality": [
+                1,
+                0
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "custom_plugin",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "revision",
+                            "description": "",
+                            "required": true,
+                            "type": "number"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "worker_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "revision",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "version",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

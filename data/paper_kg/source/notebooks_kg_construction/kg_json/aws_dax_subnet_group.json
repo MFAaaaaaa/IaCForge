@@ -1,0 +1,42 @@
+{
+    "resource": {
+        "name": "aws_dax_subnet_group",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "subnet_ids",
+            "description": "",
+            "required": true,
+            "type": "set(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "vpc_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

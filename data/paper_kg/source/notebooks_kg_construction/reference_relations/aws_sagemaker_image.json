@@ -1,0 +1,7 @@
+[
+    {
+        "argument_path": "role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    }
+]

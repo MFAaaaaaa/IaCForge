@@ -1,0 +1,59 @@
+{
+  "resource": {
+    "name": "aws_chime_voice_connector_group",
+    "description": "Creates an Amazon Chime Voice Connector group under the administrator's AWS account. You can associate Amazon Chime Voice Connectors with the Amazon Chime Voice Connector group by including VoiceConnectorItems in the request. You can include Amazon Chime Voice Connectors from different AWS Regions in your group. This creates a fault tolerant mechanism for fallback in case of availability events.",
+    "llm_summary": "The `aws_chime_voice_connector_group` resource enables the creation and management of Amazon Chime Voice Connector groups to facilitate fault-tolerant voice communication across AWS regions. It is commonly used to aggregate multiple Voice Connectors for high availability and automatic fallback during regional outages or availability events. Users can configure cross-region Voice Connector associations and prioritize failover mechanisms to ensure resilient and scalable voice infrastructure for enterprise communication systems."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_chime_voice_connector\" \"vc1\" {\n  name               = \"connector-test-1\"\n  require_encryption = true\n  aws_region         = \"us-east-1\"\n}\n\nresource \"aws_chime_voice_connector\" \"vc2\" {\n  name               = \"connector-test-2\"\n  require_encryption = true\n  aws_region         = \"us-west-2\"\n}\n\nresource \"aws_chime_voice_connector_group\" \"group\" {\n  name = \"test-group\"\n\n  connector {\n    voice_connector_id = aws_chime_voice_connector.vc1.id\n    priority           = 1\n  }\n\n  connector {\n    voice_connector_id = aws_chime_voice_connector.vc2.id\n    priority           = 3\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_chime_voice_connector_group` resource by grouping multiple `aws_chime_voice_connector` resources with specified priorities. It illustrates the use of the `connector` block to define voice connector associations and priority settings, enabling users to manage failover and routing for Amazon Chime Voice Connectors across regions."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_chime_voice_connector_group` resource allows users to specify a unique identifier for the voice connector group, typically used for referencing or managing the resource programmatically. While optional, setting this argument can help ensure consistent identification of the resource across Terraform configurations and integrations."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name of the Amazon Chime Voice Connector group.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies the unique, user-defined identifier for the Amazon Chime Voice Connector group, enabling users to define a meaningful and recognizable label for organizing and managing voice connectors. Setting this argument is essential for creating the resource, as it establishes the primary reference for the group within the Chime service and related configurations."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "connector",
+      "description": "(Optional) The Amazon Chime Voice Connectors to route inbound calls to.",
+      "cardinality": [
+        0,
+        3
+      ],
+      "arguments": [
+        {
+          "name": "priority",
+          "description": "(Required) The priority associated with the Amazon Chime Voice Connector, with 1 being the highest priority. Higher priority Amazon Chime Voice Connectors are attempted first.",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `priority` argument for the `aws_chime_voice_connector_group` resource allows users to define the order in which Amazon Chime Voice Connectors are attempted during call routing, with lower numerical values (e.g., `1`) indicating higher priority. This configuration ensures optimal failover and routing behavior by specifying the precedence of connectors, aligning with user goals for reliable and efficient voice communication."
+        },
+        {
+          "name": "voice_connector_id",
+          "description": "(Required) The Amazon Chime Voice Connector ID.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `voice_connector_id` argument specifies the unique identifier of an Amazon Chime Voice Connector to be included in the Voice Connector Group, enabling the grouping and management of multiple Voice Connectors for routing and failover purposes. By defining this ID, users can control which Voice Connector participates in the group's configuration, supporting common goals like optimizing call routing and ensuring redundancy in communication workflows."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `connector` configuration block within the `aws_chime_voice_connector_group` resource defines the Amazon Chime Voice Connectors used to route inbound calls, enabling centralized call routing across multiple connectors. By specifying these connectors, users can manage and optimize inbound call distribution, ensuring seamless integration and scalability for voice communication workflows."
+    }
+  ],
+  "attributes": []
+}

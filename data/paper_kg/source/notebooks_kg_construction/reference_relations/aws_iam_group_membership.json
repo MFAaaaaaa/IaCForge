@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "users",
+        "references_output": "aws_iam_user.name",
+        "target_resource_type": "aws_iam_user"
+    },
+    {
+        "argument_path": "group",
+        "references_output": "aws_iam_group.name",
+        "target_resource_type": "aws_iam_group"
+    }
+]

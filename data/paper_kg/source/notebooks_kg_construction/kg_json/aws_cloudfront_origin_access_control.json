@@ -1,0 +1,60 @@
+{
+    "resource": {
+        "name": "aws_cloudfront_origin_access_control",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "origin_access_control_origin_type",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "signing_behavior",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "signing_protocol",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "etag",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

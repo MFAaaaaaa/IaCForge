@@ -1,0 +1,7 @@
+[
+    {
+        "argument_path": "kms_key_id",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    }
+]

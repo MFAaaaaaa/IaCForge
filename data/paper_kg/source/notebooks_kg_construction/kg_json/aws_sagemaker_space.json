@@ -1,0 +1,516 @@
+{
+    "resource": {
+        "name": "aws_sagemaker_space",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "domain_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "space_display_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "space_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "ownership_settings",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "owner_user_profile_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "space_settings",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "app_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "code_editor_app_settings",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "app_lifecycle_management",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [],
+                            "blocks": [
+                                {
+                                    "name": "idle_settings",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "idle_timeout_in_minutes",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        },
+                        {
+                            "name": "default_resource_spec",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "instance_type",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "lifecycle_config_arn",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "sagemaker_image_arn",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "sagemaker_image_version_alias",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "sagemaker_image_version_arn",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "custom_file_system",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        0
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "efs_file_system",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "file_system_id",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "jupyter_lab_app_settings",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "app_lifecycle_management",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [],
+                            "blocks": [
+                                {
+                                    "name": "idle_settings",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "idle_timeout_in_minutes",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        },
+                        {
+                            "name": "code_repository",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                10
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "repository_url",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "default_resource_spec",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "instance_type",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "lifecycle_config_arn",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "sagemaker_image_arn",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "sagemaker_image_version_alias",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "sagemaker_image_version_arn",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "jupyter_server_app_settings",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "lifecycle_config_arns",
+                            "description": "",
+                            "required": false,
+                            "type": "set(string)"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "code_repository",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                10
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "repository_url",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "default_resource_spec",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "instance_type",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "lifecycle_config_arn",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "sagemaker_image_arn",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "sagemaker_image_version_alias",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "sagemaker_image_version_arn",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "kernel_gateway_app_settings",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "lifecycle_config_arns",
+                            "description": "",
+                            "required": false,
+                            "type": "set(string)"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "custom_image",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                200
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "app_image_config_name",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "image_name",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "image_version_number",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "default_resource_spec",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "instance_type",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "lifecycle_config_arn",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "sagemaker_image_arn",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "sagemaker_image_version_alias",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "sagemaker_image_version_arn",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "space_storage_settings",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "ebs_storage_settings",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "ebs_volume_size_in_gb",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "number"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "space_sharing_settings",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "sharing_type",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "home_efs_file_system_uid",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "url",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

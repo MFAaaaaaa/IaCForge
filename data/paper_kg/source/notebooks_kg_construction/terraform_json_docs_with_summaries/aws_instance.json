@@ -1,0 +1,959 @@
+{
+  "resource": {
+    "name": "aws_instance",
+    "description": "Provides an EC2 instance resource. This allows instances to be created, updated, and deleted. Instances also support provisioning.",
+    "llm_summary": "The `aws_instance` Terraform resource enables the creation, management, and lifecycle control of Amazon EC2 instances, providing a foundational building block for deploying virtual servers in AWS. Common use cases include hosting applications, setting up development or production environments, and provisioning compute resources for workloads. Users can configure key attributes such as instance type, AMI (Amazon Machine Image), networking (VPC, subnets, security groups), storage (EBS volumes), and advanced settings like user data scripts for bootstrapping, tags for resource organization, and auto-scaling integration."
+  },
+  "examples": [
+    {
+      "title": "Basic example using AMI lookup",
+      "code": "data \"aws_ami\" \"ubuntu\" {\n  most_recent = true\n\n  filter {\n    name   = \"name\"\n    values = [\"ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*\"]\n  }\n\n  filter {\n    name   = \"virtualization-type\"\n    values = [\"hvm\"]\n  }\n\n  owners = [\"099720109477\"] # Canonical\n}\n\nresource \"aws_instance\" \"web\" {\n  ami           = data.aws_ami.ubuntu.id\n  instance_type = \"t3.micro\"\n\n  tags = {\n    Name = \"HelloWorld\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_instance` resource using an AMI dynamically fetched via the `aws_ami` data source, with filters for the latest Ubuntu 22.04 image and Canonical ownership. Highlights the use of AMI lookup, instance type configuration (`t3.micro`), and tagging for resource identification.\""
+    },
+    {
+      "title": "Spot instance example",
+      "code": "data \"aws_ami\" \"this\" {\n  most_recent = true\n  owners      = [\"amazon\"]\n  filter {\n    name   = \"architecture\"\n    values = [\"arm64\"]\n  }\n  filter {\n    name   = \"name\"\n    values = [\"al2023-ami-2023*\"]\n  }\n}\n\nresource \"aws_instance\" \"this\" {\n  ami = data.aws_ami.this.id\n  instance_market_options {\n    market_type = \"spot\"\n    spot_options {\n      max_price = 0.0031\n    }\n  }\n  instance_type = \"t4g.nano\"\n  tags = {\n    Name = \"test-spot\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS EC2 spot instance using the `aws_instance` resource with `instance_market_options` to specify spot pricing and a maximum price (`max_price`). It also shows how to dynamically fetch the latest ARM64 Amazon Linux 2023 AMI using the `aws_ami` data source with filters, enabling cost-effective and optimized instance provisioning."
+    },
+    {
+      "title": "Network and credit specification example",
+      "code": "resource \"aws_vpc\" \"my_vpc\" {\n  cidr_block = \"172.16.0.0/16\"\n\n  tags = {\n    Name = \"tf-example\"\n  }\n}\n\nresource \"aws_subnet\" \"my_subnet\" {\n  vpc_id            = aws_vpc.my_vpc.id\n  cidr_block        = \"172.16.10.0/24\"\n  availability_zone = \"us-west-2a\"\n\n  tags = {\n    Name = \"tf-example\"\n  }\n}\n\nresource \"aws_network_interface\" \"foo\" {\n  subnet_id   = aws_subnet.my_subnet.id\n  private_ips = [\"172.16.10.100\"]\n\n  tags = {\n    Name = \"primary_network_interface\"\n  }\n}\n\nresource \"aws_instance\" \"foo\" {\n  ami           = \"ami-005e54dee72cc1d00\" # us-west-2\n  instance_type = \"t2.micro\"\n\n  network_interface {\n    network_interface_id = aws_network_interface.foo.id\n    device_index         = 0\n  }\n\n  credit_specification {\n    cpu_credits = \"unlimited\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_instance` with a custom network interface and unlimited CPU credits using the `network_interface` and `credit_specification` blocks. It also illustrates the setup of supporting resources, including a VPC, subnet, and network interface, to establish a private IP address and network connectivity for the instance."
+    },
+    {
+      "title": "CPU options example",
+      "code": "resource \"aws_vpc\" \"example\" {\n  cidr_block = \"172.16.0.0/16\"\n\n  tags = {\n    Name = \"tf-example\"\n  }\n}\n\nresource \"aws_subnet\" \"example\" {\n  vpc_id            = aws_vpc.example.id\n  cidr_block        = \"172.16.10.0/24\"\n  availability_zone = \"us-east-2a\"\n\n  tags = {\n    Name = \"tf-example\"\n  }\n}\n\ndata \"aws_ami\" \"amzn-linux-2023-ami\" {\n  most_recent = true\n  owners      = [\"amazon\"]\n\n  filter {\n    name   = \"name\"\n    values = [\"al2023-ami-2023.*-x86_64\"]\n  }\n}\n\nresource \"aws_instance\" \"example\" {\n  ami           = data.aws_ami.amzn-linux-2023-ami.id\n  instance_type = \"c6a.2xlarge\"\n  subnet_id     = aws_subnet.example.id\n\n  cpu_options {\n    core_count       = 2\n    threads_per_core = 2\n  }\n\n  tags = {\n    Name = \"tf-example\"\n  }\n}",
+      "llm_summary": "This Terraform example demonstrates how to configure CPU options for an `aws_instance` resource, specifying `core_count` and `threads_per_core` for optimized performance. It also includes the setup of supporting resources like a VPC, subnet, and dynamic AMI selection to create a complete environment for deploying an Amazon Linux 2023 instance."
+    },
+    {
+      "title": "Host resource group or License Manager registered AMI example",
+      "code": "resource \"aws_instance\" \"this\" {\n  ami                     = \"ami-0dcc1e21636832c5d\"\n  instance_type           = \"m5.large\"\n  host_resource_group_arn = \"arn:aws:resource-groups:us-west-2:123456789012:group/win-testhost\"\n  tenancy                 = \"host\"\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_instance` resource to launch an EC2 instance using a License Manager registered AMI (`ami-0dcc1e21636832c5d`) with dedicated host tenancy and association to a specific host resource group (`host_resource_group_arn`). It illustrates the use of the `tenancy` and `host_resource_group_arn` arguments for deploying instances on a dedicated host in AWS."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "ami",
+      "description": "(Optional) AMI to use for the instance. Required unless `launch_template` is specified and the Launch Template specifes an AMI. If an AMI is specified in the Launch Template, setting `ami` will override the AMI specified in the Launch Template.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ami` argument in the `aws_instance` resource allows users to specify the Amazon Machine Image (AMI) that defines the operating system and pre-configured software for the EC2 instance. Setting this argument enables users to control the instance's base environment, ensuring it aligns with application requirements or deployment goals, and can override the AMI specified in a linked Launch Template if both are provided."
+    },
+    {
+      "name": "associate_public_ip_address",
+      "description": "(Optional) Whether to associate a public IP address with an instance in a VPC.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "Controls whether the EC2 instance in a VPC is assigned a public IP address, enabling direct internet access without requiring additional networking configurations. Commonly used to configure instances for public-facing workloads or simplify connectivity in environments without NAT gateways or bastion hosts."
+    },
+    {
+      "name": "availability_zone",
+      "description": "(Optional) AZ to start the instance in.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `availability_zone` argument for the `aws_instance` resource allows users to specify the specific Availability Zone (AZ) within a region where the EC2 instance will be launched. This enables precise control over instance placement to optimize latency, redundancy, or proximity to other resources, supporting common goals like high availability and fault tolerance in cloud infrastructure design."
+    },
+    {
+      "name": "cpu_core_count",
+      "description": "(Optional, Deprecated use the `cpu_options` argument instead) Sets the number of CPU cores for an instance. This option is only supported on creation of instance type that support CPU Options CPU Cores and Threads Per CPU Core Per Instance Type - specifying this option for unsupported instance types will return an error from the EC2 API.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "\"Defines the number of CPU cores for the EC2 instance during creation, allowing users to optimize compute performance for workloads on instance types that support CPU core and thread customization. Deprecated in favor of the `cpu_options` argument and may result in errors if used with unsupported instance types.\""
+    },
+    {
+      "name": "cpu_threads_per_core",
+      "description": "(Optional - has no effect unless `cpu_core_count` is also set, Deprecated use the `cpu_options` argument instead) If set to 1, hyperthreading is disabled on the launched instance. Defaults to 2 if not set. See Optimizing CPU Options for more information.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `cpu_threads_per_core` argument in the `aws_instance` resource allows users to control the hyperthreading configuration of the instance's CPU by specifying the number of threads per core. Setting this argument to `1` disables hyperthreading, which can optimize performance for certain workloads, while the default value of `2` enables hyperthreading for increased parallelism. Note that this argument is deprecated and superseded by the `cpu_options` argument."
+    },
+    {
+      "name": "disable_api_stop",
+      "description": "(Optional) If true, enables EC2 Instance Stop Protection.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `disable_api_stop` argument for the `aws_instance` resource allows users to control EC2 Instance Stop Protection by specifying whether the instance can be stopped via API calls. Setting this to `true` prevents the instance from being stopped through the AWS API, which is useful for protecting critical workloads or ensuring high availability in production environments."
+    },
+    {
+      "name": "disable_api_termination",
+      "description": "(Optional) If true, enables EC2 Instance Termination Protection.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `disable_api_termination` argument for the `aws_instance` resource allows users to control the termination protection feature of an EC2 instance, preventing accidental deletion via API calls when set to `true`. This is commonly used to safeguard critical instances in production environments, ensuring they cannot be terminated without explicitly disabling this protection first."
+    },
+    {
+      "name": "ebs_optimized",
+      "description": "(Optional) If true, the launched EC2 instance will be EBS-optimized. Note that if this is not set on an instance type that is optimized by default then this will show as disabled but if the instance type is optimized by default then there is no need to set this and there is no effect to disabling it. See the EBS Optimized section of the AWS User Guide for more information.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `ebs_optimized` argument for the `aws_instance` resource allows users to enable or disable EBS optimization for the EC2 instance, which improves I/O performance for attached EBS volumes by dedicating additional bandwidth. This setting is typically used to optimize storage performance for workloads requiring high throughput or low latency, but it is unnecessary for instance types that are EBS-optimized by default."
+    },
+    {
+      "name": "enable_primary_ipv6",
+      "description": "(Optional) Whether to assign a primary IPv6 Global Unicast Address (GUA) to the instance when launched in a dual-stack or IPv6-only subnet. A primary IPv6 address ensures a consistent IPv6 address for the instance and is automatically assigned by AWS to the ENI. Once enabled, the first IPv6 GUA becomes the primary IPv6 address and cannot be disabled. The primary IPv6 address remains until the instance is terminated or the ENI is detached. Disabling `enable_primary_ipv6` after it has been enabled forces recreation of the instance.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_primary_ipv6` argument for the `aws_instance` resource allows users to control whether a primary IPv6 Global Unicast Address (GUA) is automatically assigned to the instance's Elastic Network Interface (ENI) when launched in a dual-stack or IPv6-only subnet. Enabling this ensures the instance has a consistent IPv6 address for communication, supporting IPv6 networking requirements, but forces instance recreation if disabled after being set."
+    },
+    {
+      "name": "get_password_data",
+      "description": "(Optional) If true, wait for password data to become available and retrieve it. Useful for getting the administrator password for instances running Microsoft Windows. The password data is exported to the `password_data` attribute. See GetPasswordData for more information.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `get_password_data` argument in the `aws_instance` resource controls whether Terraform retrieves the administrator password for Windows instances by waiting for password data to become available. Enabling this functionality (`true`) allows users to access the `password_data` attribute, which is commonly used for securely obtaining initial login credentials for Windows-based environments."
+    },
+    {
+      "name": "hibernation",
+      "description": "(Optional) If true, the launched EC2 instance will support hibernation.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `hibernation` argument for the `aws_instance` resource allows users to enable hibernation support for the EC2 instance, which preserves the instance's in-memory state when stopped, facilitating faster restarts and maintaining application state. This feature is useful for workloads requiring quick recovery or state retention across instance stops, aligning with goals like optimizing downtime and preserving session data."
+    },
+    {
+      "name": "host_id",
+      "description": "(Optional) ID of a dedicated host that the instance will be assigned to. Use when an instance is to be launched on a specific dedicated host.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "\"Defines the specific dedicated host on which the instance will be launched, enabling users to control instance placement for scenarios requiring host-level isolation, resource optimization, or compliance with licensing and tenancy requirements.\""
+    },
+    {
+      "name": "host_resource_group_arn",
+      "description": "(Optional) ARN of the host resource group in which to launch the instances. If you specify an ARN, omit the `tenancy` parameter or set it to `host`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `host_resource_group_arn` argument for the `aws_instance` resource allows users to specify the ARN of a host resource group to launch the instance on a dedicated host. By setting this argument, users can control the placement of the instance within a specific resource group, enabling configurations for tenancy optimization and compliance with dedicated hosting requirements."
+    },
+    {
+      "name": "iam_instance_profile",
+      "description": "(Optional) IAM Instance Profile to launch the instance with. Specified as the name of the Instance Profile. Ensure your credentials have the correct permission to assign the instance profile according to the EC2 documentation, notably `iam:PassRole`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `iam_instance_profile` argument allows users to associate an IAM Instance Profile with the EC2 instance, enabling the instance to assume an IAM role and access AWS resources securely. By specifying the profile name, users can control permissions and policies for the instance, supporting common goals like managing access to S3, DynamoDB, or other AWS services without embedding credentials."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_instance` resource represents the unique identifier of the EC2 instance, typically assigned by AWS upon creation. While not required, it can be used to reference or track the instance programmatically, enabling users to query or manage the instance's state and attributes within Terraform workflows or external integrations."
+    },
+    {
+      "name": "instance_initiated_shutdown_behavior",
+      "description": "(Optional) Shutdown behavior for the instance. Amazon defaults this to `stop` for EBS-backed instances and `terminate` for instance-store instances. Cannot be set on instance-store instances. See Shutdown Behavior for more information.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `instance_initiated_shutdown_behavior` argument for the `aws_instance` resource allows users to define how the instance should behave when it is shut down from within the operating system. It configures whether the instance stops or terminates, enabling control over lifecycle management and resource retention for EBS-backed instances, while being inapplicable to instance-store instances."
+    },
+    {
+      "name": "instance_type",
+      "description": "(Optional) Instance type to use for the instance. Required unless `launch_template` is specified and the Launch Template specifies an instance type. If an instance type is specified in the Launch Template, setting `instance_type` will override the instance type specified in the Launch Template. Updates to this field will trigger a stop/start of the EC2 instance.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `instance_type` argument for the `aws_instance` resource allows users to define the compute capacity and hardware configuration of the EC2 instance by specifying its type (e.g., `t2.micro`, `m5.large`). Setting this argument directly impacts the instance's performance, cost, and suitability for workloads, and it can override the instance type defined in a linked Launch Template if both are specified."
+    },
+    {
+      "name": "ipv6_address_count",
+      "description": "",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `ipv6_address_count` argument for the `aws_instance` resource allows users to specify the number of IPv6 addresses to assign to the instance's primary network interface. Configuring this argument enables IPv6 networking for the instance, supporting use cases like dual-stack environments, improved scalability, or compliance with modern networking requirements."
+    },
+    {
+      "name": "ipv6_addresses",
+      "description": "(Optional) Specify one or more IPv6 addresses from the range of the subnet to associate with the primary network interface",
+      "required": false,
+      "type": "list(string)",
+      "llm_summary": "The `ipv6_addresses` argument for the `aws_instance` resource allows users to specify one or more IPv6 addresses from the subnet's range to associate with the instance's primary network interface. This enables precise control over the instance's IPv6 networking configuration, supporting use cases like dual-stack environments, custom IP addressing, or compliance with specific network requirements."
+    },
+    {
+      "name": "key_name",
+      "description": "(Optional) Key name of the Key Pair to use for the instance; which can be managed using the `aws_key_pair` resource.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `key_name` argument for the `aws_instance` resource allows users to specify the name of an existing EC2 Key Pair to associate with the instance, enabling secure SSH access to the instance. By configuring this argument, users can define authentication credentials for remote management, aligning with common goals like securing administrative access to cloud servers."
+    },
+    {
+      "name": "monitoring",
+      "description": "(Optional) If true, the launched EC2 instance will have detailed monitoring enabled. (Available since v0.6.0)",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `monitoring` argument for the `aws_instance` resource allows users to enable or disable detailed monitoring for the EC2 instance. When set to `true`, it activates enhanced CloudWatch metrics collection, providing deeper insights into instance performance and resource utilization, which is useful for optimizing workloads and troubleshooting."
+    },
+    {
+      "name": "placement_group",
+      "description": "(Optional) Placement Group to start the instance in.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `placement_group` argument allows users to specify the name of a placement group in which the EC2 instance should be launched, enabling control over instance placement for optimized networking or workload distribution. This is commonly used to achieve high-performance computing goals, such as low-latency communication or clustered deployments, by grouping instances within a single logical unit."
+    },
+    {
+      "name": "placement_partition_number",
+      "description": "(Optional) Number of the partition the instance is in. Valid only if the `aws_placement_group` resource's `strategy` argument is set to `\"partition\"`.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `placement_partition_number` argument for the `aws_instance` resource allows users to specify the partition within a partition-based placement group where the instance will be launched. This configuration is relevant when the associated `aws_placement_group` uses the `partition` strategy, enabling users to optimize workload distribution and fault tolerance by isolating instances across distinct partitions within the placement group."
+    },
+    {
+      "name": "private_ip",
+      "description": "(Optional) Private IP address to associate with the instance in a VPC.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `private_ip` argument for the `aws_instance` resource allows users to specify a custom private IP address for the instance within a VPC, enabling precise control over network configuration. By setting this argument, users can ensure the instance uses a specific private IP, which is useful for scenarios like static IP assignments, integration with existing network architectures, or maintaining predictable communication within private subnets."
+    },
+    {
+      "name": "secondary_private_ips",
+      "description": "(Optional) List of secondary private IPv4 addresses to assign to the instance's primary network interface (eth0) in a VPC. Can only be assigned to the primary network interface (eth0) attached at instance creation, not a pre-existing network interface i.e., referenced in a `network_interface` block. Refer to the Elastic network interfaces documentation to see the maximum number of private IP addresses allowed per instance type.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `secondary_private_ips` argument for the `aws_instance` resource allows users to define additional private IPv4 addresses for the instance's primary network interface (`eth0`) during creation. This enables advanced network configurations, such as supporting multiple services or applications on distinct IPs within a VPC, and is particularly useful for scenarios requiring enhanced IP-based routing or segregation."
+    },
+    {
+      "name": "security_groups",
+      "description": "(Optional, EC2-Classic and default VPC only) List of security group names to associate with. If you are creating Instances in a VPC, use vpc_security_group_ids instead.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `security_groups` argument for the `aws_instance` resource allows users to specify a set of EC2 security group names to control network access to the instance in EC2-Classic or the default VPC. By defining this argument, users can manage inbound and outbound traffic rules for the instance, ensuring proper access control and security configurations for their application or workload."
+    },
+    {
+      "name": "source_dest_check",
+      "description": "(Optional) Controls if traffic is routed to the instance when the destination address does not match the instance. Used for NAT or VPNs. Defaults true.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `source_dest_check` argument for the `aws_instance` resource allows users to control whether the instance performs source/destination address validation on incoming traffic. Disabling this check (setting it to `false`) is essential for configuring instances as NAT gateways or VPN endpoints, enabling them to route traffic where the destination address does not match the instance itself."
+    },
+    {
+      "name": "subnet_id",
+      "description": "(Optional) VPC Subnet ID to launch in.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `subnet_id` argument allows users to specify the VPC subnet in which the EC2 instance will be launched, enabling control over the network placement and connectivity of the instance. By setting this argument, users can define the instance's association with specific routing, security groups, and IP address allocation within the chosen subnet, aligning with goals like isolating workloads or configuring network access."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of tags to assign to the resource. Note that these tags apply to the instance and not block storage devices. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_instance` resource allows users to define a map of key-value pairs that assign metadata to the instance, enabling organization, categorization, and identification of resources for purposes such as cost allocation, environment labeling, or automation workflows. These tags apply specifically to the instance itself (not associated block storage) and can override provider-level default tags if matching keys are present."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_instance` resource allows users to define a comprehensive set of key-value tags that are automatically merged from both provider-level and resource-specific tags. This enables consistent metadata management across AWS resources, supporting common goals like organizing instances by environment, cost allocation, or ownership for improved governance and operational clarity."
+    },
+    {
+      "name": "tenancy",
+      "description": "(Optional) Tenancy of the instance (if the instance is running in a VPC). An instance with a tenancy of `dedicated` runs on single-tenant hardware. The `host` tenancy is not supported for the import-instance command. Valid values are `default`, `dedicated`, and `host`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `tenancy` argument for the `aws_instance` resource allows users to specify the instance's tenancy type within a VPC, controlling whether the instance runs on shared (`default`) or single-tenant (`dedicated`) hardware. This configuration impacts resource isolation and compliance, enabling users to meet specific performance or regulatory requirements, such as ensuring dedicated physical hardware for sensitive workloads."
+    },
+    {
+      "name": "user_data",
+      "description": "(Optional) User data to provide when launching the instance. Do not pass gzip-compressed data via this argument; see `user_data_base64` instead. Updates to this field will trigger a stop/start of the EC2 instance by default. If the `user_data_replace_on_change` is set then updates to this field will trigger a destroy and recreate of the EC2 instance.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `user_data` argument for the `aws_instance` resource allows users to specify a script or configuration data that is executed during the instance's initialization, enabling tasks such as setting environment variables, installing software, or configuring the operating system. Changes to this argument trigger a stop/start or, optionally, a destroy/recreate of the EC2 instance, making it ideal for defining instance-specific bootstrapping behavior."
+    },
+    {
+      "name": "user_data_base64",
+      "description": "(Optional) Can be used instead of `user_data` to pass base64-encoded binary data directly. Use this instead of `user_data` whenever the value is not a valid UTF-8 string. For example, gzip-encoded user data must be base64-encoded and passed via this argument to avoid corruption. Updates to this field will trigger a stop/start of the EC2 instance by default. If the `user_data_replace_on_change` is set then updates to this field will trigger a destroy and recreate of the EC2 instance.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `user_data_base64` argument for the `aws_instance` resource allows users to specify base64-encoded binary data for instance initialization, enabling the configuration of startup scripts or environment settings that are not valid UTF-8 strings (e.g., gzip-encoded data). Setting this argument ensures proper handling of non-textual user data and triggers instance lifecycle changes, such as stop/start or destroy/recreate, depending on the `user_data_replace_on_change` setting."
+    },
+    {
+      "name": "user_data_replace_on_change",
+      "description": "(Optional) When used in combination with `user_data` or `user_data_base64` will trigger a destroy and recreate of the EC2 instance when set to `true`. Defaults to `false` if not set.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `user_data_replace_on_change` argument in the `aws_instance` resource controls whether changes to the `user_data` or `user_data_base64` configuration trigger a forced destroy and recreation of the EC2 instance. This enables users to ensure lifecycle consistency for instances where updated initialization scripts or environment configurations require a clean state, supporting workflows that depend on immutable infrastructure principles."
+    },
+    {
+      "name": "volume_tags",
+      "description": "(Optional) Map of tags to assign, at instance-creation time, to root and EBS volumes. Do not use volume_tags if you plan to manage block device tags outside the aws_instance configuration, such as using tags in an aws_ebs_volume resource attached via aws_volume_attachment. Doing so will result in resource cycling and inconsistent behavior.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `volume_tags` argument in the `aws_instance` resource allows users to define a map of tags that are automatically applied to the root and attached EBS volumes during instance creation. This enables streamlined resource organization, identification, and metadata management for storage volumes, but should not be used if block device tags are managed externally to avoid resource conflicts and cycling."
+    },
+    {
+      "name": "vpc_security_group_ids",
+      "description": "(Optional, VPC only) List of security group IDs to associate with.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `vpc_security_group_ids` argument for the `aws_instance` resource allows users to specify a set of security group IDs to associate with the instance within a VPC. This configuration controls network-level access to the instance, enabling users to define inbound and outbound traffic rules for enhanced security and compliance with access policies."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "capacity_reservation_specification",
+      "description": "(Optional) Describes an instance's Capacity Reservation targeting option. See Capacity Reservation Specification below for more details.  ami - (Optional) AMI to use for the instance. Required unless launch_template is specified and the Launch Template specifes an AMI. If an AMI is specified in the Launch Template, setting ami will override the AMI specified in the Launch Template.  associate_public_ip_address - (Optional) Whether to associate a public IP address with an instance in a VPC.  availability_zone - (Optional) AZ to start the instance in.  capacity_reservation_specification - (Optional) Describes an instance's Capacity Reservation targeting option. See Capacity Reservation Specification below for more details.  Changing cpu_core_count and/or cpu_threads_per_core will cause the resource to be destroyed and re-created.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "capacity_reservation_preference",
+          "description": "(Optional) Indicates the instance's Capacity Reservation preferences. Can be `\"open\"` or `\"none\"`. (Default: `\"open\"`).",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `capacity_reservation_preference` argument in the `capacity_reservation_specification` block of the `aws_instance` resource allows users to define how the instance interacts with EC2 Capacity Reservations, specifying whether it should automatically use any open Capacity Reservations (`\"open\"`) or avoid them entirely (`\"none\"`). This configuration impacts instance placement and resource allocation, enabling users to optimize for availability or cost based on their workload requirements."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "capacity_reservation_target",
+          "description": "(Optional) Information about the target Capacity Reservation. See Capacity Reservation Target below for more details.  For more information, see the documentation on Capacity Reservations.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "capacity_reservation_id",
+              "description": "(Optional) ID of the Capacity Reservation in which to run the instance.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `capacity_reservation_id` argument allows users to specify the ID of a Capacity Reservation in which the EC2 instance should run, enabling targeted allocation of compute capacity within a reserved pool. This configuration is typically used to ensure predictable instance availability in high-demand scenarios or reserved environments, aligning with capacity planning and resource management goals."
+            },
+            {
+              "name": "capacity_reservation_resource_group_arn",
+              "description": "(Optional) ARN of the Capacity Reservation resource group in which to run the instance.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `capacity_reservation_resource_group_arn` argument allows users to specify the ARN of a Capacity Reservation resource group where the instance should run, enabling targeted allocation of compute capacity within a predefined reservation group. This configuration is useful for optimizing resource utilization and ensuring instances are launched in environments with reserved capacity, aligning with workload-specific requirements or cost management strategies."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `capacity_reservation_target` block within the `capacity_reservation_specification` of the `aws_instance` resource defines settings to associate an EC2 instance with a specific Capacity Reservation, ensuring dedicated compute capacity for the instance. This block encapsulates configuration details for targeting a specific reservation, enabling users to optimize resource allocation and guarantee availability in high-demand scenarios."
+        }
+      ],
+      "llm_summary": "The `capacity_reservation_specification` block in the `aws_instance` resource enables detailed control over an instance's targeting options for AWS Capacity Reservations, ensuring predictable resource availability in specific scenarios. It encapsulates settings related to Capacity Reservation preferences, allowing users to optimize instance placement and guarantee compute capacity for critical workloads."
+    },
+    {
+      "name": "cpu_options",
+      "description": "(Optional) The CPU options for the instance. See CPU Options below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "amd_sev_snp",
+          "description": "(Optional) Indicates whether to enable the instance for AMD SEV-SNP. AMD SEV-SNP is supported with M6a, R6a, and C6a instance types only. Valid values are `enabled` and `disabled`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `amd_sev_snp` argument within the `cpu_options` block of the `aws_instance` resource allows users to specify whether AMD SEV-SNP (Secure Encrypted Virtualization - Secure Nested Paging) is enabled for the instance, enhancing hardware-based memory encryption and security. This feature is applicable only to specific instance types (M6a, R6a, C6a) and supports user goals related to configuring advanced security measures for workloads requiring confidential computing."
+        },
+        {
+          "name": "core_count",
+          "description": "(Optional) Sets the number of CPU cores for an instance. This option is only supported on creation of instance type that support CPU Options CPU Cores and Threads Per CPU Core Per Instance Type - specifying this option for unsupported instance types will return an error from the EC2 API.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `core_count` argument within the `cpu_options` block of the `aws_instance` resource allows users to define the number of physical CPU cores allocated to the instance during its creation. This configuration is useful for optimizing compute performance and tailoring the instance to workloads requiring specific core counts, but it is only applicable to instance types that support custom CPU options."
+        },
+        {
+          "name": "threads_per_core",
+          "description": "(Optional - has no effect unless `core_count` is also set) If set to 1, hyperthreading is disabled on the launched instance. Defaults to 2 if not set. See Optimizing CPU Options for more information. For more information, see the documentation on Optimizing CPU options.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `threads_per_core` argument in the `cpu_options` block of the `aws_instance` resource allows users to control the hyperthreading configuration of the instance's CPU. By setting this value to `1`, hyperthreading is disabled, optimizing the instance for workloads that benefit from single-threaded performance, while the default value of `2` enables hyperthreading for multi-threaded efficiency. This argument is typically used to fine-tune CPU performance based on workload requirements, such as high-performance computing or latency-sensitive applications."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `cpu_options` block in the `aws_instance` resource allows users to configure the CPU-related settings for an EC2 instance, such as the number of CPU cores and threads per core. This block provides fine-grained control over the instance's compute performance, enabling optimization for workloads that require specific CPU configurations, such as high-performance computing or multi-threaded applications."
+    },
+    {
+      "name": "credit_specification",
+      "description": "(Optional) Configuration block for customizing the credit specification of the instance. See Credit Specification below for more details. Terraform will only perform drift detection of its value when present in a configuration. Removing this configuration on existing instances will only stop managing it. It will not change the configuration back to the default for the instance type.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "cpu_credits",
+          "description": "(Optional) Credit option for CPU usage. Valid values include `standard` or `unlimited`. T3 instances are launched as unlimited by default. T2 instances are launched as standard by default.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `cpu_credits` argument in the `credit_specification` block of the `aws_instance` resource allows users to define the CPU credit configuration for burstable EC2 instances (e.g., T2 and T3). By specifying `standard` or `unlimited`, users can control whether the instance operates with capped CPU performance or can burst beyond baseline usage for higher workloads, aligning instance behavior with cost optimization or performance needs."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "\"Configures the credit specification for burstable performance instances within the `aws_instance` resource, allowing users to manage CPU credit usage and optimize cost-performance balance. This block encapsulates settings related to instance CPU behavior, enabling detailed control over whether the instance operates in standard or unlimited mode for handling workloads.\""
+    },
+    {
+      "name": "ebs_block_device",
+      "description": "(Optional) One or more configuration blocks with additional EBS block devices to attach to the instance. Block device configurations only apply on resource creation. See Block Devices below for details on attributes and drift detection. When accessing this as an attribute reference, it is a set of objects.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "delete_on_termination",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `delete_on_termination` argument for the `ebs_block_device` in the `aws_instance` resource controls whether the associated EBS volume is automatically deleted when the instance is terminated. Setting this to `true` ensures the volume is removed as part of the instance's lifecycle, supporting resource cleanup and cost management, while `false` retains the volume for data persistence beyond the instance's lifespan."
+        },
+        {
+          "name": "device_name",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `device_name` argument specifies the name of the block device to be attached to the instance, allowing users to define the mapping between the EBS volume and the instance's device identifier (e.g., `/dev/sda1`). By setting this argument, users ensure proper configuration of storage devices for the instance, enabling functionality such as persistent data storage or custom disk layouts."
+        },
+        {
+          "name": "encrypted",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `encrypted` argument for the `ebs_block_device` in the `aws_instance` resource allows users to specify whether the attached EBS volume should be encrypted at rest using AWS-managed or customer-managed keys. Enabling this argument enhances data security by ensuring that the volume's contents are encrypted, aligning with compliance requirements and best practices for sensitive workloads."
+        },
+        {
+          "name": "iops",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `iops` argument for the `ebs_block_device` in the `aws_instance` resource allows users to specify the number of I/O operations per second (IOPS) provisioned for the EBS volume, enabling the configuration of performance characteristics for workloads requiring high disk throughput or low latency. This is typically used to optimize storage performance for applications like databases or analytics systems, aligning with user goals of fine-tuning infrastructure for specific performance requirements."
+        },
+        {
+          "name": "kms_key_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `kms_key_id` argument for the `ebs_block_device` in the `aws_instance` resource allows users to specify the AWS KMS key ID used to encrypt the EBS volume attached to the instance. By setting this argument, users can enforce encryption at rest for the volume using a custom KMS key, aligning with security and compliance requirements for sensitive data."
+        },
+        {
+          "name": "snapshot_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `snapshot_id` argument in the `ebs_block_device` block of the `aws_instance` resource allows users to specify the ID of an existing EBS snapshot to create the block device from. By setting this argument, users can initialize the volume with pre-existing data from the snapshot, enabling use cases such as restoring data, replicating environments, or bootstrapping instances with pre-configured storage."
+        },
+        {
+          "name": "tags",
+          "description": "(Optional) Map of tags to assign to the resource. Note that these tags apply to the instance and not block storage devices. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `tags` argument for the `ebs_block_device` within the `aws_instance` resource allows users to define a map of key-value pairs to assign metadata tags to the instance itself, not the associated block storage devices. This enables users to organize, categorize, and manage instances effectively for purposes like cost allocation, environment identification, or resource tracking, with the ability to override provider-level default tags if configured."
+        },
+        {
+          "name": "tags_all",
+          "description": "",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `tags_all` argument for the `ebs_block_device` within the `aws_instance` resource allows users to define a comprehensive set of key-value tags that are automatically applied to the EBS block device and inherited from the parent resource. This enables consistent tagging for resource organization, cost allocation, and governance, aligning with common user goals like enforcing tagging policies or simplifying resource management across AWS infrastructure."
+        },
+        {
+          "name": "throughput",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `throughput` argument for the `ebs_block_device` in the `aws_instance` resource allows users to specify the desired IOPS (input/output operations per second) performance for a provisioned EBS volume configured with the `io2` or `gp3` volume types. By setting this value, users can optimize storage performance to meet application-specific requirements, such as high-throughput workloads or latency-sensitive operations."
+        },
+        {
+          "name": "volume_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `volume_id` argument in the `ebs_block_device` block of the `aws_instance` resource allows users to specify the ID of an existing EBS volume to attach to the instance. By setting this argument, users can reuse and manage pre-provisioned storage volumes, enabling scenarios like data persistence, migration, or sharing storage across instances."
+        },
+        {
+          "name": "volume_size",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `volume_size` argument for the `ebs_block_device` in the `aws_instance` resource specifies the storage capacity (in GiB) of the attached EBS volume. By configuring this argument, users can define the size of the block storage to meet application requirements, such as accommodating data persistence, scaling storage for workloads, or optimizing performance for specific use cases."
+        },
+        {
+          "name": "volume_type",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `volume_type` argument for the `ebs_block_device` in the `aws_instance` resource allows users to specify the type of EBS volume to attach to the instance, such as `gp2` (general purpose SSD), `io1` (provisioned IOPS SSD), or `sc1` (cold HDD). Configuring this argument impacts performance characteristics like throughput, latency, and cost, enabling users to optimize storage for specific workloads or application requirements."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `ebs_block_device` configuration block in the `aws_instance` resource enables the attachment of additional EBS volumes to an EC2 instance during its creation, allowing users to define storage characteristics such as size, type, and encryption. This block encapsulates settings for managing the lifecycle and attributes of attached block devices, providing granular control over instance storage to optimize performance, security, and capacity."
+    },
+    {
+      "name": "enclave_options",
+      "description": "(Optional) Enable Nitro Enclaves on launched instances. See Enclave Options below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enabled",
+          "description": "(Optional) Whether Nitro Enclaves will be enabled on the instance. Defaults to `false`. For more information, see the documentation on Nitro Enclaves.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument within the `enclave_options` block of the `aws_instance` resource allows users to specify whether Nitro Enclaves functionality is activated for the instance. Enabling this feature isolates sensitive workloads in a secure, highly constrained environment, supporting use cases like cryptographic operations or confidential data processing."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "\"Enables and configures Nitro Enclaves for secure, isolated compute environments within an `aws_instance`. This block encapsulates settings related to enclave activation, allowing users to enhance data security and achieve confidential computing for sensitive workloads.\""
+    },
+    {
+      "name": "ephemeral_block_device",
+      "description": "(Optional) One or more configuration blocks to customize Ephemeral (also known as \"Instance Store\") volumes on the instance. See Block Devices below for details. When accessing this as an attribute reference, it is a set of objects.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "device_name",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `device_name` argument specifies the name of the device to which the ephemeral block storage is attached on the instance, allowing users to define the mapping of the block device within the instance's operating system. By setting this argument, users ensure proper configuration of temporary storage for tasks like caching or high-speed data processing, aligning with the instance's ephemeral storage requirements."
+        },
+        {
+          "name": "no_device",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `no_device` argument in the `ephemeral_block_device` configuration for the `aws_instance` resource allows users to specify whether to suppress the automatic mapping of an ephemeral block device to the instance. Setting this argument to `true` disables the attachment of the ephemeral storage, which is useful for scenarios where temporary storage is unnecessary or conflicts with custom storage configurations."
+        },
+        {
+          "name": "virtual_name",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `virtual_name` argument in the `ephemeral_block_device` configuration for the `aws_instance` resource allows users to specify a name that maps the ephemeral (instance store) volume to a virtual device within the instance. By setting this argument, users can define how the ephemeral storage is identified and accessed, enabling use cases like temporary caching, high-speed local storage, or scratch space for applications requiring transient data."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `ephemeral_block_device` configuration block in the `aws_instance` resource allows users to customize ephemeral (instance store) volumes attached to the instance, enabling detailed control over temporary, high-performance storage. It encapsulates settings related to the configuration of these non-persistent block devices, helping users optimize storage for workloads requiring fast, disposable data access, such as caching or temporary processing tasks."
+    },
+    {
+      "name": "instance_market_options",
+      "description": "(Optional) Describes the market (purchasing) option for the instances. See Market Options below for details on attributes.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "market_type",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `market_type` argument within `instance_market_options` for the `aws_instance` resource allows users to specify the purchasing model for the instance, such as \"spot\" or \"on-demand.\" Configuring this argument enables cost optimization by defining whether the instance participates in the spot market for lower prices or uses the standard on-demand pricing model, aligning with budgetary and workload requirements."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "spot_options",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "instance_interruption_behavior",
+              "description": "(Optional) The behavior when a Spot Instance is interrupted. Valid values include `hibernate`, `stop`, `terminate` . The default is `terminate`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `instance_interruption_behavior` argument within the `spot_options` block of the `aws_instance` resource allows users to define how a Spot Instance should respond when interrupted, enabling control over its lifecycle behavior. By specifying values such as `hibernate`, `stop`, or `terminate`, users can configure whether the instance preserves its state, halts operations, or is permanently removed, aligning with goals like cost optimization, workload resilience, or state retention during interruptions."
+            },
+            {
+              "name": "max_price",
+              "description": "(Optional) The maximum hourly price that you're willing to pay for a Spot Instance.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "\"Defines the maximum hourly price the user is willing to pay for a Spot Instance, enabling cost control by limiting the bid price for instance provisioning within the 'spot_options' configuration of the 'aws_instance' resource.\""
+            },
+            {
+              "name": "spot_instance_type",
+              "description": "(Optional) The Spot Instance request type. Valid values include `one-time`, `persistent`. Persistent Spot Instance requests are only supported when the instance interruption behavior is either hibernate or stop. The default is `one-time`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `spot_instance_type` argument in the `spot_options` block of the `aws_instance` resource allows users to specify the type of Spot Instance request, either `one-time` or `persistent`. This configuration defines the lifecycle behavior of the Spot Instance, where `one-time` requests terminate after fulfillment and `persistent` requests maintain the instance across interruptions, provided the interruption behavior is set to hibernate or stop, enabling more resilient workloads."
+            },
+            {
+              "name": "valid_until",
+              "description": "(Optional) The end date of the request, in UTC format (YYYY-MM-DDTHH:MM:SSZ). Supported only for persistent requests.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `valid_until` argument in the `spot_options` block of the `aws_instance` resource allows users to define the expiration date and time for a persistent Spot Instance request in UTC format. By setting this argument, users can control the lifecycle of the request, ensuring it automatically terminates after the specified date, which is useful for managing cost, resource availability, or time-bound workloads."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `spot_options` configuration block within the `instance_market_options` of the `aws_instance` resource enables detailed control over the behavior and parameters of EC2 Spot Instances. It encapsulates settings such as bid price limits, instance interruption handling, and allocation strategies, allowing users to optimize cost savings and manage the reliability of workloads running on Spot Instances."
+        }
+      ],
+      "llm_summary": "\"Configures purchasing options for the AWS instance, enabling users to define market-related settings such as spot instance behavior and pricing strategies. This block allows for cost optimization and flexible instance provisioning by specifying attributes like spot instance requests and allocation preferences.\""
+    },
+    {
+      "name": "launch_template",
+      "description": "(Optional) Specifies a Launch Template to configure the instance. Parameters configured on this resource will override the corresponding parameters in the Launch Template. See Launch Template Specification below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `id` argument in the `launch_template` block of the `aws_instance` resource allows users to specify the unique identifier of an existing EC2 launch template to define instance configuration parameters such as AMI, instance type, and networking settings. By setting this argument, users can streamline instance provisioning by reusing predefined templates, ensuring consistency and reducing manual configuration effort."
+        },
+        {
+          "name": "name",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `name` argument for the `launch_template` in the `aws_instance` resource allows users to specify the name of the launch template to be used for provisioning the instance. By setting this argument, users can reference a predefined configuration for instance attributes such as AMI, instance type, and networking settings, enabling consistent and reusable infrastructure deployment aligned with common user goals like standardizing instance configurations or automating scaling workflows."
+        },
+        {
+          "name": "version",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `version` argument for the `launch_template` in the `aws_instance` resource allows users to specify which version of the launch template should be used to configure the instance. By defining this argument, users can control the exact configuration applied to the instance, such as AMI, instance type, or networking settings, ensuring consistency and alignment with specific deployment requirements or versioned infrastructure changes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `launch_template` block in the `aws_instance` resource allows users to reference an existing EC2 Launch Template to define instance configuration settings, such as AMI, instance type, and networking. It encapsulates a group of predefined parameters for streamlined instance provisioning while enabling overrides for specific settings directly in the `aws_instance` resource, offering flexibility and consistency in managing EC2 instances."
+    },
+    {
+      "name": "maintenance_options",
+      "description": "(Optional) Maintenance and recovery options for the instance. See Maintenance Options below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "auto_recovery",
+          "description": "(Optional) Automatic recovery behavior of the Instance. Can be `\"default\"` or `\"disabled\"`. See Recover your instance for more details.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `auto_recovery` argument in the `maintenance_options` block of the `aws_instance` resource allows users to configure the automatic recovery behavior of an EC2 instance during hardware or system failures. By setting this to `\"default\"` or `\"disabled\"`, users can enable or disable the instance's ability to recover automatically, aligning with goals like ensuring high availability or controlling recovery processes for critical workloads."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `maintenance_options` block in the `aws_instance` resource configures maintenance and recovery settings for the instance, enabling users to manage operational behaviors during system updates or disruptions. This block encapsulates options related to instance recovery and maintenance preferences, allowing users to optimize availability and resilience by tailoring how the instance responds to maintenance events."
+    },
+    {
+      "name": "metadata_options",
+      "description": "(Optional) Customize the metadata options of the instance. See Metadata Options below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "http_endpoint",
+          "description": "(Optional) Whether the metadata service is available. Valid values include `enabled` or `disabled`. Defaults to `enabled`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `http_endpoint` argument in the `metadata_options` block of the `aws_instance` resource allows users to control whether the EC2 instance's metadata service is accessible via HTTP. By setting this to `enabled` or `disabled`, users can define the availability of instance metadata, which is commonly used for tasks like retrieving instance-specific information or configuring IAM roles dynamically."
+        },
+        {
+          "name": "http_protocol_ipv6",
+          "description": "(Optional) Whether the IPv6 endpoint for the instance metadata service is enabled. Defaults to `disabled`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `http_protocol_ipv6` argument in the `metadata_options` block of the `aws_instance` resource allows users to control whether the instance metadata service supports IPv6 endpoints. By enabling this option (`enabled`), users can configure the instance to access metadata over IPv6, which is useful for environments requiring IPv6 connectivity or compliance with dual-stack networking setups."
+        },
+        {
+          "name": "http_put_response_hop_limit",
+          "description": "(Optional) Desired HTTP PUT response hop limit for instance metadata requests. The larger the number, the further instance metadata requests can travel. Valid values are integer from `1` to `64`. Defaults to `1`.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `http_put_response_hop_limit` argument in the `metadata_options` block of the `aws_instance` resource controls the maximum number of network hops that instance metadata HTTP PUT response requests can traverse. By configuring this value (ranging from `1` to `64`), users can define the scope of metadata accessibility, typically to enhance security by limiting metadata exposure or to enable broader access for advanced networking scenarios."
+        },
+        {
+          "name": "http_tokens",
+          "description": "(Optional) Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2). Valid values include `optional` or `required`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `http_tokens` argument in the `metadata_options` block of the `aws_instance` resource allows users to specify whether the EC2 instance metadata service requires session tokens for access, configuring the use of Instance Metadata Service Version 2 (IMDSv2). Setting this argument to `required` enhances security by enforcing token-based authentication for metadata retrieval, while `optional` maintains backward compatibility with IMDSv1."
+        },
+        {
+          "name": "instance_metadata_tags",
+          "description": "(Optional) Enables or disables access to instance tags from the instance metadata service. Valid values include `enabled` or `disabled`. Defaults to `disabled`. For more information, see the documentation on the Instance Metadata Service.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `instance_metadata_tags` argument in the `metadata_options` block of the `aws_instance` resource allows users to control whether instance tags are accessible via the Instance Metadata Service (IMDS). Setting this argument to `enabled` facilitates tag-based metadata retrieval from within the instance, which is useful for dynamic configuration, automation, or environment-specific behavior, while `disabled` restricts this access for enhanced security by default."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `metadata_options` block in the `aws_instance` resource configures instance metadata service settings, enabling control over how the instance interacts with the metadata API. It encapsulates related settings such as metadata version, HTTP endpoint accessibility, and token requirements, allowing users to enhance security, restrict metadata access, and comply with best practices for instance management."
+    },
+    {
+      "name": "network_interface",
+      "description": "(Optional) Customize network interfaces to be attached at instance boot time. See Network Interfaces below for more details.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "delete_on_termination",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `delete_on_termination` argument for the `network_interface` block in the `aws_instance` resource controls whether the associated network interface is automatically deleted when the instance is terminated. Setting this to `true` ensures the network interface is cleaned up with the instance, while setting it to `false` retains the interface for reuse or manual management, supporting lifecycle customization and resource persistence."
+        },
+        {
+          "name": "device_index",
+          "description": "",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `device_index` argument specifies the order in which a network interface is attached to the instance, defining its position relative to other interfaces. Setting this value ensures proper configuration of multi-interface setups, enabling users to control network routing, prioritization, or connectivity for specific use cases like multi-homed instances or custom networking architectures."
+        },
+        {
+          "name": "network_card_index",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `network_card_index` argument for the `network_interface` in the `aws_instance` resource allows users to specify the index of the network card to which the network interface is attached. This enables precise control over multi-network interface configurations, ensuring the correct mapping of network interfaces to specific virtual network cards for advanced networking setups or custom routing requirements."
+        },
+        {
+          "name": "network_interface_id",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `network_interface_id` argument for the `aws_instance` resource specifies the ID of an existing network interface to attach to the instance, allowing users to control the network connectivity and configuration of the instance. By setting this argument, users can define custom networking setups, such as associating the instance with a pre-configured interface for specific IP addresses, security groups, or advanced networking requirements."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `network_interface` block in the `aws_instance` resource allows users to define and customize network interfaces attached to the instance at boot time, enabling granular control over networking configurations such as private IP addresses, security groups, and subnet associations. This block is essential for scenarios requiring advanced networking setups, such as attaching multiple interfaces, managing static IPs, or isolating traffic for enhanced security and flexibility."
+    },
+    {
+      "name": "private_dns_name_options",
+      "description": "(Optional) Options for the instance hostname. The default values are inherited from the subnet. See Private DNS Name Options below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enable_resource_name_dns_a_record",
+          "description": "Indicates whether to respond to DNS queries for instance hostnames with DNS A records.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "Controls whether the instance's hostname is resolved to a DNS A record in private DNS, enabling users to configure DNS query responses for the instance's IPv4 address. This is useful for ensuring hostname-based connectivity within private networks or simplifying internal DNS management."
+        },
+        {
+          "name": "enable_resource_name_dns_aaaa_record",
+          "description": "Indicates whether to respond to DNS queries for instance hostnames with DNS AAAA records.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "Controls whether the instance's hostname resolves to DNS AAAA records, enabling IPv6 address responses for DNS queries. This argument is useful for configuring IPv6 support in private DNS settings, aligning with environments that require dual-stack or IPv6-only networking."
+        },
+        {
+          "name": "hostname_type",
+          "description": "Type of hostname for Amazon EC2 instances. For IPv4 only subnets, an instance DNS name must be based on the instance IPv4 address. For IPv6 native subnets, an instance DNS name must be based on the instance ID. For dual-stack subnets, you can specify whether DNS names use the instance IPv4 address or the instance ID. Valid values: `ip-name` and `resource-name`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `hostname_type` argument in the `private_dns_name_options` block of the `aws_instance` resource allows users to specify the type of DNS hostname assigned to the instance, controlling whether it is based on the instance's IPv4 address (`ip-name`) or instance ID (`resource-name`). This configuration impacts how the private DNS name is generated, particularly in dual-stack or IPv6-enabled subnets, enabling users to align DNS naming behavior with their network architecture and operational requirements."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "\"Configures hostname options for the instance, allowing control over private DNS naming conventions inherited from the subnet. This block enables customization of DNS attributes, such as enabling or disabling hostname assignment, to align with specific networking or naming requirements.\""
+    },
+    {
+      "name": "root_block_device",
+      "description": "(Optional) Configuration block to customize details about the root block device of the instance. See Block Devices below for details. When accessing this as an attribute reference, it is a list containing one object.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "delete_on_termination",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `delete_on_termination` argument for the `root_block_device` in the `aws_instance` resource controls whether the root volume is automatically deleted when the instance is terminated. Setting this to `true` ensures the volume is removed as part of the instance's lifecycle, supporting cleanup and resource management, while setting it to `false` retains the volume for data persistence after the instance is terminated."
+        },
+        {
+          "name": "device_name",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `device_name` argument within the `root_block_device` configuration of the `aws_instance` resource allows users to specify the name of the device as it will appear to the operating system (e.g., `/dev/xvda`). This enables precise control over how the root block storage is mapped to the instance, which is critical for defining storage configurations and ensuring compatibility with specific OS or application requirements."
+        },
+        {
+          "name": "encrypted",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `encrypted` argument for the `root_block_device` in the `aws_instance` resource allows users to specify whether the root volume of the instance should be encrypted at rest using AWS-managed or customer-managed encryption keys. Enabling this feature enhances data security by protecting the underlying storage of the instance, aligning with common goals like securing sensitive workloads and meeting compliance requirements."
+        },
+        {
+          "name": "iops",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `iops` argument for the `root_block_device` in the `aws_instance` resource allows users to specify the number of input/output operations per second (IOPS) for the block storage volume. This configuration is typically used to optimize performance for workloads requiring high disk throughput, such as databases or applications with intensive read/write operations, and is relevant when using provisioned IOPS (io1 or io2) volume types."
+        },
+        {
+          "name": "kms_key_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `kms_key_id` argument for the `root_block_device` in the `aws_instance` resource allows users to specify the AWS KMS key used to encrypt the root volume of the instance. By setting this argument, users can enforce encryption at rest with a custom KMS key, enabling enhanced data security and compliance with organizational or regulatory requirements."
+        },
+        {
+          "name": "tags",
+          "description": "(Optional) Map of tags to assign to the resource. Note that these tags apply to the instance and not block storage devices. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `tags` argument for the `root_block_device` in the `aws_instance` resource allows users to assign metadata in the form of key-value pairs to the instance, enabling organization, categorization, and identification of resources for purposes such as cost allocation, environment labeling, or automation workflows. These tags apply specifically to the instance itself, not the associated block storage devices, and can override provider-level default tags if matching keys are defined."
+        },
+        {
+          "name": "tags_all",
+          "description": "",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `tags_all` argument for the `root_block_device` of the `aws_instance` resource allows users to define a map of key-value pairs that apply metadata tags to the root block device. This enables consistent tagging for resource organization, cost allocation, and management purposes, ensuring the root block device inherits both user-defined and provider-level default tags."
+        },
+        {
+          "name": "throughput",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `throughput` argument for the `root_block_device` in the `aws_instance` resource specifies the provisioned throughput (in MiB/s) for an Amazon EBS volume when using the `io2` volume type. This allows users to optimize performance for workloads requiring high and consistent I/O, such as large-scale databases or latency-sensitive applications."
+        },
+        {
+          "name": "volume_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `volume_id` argument in the `root_block_device` configuration of the `aws_instance` resource allows users to specify the ID of an existing EBS volume to attach as the root block device for the instance. By setting this argument, users can reuse pre-configured or pre-provisioned storage volumes, enabling scenarios like data persistence, custom boot volumes, or recovery workflows."
+        },
+        {
+          "name": "volume_size",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `volume_size` argument for the `root_block_device` in the `aws_instance` resource allows users to specify the storage capacity (in GiB) of the root volume attached to the instance. By configuring this argument, users can control the size of the root disk to meet application requirements, such as accommodating larger operating systems, logs, or data storage needs, ensuring sufficient space for workloads and system functionality."
+        },
+        {
+          "name": "volume_type",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `volume_type` argument for the `root_block_device` in the `aws_instance` resource allows users to specify the type of EBS volume attached to the instance, such as `gp2`, `gp3`, `io1`, or `sc1`. Configuring this argument impacts performance characteristics like IOPS, throughput, and cost, enabling users to optimize storage for workloads such as general-purpose applications, high-performance databases, or archival use cases."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `root_block_device` configuration block in the `aws_instance` resource allows users to customize the storage settings for the instance's root volume, including attributes like size, type, and encryption. This block provides granular control over the root disk's performance and security, enabling users to optimize storage for their application's specific requirements."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_instance` resource allows users to specify the maximum duration (in string format, e.g., \"10m\" for 10 minutes) Terraform will wait for the instance creation process to complete. By configuring this timeout, users can control how long Terraform should attempt to provision the instance before failing, ensuring alignment with deployment expectations and handling potential delays in resource creation."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_instance` resource allows users to specify the maximum duration (in string format, e.g., \"5m\" for 5 minutes) Terraform should wait for the instance deletion process to complete. By configuring this timeout, users can control how long Terraform will attempt to terminate the instance before timing out, ensuring predictable behavior during resource cleanup or infrastructure decommissioning."
+        },
+        {
+          "name": "read",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `read` argument within the `timeouts` block of the `aws_instance` resource allows users to specify the maximum duration (in string format, e.g., \"5m\" for 5 minutes) Terraform will wait when reading the state or attributes of an existing EC2 instance. Configuring this timeout helps manage long-running read operations, ensuring Terraform does not fail prematurely during state refreshes or when querying instance details."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block of the `aws_instance` resource allows users to specify the maximum duration (as a string, e.g., \"30m\") Terraform will wait for updates to the instance to complete. This configuration helps control the timeout behavior during instance modifications, ensuring operations either complete within the defined timeframe or fail gracefully if exceeded."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_instance` resource allows users to define custom timeout durations for specific operations, such as creating, updating, or deleting an EC2 instance. By configuring this block, users gain precise control over operation time limits, ensuring smoother management of long-running tasks or avoiding premature failures in environments with variable provisioning speeds."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN of the instance.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "instance_lifecycle",
+      "description": "Indicates whether this is a Spot Instance or a Scheduled Instance.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "instance_state",
+      "description": "State of the instance. One of: `pending`, `running`, `shutting-down`, `terminated`, `stopping`, `stopped`. See Instance Lifecycle for more information.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "outpost_arn",
+      "description": "ARN of the Outpost the instance is assigned to.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "password_data",
+      "description": "Base-64 encoded encrypted password data for the instance. Useful for getting the administrator password for instances running Microsoft Windows. This attribute is only exported if `get_password_data` is true. Note that this encrypted value will be stored in the state file, as with all exported attributes. See GetPasswordData for more information.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "primary_network_interface_id",
+      "description": "ID of the instance's primary network interface.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "private_dns",
+      "description": "Private DNS name assigned to the instance. Can only be used inside the Amazon EC2, and only available if you've enabled DNS hostnames for your VPC.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "public_dns",
+      "description": "Public DNS name assigned to the instance. For EC2-VPC, this is only available if you've enabled DNS hostnames for your VPC.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "public_ip",
+      "description": "Public IP address assigned to the instance, if applicable. NOTE: If you are using an `aws_eip` with your instance, you should refer to the EIP's address directly and not use `public_ip` as this field will change after the EIP is attached.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "spot_instance_request_id",
+      "description": "If the request is a Spot Instance request, the ID of the request.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

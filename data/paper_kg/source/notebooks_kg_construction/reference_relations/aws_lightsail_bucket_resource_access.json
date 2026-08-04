@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "bucket_name",
+        "references_output": "aws_lightsail_bucket.name",
+        "target_resource_type": "aws_lightsail_bucket"
+    },
+    {
+        "argument_path": "resource_name",
+        "references_output": "aws_lightsail_instance.name",
+        "target_resource_type": "aws_lightsail_instance"
+    }
+]

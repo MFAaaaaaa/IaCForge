@@ -1,0 +1,63 @@
+{
+  "resource": {
+    "name": "aws_lb_target_group_attachment",
+    "description": "Provides the ability to register instances and containers with an Application Load Balancer (ALB) or Network Load Balancer (NLB) target group. For attaching resources with Elastic Load Balancer (ELB), see the aws_elb_attachment resource. aws_alb_target_group_attachment is known as aws_lb_target_group_attachment. The functionality is identical.",
+    "llm_summary": "The `aws_lb_target_group_attachment` resource enables the registration of instances, containers, or other compute resources with target groups associated with Application Load Balancers (ALBs) or Network Load Balancers (NLBs). Common use cases include load balancing traffic across EC2 instances, ECS tasks, or other targets to ensure high availability and scalability. This resource allows users to configure dynamic target group attachments for efficient traffic routing, lifecycle management of targets, and seamless integration with modern cloud architectures."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_lb_target_group_attachment\" \"test\" {\n  target_group_arn = aws_lb_target_group.test.arn\n  target_id        = aws_instance.test.id\n  port             = 80\n}\n\nresource \"aws_lb_target_group\" \"test\" {\n  # ... other configuration ...\n}\n\nresource \"aws_instance\" \"test\" {\n  # ... other configuration ...\n}",
+      "llm_summary": "This example demonstrates how to attach an EC2 instance to an Application Load Balancer (ALB) target group using the `aws_lb_target_group_attachment` resource. It highlights key configurations such as specifying the `target_group_arn`, `target_id`, and `port` to establish the connection between the load balancer and the instance for traffic routing."
+    },
+    {
+      "title": "Lambda Target",
+      "code": "resource \"aws_lambda_permission\" \"with_lb\" {\n  statement_id  = \"AllowExecutionFromlb\"\n  action        = \"lambda:InvokeFunction\"\n  function_name = aws_lambda_function.test.function_name\n  principal     = \"elasticloadbalancing.amazonaws.com\"\n  source_arn    = aws_lb_target_group.test.arn\n}\n\nresource \"aws_lb_target_group\" \"test\" {\n  name        = \"test\"\n  target_type = \"lambda\"\n}\n\nresource \"aws_lambda_function\" \"test\" {\n  # ... other configuration ...\n}\n\nresource \"aws_lb_target_group_attachment\" \"test\" {\n  target_group_arn = aws_lb_target_group.test.arn\n  target_id        = aws_lambda_function.test.arn\n  depends_on       = [aws_lambda_permission.with_lb]\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Lambda function as a target for an Application Load Balancer (ALB) using the `aws_lb_target_group_attachment` resource. It showcases the setup of Lambda permissions (`aws_lambda_permission`) to allow invocation by the ALB, the creation of a target group with `target_type = \"lambda\"`, and the attachment of the Lambda function to the target group, ensuring proper dependencies are managed."
+    },
+    {
+      "title": "Registering Multiple Targets",
+      "code": "resource \"aws_instance\" \"example\" {\n  count = 3\n  # ... other configuration ...\n}\n\nresource \"aws_lb_target_group\" \"example\" {\n  # ... other configuration ...\n}\n\nresource \"aws_lb_target_group_attachment\" \"example\" {\n  # covert a list of instance objects to a map with instance ID as the key, and an instance\n  # object as the value.\n  for_each = {\n    for k, v in aws_instance.example :\n    k => v\n  }\n\n  target_group_arn = aws_lb_target_group.example.arn\n  target_id        = each.value.id\n  port             = 80\n}",
+      "llm_summary": "This example demonstrates how to register multiple EC2 instances as targets in an AWS Application Load Balancer (ALB) target group using the `aws_lb_target_group_attachment` resource with the `for_each` meta-argument. It illustrates dynamically mapping instance IDs to target group attachments, enabling scalable and efficient load balancing configurations."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "availability_zone",
+      "description": "(Optional) The Availability Zone where the IP address of the target is to be registered. If the private IP address is outside of the VPC scope, this value must be set to `all`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `availability_zone` argument in the `aws_lb_target_group_attachment` resource allows users to specify the Availability Zone where the target's IP address will be registered, ensuring precise control over the geographic placement of traffic routing. Setting this argument is particularly important when the target's private IP address is outside the VPC scope, as it must be defined as `all` to enable cross-zone load balancing functionality."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_lb_target_group_attachment` resource specifies a unique identifier for the attachment, typically representing the relationship between a target (e.g., an EC2 instance or IP) and a target group in an AWS load balancer. While optional, setting this argument can help users manage or reference the attachment explicitly, enabling precise control over load balancer target configurations."
+    },
+    {
+      "name": "port",
+      "description": "(Optional) The port on which targets receive traffic.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `port` argument in the `aws_lb_target_group_attachment` resource allows users to specify the port on which the attached targets will receive traffic, enabling precise control over the network configuration for load-balanced applications. By defining this optional parameter, users can align target group behavior with application requirements, such as directing traffic to specific service ports for optimized functionality or multi-port setups."
+    },
+    {
+      "name": "target_group_arn",
+      "description": "(Required) The ARN of the target group with which to register targets.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `target_group_arn` argument specifies the Amazon Resource Name (ARN) of the target group to which the resource will attach targets, enabling the association of compute resources (e.g., EC2 instances, IP addresses) with a load balancer for traffic distribution. By defining this required parameter, users ensure that their targets are registered with the correct target group, facilitating load balancing and routing functionality in their cloud infrastructure."
+    },
+    {
+      "name": "target_id",
+      "description": "(Required) The ID of the target. This is the Instance ID for an instance, or the container ID for an ECS container. If the target type is `ip`, specify an IP address. If the target type is `lambda`, specify the Lambda function ARN. If the target type is `alb`, specify the ALB ARN. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `target_id` argument in the `aws_lb_target_group_attachment` resource specifies the unique identifier of the target to be registered with a load balancer's target group. This allows users to define the specific backend resource\u2014such as an EC2 instance, ECS container, IP address, Lambda function, or ALB\u2014that will receive traffic routed by the load balancer, enabling precise control over load balancing behavior and backend resource integration."
+    }
+  ],
+  "blocks": [],
+  "attributes": []
+}

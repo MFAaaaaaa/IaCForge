@@ -1,0 +1,316 @@
+{
+  "resource": {
+    "name": "aws_elb",
+    "description": "Provides an Elastic Load Balancer resource, also known as a \"Classic Load Balancer\" after the release of Application/Network Load Balancers. Terraform currently provides both a standalone ELB Attachment resource (describing an instance attached to an ELB), and an ELB resource with instances defined in-line. At this time you cannot use an ELB with in-line instances in conjunction with a ELB Attachment resources. Doing so will cause a conflict and will overwrite attachments.",
+    "llm_summary": "The `aws_elb` Terraform resource enables the creation and management of Classic Elastic Load Balancers (ELBs) in AWS, facilitating the distribution of incoming traffic across multiple EC2 instances to ensure high availability and fault tolerance. Common use cases include setting up load balancing for legacy applications, managing traffic routing, and scaling workloads in a traditional AWS environment. Users can configure instance attachments, health checks, listener settings, and security groups, while ensuring compatibility with legacy systems and avoiding conflicts between in-line instance definitions and standalone attachment resources."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "# Create a new load balancer\nresource \"aws_elb\" \"bar\" {\n  name               = \"foobar-terraform-elb\"\n  availability_zones = [\"us-west-2a\", \"us-west-2b\", \"us-west-2c\"]\n\n  access_logs {\n    bucket        = \"foo\"\n    bucket_prefix = \"bar\"\n    interval      = 60\n  }\n\n  listener {\n    instance_port     = 8000\n    instance_protocol = \"http\"\n    lb_port           = 80\n    lb_protocol       = \"http\"\n  }\n\n  listener {\n    instance_port      = 8000\n    instance_protocol  = \"http\"\n    lb_port            = 443\n    lb_protocol        = \"https\"\n    ssl_certificate_id = \"arn:aws:iam::123456789012:server-certificate/certName\"\n  }\n\n  health_check {\n    healthy_threshold   = 2\n    unhealthy_threshold = 2\n    timeout             = 3\n    target              = \"HTTP:8000/\"\n    interval            = 30\n  }\n\n  instances                   = [aws_instance.foo.id]\n  cross_zone_load_balancing   = true\n  idle_timeout                = 400\n  connection_draining         = true\n  connection_draining_timeout = 400\n\n  tags = {\n    Name = \"foobar-terraform-elb\"\n  }\n}",
+      "llm_summary": "This example demonstrates the basic configuration of an AWS Elastic Load Balancer (ELB) using Terraform, including multi-AZ deployment, access logging, HTTP and HTTPS listeners with SSL certificates, health checks, and advanced settings like cross-zone load balancing, connection draining, and idle timeout. It illustrates how to associate instances, customize listener protocols, and enable detailed logging and monitoring for a robust load balancer setup."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "availability_zones",
+      "description": "(Required for an EC2-classic ELB) The AZ's to serve traffic in.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `availability_zones` argument for the `aws_elb` resource allows users to specify the set of AWS Availability Zones where the Elastic Load Balancer (ELB) will distribute incoming traffic. Configuring this argument ensures high availability and fault tolerance by enabling the ELB to serve traffic across multiple zones, particularly required for EC2-Classic environments."
+    },
+    {
+      "name": "connection_draining",
+      "description": "(Optional) Boolean to enable connection draining. Default: `false`",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `connection_draining` argument for the `aws_elb` resource enables the configuration of connection draining, a feature that ensures active connections are allowed to complete before deregistering or shutting down backend instances. Setting this to `true` helps maintain application availability and graceful handling of in-flight requests during instance updates or scaling events."
+    },
+    {
+      "name": "connection_draining_timeout",
+      "description": "(Optional) The time in seconds to allow for connections to drain. Default: `300`",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `connection_draining_timeout` argument for the `aws_elb` resource configures the duration (in seconds) to allow active connections to gracefully complete before deregistering or terminating an instance from the load balancer. This setting helps ensure a smooth user experience by preventing abrupt connection drops during instance scaling or maintenance, aligning with common goals of maintaining application availability and reliability."
+    },
+    {
+      "name": "cross_zone_load_balancing",
+      "description": "(Optional) Enable cross-zone load balancing. Default: `true`",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `cross_zone_load_balancing` argument for the `aws_elb` resource controls whether the Elastic Load Balancer distributes incoming traffic evenly across all registered instances in all enabled availability zones, regardless of zone-specific instance counts. Enabling this feature (default: `true`) improves load distribution and fault tolerance, aligning with user goals of optimizing resource utilization and ensuring high availability across zones."
+    },
+    {
+      "name": "desync_mitigation_mode",
+      "description": "(Optional) Determines how the load balancer handles requests that might pose a security risk to an application due to HTTP desync. Valid values are `monitor`, `defensive` (default), `strictest`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `desync_mitigation_mode` argument for the `aws_elb` resource allows users to configure how the load balancer handles potentially insecure HTTP requests that could lead to desynchronization attacks. By specifying modes such as `monitor`, `defensive` (default), or `strictest`, users can define the security posture of the load balancer to balance between monitoring, moderate protection, or strict enforcement, aligning with application security requirements."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_elb` resource represents the unique identifier of the Elastic Load Balancer, typically used to reference or retrieve the ELB after creation. While optional, it can be useful for tracking, managing, or integrating the ELB with other resources or workflows in Terraform configurations."
+    },
+    {
+      "name": "idle_timeout",
+      "description": "(Optional) The time in seconds that the connection is allowed to be idle. Default: `60`",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `idle_timeout` argument for the `aws_elb` resource allows users to configure the maximum duration, in seconds, that a connection to the Elastic Load Balancer can remain idle before being terminated. This setting helps optimize resource usage and manage connection lifecycles, ensuring efficient handling of inactive sessions while balancing performance and cost."
+    },
+    {
+      "name": "instances",
+      "description": "(Optional) A list of instance ids to place in the ELB pool.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `instances` argument in the `aws_elb` resource allows users to specify a set of EC2 instance IDs to associate with the Elastic Load Balancer (ELB), defining the pool of backend instances that will receive traffic distributed by the ELB. Configuring this argument enables users to control which instances are part of the load balancing process, supporting common goals like scaling application availability and ensuring fault tolerance."
+    },
+    {
+      "name": "internal",
+      "description": "(Optional) If true, ELB will be an internal ELB.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `internal` argument for the `aws_elb` resource allows users to specify whether the Elastic Load Balancer (ELB) should be internal-facing, meaning it is accessible only within the VPC and not exposed to the public internet. Setting this to `true` is typically used to configure private ELBs for internal applications or services, supporting secure, internal-only communication."
+    },
+    {
+      "name": "name",
+      "description": "(Optional) The name of the ELB. By default generated by Terraform.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_elb` resource allows users to define a custom name for the Elastic Load Balancer (ELB), providing a human-readable identifier for easier management and organization within AWS. If not specified, Terraform generates a default name, but setting this argument is useful for aligning the ELB with naming conventions, project structures, or environment-specific identifiers."
+    },
+    {
+      "name": "name_prefix",
+      "description": "(Optional, Forces new resource) Creates a unique name beginning with the specified prefix. Conflicts with `name`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name_prefix` argument for the `aws_elb` resource allows users to define a unique prefix for the load balancer's name, enabling automated name generation while ensuring consistency across environments or deployments. This argument is useful for scenarios where dynamic naming is required, such as managing multiple ELBs in different environments, and it forces the creation of a new resource if modified."
+    },
+    {
+      "name": "security_groups",
+      "description": "(Optional) A list of security group IDs to assign to the ELB. Only valid if creating an ELB within a VPC",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `security_groups` argument for the `aws_elb` resource allows users to specify a set of security group IDs to control network access to the Elastic Load Balancer (ELB) when deployed within a VPC. By defining this argument, users can enforce inbound and outbound traffic rules, aligning the ELB's behavior with their security and access requirements for applications hosted in the cloud."
+    },
+    {
+      "name": "source_security_group",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `source_security_group` argument for the `aws_elb` resource allows users to specify the security group from which the Elastic Load Balancer (ELB) will accept traffic. By defining this, users can control and restrict inbound traffic to the ELB based on the security group rules, enhancing network security and ensuring only authorized sources can communicate with the load balancer."
+    },
+    {
+      "name": "subnets",
+      "description": "(Required for a VPC ELB) A list of subnet IDs to attach to the ELB. When an update to subnets will remove all current subnets, this will force a new resource.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `subnets` argument for the `aws_elb` resource allows users to specify the subnet IDs within a VPC where the Elastic Load Balancer (ELB) will be deployed, enabling control over the network placement and accessibility of the ELB. Configuring this argument ensures the ELB is attached to specific subnets, impacting its availability zones and network routing, and may trigger resource recreation if all existing subnets are replaced."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level. Exactly one of availability_zones or subnets must be specified: this determines if the ELB exists in a VPC or in EC2-classic. Access Logs (access_logs) support the following:",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_elb` resource allows users to assign metadata in the form of key-value pairs to the Elastic Load Balancer, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or automation workflows. When configured, these tags can override provider-level default tags, offering granular control over resource tagging to align with specific project or organizational requirements."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_elb` resource allows users to define a comprehensive set of key-value tags that are applied to the Elastic Load Balancer, including inherited tags from the provider's default configuration. This enables users to organize, categorize, and manage resources effectively for purposes such as cost allocation, environment identification, or compliance tracking."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "access_logs",
+      "description": "(Optional) An Access Logs block. Access Logs documented below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "bucket",
+          "description": "(Required) The S3 bucket name to store the logs in.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `bucket` argument specifies the name of the S3 bucket where access logs for the Elastic Load Balancer (ELB) will be stored, enabling centralized logging and compliance tracking. By configuring this required parameter, users can define the destination for log data, supporting use cases like auditing, troubleshooting, and long-term storage of ELB access logs."
+        },
+        {
+          "name": "bucket_prefix",
+          "description": "(Optional) The S3 bucket prefix. Logs are stored in the root if not configured.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `bucket_prefix` argument for the `access_logs` configuration in the `aws_elb` resource allows users to specify a custom prefix for log file names stored in the designated S3 bucket. By setting this optional string, users can organize and differentiate logs within the bucket, enabling better management and retrieval of ELB access logs for environments, applications, or specific use cases."
+        },
+        {
+          "name": "enabled",
+          "description": "(Optional) Boolean to enable / disable `access_logs`. Default is `true` Listeners (listener) support the following:",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument for the `access_logs` block in the `aws_elb` resource allows users to control whether access logging is activated for the load balancer. Setting this boolean to `true` enables the collection of detailed request and connection logs, which is useful for monitoring, debugging, and compliance purposes, while disabling it (`false`) stops log generation to reduce storage or processing overhead."
+        },
+        {
+          "name": "interval",
+          "description": "(Required) The interval between checks.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `interval` argument in the `access_logs` block of the `aws_elb` resource specifies the time interval, in minutes, at which access logs are delivered to the configured S3 bucket. By setting this value, users can control the frequency of log delivery, enabling them to balance log granularity with storage and processing costs."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `access_logs` configuration block in the `aws_elb` resource enables the setup of logging for Elastic Load Balancer (ELB) traffic, allowing users to capture detailed access information for monitoring and auditing purposes. It encapsulates settings related to log storage, such as the S3 bucket destination and log prefix, helping users achieve enhanced visibility into ELB activity and troubleshoot issues effectively."
+    },
+    {
+      "name": "health_check",
+      "description": "(Optional) A health_check block. Health Check documented below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "healthy_threshold",
+          "description": "(Required) The number of checks before the instance is declared healthy.",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `healthy_threshold` argument in the `health_check` block of the `aws_elb` resource specifies the minimum number of consecutive successful health checks required for an instance to be marked as healthy. This configuration allows users to define the resilience criteria for their load balancer, ensuring that only consistently stable instances are included in traffic distribution, which supports high availability and reliable application performance."
+        },
+        {
+          "name": "interval",
+          "description": "(Required) The interval between checks.",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `interval` argument in the `health_check` block of the `aws_elb` resource specifies the frequency, in seconds, at which health checks are performed on registered instances. By defining this value, users control the regularity of instance health monitoring, ensuring timely detection of unhealthy instances to maintain load balancer performance and availability."
+        },
+        {
+          "name": "target",
+          "description": "(Required) The target of the check. Valid pattern is \"${PROTOCOL}:${PORT}${PATH}\", where PROTOCOL values are:`HTTP`, `HTTPS` - PORT and PATH are required `TCP`, `SSL` - PORT is required, PATH is not supported",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `target` argument in the `health_check` block of the `aws_elb` resource specifies the endpoint and protocol used to perform health checks on backend instances. By defining the protocol (`HTTP`, `HTTPS`, `TCP`, or `SSL`), port, and optional path, users configure how the load balancer determines instance health, ensuring traffic is routed only to healthy targets and improving application reliability."
+        },
+        {
+          "name": "timeout",
+          "description": "(Required) The length of time before the check times out.",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `timeout` argument for the `health_check` in the `aws_elb` resource specifies the maximum duration (in seconds) that the load balancer waits for a response from a target before marking the health check as failed. This ensures users can control the responsiveness threshold for their application, helping to define acceptable service latency and improve fault tolerance by identifying unresponsive instances."
+        },
+        {
+          "name": "unhealthy_threshold",
+          "description": "(Required) The number of checks before the instance is declared unhealthy.",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `unhealthy_threshold` argument in the `health_check` block of the `aws_elb` resource specifies the number of consecutive failed health checks required to mark an instance as unhealthy. By configuring this value, users can control the sensitivity of the load balancer's health monitoring, ensuring instances are only removed from service after a defined number of failures, which helps balance reliability and responsiveness in handling potential instance issues."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `health_check` block in the `aws_elb` resource configures the health monitoring mechanism for Elastic Load Balancers, enabling automated checks to determine the availability and responsiveness of registered instances. It encapsulates settings such as target endpoints, intervals, and thresholds, allowing users to ensure reliable traffic routing by detecting and excluding unhealthy instances from load balancing."
+    },
+    {
+      "name": "listener",
+      "description": "(Required) A list of listener blocks. Listeners documented below.",
+      "cardinality": [
+        1,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "instance_port",
+          "description": "(Required) The port on the instance to route to",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `instance_port` argument specifies the port on the backend instance that the Elastic Load Balancer (ELB) routes incoming traffic to, enabling users to define how the listener forwards requests to application servers. By configuring this required parameter, users ensure proper connectivity between the ELB and their application instances, supporting common goals like load balancing and high availability for services running on specific ports."
+        },
+        {
+          "name": "instance_protocol",
+          "description": "(Required) The protocol to use to the instance. Valid values are `HTTP`, `HTTPS`, `TCP`, or `SSL`",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `instance_protocol` argument specifies the communication protocol used between the Elastic Load Balancer (ELB) listener and the backend instances, enabling users to define how traffic is forwarded (e.g., HTTP, HTTPS, TCP, or SSL). By setting this required parameter, users control the protocol compatibility and security of the connection to their application servers, aligning with common goals like configuring secure or optimized traffic handling."
+        },
+        {
+          "name": "lb_port",
+          "description": "(Required) The port to listen on for the load balancer",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `lb_port` argument specifies the port on which the load balancer's listener will accept incoming traffic, enabling users to define the entry point for client requests. By configuring this required parameter, users can control how the load balancer routes traffic to backend instances, aligning with application requirements or network design."
+        },
+        {
+          "name": "lb_protocol",
+          "description": "(Required) The protocol to listen on. Valid values are `HTTP`, `HTTPS`, `TCP`, or `SSL`",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `lb_protocol` argument specifies the communication protocol (e.g., `HTTP`, `HTTPS`, `TCP`, or `SSL`) that the load balancer listener will use to handle incoming traffic. By defining this, users control how the load balancer processes and routes requests, enabling compatibility with specific application requirements or security standards, such as encrypted connections for HTTPS or SSL."
+        },
+        {
+          "name": "ssl_certificate_id",
+          "description": "(Optional) The ARN of an SSL certificate you have uploaded to AWS IAM. Note ECDSA-specific restrictions below. Only valid when `lb_protocol` is either HTTPS or SSL Health Check (health_check) supports the following:",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `ssl_certificate_id` argument for the `listener` in the `aws_elb` resource allows users to specify the ARN of an SSL certificate managed in AWS IAM, enabling secure communication over HTTPS or SSL protocols. By configuring this argument, users can define the certificate used for encrypting traffic to the load balancer, supporting common goals like securing application endpoints and ensuring compliance with encryption standards."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `listener` configuration block in the `aws_elb` resource defines the rules and settings for handling incoming traffic to the Elastic Load Balancer (ELB). It encapsulates related settings such as protocol, port, and backend target configurations, enabling users to specify how the ELB routes and processes requests. Configuring this block allows users to set up precise traffic management and ensure secure and efficient communication between clients and backend services."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_elb` resource allows users to specify the maximum duration (as a string, e.g., \"10m\") Terraform will wait for the Elastic Load Balancer to be successfully created. Configuring this timeout helps manage deployment workflows by preventing indefinite waits or premature failures during resource provisioning."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block of the `aws_elb` resource allows users to specify the maximum duration (in string format, e.g., \"30m\") Terraform will wait for updates to the Elastic Load Balancer to complete. Configuring this argument helps ensure smoother resource management by preventing timeout errors during modifications, aligning with user goals of reliable infrastructure updates and deployment workflows."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_elb` resource allows users to define custom timeout durations for specific operations during the lifecycle management of an Elastic Load Balancer, such as creation, update, or deletion. By configuring this block, users gain precise control over operation time limits, ensuring smoother resource provisioning and avoiding potential timeout errors in complex or slow environments."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the ELB",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "dns_name",
+      "description": "The DNS name of the ELB",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "source_security_group_id",
+      "description": "The ID of the security group that you can use as part of your inbound rules for your load balancer's back-end application instances. Only available on ELBs launched in a VPC.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "zone_id",
+      "description": "The canonical hosted zone ID of the ELB (to be used in a Route 53 Alias record)",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

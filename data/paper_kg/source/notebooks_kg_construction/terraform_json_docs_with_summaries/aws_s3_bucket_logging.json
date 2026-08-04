@@ -1,0 +1,163 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_logging",
+    "description": "Provides an S3 bucket (server access) logging resource. For more information, see Logging requests using server access logging in the AWS S3 User Guide. Amazon S3 supports server access logging, AWS CloudTrail, or a combination of both. Refer to the Logging options for Amazon S3 to decide which method meets your requirements. This resource cannot be used with S3 directory buckets.",
+    "llm_summary": "The `aws_s3_bucket_logging` resource manages the configuration of server access logging for Amazon S3 buckets, enabling detailed tracking of access requests for auditing, compliance, and security purposes. It is commonly used to set up logging for monitoring bucket activity, troubleshooting access issues, or meeting regulatory requirements by storing log data in a designated target bucket. This resource allows users to define logging settings, including the target bucket and optional log file prefix, but cannot be used with S3 directory-style buckets."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"my-tf-example-bucket\"\n}\n\nresource \"aws_s3_bucket_acl\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n  acl    = \"private\"\n}\n\nresource \"aws_s3_bucket\" \"log_bucket\" {\n  bucket = \"my-tf-log-bucket\"\n}\n\nresource \"aws_s3_bucket_acl\" \"log_bucket_acl\" {\n  bucket = aws_s3_bucket.log_bucket.id\n  acl    = \"log-delivery-write\"\n}\n\nresource \"aws_s3_bucket_logging\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n\n  target_bucket = aws_s3_bucket.log_bucket.id\n  target_prefix = \"log/\"\n}",
+      "llm_summary": "This example demonstrates how to configure S3 bucket logging using the `aws_s3_bucket_logging` resource by setting up a source bucket (`aws_s3_bucket.example`) to log access requests to a target logging bucket (`aws_s3_bucket.log_bucket`) with a specified `target_prefix`. It highlights the use of `target_bucket` and `target_prefix` arguments, along with proper ACL configurations (`private` and `log-delivery-write`) for both the source and logging buckets."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bucket",
+      "description": "(Required, Forces new resource) Name of the bucket.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket` argument specifies the name of the S3 bucket where server access logging will be configured, enabling users to define the target bucket that will store log files for monitoring and auditing purposes. This required parameter ensures the logging functionality is tied to a specific bucket, supporting common goals like tracking access patterns and enhancing security compliance."
+    },
+    {
+      "name": "expected_bucket_owner",
+      "description": "(Optional, Forces new resource) Account ID of the expected bucket owner.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `expected_bucket_owner` argument in the `aws_s3_bucket_logging` resource allows users to specify the AWS account ID of the bucket owner to ensure that logging is configured only for a bucket owned by the expected account. This provides an additional layer of security and ownership validation, helping prevent misconfigurations or accidental logging to buckets outside the intended account."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_s3_bucket_logging` resource represents a unique identifier for the logging configuration, typically used to reference or manage the logging setup programmatically. While optional, it can help users track or distinguish specific logging configurations, especially in complex environments with multiple S3 bucket logging setups."
+    },
+    {
+      "name": "target_bucket",
+      "description": "(Required) Name of the bucket where you want Amazon S3 to store server access logs.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `target_bucket` argument in the `aws_s3_bucket_logging` resource specifies the destination S3 bucket where server access logs for the source bucket will be stored. By configuring this required parameter, users enable centralized logging for monitoring and auditing bucket activity, supporting compliance, security analysis, and operational insights."
+    },
+    {
+      "name": "target_prefix",
+      "description": "(Required) Prefix for all log object keys.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `target_prefix` argument in the `aws_s3_bucket_logging` resource specifies the key name prefix for log files stored in the target S3 bucket, allowing users to organize and distinguish log objects by defining a custom naming structure. This is essential for managing and categorizing access logs, enabling better tracking, retrieval, and analysis of bucket activity."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "target_grant",
+      "description": "(Optional) Set of configuration blocks with information for granting permissions. See below.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "permission",
+          "description": "(Required) Logging permissions assigned to the grantee for the bucket. Valid values: `FULL_CONTROL`, `READ`, `WRITE`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `permission` argument in the `target_grant` block of the `aws_s3_bucket_logging` resource specifies the level of access granted to a designated entity (grantee) for the S3 bucket's logging configuration. By setting this argument to one of the valid values (`FULL_CONTROL`, `READ`, or `WRITE`), users define the grantee's ability to manage, view, or write log files, enabling precise control over logging access and compliance with security or operational requirements."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "grantee",
+          "description": "(Required) Configuration block for the person being granted permissions. See below.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "display_name",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `display_name` argument for the `grantee` in the `aws_s3_bucket_logging` resource allows users to specify a human-readable identifier for the grantee, typically used to provide clarity or context when defining access permissions for logging. While optional, setting this argument can help users distinguish between grantees, improving the manageability and readability of access configurations for S3 bucket logging."
+            },
+            {
+              "name": "email_address",
+              "description": "(Optional) Email address of the grantee. See Regions and Endpoints for supported AWS regions where this argument can be specified.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `email_address` argument allows users to specify the email address of a grantee for S3 bucket logging permissions, enabling targeted access control for log delivery. By setting this argument, users can define a recipient for access rights in supported AWS regions, aligning with common goals like managing security and compliance for log data."
+            },
+            {
+              "name": "id",
+              "description": "(Optional) Canonical user ID of the grantee.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `id` argument for the `grantee` in the `aws_s3_bucket_logging` resource allows users to specify the canonical user ID of the entity that will receive access to the S3 bucket's log files. By setting this argument, users can define the specific AWS account or user that will act as the grantee, enabling precise control over log delivery permissions and ensuring compliance with access policies."
+            },
+            {
+              "name": "type",
+              "description": "(Required) Type of grantee. Valid values: `CanonicalUser`, `AmazonCustomerByEmail`, `Group`.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `type` argument specifies the category of the grantee for S3 bucket logging permissions, allowing users to define whether access is granted to an individual AWS account (`CanonicalUser`), an email-associated AWS customer (`AmazonCustomerByEmail`), or a predefined group (`Group`). By setting this argument, users control how logging access is delegated, aligning with their access management strategy and ensuring proper permissions for log delivery."
+            },
+            {
+              "name": "uri",
+              "description": "(Optional) URI of the grantee group.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `uri` argument in the `grantee` block of the `aws_s3_bucket_logging` resource allows users to specify the URI of a predefined grantee group, such as `http://acs.amazonaws.com/groups/s3/LogDelivery`. This enables the configuration of access permissions for logging, typically granting specific groups the ability to write log files to the target S3 bucket."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The \"grantee\" configuration block within the \"target_grant\" context of the \"aws_s3_bucket_logging\" resource defines the entity (user, group, or role) being granted specific permissions to access S3 bucket logging data. It encapsulates settings that specify the identity and type of the grantee, enabling users to control access to logging information for compliance, auditing, or operational purposes. Configuring this block ensures precise permission management for logging data, aligning with security and access control requirements."
+        }
+      ],
+      "llm_summary": "The `target_grant` configuration block within the `aws_s3_bucket_logging` resource defines permissions for access to the S3 bucket's logging target, enabling fine-grained control over who can read or write the log files stored in the target bucket. This block encapsulates settings related to granting access, such as specifying grantees and permissions, and helps users ensure secure and compliant logging by explicitly managing access to log data."
+    },
+    {
+      "name": "target_object_key_format",
+      "description": "(Optional) Amazon S3 key format for log objects. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "partitioned_prefix",
+          "description": "(Optional) Partitioned S3 key for log objects. See below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "partition_date_source",
+              "description": "(Required) Specifies the partition date source for the partitioned prefix. Valid values: `EventTime`, `DeliveryTime`.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `partition_date_source` argument for the `aws_s3_bucket_logging` resource defines the source of the date used to create partitioned prefixes in the S3 bucket's logging configuration. By specifying either `EventTime` or `DeliveryTime`, users control whether the partitioning is based on the time the logged event occurred or the time the log was delivered, enabling precise organization and retrieval of log data for analytics or compliance purposes."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `partitioned_prefix` block within the `target_object_key_format` configuration of the `aws_s3_bucket_logging` resource defines a customizable partitioned S3 key structure for log object storage. This enables users to organize and manage log files more effectively by specifying a dynamic prefix format, often used to group logs by attributes like date, time, or other metadata, facilitating easier retrieval and analysis."
+        },
+        {
+          "name": "simple_prefix",
+          "description": "(Optional) Use the simple format for S3 keys for log objects. To use, set `simple_prefix {}`.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [],
+          "llm_summary": "The `simple_prefix` block within the `target_object_key_format` configuration of the `aws_s3_bucket_logging` resource enables the use of a simplified naming format for S3 log object keys. By configuring this block, users can define a straightforward prefix structure for log file names, streamlining log organization and retrieval in S3 buckets."
+        }
+      ],
+      "llm_summary": "The `target_object_key_format` block in the `aws_s3_bucket_logging` resource specifies the naming convention for log object keys stored in the target S3 bucket, enabling users to define a custom format for log file organization. Configuring this block helps users achieve better log management and retrieval by structuring log file names to align with specific organizational or analytical needs."
+    }
+  ],
+  "attributes": []
+}

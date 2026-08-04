@@ -1,0 +1,113 @@
+{
+    "resource": {
+        "name": "aws_eks_fargate_profile",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "cluster_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "fargate_profile_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "pod_execution_role_arn",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "subnet_ids",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "selector",
+            "description": "",
+            "cardinality": [
+                1,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "labels",
+                    "description": "",
+                    "required": false,
+                    "type": "map(string)"
+                },
+                {
+                    "name": "namespace",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "status",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

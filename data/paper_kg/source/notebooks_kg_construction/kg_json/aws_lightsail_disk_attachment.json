@@ -1,0 +1,35 @@
+{
+    "resource": {
+        "name": "aws_lightsail_disk_attachment",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "disk_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "disk_path",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "instance_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": []
+}

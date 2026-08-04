@@ -1,0 +1,199 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_inventory",
+    "description": "Provides a S3 bucket inventory configuration resource. This resource cannot be used with S3 directory buckets.",
+    "llm_summary": "The `aws_s3_bucket_inventory` resource manages the configuration of inventory reports for S3 buckets, enabling detailed tracking and auditing of stored objects. Common use cases include setting up automated object metadata reporting for compliance, cost analysis, or lifecycle management. Users can configure inventory frequency, included object metadata, filters, and delivery destinations, making it ideal for optimizing storage insights and governance in cloud environments."
+  },
+  "examples": [
+    {
+      "title": "Add inventory configuration",
+      "code": "resource \"aws_s3_bucket\" \"test\" {\n  bucket = \"my-tf-test-bucket\"\n}\n\nresource \"aws_s3_bucket\" \"inventory\" {\n  bucket = \"my-tf-inventory-bucket\"\n}\n\nresource \"aws_s3_bucket_inventory\" \"test\" {\n  bucket = aws_s3_bucket.test.id\n  name   = \"EntireBucketDaily\"\n\n  included_object_versions = \"All\"\n\n  schedule {\n    frequency = \"Daily\"\n  }\n\n  destination {\n    bucket {\n      format     = \"ORC\"\n      bucket_arn = aws_s3_bucket.inventory.arn\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS S3 bucket inventory using the `aws_s3_bucket_inventory` resource to track object metadata and versions in a source bucket (`aws_s3_bucket.test`) and store the inventory in a destination bucket (`aws_s3_bucket.inventory`) in ORC format. Key configurations include setting the inventory schedule to \"Daily,\" enabling tracking of all object versions, and specifying the destination bucket ARN and format."
+    },
+    {
+      "title": "Add inventory configuration with S3 object prefix",
+      "code": "resource \"aws_s3_bucket\" \"test\" {\n  bucket = \"my-tf-test-bucket\"\n}\n\nresource \"aws_s3_bucket\" \"inventory\" {\n  bucket = \"my-tf-inventory-bucket\"\n}\n\nresource \"aws_s3_bucket_inventory\" \"test-prefix\" {\n  bucket = aws_s3_bucket.test.id\n  name   = \"DocumentsWeekly\"\n\n  included_object_versions = \"All\"\n\n  schedule {\n    frequency = \"Daily\"\n  }\n\n  filter {\n    prefix = \"documents/\"\n  }\n\n  destination {\n    bucket {\n      format     = \"ORC\"\n      bucket_arn = aws_s3_bucket.inventory.arn\n      prefix     = \"inventory\"\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS S3 bucket inventory with a specific object prefix filter (\"documents/\") and daily scheduling using the `aws_s3_bucket_inventory` resource. It showcases key configurations such as the `filter` block for prefix-based object selection, the `destination` block for specifying the target bucket and format (ORC), and the `schedule` block for defining inventory frequency."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bucket",
+      "description": "(Required) S3 bucket configuration where inventory results are published (documented below). The bucket configuration supports the following:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket` argument in the `aws_s3_bucket_inventory` resource specifies the target S3 bucket where inventory results will be published, enabling users to define the storage location for detailed metadata reports about objects in the source bucket. This configuration is essential for managing inventory data, supporting compliance, auditing, and optimization workflows by centralizing object-level insights."
+    },
+    {
+      "name": "enabled",
+      "description": "(Optional, Default: `true`) Specifies whether the inventory is enabled or disabled.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enabled` argument in the `aws_s3_bucket_inventory` resource controls whether the S3 bucket inventory feature is active or disabled. Setting this argument to `true` enables the generation of inventory reports for the bucket, supporting common user goals like auditing, compliance, and data management, while disabling it halts report generation."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_s3_bucket_inventory` resource allows users to define a unique identifier for the inventory configuration within an S3 bucket. By specifying this string, users can distinguish and manage multiple inventory configurations, enabling precise tracking and organization of bucket-level data insights such as object metadata and storage metrics."
+    },
+    {
+      "name": "included_object_versions",
+      "description": "(Required) Object versions to include in the inventory list. Valid values: `All`, `Current`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `included_object_versions` argument in the `aws_s3_bucket_inventory` resource specifies which object versions (`All` or `Current`) should be included in the S3 inventory report. This allows users to control whether the inventory captures all versions of objects or only the current version, enabling detailed tracking and auditing of object storage for compliance, cost analysis, or data management purposes."
+    },
+    {
+      "name": "name",
+      "description": "(Required) Unique identifier of the inventory configuration for the bucket.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument in the `aws_s3_bucket_inventory` resource specifies a unique identifier for the inventory configuration within an S3 bucket. By defining this value, users can manage and distinguish multiple inventory configurations, enabling precise tracking and reporting of object metadata and storage analytics for the bucket."
+    },
+    {
+      "name": "optional_fields",
+      "description": "(Optional) List of optional fields that are included in the inventory results. Please refer to the S3 documentation for more details. The filter configuration supports the following:",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `optional_fields` argument in the `aws_s3_bucket_inventory` resource allows users to specify additional metadata fields to include in the S3 inventory results, such as object size, last modified date, or storage class. Configuring this argument enhances the granularity of inventory reports, enabling more detailed analysis and management of S3 bucket contents to support common goals like auditing, cost optimization, and compliance."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "destination",
+      "description": "(Required) Contains information about where to publish the inventory results (documented below).",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "bucket",
+          "description": "(Required) S3 bucket configuration where inventory results are published (documented below).  The bucket configuration supports the following:",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "account_id",
+              "description": "(Optional) ID of the account that owns the destination bucket. Recommended to be set to prevent problems if the destination bucket ownership changes.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `account_id` argument for the `aws_s3_bucket_inventory` resource allows users to specify the AWS account ID that owns the destination bucket where inventory results are stored. Setting this argument ensures stability and prevents disruptions in inventory delivery if the ownership of the destination bucket changes, supporting reliable cross-account configurations and data management."
+            },
+            {
+              "name": "bucket_arn",
+              "description": "(Required) Amazon S3 bucket ARN of the destination.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `bucket_arn` argument specifies the Amazon Resource Name (ARN) of the destination S3 bucket where inventory reports will be stored, enabling users to define the target location for the data generated by the `aws_s3_bucket_inventory` resource. By setting this required argument, users ensure proper linkage between the inventory configuration and the destination bucket, supporting common goals like data organization, compliance reporting, and storage management."
+            },
+            {
+              "name": "format",
+              "description": "(Required) Specifies the output format of the inventory results. Can be `CSV`, `ORC` or `Parquet`.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `format` argument in the `aws_s3_bucket_inventory` resource specifies the data serialization format (`CSV`, `ORC`, or `Parquet`) for the inventory results of the S3 bucket. By defining this argument, users control how inventory data is structured and stored, enabling compatibility with downstream analytics, reporting, or data processing workflows."
+            },
+            {
+              "name": "prefix",
+              "description": "(Optional) Prefix that is prepended to all inventory results.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `prefix` argument allows users to define a specific key prefix that is prepended to all inventory result files stored in the S3 bucket, enabling organized storage and easier identification of inventory data. This is useful for categorizing inventory results by environment, application, or other logical groupings to align with common data management practices."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "encryption",
+              "description": "(Optional) Contains the type of server-side encryption to use to encrypt the inventory (documented below).  The encryption configuration supports the following:",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [],
+              "blocks": [
+                {
+                  "name": "sse_kms",
+                  "description": "(Optional) Specifies to use server-side encryption with AWS KMS-managed keys to encrypt the inventory file (documented below).",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "key_id",
+                      "description": "(Required) ARN of the KMS customer master key (CMK) used to encrypt the inventory file.",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `key_id` argument in the `sse_kms` block of the `aws_s3_bucket_inventory` resource specifies the ARN of the KMS customer master key (CMK) used to encrypt the inventory file. By defining this argument, users ensure that the inventory data is securely encrypted at rest using a specific KMS key, aligning with compliance and data protection requirements."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `sse_kms` configuration block within the \"encryption\" context of the `aws_s3_bucket_inventory` resource enables server-side encryption of inventory files using AWS KMS-managed keys. It encapsulates settings for secure data protection, ensuring compliance and enhanced security for inventory file storage by leveraging AWS Key Management Service (KMS). Configuring this block allows users to enforce encryption standards and manage sensitive data securely within S3 bucket inventory reports."
+                },
+                {
+                  "name": "sse_s3",
+                  "description": "(Optional) Specifies to use server-side encryption with Amazon S3-managed keys (SSE-S3) to encrypt the inventory file.  The sse_kms configuration supports the following:",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [],
+                  "blocks": [],
+                  "llm_summary": "The `sse_s3` configuration block within the \"encryption\" context of the `aws_s3_bucket_inventory` resource enables server-side encryption using Amazon S3-managed keys (SSE-S3) to secure inventory files. This block simplifies encryption management by leveraging default S3 encryption mechanisms, ensuring data protection without requiring custom key configurations, and is ideal for users seeking straightforward encryption for inventory data."
+                }
+              ],
+              "llm_summary": "The \"encryption\" configuration block in the `aws_s3_bucket_inventory` resource defines the server-side encryption settings used to secure inventory reports for an S3 bucket. It encapsulates options for specifying encryption types, enabling users to ensure sensitive inventory data is protected during storage and compliance with security requirements."
+            }
+          ],
+          "llm_summary": "The \"bucket\" configuration block within the \"destination\" context of the `aws_s3_bucket_inventory` resource specifies the target S3 bucket where inventory results are published. It encapsulates settings related to the destination bucket, enabling users to define where inventory data is stored, ensuring proper organization and accessibility for compliance, auditing, or data management workflows. Configuring this block allows users to establish a centralized repository for inventory reports, facilitating efficient tracking and analysis of S3 bucket contents."
+        }
+      ],
+      "llm_summary": "The \"destination\" configuration block in the `aws_s3_bucket_inventory` resource specifies where inventory results are published, enabling users to define the target location for storing inventory reports. It encapsulates settings related to the destination bucket, access permissions, and optional encryption, allowing users to securely and efficiently manage the delivery of S3 bucket inventory data for auditing, compliance, or analytics purposes."
+    },
+    {
+      "name": "filter",
+      "description": "(Optional) Specifies an inventory filter. The inventory only includes objects that meet the filter's criteria (documented below).",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "prefix",
+          "description": "(Optional) Prefix that is prepended to all inventory results.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `prefix` argument in the `filter` block of the `aws_s3_bucket_inventory` resource allows users to specify a string that is prepended to all inventory results, effectively narrowing the scope of the inventory to objects within the S3 bucket that match the defined prefix. This enables users to organize and filter inventory data based on object key patterns, supporting use cases like targeted reporting, compliance checks, or data management workflows for specific subsets of bucket contents."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `filter` block in the `aws_s3_bucket_inventory` resource defines criteria to include specific objects in the inventory report, enabling precise control over which S3 objects are analyzed. By configuring this block, users can tailor inventory generation to focus on subsets of objects, such as those matching specific prefixes or tags, optimizing data management and reporting workflows."
+    },
+    {
+      "name": "schedule",
+      "description": "(Required) Specifies the schedule for generating inventory results (documented below).",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "frequency",
+          "description": "(Required) Specifies how frequently inventory results are produced. Valid values: `Daily`, `Weekly`. The destination configuration supports the following:",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `frequency` argument in the `aws_s3_bucket_inventory` resource specifies the interval at which inventory reports are generated for the S3 bucket, allowing users to define whether reports are produced daily or weekly. This configuration is essential for scheduling regular insights into bucket contents, supporting compliance, auditing, and data management goals."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"schedule\" configuration block in the `aws_s3_bucket_inventory` resource defines the frequency at which inventory reports are generated for an S3 bucket, enabling automated and periodic insights into bucket contents. By specifying the schedule, users can ensure consistent reporting intervals to support compliance, auditing, or data management workflows."
+    }
+  ],
+  "attributes": []
+}

@@ -1,0 +1,84 @@
+{
+    "resource": {
+        "name": "aws_lightsail_bucket",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "bundle_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "force_delete",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "availability_zone",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "created_at",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "region",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "support_code",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "url",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

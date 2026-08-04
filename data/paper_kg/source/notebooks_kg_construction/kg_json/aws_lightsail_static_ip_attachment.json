@@ -1,0 +1,36 @@
+{
+    "resource": {
+        "name": "aws_lightsail_static_ip_attachment",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "instance_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "static_ip_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "ip_address",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

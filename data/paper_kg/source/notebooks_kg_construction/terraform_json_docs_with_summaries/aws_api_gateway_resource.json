@@ -1,0 +1,53 @@
+{
+  "resource": {
+    "name": "aws_api_gateway_resource",
+    "description": "Provides an API Gateway Resource.",
+    "llm_summary": "The `aws_api_gateway_resource` Terraform resource enables the creation and hierarchical management of resources within an AWS API Gateway REST API, allowing users to define specific endpoints and paths for their APIs. Common use cases include building RESTful APIs, structuring URL paths for microservices, and integrating backend services with custom routes. It supports configurations for parent-child resource relationships, enabling dynamic API path creation and fine-grained control over API structure and routing."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_api_gateway_rest_api\" \"MyDemoAPI\" {\n  name        = \"MyDemoAPI\"\n  description = \"This is my API for demonstration purposes\"\n}\n\nresource \"aws_api_gateway_resource\" \"MyDemoResource\" {\n  rest_api_id = aws_api_gateway_rest_api.MyDemoAPI.id\n  parent_id   = aws_api_gateway_rest_api.MyDemoAPI.root_resource_id\n  path_part   = \"mydemoresource\"\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_api_gateway_resource` by creating a custom resource path (`path_part`) within an API Gateway REST API. It illustrates linking the resource to a parent (`parent_id`) and associating it with the API (`rest_api_id`), showcasing the foundational setup for defining API endpoints."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_api_gateway_resource` resource represents the unique identifier of the API Gateway resource, allowing users to reference or manage a specific resource within the API Gateway hierarchy. While optional, setting this argument is typically used to retrieve or interact with an existing resource, supporting workflows like resource updates, dependency management, or integration with other Terraform resources."
+    },
+    {
+      "name": "parent_id",
+      "description": "(Required) ID of the parent API resource",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `parent_id` argument specifies the ID of the parent API Gateway resource, enabling users to define the hierarchical structure of their API by associating the current resource with an existing parent. This is essential for organizing API endpoints and paths, as it determines the placement of the resource within the API's resource tree."
+    },
+    {
+      "name": "path_part",
+      "description": "(Required) Last path segment of this API resource.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `path_part` argument specifies the last segment of the URL path for an API Gateway resource, allowing users to define the hierarchical structure of their API endpoints. By setting this required string, users control the routing and organization of API paths, enabling the creation of nested resources and precise endpoint definitions for their API Gateway."
+    },
+    {
+      "name": "rest_api_id",
+      "description": "(Required) ID of the associated REST API",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `rest_api_id` argument specifies the unique identifier of the associated REST API, linking the `aws_api_gateway_resource` to a specific API instance. By setting this required value, users define the parent API under which the resource will be created, enabling the hierarchical structure and routing of API endpoints within the API Gateway."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "path",
+      "description": "Complete path for this API resource, including all parent paths.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+    "resource": {
+        "name": "aws_cognito_user_pool_domain",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "certificate_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "domain",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "user_pool_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "aws_account_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "cloudfront_distribution",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "cloudfront_distribution_arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "cloudfront_distribution_zone_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "s3_bucket",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "version",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

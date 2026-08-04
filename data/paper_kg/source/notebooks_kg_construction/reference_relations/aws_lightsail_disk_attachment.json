@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "disk_name",
+        "references_output": "aws_lightsail_disk.name",
+        "target_resource_type": "aws_lightsail_disk"
+    },
+    {
+        "argument_path": "instance_name",
+        "references_output": "aws_lightsail_instance.name",
+        "target_resource_type": "aws_lightsail_instance"
+    }
+]

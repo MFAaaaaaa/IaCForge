@@ -1,0 +1,434 @@
+{
+  "resource": {
+    "name": "aws_lb_target_group",
+    "description": "Provides a Target Group resource for use with Load Balancer resources. aws_alb_target_group is known as aws_lb_target_group. The functionality is identical.",
+    "llm_summary": "The `aws_lb_target_group` resource enables the creation and management of target groups for use with AWS Load Balancers, supporting both Application Load Balancers (ALB) and Network Load Balancers (NLB). It is commonly used to route traffic to specific backend services, such as EC2 instances, containers, or IP addresses, based on health checks and load balancing algorithms. Users can configure key settings like protocol types (HTTP, HTTPS, TCP), health check parameters, stickiness, and lifecycle rules to optimize traffic distribution and ensure high availability for their applications."
+  },
+  "examples": [
+    {
+      "title": "Instance Target Group",
+      "code": "resource \"aws_lb_target_group\" \"test\" {\n  name     = \"tf-example-lb-tg\"\n  port     = 80\n  protocol = \"HTTP\"\n  vpc_id   = aws_vpc.main.id\n}\n\nresource \"aws_vpc\" \"main\" {\n  cidr_block = \"10.0.0.0/16\"\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Application Load Balancer (ALB) target group using the `aws_lb_target_group` resource, specifying HTTP protocol, port 80, and associating it with a VPC defined by the `aws_vpc` resource. It illustrates the foundational setup for routing traffic to targets within a custom VPC."
+    },
+    {
+      "title": "IP Target Group",
+      "code": "resource \"aws_lb_target_group\" \"ip-example\" {\n  name        = \"tf-example-lb-tg\"\n  port        = 80\n  protocol    = \"HTTP\"\n  target_type = \"ip\"\n  vpc_id      = aws_vpc.main.id\n}\n\nresource \"aws_vpc\" \"main\" {\n  cidr_block = \"10.0.0.0/16\"\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Application Load Balancer (ALB) target group with the `target_type` set to `ip`, enabling direct IP-based routing for HTTP traffic on port 80 within a specified VPC. It highlights the use of the `vpc_id` argument to associate the target group with a custom VPC defined using the `aws_vpc` resource."
+    },
+    {
+      "title": "Lambda Target Group",
+      "code": "resource \"aws_lb_target_group\" \"lambda-example\" {\n  name        = \"tf-example-lb-tg\"\n  target_type = \"lambda\"\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS Application Load Balancer (ALB) target group with a `lambda` target type using the `aws_lb_target_group` resource. This example highlights the minimal setup required to route traffic to AWS Lambda functions via an ALB.\""
+    },
+    {
+      "title": "ALB Target Group",
+      "code": "resource \"aws_lb_target_group\" \"alb-example\" {\n  name        = \"tf-example-lb-alb-tg\"\n  target_type = \"alb\"\n  port        = 80\n  protocol    = \"TCP\"\n  vpc_id      = aws_vpc.main.id\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Application Load Balancer (ALB) target group using the `aws_lb_target_group` resource with the `target_type` set to `alb`. It showcases key arguments such as `port`, `protocol`, and `vpc_id`, enabling users to define a TCP-based target group for routing traffic within a specified VPC."
+    },
+    {
+      "title": "Target group with unhealthy connection termination disabled",
+      "code": "resource \"aws_lb_target_group\" \"tcp-example\" {\n  name     = \"tf-example-lb-nlb-tg\"\n  port     = 25\n  protocol = \"TCP\"\n  vpc_id   = aws_vpc.main.id\n\n  target_health_state {\n    enable_unhealthy_connection_termination = false\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_lb_target_group` for a TCP-based target group with unhealthy connection termination explicitly disabled using the `target_health_state` block and the `enable_unhealthy_connection_termination` argument, ensuring connections are not prematurely terminated for unhealthy targets.\""
+    },
+    {
+      "title": "Target group with health requirements",
+      "code": "resource \"aws_lb_target_group\" \"tcp-example\" {\n  name     = \"tf-example-lb-nlb-tg\"\n  port     = 80\n  protocol = \"TCP\"\n  vpc_id   = aws_vpc.main.id\n\n  target_group_health {\n    dns_failover {\n      minimum_healthy_targets_count      = \"1\"\n      minimum_healthy_targets_percentage = \"off\"\n    }\n\n    unhealthy_state_routing {\n      minimum_healthy_targets_count      = \"1\"\n      minimum_healthy_targets_percentage = \"off\"\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Network Load Balancer (NLB) target group with custom health requirements using the `target_group_health` block in the `aws_lb_target_group` resource. It showcases advanced health check settings, including DNS failover and unhealthy state routing, with parameters for minimum healthy targets count and percentage."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "connection_termination",
+      "description": "(Optional) Whether to terminate connections at the end of the deregistration timeout on Network Load Balancers. See doc for more information. Default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `connection_termination` argument in the `aws_lb_target_group` resource allows users to control whether active connections are forcibly terminated at the end of the deregistration timeout period for targets in a Network Load Balancer. Enabling this feature (`true`) ensures clean disconnection of clients when targets are deregistered, which can be useful for managing connection lifecycles during scaling or maintenance events."
+    },
+    {
+      "name": "deregistration_delay",
+      "description": "(Optional) Amount time for Elastic Load Balancing to wait before changing the state of a deregistering target from draining to unused. The range is 0-3600 seconds. The default value is 300 seconds.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `deregistration_delay` argument in the `aws_lb_target_group` resource allows users to configure the time Elastic Load Balancing waits before transitioning a deregistering target from the draining state to unused. This setting impacts the lifecycle of targets during deregistration, enabling users to control how long in-flight requests are allowed to complete before the target is fully removed, with a default delay of 300 seconds and a configurable range of 0-3600 seconds."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_lb_target_group` resource represents the unique identifier of the target group, typically used to reference or manage the target group in other resources or operations. While optional, specifying this argument can help users explicitly define or retrieve the target group's ID for integration with dependent resources, automation workflows, or debugging purposes."
+    },
+    {
+      "name": "ip_address_type",
+      "description": "(Optional, forces new resource) The type of IP addresses used by the target group, only supported when target type is set to `ip`. Possible values are `ipv4` or `ipv6`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ip_address_type` argument in the `aws_lb_target_group` resource allows users to specify whether the target group uses IPv4 or IPv6 addresses, enabling control over the IP version for routing traffic to targets when the target type is set to `ip`. Configuring this argument ensures compatibility with the desired network protocol and impacts how the load balancer interacts with targets in the group."
+    },
+    {
+      "name": "lambda_multi_value_headers_enabled",
+      "description": "(Optional) Whether the request and response headers exchanged between the load balancer and the Lambda function include arrays of values or strings. Only applies when `target_type` is `lambda`. Default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "Controls whether the load balancer exchanges multi-value headers (arrays of values) or single-value headers (strings) with a Lambda function when the target type is set to `lambda`. Enabling this argument allows users to handle more complex header structures, which is useful for applications requiring detailed header data in request and response processing."
+    },
+    {
+      "name": "load_balancing_algorithm_type",
+      "description": "(Optional) Determines how the load balancer selects targets when routing requests. Only applicable for Application Load Balancer Target Groups. The value is `round_robin`, `least_outstanding_requests`, or `weighted_random`. The default is `round_robin`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `load_balancing_algorithm_type` argument in the `aws_lb_target_group` resource allows users to define the method by which an Application Load Balancer distributes incoming requests across its targets. By specifying values such as `round_robin`, `least_outstanding_requests`, or `weighted_random`, users can optimize request routing to achieve desired performance outcomes, such as evenly distributing traffic or prioritizing targets with lower load."
+    },
+    {
+      "name": "load_balancing_anomaly_mitigation",
+      "description": "(Optional) Determines whether to enable target anomaly mitigation. Target anomaly mitigation is only supported by the `weighted_random` load balancing algorithm type. See doc for more information. The value is `\"on\"` or `\"off\"`. The default is `\"off\"`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `load_balancing_anomaly_mitigation` argument in the `aws_lb_target_group` resource allows users to control whether anomaly mitigation is enabled for targets when using the `weighted_random` load balancing algorithm. Setting this argument to `\"on\"` helps improve reliability by mitigating anomalies in target behavior, while leaving it `\"off\"` (default) disables this functionality, aligning with typical user goals of optimizing load balancing performance and resilience."
+    },
+    {
+      "name": "load_balancing_cross_zone_enabled",
+      "description": "(Optional) Indicates whether cross zone load balancing is enabled. The value is `\"true\"`, `\"false\"` or `\"use_load_balancer_configuration\"`. The default is `\"use_load_balancer_configuration\"`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `load_balancing_cross_zone_enabled` argument in the `aws_lb_target_group` resource allows users to control whether cross-zone load balancing is enabled for the target group. This setting impacts how traffic is distributed across targets in different availability zones, enabling more even load distribution (`true`), disabling it (`false`), or deferring to the load balancer's default configuration (`use_load_balancer_configuration`)."
+    },
+    {
+      "name": "name",
+      "description": "(Optional, Forces new resource) Name of the target group. If omitted, Terraform will assign a random, unique name. This name must be unique per region per account, can have a maximum of 32 characters, must contain only alphanumeric characters or hyphens, and must not begin or end with a hyphen.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_lb_target_group` resource allows users to define a unique, human-readable identifier for the target group within a specific region and account. Setting this argument enables users to control the naming convention for organizational clarity and resource management, while omitting it lets Terraform generate a random name."
+    },
+    {
+      "name": "name_prefix",
+      "description": "(Optional, Forces new resource) Creates a unique name beginning with the specified prefix. Conflicts with `name`. Cannot be longer than 6 characters.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name_prefix` argument in the `aws_lb_target_group` resource allows users to define a unique, automatically generated name for the target group that begins with a specified prefix. This is useful for ensuring name uniqueness across environments or deployments, particularly in scenarios where dynamic naming is required. It conflicts with the `name` argument and is limited to a maximum of 6 characters, making it ideal for concise, environment-specific identifiers."
+    },
+    {
+      "name": "port",
+      "description": "(May be required, Forces new resource) Port on which targets receive traffic, unless overridden when registering a specific target. Required when `target_type` is `instance`, `ip` or `alb`. Does not apply when `target_type` is `lambda`.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `port` argument in the `aws_lb_target_group` resource specifies the port on which targets (e.g., instances, IPs, or ALBs) receive traffic, enabling users to define the communication endpoint for their load-balanced targets. This argument is essential for configuring traffic routing when the `target_type` is not `lambda`, ensuring proper connectivity and functionality of the load balancer with its associated targets."
+    },
+    {
+      "name": "preserve_client_ip",
+      "description": "(Optional) Whether client IP preservation is enabled. See doc for more information.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `preserve_client_ip` argument in the `aws_lb_target_group` resource allows users to control whether the client\u2019s IP address is preserved when traffic is forwarded to targets. Enabling this feature is typically used to maintain source IP visibility for applications or services that require client identification for logging, security, or request handling purposes."
+    },
+    {
+      "name": "protocol",
+      "description": "(May be required, Forces new resource) Protocol to use for routing traffic to the targets. Should be one of `GENEVE`, `HTTP`, `HTTPS`, `TCP`, `TCP_UDP`, `TLS`, or `UDP`. Required when `target_type` is `instance`, `ip`, or `alb`. Does not apply when `target_type` is `lambda`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `protocol` argument in the `aws_lb_target_group` resource allows users to define the communication protocol used for routing traffic to the targets, such as `HTTP`, `HTTPS`, `TCP`, or `UDP`. By specifying this argument, users configure the behavior of the load balancer to match the application's networking requirements, ensuring proper traffic handling and compatibility with the target type (e.g., `instance`, `ip`, or `alb`)."
+    },
+    {
+      "name": "protocol_version",
+      "description": "(Optional, Forces new resource) Only applicable when `protocol` is `HTTP` or `HTTPS`. The protocol version. Specify `GRPC` to send requests to targets using gRPC. Specify `HTTP2` to send requests to targets using HTTP/2. The default is `HTTP1`, which sends requests to targets using HTTP/1.1",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `protocol_version` argument in the `aws_lb_target_group` resource allows users to specify the communication protocol version (`HTTP1`, `HTTP2`, or `GRPC`) used for routing requests to targets when the load balancer operates with `HTTP` or `HTTPS` protocols. Configuring this argument enables advanced protocol support, such as HTTP/2 for improved performance or gRPC for modern service-to-service communication, tailoring the target group behavior to meet specific application requirements."
+    },
+    {
+      "name": "proxy_protocol_v2",
+      "description": "(Optional) Whether to enable support for proxy protocol v2 on Network Load Balancers. See doc for more information. Default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `proxy_protocol_v2` argument in the `aws_lb_target_group` resource allows users to enable support for Proxy Protocol v2 on Network Load Balancers, which forwards client connection metadata (e.g., source IP and port) to the target. Setting this argument to `true` is useful for applications requiring detailed connection information for logging, security, or traffic analysis, while the default value of `false` disables this functionality."
+    },
+    {
+      "name": "slow_start",
+      "description": "(Optional) Amount time for targets to warm up before the load balancer sends them a full share of requests. The range is 30-900 seconds or 0 to disable. The default value is 0 seconds.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `slow_start` argument in the `aws_lb_target_group` resource configures the warm-up period for targets, allowing users to define the duration (30-900 seconds or 0 to disable) during which the load balancer gradually increases the request load to new targets. This helps optimize performance and prevent overload during target initialization, making it ideal for scenarios where applications require time to stabilize before handling full traffic."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument allows users to assign key-value metadata to the `aws_lb_target_group` resource, enabling resource organization, identification, and cost allocation. When used alongside a provider's `default_tags` configuration, it ensures custom tags take precedence, supporting common goals like environment labeling, ownership tracking, and compliance with tagging policies."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_lb_target_group` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to the target group and its associated resources. This enables efficient organization, categorization, and management of resources by applying metadata for purposes such as cost allocation, environment identification, or compliance tracking."
+    },
+    {
+      "name": "target_type",
+      "description": "(Optional, Forces new resource) Type of target that you must specify when registering targets with this target group. See doc for supported values. The default is `instance`. Note that you can't specify targets for a target group using both instance IDs and IP addresses. If the target type is `ip`, specify IP addresses from the subnets of the virtual private cloud (VPC) for the target group, the RFC 1918 range (10.0.0.0/8, 172.16.0.0/12, and 192.168.0.0/16), and the RFC 6598 range (100.64.0.0/10). You can't specify publicly routable IP addresses. Network Load Balancers do not support the `lambda` target type. Application Load Balancers do not support the `alb` target type.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `target_type` argument in the `aws_lb_target_group` resource allows users to define the type of targets (e.g., `instance`, `ip`, `lambda`, or `alb`) that can be registered with the load balancer's target group. This configuration impacts how traffic is routed to backend resources, enabling users to tailor the target group to specific deployment scenarios, such as routing to EC2 instances, private IP addresses within a VPC, or Lambda functions, while adhering to compatibility constraints for Application and Network Load Balancers."
+    },
+    {
+      "name": "vpc_id",
+      "description": "(Optional, Forces new resource) Identifier of the VPC in which to create the target group. Required when `target_type` is `instance`, `ip` or `alb`. Does not apply when `target_type` is `lambda`. connection_termination - (Optional) Whether to terminate connections at the end of the deregistration timeout on Network Load Balancers. See doc for more information. Default is false. deregistration_delay - (Optional) Amount time for Elastic Load Balancing to wait before changing the state of a deregistering target from draining to unused. The range is 0-3600 seconds. The default value is 300 seconds. health_check - (Optional, Maximum of 1) Health Check configuration block. Detailed below. lambda_multi_value_headers_enabled - (Optional) Whether the request and response headers exchanged between the load balancer and the Lambda function include arrays of values or strings. Only applies when target_type is lambda. Default is false. load_balancing_algorithm_type - (Optional) Determines how the load balancer selects targets when routing requests. Only applicable for Application Load Balancer Target Groups. The value is round_robin, least_outstanding_requests, or weighted_random. The default is round_robin. load_balancing_anomaly_mitigation - (Optional) Determines whether to enable target anomaly mitigation. Target anomaly mitigation is only supported by the weighted_random load balancing algorithm type. See doc for more information. The value is \"on\" or \"off\". The default is \"off\". load_balancing_cross_zone_enabled - (Optional) Indicates whether cross zone load balancing is enabled. The value is \"true\", \"false\" or \"use_load_balancer_configuration\". The default is \"use_load_balancer_configuration\". name_prefix - (Optional, Forces new resource) Creates a unique name beginning with the specified prefix. Conflicts with name. Cannot be longer than 6 characters. name - (Optional, Forces new resource) Name of the target group. If omitted, Terraform will assign a random, unique name. This name must be unique per region per account, can have a maximum of 32 characters, must contain only alphanumeric characters or hyphens, and must not begin or end with a hyphen. port - (May be required, Forces new resource) Port on which targets receive traffic, unless overridden when registering a specific target. Required when target_type is instance, ip or alb. Does not apply when target_type is lambda. preserve_client_ip - (Optional) Whether client IP preservation is enabled. See doc for more information. protocol_version - (Optional, Forces new resource) Only applicable when protocol is HTTP or HTTPS. The protocol version. Specify GRPC to send requests to targets using gRPC. Specify HTTP2 to send requests to targets using HTTP/2. The default is HTTP1, which sends requests to targets using HTTP/1.1 protocol - (May be required, Forces new resource) Protocol to use for routing traffic to the targets. Should be one of GENEVE, HTTP, HTTPS, TCP, TCP_UDP, TLS, or UDP. Required when target_type is instance, ip, or alb. Does not apply when target_type is lambda. proxy_protocol_v2 - (Optional) Whether to enable support for proxy protocol v2 on Network Load Balancers. See doc for more information. Default is false. slow_start - (Optional) Amount time for targets to warm up before the load balancer sends them a full share of requests. The range is 30-900 seconds or 0 to disable. The default value is 0 seconds. stickiness - (Optional, Maximum of 1) Stickiness configuration block. Detailed below. tags - (Optional) Map of tags to assign to the resource. If configured with a provider default_tags configuration block present, tags with matching keys will overwrite those defined at the provider-level. target_failover - (Optional) Target failover block. Only applicable for Gateway Load Balancer target groups. See target_failover for more information. target_health_state - (Optional) Target health state block. Only applicable for Network Load Balancer target groups when protocol is TCP or TLS. See target_health_state for more information. target_group_health - (Optional) Target health requirements block. See target_group_health for more information. target_type - (Optional, Forces new resource) Type of target that you must specify when registering targets with this target group. See doc for supported values. The default is instance. Note that you can't specify targets for a target group using both instance IDs and IP addresses. If the target type is ip, specify IP addresses from the subnets of the virtual private cloud (VPC) for the target group, the RFC 1918 range (10.0.0.0/8, 172.16.0.0/12, and 192.168.0.0/16), and the RFC 6598 range (100.64.0.0/10). You can't specify publicly routable IP addresses. Network Load Balancers do not support the lambda target type. Application Load Balancers do not support the alb target type. ip_address_type (Optional, forces new resource) The type of IP addresses used by the target group, only supported when target type is set to ip. Possible values are ipv4 or ipv6. vpc_id - (Optional, Forces new resource) Identifier of the VPC in which to create the target group. Required when target_type is instance, ip or alb. Does not apply when target_type is lambda.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `vpc_id` argument in the `aws_lb_target_group` resource specifies the VPC where the target group will be created, ensuring compatibility with the `target_type` values of `instance`, `ip`, or `alb`. By defining this, users can control the network scope and connectivity of the target group, aligning it with their VPC architecture and enabling proper routing and resource association within the specified VPC."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "health_check",
+      "description": "(Optional, Maximum of 1) Health Check configuration block. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enabled",
+          "description": "(Optional) Whether health checks are enabled. Defaults to `true`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument in the `health_check` block of the `aws_lb_target_group` resource allows users to control whether health checks are active for the target group. Disabling this feature (`false`) can bypass health monitoring, which may be useful for specific testing scenarios, while leaving it enabled (`true`, default) ensures the load balancer evaluates the health of targets to route traffic only to healthy instances."
+        },
+        {
+          "name": "healthy_threshold",
+          "description": "(Optional) Number of consecutive health check successes required before considering a target healthy. The range is 2-10. Defaults to 3.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `healthy_threshold` argument for the `health_check` configuration in the `aws_lb_target_group` resource specifies the number of consecutive successful health checks required to mark a target as healthy. This allows users to control the resilience and stability of target health determination, ensuring that transient failures do not prematurely affect load balancing decisions."
+        },
+        {
+          "name": "interval",
+          "description": "(Optional) Approximate amount of time, in seconds, between health checks of an individual target. The range is 5-300. For `lambda` target groups, it needs to be greater than the timeout of the underlying `lambda`. Defaults to 30.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `interval` argument in the `health_check` block of the `aws_lb_target_group` resource specifies the frequency, in seconds, at which health checks are performed on individual targets. By configuring this value (range: 5-300, default: 30), users can control the responsiveness of health monitoring, balancing between faster detection of target health changes and reduced overhead. For `lambda` target groups, it must exceed the Lambda function's timeout to ensure accurate health assessments."
+        },
+        {
+          "name": "matcher",
+          "description": "(Optional) The HTTP or gRPC codes to use when checking for a successful response from a target. The `health_check.protocol` must be one of `HTTP` or `HTTPS` or the `target_type` must be `lambda`. Values can be comma-separated individual values (e.g., \"200,202\") or a range of values (e.g., \"200-299\").For gRPC-based target groups (i.e., the `protocol` is one of `HTTP` or `HTTPS` and the `protocol_version` is `GRPC`), values can be between `0` and `99`. The default is `12`. When used with an Application Load Balancer (i.e., the `protocol` is one of `HTTP` or `HTTPS` and the `protocol_version` is not `GRPC`), values can be between `200` and `499`. The default is `200`. When used with a Network Load Balancer (i.e., the `protocol` is one of `TCP`, `TCP_UDP`, `UDP`, or `TLS`), values can be between `200` and `599`. The default is `200-399`. When the `target_type` is `lambda`, values can be between `200` and `499`. The default is `200`. - For gRPC-based target groups (i.e., the `protocol` is one of `HTTP` or `HTTPS` and the `protocol_version` is `GRPC`), values can be between `0` and `99`. The default is `12`. - When used with an Application Load Balancer (i.e., the `protocol` is one of `HTTP` or `HTTPS` and the `protocol_version` is not `GRPC`), values can be between `200` and `499`. The default is `200`. - When used with a Network Load Balancer (i.e., the `protocol` is one of `TCP`, `TCP_UDP`, `UDP`, or `TLS`), values can be between `200` and `599`. The default is `200-399`. - When the `target_type` is `lambda`, values can be between `200` and `499`. The default is `200`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `matcher` argument in the `health_check` block of the `aws_lb_target_group` resource allows users to define the HTTP, gRPC, or Lambda response codes that determine whether a target is considered healthy during health checks. By specifying individual codes or ranges, users can customize the success criteria for targets based on the load balancer type and protocol, ensuring alignment with application-specific requirements for availability and reliability."
+        },
+        {
+          "name": "path",
+          "description": "(May be required) Destination for the health check request. Required for HTTP/HTTPS ALB and HTTP NLB. Only applies to HTTP/HTTPS.For HTTP and HTTPS health checks, the default is `/`. For gRPC health checks, the default is `/AWS.ALB/healthcheck`. - For HTTP and HTTPS health checks, the default is `/`. - For gRPC health checks, the default is `/AWS.ALB/healthcheck`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `path` argument in the `health_check` block of the `aws_lb_target_group` resource allows users to specify the endpoint path that the load balancer uses to perform health checks on targets. By defining this path, users can customize the destination for HTTP, HTTPS, or gRPC health check requests, ensuring the load balancer verifies the availability and responsiveness of specific application endpoints critical to their infrastructure."
+        },
+        {
+          "name": "port",
+          "description": "(Optional) The port the load balancer uses when performing health checks on targets. Valid values are either `traffic-port`, to use the same port as the target group, or a valid port number between `1` and `65536`. Default is `traffic-port`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `port` argument in the `health_check` block of the `aws_lb_target_group` resource allows users to specify the port used by the load balancer to perform health checks on targets. By setting this argument, users can either use the target group's traffic port (`traffic-port`) or define a specific port number (1\u201365536), enabling precise control over health check behavior to ensure target availability and alignment with application requirements."
+        },
+        {
+          "name": "protocol",
+          "description": "(Optional) Protocol the load balancer uses when performing health checks on targets. Must be one of `TCP`, `HTTP`, or `HTTPS`. The `TCP` protocol is not supported for health checks if the protocol of the target group is `HTTP` or `HTTPS`. Default is `HTTP`. Cannot be specified when the `target_type` is `lambda`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `protocol` argument in the `health_check` block of the `aws_lb_target_group` resource allows users to specify the communication protocol (`TCP`, `HTTP`, or `HTTPS`) used by the load balancer to perform health checks on targets. This configuration determines how the load balancer interacts with targets to assess their availability and responsiveness, ensuring compatibility with the target group's protocol and operational requirements."
+        },
+        {
+          "name": "timeout",
+          "description": "(optional) Amount of time, in seconds, during which no response from a target means a failed health check. The range is 2\u2013120 seconds. For target groups with a protocol of HTTP, the default is 6 seconds. For target groups with a protocol of TCP, TLS or HTTPS, the default is 10 seconds. For target groups with a protocol of GENEVE, the default is 5 seconds. If the target type is lambda, the default is 30 seconds.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `timeout` argument in the `health_check` block of the `aws_lb_target_group` resource allows users to define the maximum duration (in seconds) a target has to respond to a health check before it is considered failed. By configuring this value, users can tailor the responsiveness expectations for targets based on the protocol or workload type, ensuring optimal health check behavior for applications with varying latency requirements."
+        },
+        {
+          "name": "unhealthy_threshold",
+          "description": "(Optional) Number of consecutive health check failures required before considering a target unhealthy. The range is 2-10. Defaults to 3. - For gRPC-based target groups (i.e., the `protocol` is one of `HTTP` or `HTTPS` and the `protocol_version` is `GRPC`), values can be between `0` and `99`. The default is `12`. - When used with an Application Load Balancer (i.e., the `protocol` is one of `HTTP` or `HTTPS` and the `protocol_version` is not `GRPC`), values can be between `200` and `499`. The default is `200`. - When used with a Network Load Balancer (i.e., the `protocol` is one of `TCP`, `TCP_UDP`, `UDP`, or `TLS`), values can be between `200` and `599`. The default is `200-399`. - When the `target_type` is `lambda`, values can be between `200` and `499`. The default is `200`. - For HTTP and HTTPS health checks, the default is `/`. - For gRPC health checks, the default is `/AWS.ALB/healthcheck`.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `unhealthy_threshold` argument in the `health_check` block of the `aws_lb_target_group` resource allows users to define the number of consecutive health check failures required to mark a target as unhealthy. This configuration impacts the load balancer's ability to dynamically route traffic by ensuring targets are excluded from serving requests after repeated failures, enabling precise control over fault tolerance and service reliability."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"health_check\" configuration block within the \"aws_lb_target_group\" resource defines the parameters for monitoring the health and availability of targets in the load balancer target group. It encapsulates settings such as protocol, path, interval, and timeout, enabling users to customize health check behavior to ensure reliable traffic routing and proactive detection of unhealthy targets. Configuring this block helps optimize application performance and maintain high availability by automating target health validation."
+    },
+    {
+      "name": "stickiness",
+      "description": "(Optional, Maximum of 1) Stickiness configuration block. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "cookie_duration",
+          "description": "(Optional) Only used when the type is `lb_cookie`. The time period, in seconds, during which requests from a client should be routed to the same target. After this time period expires, the load balancer-generated cookie is considered stale. The range is 1 second to 1 week (604800 seconds). The default value is 1 day (86400 seconds).",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `cookie_duration` argument in the `stickiness` block of the `aws_lb_target_group` resource defines the lifespan, in seconds, of the load balancer-generated cookie used to maintain session stickiness for clients when the stickiness type is set to `lb_cookie`. By configuring this value, users can control how long requests from the same client are consistently routed to the same target, enabling session persistence for applications that require stateful interactions."
+        },
+        {
+          "name": "cookie_name",
+          "description": "(Optional) Name of the application based cookie. AWSALB, AWSALBAPP, and AWSALBTG prefixes are reserved and cannot be used. Only needed when type is `app_cookie`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `cookie_name` argument in the `stickiness` context of the `aws_lb_target_group` resource allows users to specify the name of the application-based cookie used to enable session stickiness for client requests. This argument is required when the stickiness type is set to `app_cookie` and helps ensure consistent routing of client requests to the same target, supporting use cases like maintaining user sessions in stateful applications."
+        },
+        {
+          "name": "enabled",
+          "description": "(Optional) Boolean to enable / disable `stickiness`. Default is `true`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument in the `stickiness` block of the `aws_lb_target_group` resource allows users to control whether session stickiness is activated for the target group. Enabling this feature ensures that client requests are consistently routed to the same target within the group, supporting use cases like maintaining session state for applications that require persistent connections."
+        },
+        {
+          "name": "type",
+          "description": "(Required) The type of sticky sessions. The only current possible values are `lb_cookie`, `app_cookie` for ALBs, `source_ip` for NLBs, and `source_ip_dest_ip`, `source_ip_dest_ip_proto` for GWLBs.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument in the \"stickiness\" context of the `aws_lb_target_group` resource specifies the method used to maintain session stickiness for load balancer targets. By defining this argument, users control how client requests are consistently routed to the same target, with options like `lb_cookie` or `app_cookie` for ALBs, and `source_ip` or `source_ip_dest_ip` for NLBs and GWLBs, enabling session persistence based on cookies or client connection attributes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"stickiness\" configuration block in the \"aws_lb_target_group\" resource enables session stickiness, ensuring that requests from a client are consistently routed to the same target within the load balancer. It encapsulates settings related to stickiness mechanisms, such as duration and type, allowing users to optimize session persistence for stateful applications and improve user experience by maintaining session continuity."
+    },
+    {
+      "name": "target_failover",
+      "description": "(Optional) Target failover block. Only applicable for Gateway Load Balancer target groups. See target_failover for more information.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "on_deregistration",
+          "description": "(Optional) Indicates how the GWLB handles existing flows when a target is deregistered. Possible values are `rebalance` and `no_rebalance`. Must match the attribute value set for `on_unhealthy`. Default: `no_rebalance`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `on_deregistration` argument in the `target_failover` context of the `aws_lb_target_group` resource specifies how the Gateway Load Balancer (GWLB) manages existing network flows when a target is deregistered. By setting this value to either `rebalance` or `no_rebalance`, users control whether traffic is redistributed to other targets or allowed to continue flowing to the deregistering target, aligning with failover and traffic management strategies."
+        },
+        {
+          "name": "on_unhealthy",
+          "description": "Indicates how the GWLB handles existing flows when a target is unhealthy. Possible values are `rebalance` and `no_rebalance`. Must match the attribute value set for `on_deregistration`. Default: `no_rebalance`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `on_unhealthy` argument in the `aws_lb_target_group` resource specifies how the Gateway Load Balancer (GWLB) handles existing network flows when a target becomes unhealthy, allowing users to control failover behavior during target health transitions. By setting this argument to either `rebalance` or `no_rebalance`, users can define whether traffic is redistributed across healthy targets or remains routed to the original target, aligning failover behavior with application resilience and traffic management goals."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `target_failover` block in the `aws_lb_target_group` resource configures failover behavior for Gateway Load Balancer target groups, enabling automatic redirection of traffic to alternate targets in case of failure. This block encapsulates settings related to failover mechanisms, providing enhanced resilience and high availability for workloads by ensuring uninterrupted traffic flow during target outages."
+    },
+    {
+      "name": "target_group_health",
+      "description": "(Optional) Target health requirements block. See target_group_health for more information.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "dns_failover",
+          "description": "(Optional) Block to configure DNS Failover requirements. See DNS Failover below for details on attributes.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "minimum_healthy_targets_count",
+              "description": "(Optional) The minimum number of targets that must be healthy. If the number of healthy targets is below this value, mark the zone as unhealthy in DNS, so that traffic is routed only to healthy zones. The possible values are `off` or an integer from `1` to the maximum number of targets. The default is `off`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `minimum_healthy_targets_count` argument for the `aws_lb_target_group` resource allows users to define the minimum number of healthy targets required to mark a DNS zone as healthy during failover scenarios. By configuring this value (either as `off` or an integer), users can control traffic routing behavior to ensure that requests are directed only to zones with sufficient healthy targets, supporting high availability and resilience in multi-zone architectures."
+            },
+            {
+              "name": "minimum_healthy_targets_percentage",
+              "description": "(Optional) The minimum percentage of targets that must be healthy. If the percentage of healthy targets is below this value, mark the zone as unhealthy in DNS, so that traffic is routed only to healthy zones. The possible values are `off` or an integer from `1` to `100`. The default is `off`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `minimum_healthy_targets_percentage` argument allows users to define the threshold percentage of healthy targets required to mark a DNS zone as healthy for failover purposes in an AWS load balancer target group. By configuring this value (either as `off` or an integer between `1` and `100`), users can control DNS routing behavior to ensure traffic is directed only to zones with sufficient healthy targets, supporting high availability and resilience in multi-zone architectures."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `dns_failover` block within the `target_group_health` configuration of the `aws_lb_target_group` resource enables the setup of DNS failover requirements to ensure high availability and resilience for target group health checks. It encapsulates settings related to failover mechanisms, allowing users to define conditions under which DNS failover is triggered, thereby enhancing fault tolerance and ensuring seamless traffic redirection during health check failures."
+        },
+        {
+          "name": "unhealthy_state_routing",
+          "description": "(Optional) Block to configure Unhealthy State Routing requirements. See Unhealthy State Routing below for details on attributes.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "minimum_healthy_targets_count",
+              "description": "(Optional) The minimum number of targets that must be healthy. If the number of healthy targets is below this value, send traffic to all targets, including unhealthy targets. The possible values are `1` to the maximum number of targets. The default is `1`.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `minimum_healthy_targets_count` argument in the context of `unhealthy_state_routing` for the `aws_lb_target_group` resource allows users to define the minimum number of healthy targets required before traffic is routed exclusively to healthy targets. If the count of healthy targets falls below this threshold, traffic is sent to all targets, including unhealthy ones, ensuring service availability during degraded states. This configuration is useful for maintaining resilience and minimizing downtime in scenarios where target health fluctuates."
+            },
+            {
+              "name": "minimum_healthy_targets_percentage",
+              "description": "(Optional) The minimum percentage of targets that must be healthy. If the percentage of healthy targets is below this value, send traffic to all targets, including unhealthy targets. The possible values are `off` or an integer from `1` to `100`. The default is `off`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `minimum_healthy_targets_percentage` argument in the context of `unhealthy_state_routing` for the `aws_lb_target_group` resource allows users to define the minimum percentage of healthy targets required to maintain normal traffic routing. If the percentage of healthy targets falls below this threshold, traffic is routed to all targets, including unhealthy ones, ensuring service availability during degraded states. This configuration is useful for balancing reliability and fault tolerance in scenarios where maintaining traffic flow is critical."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `unhealthy_state_routing` block within the `target_group_health` configuration of the `aws_lb_target_group` resource defines routing behavior for targets deemed unhealthy, enabling fine-grained control over how traffic is managed during unhealthy states. It encapsulates settings related to routing requirements and conditions, helping users optimize failover strategies and ensure application resilience by customizing traffic handling for degraded target health scenarios."
+        }
+      ],
+      "llm_summary": "The `target_group_health` configuration block within the `aws_lb_target_group` resource defines health check requirements and parameters for monitoring the availability and responsiveness of targets in the load balancer's target group. By configuring this block, users can customize health check settings such as thresholds, intervals, and protocols, ensuring precise control over target health evaluation to optimize load balancing and application reliability."
+    },
+    {
+      "name": "target_health_state",
+      "description": "(Optional) Target health state block. Only applicable for Network Load Balancer target groups when `protocol` is `TCP` or `TLS`. See target_health_state for more information.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "enable_unhealthy_connection_termination",
+          "description": "(Optional) Indicates whether the load balancer terminates connections to unhealthy targets. Possible values are `true` or `false`. Default: `true`.",
+          "required": true,
+          "type": "bool",
+          "llm_summary": "The `enable_unhealthy_connection_termination` argument in the `aws_lb_target_group` resource allows users to control whether the load balancer automatically terminates connections to targets deemed unhealthy based on their health state. Setting this argument to `true` ensures efficient traffic routing by preventing connections to failing targets, aligning with common user goals of optimizing application availability and reliability."
+        },
+        {
+          "name": "unhealthy_draining_interval",
+          "description": "(Optional) Indicates the time to wait for in-flight requests to complete when a target becomes unhealthy. The range is `0-360000`. This value has to be set only if `enable_unhealthy_connection_termination` is set to false. Default: `0`.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `unhealthy_draining_interval` argument in the `aws_lb_target_group` resource allows users to configure the duration (in milliseconds) for which in-flight requests are allowed to complete when a target transitions to an unhealthy state. This setting impacts connection management by defining a graceful draining period, ensuring uninterrupted request handling before termination, and is relevant when `enable_unhealthy_connection_termination` is disabled."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `target_health_state` block within the `aws_lb_target_group` resource enables detailed configuration of target health monitoring for Network Load Balancer target groups using the `TCP` or `TLS` protocol. It encapsulates settings related to health state evaluation, allowing users to define criteria for determining the operational status of targets, ensuring precise control over load balancing behavior and failover mechanisms."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN of the Target Group (matches `id`).",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "arn_suffix",
+      "description": "ARN suffix for use with CloudWatch Metrics.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "load_balancer_arns",
+      "description": "ARNs of the Load Balancers associated with the Target Group.",
+      "optional": false,
+      "type": "set(string)"
+    }
+  ]
+}

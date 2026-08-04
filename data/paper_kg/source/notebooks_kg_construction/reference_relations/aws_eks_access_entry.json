@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "cluster_name",
+        "references_output": "aws_eks_cluster.name",
+        "target_resource_type": "aws_eks_cluster"
+    },
+    {
+        "argument_path": "principal_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    }
+]

@@ -1,0 +1,22 @@
+[
+    {
+        "argument_path": "redrive_policy.deadLetterTargetArn",
+        "references_output": "aws_sqs_queue.arn",
+        "target_resource_type": "aws_sqs_queue"
+    },
+    {
+        "argument_path": "redrive_allow_policy.sourceQueueArns",
+        "references_output": "aws_sqs_queue.arn",
+        "target_resource_type": "aws_sqs_queue"
+    },
+    {
+        "argument_path": "redrive_allow_policy.queue_url",
+        "references_output": "aws_sqs_queue.id",
+        "target_resource_type": "aws_sqs_queue"
+    },
+    {
+        "argument_path": "kms_master_key_id",
+        "references_output": "aws_kms_key.id",
+        "target_resource_type": "aws_kms_key"
+    }
+]

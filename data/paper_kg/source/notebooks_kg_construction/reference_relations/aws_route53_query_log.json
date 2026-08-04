@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "cloudwatch_log_group_arn",
+        "references_output": "aws_cloudwatch_log_group.arn",
+        "target_resource_type": "aws_cloudwatch_log_group"
+    },
+    {
+        "argument_path": "zone_id",
+        "references_output": "aws_route53_zone.zone_id",
+        "target_resource_type": "aws_route53_zone"
+    }
+]

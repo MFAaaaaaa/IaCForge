@@ -1,0 +1,7 @@
+[
+    {
+        "argument_path": "vpc_id",
+        "references_output": "aws_vpc.id",
+        "target_resource_type": "aws_vpc"
+    }
+]

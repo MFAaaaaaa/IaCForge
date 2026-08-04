@@ -1,0 +1,66 @@
+{
+    "resource": {
+        "name": "aws_placement_group",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "partition_count",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "spread_level",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "strategy",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "placement_group_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

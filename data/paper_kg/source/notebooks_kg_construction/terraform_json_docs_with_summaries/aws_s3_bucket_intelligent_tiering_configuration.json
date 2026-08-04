@@ -1,0 +1,104 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_intelligent_tiering_configuration",
+    "description": "Provides an S3 Intelligent-Tiering configuration resource. This resource cannot be used with S3 directory buckets.",
+    "llm_summary": "The `aws_s3_bucket_intelligent_tiering_configuration` resource enables the management of Intelligent-Tiering settings for Amazon S3 buckets, optimizing storage costs by automatically moving objects between access tiers based on usage patterns. It is commonly used to configure automated tier transitions for data with unpredictable or changing access patterns, ensuring cost-efficiency without manual intervention. Key configurations include defining tiering policies, access monitoring, and customizing retrieval latency preferences, making it ideal for dynamic data storage optimization."
+  },
+  "examples": [
+    {
+      "title": "Add intelligent tiering configuration for entire S3 bucket",
+      "code": "resource \"aws_s3_bucket_intelligent_tiering_configuration\" \"example-entire-bucket\" {\n  bucket = aws_s3_bucket.example.id\n  name   = \"EntireBucket\"\n\n  tiering {\n    access_tier = \"DEEP_ARCHIVE_ACCESS\"\n    days        = 180\n  }\n  tiering {\n    access_tier = \"ARCHIVE_ACCESS\"\n    days        = 125\n  }\n}\n\nresource \"aws_s3_bucket\" \"example\" {\n  bucket = \"example\"\n}",
+      "llm_summary": "\"Demonstrates how to configure intelligent tiering for an entire S3 bucket using the `aws_s3_bucket_intelligent_tiering_configuration` resource, specifying tiering transitions to `DEEP_ARCHIVE_ACCESS` after 180 days and `ARCHIVE_ACCESS` after 125 days. This example highlights the use of the `tiering` block to optimize storage costs based on access patterns.\""
+    },
+    {
+      "title": "Add intelligent tiering configuration with S3 object filter",
+      "code": "resource \"aws_s3_bucket_intelligent_tiering_configuration\" \"example-filtered\" {\n  bucket = aws_s3_bucket.example.id\n  name   = \"ImportantBlueDocuments\"\n\n  status = \"Disabled\"\n\n  filter {\n    prefix = \"documents/\"\n\n    tags = {\n      priority = \"high\"\n      class    = \"blue\"\n    }\n  }\n\n  tiering {\n    access_tier = \"ARCHIVE_ACCESS\"\n    days        = 125\n  }\n}\n\nresource \"aws_s3_bucket\" \"example\" {\n  bucket = \"example\"\n}",
+      "llm_summary": "This example demonstrates how to configure intelligent tiering for an S3 bucket with a custom object filter using the `aws_s3_bucket_intelligent_tiering_configuration` resource. It showcases the use of the `filter` block to target objects with a specific prefix and tags, and the `tiering` block to define tiering rules, such as moving objects to the `ARCHIVE_ACCESS` tier after 125 days."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bucket",
+      "description": "(Required) Name of the bucket this intelligent tiering configuration is associated with.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket` argument specifies the name of the S3 bucket to which the intelligent tiering configuration will be applied, enabling automated storage cost optimization by dynamically transitioning objects between access tiers based on usage patterns. This required parameter ensures the configuration is explicitly tied to the intended bucket, aligning with user goals of managing storage efficiency and lifecycle policies for specific resources."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_s3_bucket_intelligent_tiering_configuration` resource allows users to define a unique identifier for the intelligent tiering configuration within an S3 bucket. This identifier is used to distinguish and manage multiple tiering configurations, enabling users to organize and apply specific storage optimization rules tailored to their data access patterns."
+    },
+    {
+      "name": "name",
+      "description": "(Required) Unique name used to identify the S3 Intelligent-Tiering configuration for the bucket.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies a unique identifier for the S3 Intelligent-Tiering configuration within the bucket, enabling users to define and manage distinct tiering policies for optimizing storage costs and access patterns. By setting this required value, users can organize and reference specific configurations, ensuring clarity and control over intelligent tiering behavior in multi-policy environments."
+    },
+    {
+      "name": "status",
+      "description": "(Optional) Specifies the status of the configuration. Valid values: `Enabled`, `Disabled`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `status` argument in the `aws_s3_bucket_intelligent_tiering_configuration` resource allows users to control whether the intelligent tiering configuration is active (`Enabled`) or inactive (`Disabled`) for an S3 bucket. By setting this argument, users can define the operational state of automated storage tiering, which impacts cost optimization and data access efficiency based on usage patterns."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "filter",
+      "description": "(Optional) Bucket filter. The configuration only includes objects that meet the filter's criteria (documented below).",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "prefix",
+          "description": "(Optional) Object key name prefix that identifies the subset of objects to which the configuration applies.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `prefix` argument allows users to specify an object key name prefix to filter and target a specific subset of S3 objects for the intelligent tiering configuration. By setting this argument, users can apply tiering policies only to objects with keys that match the defined prefix, enabling precise control over storage cost optimization for selected data."
+        },
+        {
+          "name": "tags",
+          "description": "(Optional) All of these tags must exist in the object's tag set in order for the configuration to apply. The tiering configuration supports the following:",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `tags` argument allows users to define a map of key-value pairs that must exist in an object's tag set for the intelligent tiering configuration to apply. This enables fine-grained control over which objects are included in the tiering behavior, helping users target specific subsets of S3 objects based on custom metadata for cost optimization and storage management."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `filter` block within the `aws_s3_bucket_intelligent_tiering_configuration` resource defines criteria to include only specific objects in the intelligent tiering configuration, enabling precise control over which objects are evaluated for automatic storage tier optimization. This block encapsulates settings for filtering objects based on attributes like prefixes or tags, helping users target intelligent tiering policies to relevant subsets of bucket data for cost and performance efficiency."
+    },
+    {
+      "name": "tiering",
+      "description": "(Required) S3 Intelligent-Tiering storage class tiers of the configuration (documented below).  The filter configuration supports the following:",
+      "cardinality": [
+        1,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "access_tier",
+          "description": "(Required) S3 Intelligent-Tiering access tier. Valid values: `ARCHIVE_ACCESS`, `DEEP_ARCHIVE_ACCESS`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `access_tier` argument specifies the S3 Intelligent-Tiering storage tier to which objects are transitioned, allowing users to optimize costs for infrequently accessed data. By setting this required parameter to either `ARCHIVE_ACCESS` or `DEEP_ARCHIVE_ACCESS`, users define the long-term storage class for objects, enabling automated tiering based on access patterns to reduce storage expenses while retaining data accessibility."
+        },
+        {
+          "name": "days",
+          "description": "(Required) Number of consecutive days of no access after which an object will be eligible to be transitioned to the corresponding tier.",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `days` argument in the `aws_s3_bucket_intelligent_tiering_configuration` resource specifies the number of consecutive days an object must remain unaccessed before it becomes eligible for automatic transition to a lower-cost storage tier. This configuration enables users to define lifecycle behavior for optimizing storage costs by automating tier transitions based on access patterns."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"tiering\" configuration block within the \"aws_s3_bucket_intelligent_tiering_configuration\" resource defines the S3 Intelligent-Tiering storage class tiers, enabling automated data movement between tiers based on access patterns. This block encapsulates settings that optimize storage costs by dynamically managing data placement across performance and archival tiers, helping users achieve efficient and cost-effective storage management for infrequently accessed objects."
+    }
+  ],
+  "attributes": []
+}

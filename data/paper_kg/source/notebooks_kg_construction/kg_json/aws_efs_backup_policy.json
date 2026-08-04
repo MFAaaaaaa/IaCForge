@@ -1,0 +1,41 @@
+{
+    "resource": {
+        "name": "aws_efs_backup_policy",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "file_system_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "backup_policy",
+            "description": "",
+            "cardinality": [
+                1,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "status",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": []
+}

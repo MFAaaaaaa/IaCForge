@@ -1,0 +1,53 @@
+{
+  "resource": {
+    "name": "aws_route53_zone_association",
+    "description": "Manages a Route53 Hosted Zone VPC association. VPC associations can only be made on private zones. See the aws_route53_vpc_association_authorization resource for setting up cross-account associations. Unless explicit association ordering is required (e.g., a separate cross-account association authorization), usage of this resource is not recommended. Use the vpc configuration blocks available within the aws_route53_zone resource instead. Terraform provides both this standalone Zone VPC Association resource and exclusive VPC associations defined in-line in the aws_route53_zone resource via vpc configuration blocks. At this time, you cannot use those in-line VPC associations in conjunction with this resource and the same zone ID otherwise it will cause a perpetual difference in plan output. You can optionally use the generic Terraform resource lifecycle configuration block with ignore_changes in the aws_route53_zone resource to manage additional associations via this resource.",
+    "llm_summary": "The `aws_route53_zone_association` Terraform resource manages the association of private Route 53 hosted zones with VPCs, enabling DNS resolution within specific VPCs. It is commonly used for configuring private DNS zones in scenarios requiring cross-account VPC associations or explicit control over VPC linkage. While standalone, this resource is best suited for advanced use cases like lifecycle management of VPC associations or handling cross-account setups, as simpler configurations can be achieved directly within the `aws_route53_zone` resource using inline `vpc` blocks."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_vpc\" \"primary\" {\n  cidr_block           = \"10.6.0.0/16\"\n  enable_dns_hostnames = true\n  enable_dns_support   = true\n}\n\nresource \"aws_vpc\" \"secondary\" {\n  cidr_block           = \"10.7.0.0/16\"\n  enable_dns_hostnames = true\n  enable_dns_support   = true\n}\n\nresource \"aws_route53_zone\" \"example\" {\n  name = \"example.com\"\n\n  # NOTE: The aws_route53_zone vpc argument accepts multiple configuration\n  #       blocks. The below usage of the single vpc configuration, the\n  #       lifecycle configuration, and the aws_route53_zone_association\n  #       resource is for illustrative purposes (e.g., for a separate\n  #       cross-account authorization process, which is not shown here).\n  vpc {\n    vpc_id = aws_vpc.primary.id\n  }\n\n  lifecycle {\n    ignore_changes = [vpc]\n  }\n}\n\nresource \"aws_route53_zone_association\" \"secondary\" {\n  zone_id = aws_route53_zone.example.zone_id\n  vpc_id  = aws_vpc.secondary.id\n}",
+      "llm_summary": "This example demonstrates how to associate an existing Route 53 hosted zone with multiple VPCs using the `aws_route53_zone_association` resource, enabling DNS resolution across VPCs. It highlights the use of the `vpc` block in the `aws_route53_zone` resource with lifecycle `ignore_changes` to manage cross-account or multi-VPC setups."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_route53_zone_association` resource represents a unique identifier for the association between a Route 53 hosted zone and a VPC. While optional, it can be used to reference or manage the association explicitly, enabling users to track or interact with the resource programmatically in Terraform configurations."
+    },
+    {
+      "name": "vpc_id",
+      "description": "(Required) The VPC to associate with the private hosted zone.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `vpc_id` argument specifies the ID of the VPC to associate with a private Route 53 hosted zone, enabling DNS resolution within that VPC. This is a required parameter that ensures the hosted zone is accessible only within the specified VPC, aligning with common goals of securing and isolating DNS functionality in private cloud environments."
+    },
+    {
+      "name": "vpc_region",
+      "description": "(Optional) The VPC's region. Defaults to the region of the AWS provider.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `vpc_region` argument in the `aws_route53_zone_association` resource allows users to specify the AWS region of the VPC being associated with a Route 53 private hosted zone. By setting this argument, users can explicitly define the region for the VPC, enabling cross-region associations or ensuring alignment with multi-region architectures. If omitted, the region defaults to the AWS provider's configured region."
+    },
+    {
+      "name": "zone_id",
+      "description": "(Required) The private hosted zone to associate.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `zone_id` argument specifies the unique identifier of the private hosted zone to be associated with a specific VPC in the `aws_route53_zone_association` resource. By setting this required argument, users enable DNS resolution for the private hosted zone within the associated VPC, ensuring seamless integration and routing for private domain names in their cloud infrastructure."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "owning_account",
+      "description": "The account ID of the account that created the hosted zone.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

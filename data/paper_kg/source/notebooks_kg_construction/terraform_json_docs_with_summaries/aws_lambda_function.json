@@ -1,0 +1,551 @@
+{
+  "resource": {
+    "name": "aws_lambda_function",
+    "description": "Provides a Lambda Function resource. Lambda allows you to trigger execution of code in response to events in AWS, enabling serverless backend solutions. The Lambda Function itself includes source code and runtime configuration. For information about Lambda and how to use it, see What is AWS Lambda? For a detailed example of setting up Lambda and API Gateway, see Serverless Applications with AWS Lambda and API Gateway. Due to AWS Lambda improved VPC networking changes that began deploying in September 2019, EC2 subnets and security groups associated with Lambda Functions can take up to 45 minutes to successfully delete. Terraform AWS Provider version 2.31.0 and later automatically handles this increased timeout, however prior versions require setting the customizable deletion timeouts of those Terraform resources to 45 minutes (delete = \"45m\"). AWS and HashiCorp are working together to reduce the amount of time required for resource deletion and updates can be tracked in this GitHub issue. If you get a KMSAccessDeniedException: Lambda was unable to decrypt the environment variables because KMS access was denied error when invoking an aws_lambda_function with environment variables, the IAM role associated with the function may have been deleted and recreated after the function was created. You can fix the problem two ways: 1) updating the function's role to another role and then updating it back again to the recreated role, or 2) by using Terraform to taint the function and apply your configuration again to recreate the function. (When you create a function, Lambda grants permissions on the KMS key to the function's IAM role. If the IAM role is recreated, the grant is no longer valid. Changing the function's role or recreating the function causes Lambda to update the grant.) To give an external source (like an EventBridge Rule, SNS, or S3) permission to access the Lambda function, use the aws_lambda_permission resource. See Lambda Permission Model for more details. On the other hand, the role argument of this resource is the function's execution role for identity and access to AWS services and resources.",
+    "llm_summary": "The `aws_lambda_function` resource enables the creation and management of AWS Lambda functions, supporting serverless execution of code in response to events from services like S3, EventBridge, or API Gateway. It is commonly used for building event-driven architectures, automating backend workflows, and integrating with other AWS services. Key configurations include runtime settings, source code deployment, environment variables, VPC networking, IAM execution roles, and permissions for external triggers, making it ideal for scalable, serverless application development."
+  },
+  "examples": [
+    {
+      "title": "Basic Example",
+      "code": "data \"aws_iam_policy_document\" \"assume_role\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"lambda.amazonaws.com\"]\n    }\n\n    actions = [\"sts:AssumeRole\"]\n  }\n}\n\nresource \"aws_iam_role\" \"iam_for_lambda\" {\n  name               = \"iam_for_lambda\"\n  assume_role_policy = data.aws_iam_policy_document.assume_role.json\n}\n\ndata \"archive_file\" \"lambda\" {\n  type        = \"zip\"\n  source_file = \"lambda.js\"\n  output_path = \"lambda_function_payload.zip\"\n}\n\nresource \"aws_lambda_function\" \"test_lambda\" {\n  # If the file is not in the current working directory you will need to include a\n  # path.module in the filename.\n  filename      = \"lambda_function_payload.zip\"\n  function_name = \"lambda_function_name\"\n  role          = aws_iam_role.iam_for_lambda.arn\n  handler       = \"index.test\"\n\n  source_code_hash = data.archive_file.lambda.output_base64sha256\n\n  runtime = \"nodejs18.x\"\n\n  environment {\n    variables = {\n      foo = \"bar\"\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to deploy an AWS Lambda function using the `aws_lambda_function` resource, including packaging the function code with `archive_file`, configuring the execution role with `aws_iam_role` and an assume role policy, and setting environment variables. It illustrates key configurations such as specifying the runtime (`nodejs18.x`), handler, source code hash, and associating the Lambda function with an IAM role for execution permissions."
+    },
+    {
+      "title": "Lambda Layers",
+      "code": "resource \"aws_lambda_layer_version\" \"example\" {\n  # ... other configuration ...\n}\n\nresource \"aws_lambda_function\" \"example\" {\n  # ... other configuration ...\n  layers = [aws_lambda_layer_version.example.arn]\n}",
+      "llm_summary": "\"Demonstrates how to associate an AWS Lambda function with a custom Lambda layer using the `layers` argument, enabling code reuse and modular functionality by referencing the ARN of an `aws_lambda_layer_version` resource.\""
+    },
+    {
+      "title": "Lambda Ephemeral Storage",
+      "code": "data \"aws_iam_policy_document\" \"assume_role\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"lambda.amazonaws.com\"]\n    }\n\n    actions = [\"sts:AssumeRole\"]\n  }\n}\n\nresource \"aws_iam_role\" \"iam_for_lambda\" {\n  name               = \"iam_for_lambda\"\n  assume_role_policy = data.aws_iam_policy_document.assume_role.json\n}\n\nresource \"aws_lambda_function\" \"test_lambda\" {\n  filename      = \"lambda_function_payload.zip\"\n  function_name = \"lambda_function_name\"\n  role          = aws_iam_role.iam_for_lambda.arn\n  handler       = \"index.test\"\n  runtime       = \"nodejs18.x\"\n\n  ephemeral_storage {\n    size = 10240 # Min 512 MB and the Max 10240 MB\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS Lambda function with custom ephemeral storage size using the `ephemeral_storage` block, allowing up to 10 GB of temporary disk space. Includes IAM role setup with an assume role policy for Lambda execution permissions.\""
+    },
+    {
+      "title": "Lambda File Systems",
+      "code": "# A lambda function connected to an EFS file system\nresource \"aws_lambda_function\" \"example\" {\n  # ... other configuration ...\n\n  file_system_config {\n    # EFS file system access point ARN\n    arn = aws_efs_access_point.access_point_for_lambda.arn\n\n    # Local mount path inside the lambda function. Must start with '/mnt/'.\n    local_mount_path = \"/mnt/efs\"\n  }\n\n  vpc_config {\n    # Every subnet should be able to reach an EFS mount target in the same Availability Zone. Cross-AZ mounts are not permitted.\n    subnet_ids         = [aws_subnet.subnet_for_lambda.id]\n    security_group_ids = [aws_security_group.sg_for_lambda.id]\n  }\n\n  # Explicitly declare dependency on EFS mount target.\n  # When creating or updating Lambda functions, mount target must be in 'available' lifecycle state.\n  depends_on = [aws_efs_mount_target.alpha]\n}\n\n# EFS file system\nresource \"aws_efs_file_system\" \"efs_for_lambda\" {\n  tags = {\n    Name = \"efs_for_lambda\"\n  }\n}\n\n# Mount target connects the file system to the subnet\nresource \"aws_efs_mount_target\" \"alpha\" {\n  file_system_id  = aws_efs_file_system.efs_for_lambda.id\n  subnet_id       = aws_subnet.subnet_for_lambda.id\n  security_groups = [aws_security_group.sg_for_lambda.id]\n}\n\n# EFS access point used by lambda file system\nresource \"aws_efs_access_point\" \"access_point_for_lambda\" {\n  file_system_id = aws_efs_file_system.efs_for_lambda.id\n\n  root_directory {\n    path = \"/lambda\"\n    creation_info {\n      owner_gid   = 1000\n      owner_uid   = 1000\n      permissions = \"777\"\n    }\n  }\n\n  posix_user {\n    gid = 1000\n    uid = 1000\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Lambda function to integrate with an EFS file system using the `file_system_config` block, enabling persistent storage accessible via a local mount path (`/mnt/efs`). It illustrates the setup of supporting resources, including an EFS file system, access point, and mount target, along with VPC configurations to ensure secure connectivity."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "architectures",
+      "description": "(Optional) Instruction set architecture for your Lambda function. Valid values are `[\"x86_64\"]` and `[\"arm64\"]`. Default is `[\"x86_64\"]`. Removing this attribute, function's architecture stay the same.",
+      "required": false,
+      "type": "list(string)",
+      "llm_summary": "The `architectures` argument for the `aws_lambda_function` resource allows users to specify the instruction set architecture (`x86_64` or `arm64`) for their Lambda function, enabling compatibility with different processor types. This configuration impacts performance and cost optimization, as users can choose architectures suited to their workload requirements, such as leveraging ARM-based processors for efficiency."
+    },
+    {
+      "name": "code_signing_config_arn",
+      "description": "(Optional) To enable code signing for this function, specify the ARN of a code-signing configuration. A code-signing configuration includes a set of signing profiles, which define the trusted publishers for this function.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `code_signing_config_arn` argument allows users to specify the ARN of a code-signing configuration for an AWS Lambda function, enabling code signing to ensure the integrity and trustworthiness of the function's deployment package. By defining this, users can enforce security policies that validate the source and authenticity of the code through trusted signing profiles, aligning with compliance and security goals."
+    },
+    {
+      "name": "description",
+      "description": "(Optional) Description of what your Lambda Function does.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_lambda_function` resource allows users to define a human-readable summary of the function's purpose or functionality. Setting this argument helps document the Lambda function's role within the infrastructure, improving clarity and maintainability, especially in environments with multiple functions."
+    },
+    {
+      "name": "filename",
+      "description": "(Optional) Path to the function's deployment package within the local filesystem. Exactly one of `filename`, `image_uri`, or `s3_bucket` must be specified.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `filename` argument in the `aws_lambda_function` resource specifies the local file path to the deployment package for the Lambda function. By setting this argument, users can define the source code and dependencies for their function directly from their local filesystem, enabling the deployment of custom logic without relying on external sources like S3 or container images."
+    },
+    {
+      "name": "function_name",
+      "description": "(Required) Unique name for your Lambda Function.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `function_name` argument specifies the unique identifier for the AWS Lambda function, allowing users to define a distinct name that facilitates resource management, discovery, and integration with other AWS services. Setting this argument ensures the function can be referenced programmatically and avoids naming conflicts within the AWS account."
+    },
+    {
+      "name": "handler",
+      "description": "(Optional) Function entrypoint in your code.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `handler` argument in the `aws_lambda_function` resource specifies the entry point of the function's code, defining the method or function within the deployed code that AWS Lambda will invoke when the function is executed. Configuring this argument ensures the correct execution flow by mapping the Lambda runtime to the appropriate code logic, aligning with user goals of deploying and running serverless applications effectively."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_lambda_function` resource allows users to specify a unique identifier for the Lambda function, typically used to reference the function within Terraform's state or other dependent resources. While optional, setting this argument can help ensure consistent identification and tracking of the function across infrastructure configurations."
+    },
+    {
+      "name": "image_uri",
+      "description": "(Optional) ECR image URI containing the function's deployment package. Exactly one of `filename`, `image_uri`, or `s3_bucket` must be specified.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `image_uri` argument for the `aws_lambda_function` resource allows users to specify the Amazon ECR image URI containing the containerized deployment package for the Lambda function. By setting this argument, users can define the source of the function's code and runtime environment, enabling the use of custom container images to meet specific application requirements, such as custom dependencies or runtime configurations."
+    },
+    {
+      "name": "kms_key_arn",
+      "description": "(Optional) Amazon Resource Name (ARN) of the AWS Key Management Service (KMS) key that is used to encrypt environment variables. If this configuration is not provided when environment variables are in use, AWS Lambda uses a default service key. If this configuration is provided when environment variables are not in use, the AWS Lambda API does not save this configuration and Terraform will show a perpetual difference of adding the key. To fix the perpetual difference, remove this configuration.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `kms_key_arn` argument allows users to specify the ARN of an AWS KMS key to encrypt environment variables for the Lambda function, enhancing security for sensitive data. If not set, AWS Lambda defaults to using a service-managed key, but providing this configuration ensures control over encryption keys, aligning with compliance or security requirements."
+    },
+    {
+      "name": "layers",
+      "description": "(Optional) List of Lambda Layer Version ARNs (maximum of 5) to attach to your Lambda Function. See Lambda Layers",
+      "required": false,
+      "type": "list(string)",
+      "llm_summary": "The `layers` argument in the `aws_lambda_function` resource allows users to specify a list of up to 5 Lambda Layer Version ARNs to attach to the function, enabling the inclusion of shared code, libraries, or runtime dependencies. This configuration helps streamline function development by reusing pre-packaged resources, reducing code duplication, and simplifying maintenance."
+    },
+    {
+      "name": "memory_size",
+      "description": "(Optional) Amount of memory in MB your Lambda Function can use at runtime. Defaults to `128`. See Limits",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `memory_size` argument for the `aws_lambda_function` resource allows users to define the amount of memory (in MB) allocated to the Lambda function during runtime, directly impacting its performance and resource availability. Configuring this value helps optimize execution speed and cost, as higher memory allocations can improve processing power but may increase pricing based on AWS Lambda's billing model."
+    },
+    {
+      "name": "package_type",
+      "description": "(Optional) Lambda deployment package type. Valid values are `Zip` and `Image`. Defaults to `Zip`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `package_type` argument specifies the deployment package format for the Lambda function, allowing users to choose between `Zip` for functions packaged as .zip archives or `Image` for container image-based deployments. This configuration determines how the function's code is provided and executed, aligning with user goals such as deploying traditional code archives or leveraging containerized workflows for greater flexibility."
+    },
+    {
+      "name": "publish",
+      "description": "(Optional) Whether to publish creation/change as new Lambda Function Version. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `publish` argument in the `aws_lambda_function` resource controls whether changes to the Lambda function automatically create and publish a new version. Setting this to `true` enables versioning, which is useful for managing function lifecycle and ensuring immutability of deployed code for production environments."
+    },
+    {
+      "name": "replace_security_groups_on_destroy",
+      "description": "(Optional) Whether to replace the security groups on the function's VPC configuration prior to destruction. Removing these security group associations prior to function destruction can speed up security group deletion times of AWS's internal cleanup operations. By default, the security groups will be replaced with the `default` security group in the function's configured VPC. Set the `replacement_security_group_ids` attribute to use a custom list of security groups for replacement.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `replace_security_groups_on_destroy` argument for the `aws_lambda_function` resource allows users to control whether the Lambda function's associated security groups in a VPC are replaced with default or custom security groups before the function is destroyed. This configuration optimizes AWS's internal cleanup processes, potentially speeding up security group deletion times, and is particularly useful for managing lifecycle behaviors in environments with strict resource cleanup requirements."
+    },
+    {
+      "name": "replacement_security_group_ids",
+      "description": "(Optional) List of security group IDs to assign to the function's VPC configuration prior to destruction. `replace_security_groups_on_destroy` must be set to `true` to use this attribute.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "Defines a set of security group IDs to temporarily assign to the Lambda function's VPC configuration during resource destruction, ensuring controlled network access during replacement. This argument supports lifecycle management by enabling seamless security group transitions when `replace_security_groups_on_destroy` is set to `true`."
+    },
+    {
+      "name": "reserved_concurrent_executions",
+      "description": "(Optional) Amount of reserved concurrent executions for this lambda function. A value of `0` disables lambda from being triggered and `-1` removes any concurrency limitations. Defaults to Unreserved Concurrency Limits `-1`. See Managing Concurrency",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `reserved_concurrent_executions` argument for the `aws_lambda_function` resource allows users to control the maximum number of concurrent executions allocated to a specific Lambda function, ensuring predictable performance and resource isolation. Setting this value can help manage function scalability, prevent overloading downstream systems, or disable the function entirely (`0`), while using `-1` removes concurrency limits for unrestricted execution."
+    },
+    {
+      "name": "role",
+      "description": "(Required) Amazon Resource Name (ARN) of the function's execution role. The role provides the function's identity and access to AWS services and resources. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `role` argument specifies the Amazon Resource Name (ARN) of the IAM execution role that grants the AWS Lambda function permissions to access AWS services and resources. By defining this role, users control the function's identity and security context, enabling it to perform actions such as reading from S3, writing to DynamoDB, or invoking other AWS services as part of its execution."
+    },
+    {
+      "name": "runtime",
+      "description": "(Optional) Identifier of the function's runtime. See Runtimes for valid values.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `runtime` argument for the `aws_lambda_function` resource allows users to specify the programming language and execution environment for the Lambda function, such as Python, Node.js, or Java. Configuring this argument ensures compatibility with the function's code and dependencies, enabling the desired runtime behavior and execution capabilities."
+    },
+    {
+      "name": "s3_bucket",
+      "description": "(Optional) S3 bucket location containing the function's deployment package. This bucket must reside in the same AWS region where you are creating the Lambda function. Exactly one of `filename`, `image_uri`, or `s3_bucket` must be specified. When `s3_bucket` is set, `s3_key` is required.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `s3_bucket` argument for the `aws_lambda_function` resource allows users to specify the S3 bucket that contains the deployment package for the Lambda function. This enables the function's code to be sourced from an existing S3 bucket in the same AWS region, supporting workflows where code artifacts are managed externally or pre-packaged for deployment."
+    },
+    {
+      "name": "s3_key",
+      "description": "(Optional) S3 key of an object containing the function's deployment package. When `s3_bucket` is set, `s3_key` is required.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `s3_key` argument specifies the exact object key within an S3 bucket that contains the deployment package for the Lambda function. By configuring this argument alongside `s3_bucket`, users can define the source location of their function's code, enabling seamless integration with S3-hosted artifacts for deployment."
+    },
+    {
+      "name": "s3_object_version",
+      "description": "(Optional) Object version containing the function's deployment package. Conflicts with `filename` and `image_uri`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `s3_object_version` argument allows users to specify the version ID of an S3 object containing the Lambda function's deployment package, enabling precise control over which version of the code is deployed. This is particularly useful for managing versioned S3 buckets and ensuring consistent function updates, but it cannot be used alongside `filename` or `image_uri`."
+    },
+    {
+      "name": "skip_destroy",
+      "description": "(Optional) Set to true if you do not wish the function to be deleted at destroy time, and instead just remove the function from the Terraform state.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `skip_destroy` argument in the `aws_lambda_function` resource allows users to define the lifecycle behavior of the Lambda function during Terraform destroy operations. When set to `true`, it prevents the function from being deleted, ensuring its retention while removing it from Terraform's state, which is useful for preserving critical functions or avoiding accidental deletion in production environments."
+    },
+    {
+      "name": "source_code_hash",
+      "description": "(Optional) Virtual attribute used to trigger replacement when source code changes. Must be set to a base64-encoded SHA256 hash of the package file specified with either `filename` or `s3_key`. The usual way to set this is `filebase64sha256(\"file.zip\")` (Terraform 0.11.12 and later) or `base64sha256(file(\"file.zip\"))` (Terraform 0.11.11 and earlier), where \"file.zip\" is the local filename of the lambda function source archive.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `source_code_hash` argument in the `aws_lambda_function` resource allows users to define a base64-encoded SHA256 hash of the Lambda function's source code package, ensuring that updates to the code trigger resource replacement. This helps maintain version integrity and automates deployment consistency by detecting changes in the function's source archive, aligning with common user goals of managing code updates and lifecycle behavior."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of tags to assign to the object. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_lambda_function` resource allows users to assign key-value metadata to the Lambda function, enabling organization, categorization, and resource tracking. By defining tags, users can streamline cost allocation, implement governance policies, and enhance searchability within their cloud environment, while also overriding provider-level default tags if applicable."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_lambda_function` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to the Lambda function and any related resources. By configuring this argument, users can streamline resource organization, enable cost allocation tracking, and enforce tagging policies across their infrastructure for improved governance and management."
+    },
+    {
+      "name": "timeout",
+      "description": "(Optional) Amount of time your Lambda Function has to run in seconds. Defaults to `3`. See Limits.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `timeout` argument for the `aws_lambda_function` resource specifies the maximum duration, in seconds, that the Lambda function is allowed to run before being forcibly terminated. Configuring this value enables users to control the execution time for their function, ensuring it aligns with workload requirements and avoids exceeding AWS limits or incurring unnecessary costs."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "dead_letter_config",
+      "description": "(Optional) Configuration block. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "target_arn",
+          "description": "(Required) ARN of an SNS topic or SQS queue to notify when an invocation fails. If this option is used, the function's IAM role must be granted suitable access to write to the target object, which means allowing either the `sns:Publish` or `sqs:SendMessage` action on this ARN, depending on which service is targeted.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `target_arn` argument in the `dead_letter_config` block of the `aws_lambda_function` resource specifies the Amazon Resource Name (ARN) of an SNS topic or SQS queue to receive notifications when a Lambda invocation fails. By setting this required argument, users enable a dead-letter queue mechanism to capture and manage failed events, ensuring reliable error handling and facilitating debugging or retry workflows."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `dead_letter_config` block in the `aws_lambda_function` resource enables the configuration of a dead-letter queue, allowing users to specify where failed Lambda function events should be sent for further analysis or processing. This block encapsulates settings related to the target destination, such as an Amazon SQS queue or SNS topic, helping users improve error handling and ensure reliable event processing workflows."
+    },
+    {
+      "name": "environment",
+      "description": "(Optional) Configuration block. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "variables",
+          "description": "(Optional) Map of environment variables that are accessible from the function code during execution. If provided at least one key must be present.",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "\"Defines a map of key-value pairs for environment variables accessible to the Lambda function during execution, enabling users to configure dynamic runtime settings, secrets, or application-specific parameters without modifying the function code.\""
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"environment\" configuration block for the `aws_lambda_function` resource defines environment variables that can be passed to the Lambda function at runtime, enabling dynamic configuration and customization of the function's behavior. This block encapsulates key-value pairs for environment variables, allowing users to manage application settings, secrets, or runtime parameters without modifying the function code, thereby enhancing flexibility and operational control."
+    },
+    {
+      "name": "ephemeral_storage",
+      "description": "(Optional) The amount of Ephemeral storage(`/tmp`) to allocate for the Lambda Function in MB. This parameter is used to expand the total amount of Ephemeral storage available, beyond the default amount of `512`MB. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "size",
+          "description": "(Required) The size of the Lambda function Ephemeral storage(`/tmp`) represented in MB. The minimum supported `ephemeral_storage` value defaults to `512`MB and the maximum supported value is `10240`MB.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `size` argument for the `ephemeral_storage` configuration in the `aws_lambda_function` resource specifies the amount of temporary storage (in MB) available in the `/tmp` directory during the execution of a Lambda function. By setting this value (ranging from 512 MB to 10,240 MB), users can control the storage capacity for temporary files, enabling use cases such as caching, intermediate data processing, or handling large files within the function's runtime."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "\"Configures the amount of `/tmp` ephemeral storage allocated to an AWS Lambda function, enabling users to expand beyond the default 512 MB to support workloads requiring additional temporary disk space for processing or caching during execution.\""
+    },
+    {
+      "name": "file_system_config",
+      "description": "(Optional) Configuration block. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "arn",
+          "description": "(Required) Amazon Resource Name (ARN) of the Amazon EFS Access Point that provides access to the file system.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `arn` argument in the `file_system_config` block of the `aws_lambda_function` resource specifies the Amazon Resource Name (ARN) of the Amazon EFS Access Point, enabling the Lambda function to securely access the associated file system. By defining this required parameter, users can configure persistent storage for their Lambda function, typically to support stateful workloads, shared data access, or large-scale file processing."
+        },
+        {
+          "name": "local_mount_path",
+          "description": "(Required) Path where the function can access the file system, starting with /mnt/.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `local_mount_path` argument specifies the directory path within the Lambda function's runtime environment where the attached file system (via `file_system_config`) will be accessible, starting with `/mnt/`. By defining this path, users enable the function to interact with the file system for tasks like reading or writing files, supporting use cases such as shared storage, caching, or processing large datasets."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `file_system_config` block in the `aws_lambda_function` resource enables integration with an Amazon Elastic File System (EFS), allowing the Lambda function to access shared file storage. It encapsulates settings such as the EFS access point and mount target, providing users with the ability to configure persistent storage for stateful workloads or large-scale data processing directly within their Lambda functions."
+    },
+    {
+      "name": "image_config",
+      "description": "(Optional) Configuration block. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "command",
+          "description": "(Optional) Parameters that you want to pass in with `entry_point`.",
+          "required": false,
+          "type": "list(string)",
+          "llm_summary": "The `command` argument in the `image_config` block of the `aws_lambda_function` resource allows users to define a list of strings that specify runtime parameters passed to the container's `entry_point`. This enables customization of the container's execution behavior, such as configuring startup commands or fine-tuning the function's initialization process to meet specific application requirements."
+        },
+        {
+          "name": "entry_point",
+          "description": "(Optional) Entry point to your application, which is typically the location of the runtime executable.",
+          "required": false,
+          "type": "list(string)",
+          "llm_summary": "The `entry_point` argument in the `image_config` block of the `aws_lambda_function` resource allows users to specify the list of commands or paths that define the runtime executable's starting point within a container image. Configuring this argument ensures the Lambda function knows where to begin execution, aligning with user goals of customizing application behavior and runtime initialization."
+        },
+        {
+          "name": "working_directory",
+          "description": "(Optional) Working directory.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `working_directory` argument in the `image_config` block of the `aws_lambda_function` resource allows users to specify the default directory within the container image where the Lambda function's code will execute. By setting this argument, users can control the runtime environment's file path context, which is particularly useful for organizing dependencies, assets, or scripts relative to a specific directory structure within the container."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `image_config` block within the `aws_lambda_function` resource allows users to configure runtime settings specific to Lambda functions deployed using container images. It encapsulates related settings such as entry point and command overrides, enabling fine-grained control over how the container-based Lambda function is executed. This block is essential for customizing the behavior of containerized Lambda functions to meet specific application requirements."
+    },
+    {
+      "name": "logging_config",
+      "description": "(Optional) Configuration block used to specify advanced logging settings. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "application_log_level",
+          "description": "(Optional) for JSON structured logs, choose the detail level of the logs your application sends to CloudWatch when using supported logging libraries.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `application_log_level` argument in the `logging_config` block of the `aws_lambda_function` resource allows users to define the verbosity of JSON-structured application logs sent to CloudWatch when using supported logging libraries. By configuring this argument, users can control the granularity of log details (e.g., error, info, debug) to align with their monitoring and troubleshooting needs, optimizing log visibility and CloudWatch usage."
+        },
+        {
+          "name": "log_format",
+          "description": "(Required) select between `Text` and structured `JSON` format for your function's logs.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `log_format` argument in the `logging_config` block of the `aws_lambda_function` resource allows users to specify the format of their function's logs, choosing between plain `Text` or structured `JSON`. This configuration impacts how log data is structured and consumed, enabling users to align logging output with their preferred analysis tools or monitoring systems for improved readability and integration."
+        },
+        {
+          "name": "log_group",
+          "description": "(Optional) the CloudWatch log group your function sends logs to.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `log_group` argument in the `logging_config` block of the `aws_lambda_function` resource allows users to specify the CloudWatch Log Group where the Lambda function's execution logs will be sent. Configuring this argument enables centralized log management, helping users monitor function behavior, troubleshoot issues, and analyze performance metrics within a defined log group."
+        },
+        {
+          "name": "system_log_level",
+          "description": "(optional) for JSON structured logs, choose the detail level of the Lambda platform event logs sent to CloudWatch, such as `ERROR`, `DEBUG`, or `INFO`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `system_log_level` argument in the `logging_config` of the `aws_lambda_function` resource allows users to specify the verbosity level of Lambda platform event logs sent to CloudWatch, such as `ERROR`, `DEBUG`, or `INFO`. By configuring this, users can control the granularity of diagnostic and operational insights for their Lambda function, aligning log detail with debugging or monitoring needs."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "\"Defines advanced logging settings for an AWS Lambda function, enabling detailed control over log output and behavior. This block encapsulates configurations related to log management, helping users optimize monitoring and debugging by tailoring logging mechanisms to their specific requirements.\""
+    },
+    {
+      "name": "snap_start",
+      "description": "(Optional) Snap start settings block. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "apply_on",
+          "description": "(Required) Conditions where snap start is enabled. Valid values are `PublishedVersions`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `apply_on` argument for the `snap_start` feature in the `aws_lambda_function` resource specifies the conditions under which SnapStart optimization is applied, allowing users to control its activation for specific Lambda function versions. By setting this argument to `PublishedVersions`, users enable SnapStart for published versions of the function, improving cold start performance and aligning with deployment strategies that prioritize production-ready versions."
+        },
+        {
+          "name": "optimization_status",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `optimization_status` argument within the `snap_start` context of the `aws_lambda_function` resource allows users to control whether SnapStart optimization is enabled or disabled for the Lambda function. This setting impacts cold start performance by pre-initializing and caching the execution environment, improving startup times for supported functions."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `snap_start` configuration block in the `aws_lambda_function` resource enables the management of SnapStart settings, which optimize Lambda function cold start performance by pre-initializing execution environments. This block encapsulates related settings for configuring SnapStart behavior, allowing users to reduce latency and improve function responsiveness during invocation."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_lambda_function` resource allows users to specify the maximum duration (as a string, e.g., \"10m\") Terraform will wait for the Lambda function creation process to complete. Configuring this timeout helps manage deployment expectations and avoid prolonged waits or premature failures during resource provisioning."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block for the `aws_lambda_function` resource allows users to specify the maximum duration (in string format, e.g., \"5m\" for 5 minutes) Terraform will wait for the deletion of a Lambda function to complete. Configuring this argument helps control the timeout behavior during resource destruction, ensuring smoother lifecycle management and preventing operations from hanging indefinitely during deletion."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_lambda_function` resource allows users to specify the maximum duration (in string format, e.g., \"5m\" for 5 minutes) Terraform will wait for updates to the Lambda function to complete. Configuring this timeout ensures predictable behavior during resource updates, helping users manage deployment workflows and avoid prolonged or stalled operations."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"timeouts\" configuration block in the \"aws_lambda_function\" resource defines customizable timeout durations for specific operations, such as creating, updating, or deleting a Lambda function. By configuring this block, users can manage operation time limits to prevent long-running processes or ensure predictable infrastructure provisioning, offering greater control over deployment reliability and responsiveness."
+    },
+    {
+      "name": "tracing_config",
+      "description": "(Optional) Configuration block. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "mode",
+          "description": "(Required) Whether to sample and trace a subset of incoming requests with AWS X-Ray. Valid values are `PassThrough` and `Active`. If `PassThrough`, Lambda will only trace the request from an upstream service if it contains a tracing header with \"sampled=1\". If `Active`, Lambda will respect any tracing header it receives from an upstream service. If no tracing header is received, Lambda will call X-Ray for a tracing decision.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `mode` argument in the `tracing_config` block of the `aws_lambda_function` resource specifies the tracing behavior for incoming requests using AWS X-Ray. By setting this required argument to either `PassThrough` or `Active`, users control whether Lambda traces requests based on upstream tracing headers (`PassThrough`) or actively initiates tracing decisions with X-Ray when no headers are present (`Active`), enabling detailed request tracking and debugging for serverless applications."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `tracing_config` block in the `aws_lambda_function` resource enables the configuration of AWS X-Ray tracing for the Lambda function, allowing users to monitor and analyze request flows and performance metrics. It encapsulates settings related to tracing modes, such as enabling active or passive tracing, helping users achieve enhanced observability and debugging capabilities for distributed applications."
+    },
+    {
+      "name": "vpc_config",
+      "description": "(Optional) Configuration block. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "ipv6_allowed_for_dual_stack",
+          "description": "(Optional) Allows outbound IPv6 traffic on VPC functions that are connected to dual-stack subnets. Default is `false`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `ipv6_allowed_for_dual_stack` argument in the `vpc_config` of the `aws_lambda_function` resource controls whether outbound IPv6 traffic is permitted for Lambda functions connected to dual-stack subnets. Enabling this option (`true`) allows the function to utilize IPv6 for external communication, which is useful for modern networking requirements or environments prioritizing IPv6 compatibility, while leaving it disabled (`false`) restricts traffic to IPv4 only."
+        },
+        {
+          "name": "security_group_ids",
+          "description": "(Required) List of security group IDs associated with the Lambda function.",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "Defines the security groups associated with the Lambda function's VPC configuration, enabling control over inbound and outbound network traffic to the function. This argument is essential for users aiming to enforce network-level security and access restrictions within their VPC environment."
+        },
+        {
+          "name": "subnet_ids",
+          "description": "(Required) List of subnet IDs associated with the Lambda function.",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `subnet_ids` argument in the `vpc_config` block of the `aws_lambda_function` resource specifies the set of subnet IDs within a VPC where the Lambda function will operate. By defining this, users ensure the function has network connectivity to resources within the specified subnets, enabling use cases like accessing databases, caches, or other private services while maintaining VPC-level security and isolation."
+        },
+        {
+          "name": "vpc_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `vpc_id` argument in the `vpc_config` block of the `aws_lambda_function` resource allows users to specify the ID of the VPC where the Lambda function will operate. Setting this argument enables the function to access resources within the specified VPC, such as databases or private APIs, aligning with common goals like securing network communication and integrating with private infrastructure."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `vpc_config` block in the `aws_lambda_function` resource configures network connectivity for the Lambda function by specifying VPC-related settings, such as subnet IDs and security group IDs. This enables the function to securely access resources within a private VPC, such as databases or internal APIs, ensuring controlled and isolated network communication."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) identifying your Lambda Function.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "code_sha256",
+      "description": "Base64-encoded representation of raw SHA-256 sum of the zip file.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "invoke_arn",
+      "description": "ARN to be used for invoking Lambda Function from API Gateway - to be used in `aws_api_gateway_integration`'s `uri`.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "last_modified",
+      "description": "Date this resource was last modified.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "qualified_arn",
+      "description": "ARN identifying your Lambda Function Version (if versioning is enabled via `publish = true`).",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "qualified_invoke_arn",
+      "description": "Qualified ARN (ARN with lambda version number) to be used for invoking Lambda Function from API Gateway - to be used in `aws_api_gateway_integration`'s `uri`.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "signing_job_arn",
+      "description": "ARN of the signing job.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "signing_profile_version_arn",
+      "description": "ARN of the signing profile version.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "source_code_size",
+      "description": "Size in bytes of the function .zip file.",
+      "optional": false,
+      "type": "number"
+    },
+    {
+      "name": "version",
+      "description": "Latest published version of your Lambda Function.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

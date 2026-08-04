@@ -1,0 +1,610 @@
+{
+  "resource": {
+    "name": "aws_dynamodb_table",
+    "description": "Provides a DynamoDB table resource. We recommend using lifecycle ignore_changes for read_capacity and/or write_capacity if there's autoscaling policy attached to the table. When using aws_dynamodb_table_replica with this resource, use lifecycle ignore_changes for replica, e.g., lifecycle { ignore_changes = [replica] }.",
+    "llm_summary": "The `aws_dynamodb_table` Terraform resource enables the creation and management of DynamoDB tables for scalable, low-latency NoSQL database solutions on AWS. It supports configurations for read and write capacity, including autoscaling policies, and facilitates lifecycle management to handle changes in capacity or replicas seamlessly. Common use cases include building high-performance applications, implementing serverless architectures, and managing global table replicas for multi-region data consistency."
+  },
+  "examples": [
+    {
+      "title": "Basic Example",
+      "code": "resource \"aws_dynamodb_table\" \"basic-dynamodb-table\" {\n  name           = \"GameScores\"\n  billing_mode   = \"PROVISIONED\"\n  read_capacity  = 20\n  write_capacity = 20\n  hash_key       = \"UserId\"\n  range_key      = \"GameTitle\"\n\n  attribute {\n    name = \"UserId\"\n    type = \"S\"\n  }\n\n  attribute {\n    name = \"GameTitle\"\n    type = \"S\"\n  }\n\n  attribute {\n    name = \"TopScore\"\n    type = \"N\"\n  }\n\n  ttl {\n    attribute_name = \"TimeToExist\"\n    enabled        = true\n  }\n\n  global_secondary_index {\n    name               = \"GameTitleIndex\"\n    hash_key           = \"GameTitle\"\n    range_key          = \"TopScore\"\n    write_capacity     = 10\n    read_capacity      = 10\n    projection_type    = \"INCLUDE\"\n    non_key_attributes = [\"UserId\"]\n  }\n\n  tags = {\n    Name        = \"dynamodb-table-1\"\n    Environment = \"production\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_dynamodb_table` resource with provisioned throughput, a composite primary key (hash and range keys), and a global secondary index for optimized querying. It also showcases TTL settings, attribute definitions, and tagging for production environments, making it ideal for users learning to set up a scalable and query-efficient DynamoDB table."
+    },
+    {
+      "title": "Global Tables",
+      "code": "resource \"aws_dynamodb_table\" \"example\" {\n  name             = \"example\"\n  hash_key         = \"TestTableHashKey\"\n  billing_mode     = \"PAY_PER_REQUEST\"\n  stream_enabled   = true\n  stream_view_type = \"NEW_AND_OLD_IMAGES\"\n\n  attribute {\n    name = \"TestTableHashKey\"\n    type = \"S\"\n  }\n\n  replica {\n    region_name = \"us-east-2\"\n  }\n\n  replica {\n    region_name = \"us-west-2\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS DynamoDB Global Table with the `aws_dynamodb_table` resource, using the `replica` block to enable multi-region replication across `us-east-2` and `us-west-2`. Highlights key settings such as `PAY_PER_REQUEST` billing mode, `stream_enabled` with `NEW_AND_OLD_IMAGES`, and defining a hash key attribute.\""
+    },
+    {
+      "title": "Replica Tagging",
+      "code": "provider \"aws\" {\n  region = \"us-west-2\"\n}\n\nprovider \"awsalternate\" {\n  region = \"us-east-1\"\n}\n\nprovider \"awsthird\" {\n  region = \"us-east-2\"\n}\n\ndata \"aws_region\" \"current\" {}\n\ndata \"aws_region\" \"alternate\" {\n  provider = \"awsalternate\"\n}\n\ndata \"aws_region\" \"third\" {\n  provider = \"awsthird\"\n}\n\nresource \"aws_dynamodb_table\" \"example\" {\n  billing_mode     = \"PAY_PER_REQUEST\"\n  hash_key         = \"TestTableHashKey\"\n  name             = \"example-13281\"\n  stream_enabled   = true\n  stream_view_type = \"NEW_AND_OLD_IMAGES\"\n\n  attribute {\n    name = \"TestTableHashKey\"\n    type = \"S\"\n  }\n\n  replica {\n    region_name = data.aws_region.alternate.name\n  }\n\n  replica {\n    region_name    = data.aws_region.third.name\n    propagate_tags = true\n  }\n\n  tags = {\n    Architect = \"Eleanor\"\n    Zone      = \"SW\"\n  }\n}\n\nresource \"aws_dynamodb_tag\" \"example\" {\n  resource_arn = replace(aws_dynamodb_table.example.arn, data.aws_region.current.name, data.aws_region.alternate.name)\n  key          = \"Architect\"\n  value        = \"Gigi\"\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_dynamodb_table` with cross-region replicas, including tagging propagation for one replica and custom tags for another using the `replica` block and `aws_dynamodb_tag` resource. It illustrates advanced DynamoDB configurations such as enabling streams, using `PAY_PER_REQUEST` billing mode, and dynamically referencing regions via `data` sources for multi-region setups."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "billing_mode",
+      "description": "(Optional) Controls how you are charged for read and write throughput and how you manage capacity. The valid values are `PROVISIONED` and `PAY_PER_REQUEST`. Defaults to `PROVISIONED`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `billing_mode` argument for the `aws_dynamodb_table` resource allows users to define how read and write throughput is managed and charged, offering a choice between `PROVISIONED` capacity (fixed throughput with predictable costs) and `PAY_PER_REQUEST` mode (on-demand scaling with variable costs based on usage). This configuration impacts cost optimization and scalability, enabling users to align DynamoDB table capacity with workload demands and budgetary goals."
+    },
+    {
+      "name": "deletion_protection_enabled",
+      "description": "(Optional) Enables deletion protection for table. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `deletion_protection_enabled` argument for the `aws_dynamodb_table` resource allows users to configure a safeguard that prevents accidental deletion of the DynamoDB table. By enabling this feature (`true`), users can ensure the table's lifecycle is protected, aligning with common goals of resource stability and data retention in production environments."
+    },
+    {
+      "name": "hash_key",
+      "description": "(Required, Forces new resource) Attribute to use as the hash (partition) key. Must also be defined as an `attribute`. See below.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `hash_key` argument in the `aws_dynamodb_table` resource specifies the primary partition key for the table, defining how data is distributed and accessed within DynamoDB. By setting this argument, users control the core data organization and retrieval mechanism, ensuring efficient partitioning and enabling predictable query performance for their table."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_dynamodb_table` resource specifies the unique identifier of the DynamoDB table, typically used to reference the table in other resources or outputs. While optional, setting this argument can help users explicitly define or manage the table's identity within their Terraform configuration, supporting workflows like cross-resource dependencies or external integrations."
+    },
+    {
+      "name": "name",
+      "description": "(Required) Unique within a region name of the table. Optional arguments:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_dynamodb_table` resource specifies the unique identifier for the DynamoDB table within a given AWS region. By defining this required string, users establish the table's primary reference for operations, integrations, and management, ensuring clarity and uniqueness in multi-environment or multi-table deployments."
+    },
+    {
+      "name": "range_key",
+      "description": "(Optional, Forces new resource) Attribute to use as the range (sort) key. Must also be defined as an `attribute`, see below.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `range_key` argument in the `aws_dynamodb_table` resource allows users to define the attribute that serves as the range (sort) key for the table's primary key schema, enabling the organization and retrieval of data based on a composite key structure. Setting this argument facilitates advanced querying and sorting capabilities, making it essential for use cases requiring hierarchical or ordered data storage."
+    },
+    {
+      "name": "read_capacity",
+      "description": "(Optional) Number of read units for this table. If the `billing_mode` is `PROVISIONED`, this field is required.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `read_capacity` argument for the `aws_dynamodb_table` resource allows users to define the number of read capacity units provisioned for the table, directly controlling its ability to handle read operations under the `PROVISIONED` billing mode. Configuring this argument ensures predictable performance for read requests, making it essential for workloads with consistent or high read demand."
+    },
+    {
+      "name": "restore_date_time",
+      "description": "(Optional) Time of the point-in-time recovery point to restore.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `restore_date_time` argument in the `aws_dynamodb_table` resource allows users to specify a precise point-in-time recovery timestamp for restoring a DynamoDB table to its state at that moment. This enables the configuration of disaster recovery or rollback scenarios by restoring data from a specific historical snapshot, supporting use cases like data integrity preservation or recovery from accidental changes."
+    },
+    {
+      "name": "restore_source_name",
+      "description": "(Optional) Name of the table to restore. Must match the name of an existing table.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `restore_source_name` argument allows users to specify the name of an existing DynamoDB table to restore from, enabling the creation of a new table based on the data and configuration of the specified source table. This is typically used to recover or replicate table data for disaster recovery, testing, or cloning purposes."
+    },
+    {
+      "name": "restore_source_table_arn",
+      "description": "(Optional) ARN of the source table to restore. Must be supplied for cross-region restores.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `restore_source_table_arn` argument allows users to specify the ARN of a source DynamoDB table for restoring data, particularly in cross-region scenarios. By setting this argument, users can enable the creation of a new table based on the state of an existing table, supporting disaster recovery, data replication, or migration workflows."
+    },
+    {
+      "name": "restore_to_latest_time",
+      "description": "(Optional) If set, restores table to the most recent point-in-time recovery point.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `restore_to_latest_time` argument for the `aws_dynamodb_table` resource allows users to control whether the table is restored to the most recent point-in-time recovery snapshot. Enabling this functionality simplifies disaster recovery by automatically restoring the table to its latest state, supporting use cases like data recovery and rollback to mitigate accidental data loss or corruption."
+    },
+    {
+      "name": "stream_enabled",
+      "description": "(Optional) Whether Streams are enabled.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `stream_enabled` argument for the `aws_dynamodb_table` resource allows users to control whether DynamoDB Streams are activated for the table, enabling real-time data capture of item-level changes. By setting this argument to `true`, users can configure the table to stream change events, which is commonly used for building event-driven architectures, replicating data, or integrating with downstream systems like AWS Lambda or analytics pipelines."
+    },
+    {
+      "name": "stream_view_type",
+      "description": "(Optional) When an item in the table is modified, StreamViewType determines what information is written to the table's stream. Valid values are `KEYS_ONLY`, `NEW_IMAGE`, `OLD_IMAGE`, `NEW_AND_OLD_IMAGES`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `stream_view_type` argument for the `aws_dynamodb_table` resource allows users to configure the type of data captured in the table's stream when items are modified. By specifying one of the valid values (`KEYS_ONLY`, `NEW_IMAGE`, `OLD_IMAGE`, `NEW_AND_OLD_IMAGES`), users can control the level of detail recorded in the stream, enabling functionality for real-time data processing, change tracking, or integration with event-driven architectures."
+    },
+    {
+      "name": "table_class",
+      "description": "(Optional) Storage class of the table. Valid values are `STANDARD` and `STANDARD_INFREQUENT_ACCESS`. Default value is `STANDARD`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `table_class` argument for the `aws_dynamodb_table` resource allows users to specify the storage class for the table, enabling control over cost and performance trade-offs. By setting this argument to either `STANDARD` (default) or `STANDARD_INFREQUENT_ACCESS`, users can optimize the table for frequent or infrequent access patterns, aligning with their workload and budget requirements."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to populate on the created table. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_dynamodb_table` resource allows users to define a map of key-value pairs to assign metadata tags to the DynamoDB table. This enables efficient resource organization, cost allocation, and management by categorizing the table with labels such as environment, project, or owner, while also supporting provider-level tag overrides for enhanced flexibility."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_dynamodb_table` resource allows users to define a comprehensive set of key-value tags that are automatically merged from both provider-level and resource-specific tags. This enables centralized tagging for resource organization, cost allocation, and governance, supporting common user goals like tracking environments, ownership, or compliance across cloud infrastructure."
+    },
+    {
+      "name": "write_capacity",
+      "description": "(Optional) Number of write units for this table. If the `billing_mode` is `PROVISIONED`, this field is required.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `write_capacity` argument for the `aws_dynamodb_table` resource allows users to define the number of write capacity units allocated to the table when using the `PROVISIONED` billing mode. Configuring this parameter directly impacts the table's ability to handle write operations, enabling users to optimize performance and control costs based on expected workloads."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "attribute",
+      "description": "(Required) Set of nested attribute definitions. Only required for `hash_key` and `range_key` attributes. See below.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "name",
+          "description": "(Required) Name of the attribute",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `name` argument specifies the unique identifier for an attribute in a DynamoDB table, allowing users to define the key name used to store and query data within the table. Setting this argument is essential for configuring the schema of the table, as it determines how items are indexed and accessed based on the attribute's role (e.g., partition key or sort key)."
+        },
+        {
+          "name": "type",
+          "description": "(Required) Attribute type. Valid values are `S` (string), `N` (number), `B` (binary).",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument specifies the data type (`S` for string, `N` for number, or `B` for binary) of a DynamoDB table attribute, enabling users to define how the attribute's values are stored and interpreted. This is essential for configuring key schema elements like partition and sort keys, ensuring proper indexing and query functionality within the table."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `attribute` configuration block in the `aws_dynamodb_table` resource defines the schema for table attributes, specifying key details such as `hash_key` and `range_key` attributes. This block enables users to configure the foundational structure of a DynamoDB table by declaring attribute definitions critical for indexing and querying data efficiently."
+    },
+    {
+      "name": "global_secondary_index",
+      "description": "(Optional) Describe a GSI for the table; subject to the normal limits on the number of GSIs, projected attributes, etc. See below.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "hash_key",
+          "description": "(Required) Name of the hash key in the index; must be defined as an attribute in the resource.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `hash_key` argument specifies the primary partitioning attribute for the `global_secondary_index` in an `aws_dynamodb_table`, enabling users to define the key used to distribute and organize data within the index. By setting this required string value, users ensure the index can efficiently query and retrieve items based on the defined hash key, aligning with common goals like optimizing data access patterns and supporting scalable application queries."
+        },
+        {
+          "name": "name",
+          "description": "(Required) Name of the index.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `name` argument specifies the unique identifier for the global secondary index within the DynamoDB table, allowing users to define and reference the index for querying and sorting data based on alternate key attributes. Setting this argument is essential for enabling the creation and management of the index, which supports optimized access patterns and enhances query performance for specific use cases."
+        },
+        {
+          "name": "non_key_attributes",
+          "description": "(Optional) Only required with `INCLUDE` as a projection type; a list of attributes to project into the index. These do not need to be defined as attributes on the table.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `non_key_attributes` argument for the `global_secondary_index` in the `aws_dynamodb_table` resource allows users to specify a set of table attributes to include in the index projection when using the `INCLUDE` projection type. This enables fine-grained control over which non-key attributes are accessible in the index, optimizing query performance and reducing storage costs by limiting the data replicated in the index."
+        },
+        {
+          "name": "projection_type",
+          "description": "(Required) One of `ALL`, `INCLUDE` or `KEYS_ONLY` where `ALL` projects every attribute into the index, `KEYS_ONLY` projects into the index only the table and index hash_key and sort_key attributes , `INCLUDE` projects into the index all of the attributes that are defined in `non_key_attributes` in addition to the attributes that that`KEYS_ONLY` project.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `projection_type` argument for the `global_secondary_index` in the `aws_dynamodb_table` resource specifies how attributes from the base table are projected into the index, allowing users to control the scope of data available in the index. By setting this argument to `ALL`, `KEYS_ONLY`, or `INCLUDE`, users can define whether all attributes, only key attributes, or a subset of non-key attributes are included, enabling efficient query optimization and tailored index behavior to meet specific application requirements."
+        },
+        {
+          "name": "range_key",
+          "description": "(Optional) Name of the range key; must be defined",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `range_key` argument for the `global_secondary_index` in the `aws_dynamodb_table` resource allows users to specify the name of the range (sort) key for the index, enabling more granular query capabilities by defining how items within the index are organized and retrieved. Setting this argument is optional but critical for use cases requiring composite key-based querying, as it enhances data filtering and sorting within the secondary index."
+        },
+        {
+          "name": "read_capacity",
+          "description": "(Optional) Number of read units for this index. Must be set if billing_mode is set to PROVISIONED.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "\"Configures the number of read capacity units for the global secondary index in a DynamoDB table when using PROVISIONED billing mode, allowing users to define the throughput performance and scalability for read operations on the index to meet application-specific requirements.\""
+        },
+        {
+          "name": "write_capacity",
+          "description": "(Optional) Number of write units for this index. Must be set if billing_mode is set to PROVISIONED.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `write_capacity` argument for the `global_secondary_index` in the `aws_dynamodb_table` resource allows users to define the number of provisioned write capacity units allocated to the index when the table's `billing_mode` is set to `PROVISIONED`. Configuring this value ensures predictable performance for write operations on the index, supporting workloads with consistent throughput requirements."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "on_demand_throughput",
+          "description": "(Optional) Sets the maximum number of read and write units for the specified on-demand table. See below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "max_read_request_units",
+              "description": "(Optional) Maximum number of read request units for the specified table. To specify set the value greater than or equal to 1. To remove set the value to -1.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "\"max_read_request_units\" allows users to define the maximum number of read request units for an AWS DynamoDB table when using on-demand throughput mode, enabling control over read capacity limits to optimize cost and performance. Setting this argument can help manage scalability by specifying a cap (\u22651) or removing the limit (-1), aligning with workload requirements and budget constraints."
+            },
+            {
+              "name": "max_write_request_units",
+              "description": "(Optional) Maximum number of write request units for the specified table. To specify set the value greater than or equal to 1. To remove set the value to -1.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `max_write_request_units` argument for the `on_demand_throughput` configuration in the `aws_dynamodb_table` resource allows users to define the maximum number of write request units the table can handle in on-demand mode, enabling control over write capacity limits to manage cost and performance. Setting this value ensures predictable scaling behavior, with options to specify a cap (\u22651) or remove the limit (-1) based on workload requirements."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "\"Configures the maximum read and write capacity for an on-demand DynamoDB table's global secondary index, enabling automatic scaling based on workload demands without requiring manual provisioning. This block helps users optimize performance and cost-efficiency by dynamically adjusting throughput for secondary index operations.\""
+        }
+      ],
+      "llm_summary": "The `global_secondary_index` block in the `aws_dynamodb_table` resource defines additional indexes to enable efficient querying of data using alternative key attributes beyond the primary key. It encapsulates settings for index name, key schema, projection attributes, and throughput capacity, allowing users to optimize query performance and support diverse access patterns for their DynamoDB table."
+    },
+    {
+      "name": "import_table",
+      "description": "(Optional) Import Amazon S3 data into a new table. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "input_compression_type",
+          "description": "(Optional) Type of compression to be used on the input coming from the imported table. Valid values are `GZIP`, `ZSTD` and `NONE`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `input_compression_type` argument for the `import_table` feature in the `aws_dynamodb_table` resource allows users to specify the compression format (`GZIP`, `ZSTD`, or `NONE`) applied to the data being imported from an external table. Configuring this argument optimizes data transfer efficiency and storage during the import process, aligning with user goals such as reducing network overhead or ensuring compatibility with the source data format."
+        },
+        {
+          "name": "input_format",
+          "description": "(Required) The format of the source data. Valid values are `CSV`, `DYNAMODB_JSON`, and `ION`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `input_format` argument for the `import_table` feature of the `aws_dynamodb_table` resource specifies the format of the source data being imported into the DynamoDB table, allowing users to define how the data is structured and interpreted during the import process. By setting this required argument to one of the valid values (`CSV`, `DYNAMODB_JSON`, or `ION`), users ensure compatibility between the source data and the table schema, enabling seamless data ingestion and accurate representation within DynamoDB."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "input_format_options",
+          "description": "(Optional) Describe the format options for the data that was imported into the target table. There is one value, `csv`. See below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "csv",
+              "description": "(Optional) This block contains the processing options for the CSV file being imported:`delimiter` - (Optional) The delimiter used for separating items in the CSV file being imported. `header_list` - (Optional) List of the headers used to specify a common header for all source CSV files being imported.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "delimiter",
+                  "description": "(Optional) The delimiter used for separating items in the CSV file being imported.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `delimiter` argument for the `aws_dynamodb_table` resource's `csv` context allows users to specify the character used to separate values in a CSV file during data import. Configuring this argument ensures proper parsing of the file, enabling accurate mapping of CSV data to DynamoDB table attributes, which is essential for seamless data ingestion and alignment with user-defined schemas."
+                },
+                {
+                  "name": "header_list",
+                  "description": "(Optional) List of the headers used to specify a common header for all source CSV files being imported.",
+                  "required": false,
+                  "type": "set(string)",
+                  "llm_summary": "The `header_list` argument for the `aws_dynamodb_table` resource in the context of CSV imports allows users to define a set of column headers that standardize the structure of all source CSV files being imported into the table. By specifying this argument, users ensure consistent mapping of CSV data to DynamoDB attributes, facilitating accurate data ingestion and reducing errors during import."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `csv` configuration block within `input_format_options` for the `aws_dynamodb_table` resource defines processing settings for importing CSV files into DynamoDB. It encapsulates options such as `delimiter` for item separation and `header_list` for specifying consistent headers across source files, enabling precise control over data formatting and ensuring seamless ingestion of structured CSV data into the table."
+            }
+          ],
+          "llm_summary": "The `input_format_options` block in the `import_table` configuration of the `aws_dynamodb_table` resource specifies the format settings for data imported into the target DynamoDB table, currently supporting `csv` as the input format. This block enables users to define how imported data is structured, ensuring compatibility and proper ingestion during table import operations."
+        },
+        {
+          "name": "s3_bucket_source",
+          "description": "(Required) Values for the S3 bucket the source file is imported from. See below.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "bucket",
+              "description": "(Required) The S3 bucket that is being imported from.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `bucket` argument specifies the name of the S3 bucket from which data is imported into the DynamoDB table, enabling users to define the source location for pre-existing data or backups. By setting this required parameter, users can configure the integration between DynamoDB and S3, facilitating workflows like data migration, initialization, or recovery from S3 storage."
+            },
+            {
+              "name": "bucket_owner",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `bucket_owner` argument for the `s3_bucket_source` in the `aws_dynamodb_table` resource allows users to specify the AWS account ID of the owner of the S3 bucket being used as the source. This ensures proper access control and ownership validation when integrating the S3 bucket with the DynamoDB table, particularly in cross-account scenarios where permissions and data access need to be explicitly defined."
+            },
+            {
+              "name": "key_prefix",
+              "description": "(Optional) The key prefix shared by all S3 Objects that are being imported.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `key_prefix` argument allows users to specify a common prefix for S3 object keys within the `s3_bucket_source` configuration, enabling the selective import of objects from an S3 bucket into the DynamoDB table. By setting this argument, users can filter and control which S3 objects are included in the import process, aligning with use cases like targeted data migration or scoped data processing."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `s3_bucket_source` block within the `import_table` configuration of the `aws_dynamodb_table` resource specifies the S3 bucket details for importing a source file into a DynamoDB table. It encapsulates settings related to the S3 bucket location, enabling users to define the source of the data to be imported, facilitating seamless integration of external datasets into DynamoDB for initialization or migration purposes."
+        }
+      ],
+      "llm_summary": "The `import_table` configuration block in the `aws_dynamodb_table` resource enables importing data from Amazon S3 into a newly created DynamoDB table, facilitating seamless migration or initialization of table data from external sources. It encapsulates settings related to the import process, such as specifying the S3 source and associated parameters, allowing users to efficiently populate a DynamoDB table with pre-existing data for analytics, application bootstrapping, or data integration workflows."
+    },
+    {
+      "name": "local_secondary_index",
+      "description": "(Optional, Forces new resource) Describe an LSI on the table; these can only be allocated at creation so you cannot change this definition after you have created the resource. See below.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "name",
+          "description": "(Required) Name of the index",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `name` argument specifies the unique identifier for a local secondary index (LSI) within a DynamoDB table, allowing users to define and reference the index for querying and data retrieval. Setting this argument is essential for enabling the creation and management of the LSI, aligning with user goals of optimizing query performance and customizing data access patterns."
+        },
+        {
+          "name": "non_key_attributes",
+          "description": "(Optional) Only required with `INCLUDE` as a projection type; a list of attributes to project into the index. These do not need to be defined as attributes on the table.",
+          "required": false,
+          "type": "list(string)",
+          "llm_summary": "Defines a list of non-key attributes to include in the projection for a local secondary index when the `INCLUDE` projection type is used, allowing users to customize which additional table attributes are accessible in the index. This enables efficient querying of specific non-key data without retrieving the full table, supporting optimized read operations for targeted use cases."
+        },
+        {
+          "name": "projection_type",
+          "description": "(Required) One of `ALL`, `INCLUDE` or `KEYS_ONLY` where `ALL` projects every attribute into the index, `KEYS_ONLY` projects into the index only the table and index hash_key and sort_key attributes , `INCLUDE` projects into the index all of the attributes that are defined in `non_key_attributes` in addition to the attributes that that`KEYS_ONLY` project.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `projection_type` argument for the `local_secondary_index` in the `aws_dynamodb_table` resource specifies how attributes from the main table are included in the index, allowing users to control the scope of data projected into the index. By setting this to `ALL`, `KEYS_ONLY`, or `INCLUDE`, users can define whether all attributes, only key attributes, or a subset of non-key attributes are available in the index, enabling efficient query optimization based on application-specific access patterns."
+        },
+        {
+          "name": "range_key",
+          "description": "(Required) Name of the range key.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `range_key` argument specifies the attribute used as the range (sort) key for a local secondary index in an AWS DynamoDB table. By defining this key, users control how items within a partition are organized and queried in the index, enabling efficient retrieval of data based on secondary sorting criteria."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `local_secondary_index` block in the `aws_dynamodb_table` resource defines an optional secondary index that enables efficient querying of data within the same partition key but with a different sort key. This block encapsulates settings for creating and managing the index at table creation, as LSIs cannot be modified post-deployment, allowing users to optimize query performance for specific access patterns."
+    },
+    {
+      "name": "on_demand_throughput",
+      "description": "(Optional) Sets the maximum number of read and write units for the specified on-demand table. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "max_read_request_units",
+          "description": "(Optional) Maximum number of read request units for the specified table. To specify set the value greater than or equal to 1. To remove set the value to -1.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "\"max_read_request_units\" allows users to define the maximum number of read request units for an AWS DynamoDB table operating with on-demand throughput, enabling control over read capacity limits to optimize cost and performance. Setting this argument can help manage scalability by capping read operations or disabling the limit entirely with a value of -1."
+        },
+        {
+          "name": "max_write_request_units",
+          "description": "(Optional) Maximum number of write request units for the specified table. To specify set the value greater than or equal to 1. To remove set the value to -1.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "Defines the maximum write capacity for an on-demand DynamoDB table, allowing users to control the upper limit of write request units to manage costs or enforce throughput constraints. Setting this value to -1 removes the limit, enabling unrestricted scaling based on demand."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `on_demand_throughput` block in the `aws_dynamodb_table` resource configures the maximum read and write capacity units for an on-demand DynamoDB table, enabling automatic scaling based on workload demands without requiring manual capacity planning. This block helps users optimize performance and cost by dynamically adjusting throughput to match application needs."
+    },
+    {
+      "name": "point_in_time_recovery",
+      "description": "(Optional) Enable point-in-time recovery options. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enabled",
+          "description": "(Required) Whether to enable point-in-time recovery. It can take 10 minutes to enable for new tables. If the `point_in_time_recovery` block is not provided, this defaults to `false`.",
+          "required": true,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument for the `point_in_time_recovery` block in the `aws_dynamodb_table` resource allows users to control whether point-in-time recovery is activated for the table, enabling automatic backups that provide the ability to restore data to any second within the last 35 days. Setting this argument to `true` is essential for users aiming to enhance data durability and disaster recovery capabilities, ensuring protection against accidental deletions or corruption."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `point_in_time_recovery` configuration block in the `aws_dynamodb_table` resource enables and manages point-in-time recovery capabilities, allowing users to restore table data to any specific time within the last 35 days. This block encapsulates settings related to data recovery and backup, helping users achieve enhanced data protection and disaster recovery for DynamoDB tables."
+    },
+    {
+      "name": "replica",
+      "description": "(Optional) Configuration block(s) with DynamoDB Global Tables V2 (version 2019.11.21) replication configurations. See below.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "arn",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `arn` argument in the `replica` block of the `aws_dynamodb_table` resource allows users to specify the Amazon Resource Name (ARN) of an existing DynamoDB table replica in another AWS region. By setting this argument, users can define cross-region replication behavior, enabling global data distribution and high availability for their DynamoDB table."
+        },
+        {
+          "name": "kms_key_arn",
+          "description": "(Optional) ARN of the CMK that should be used for the AWS KMS encryption. This argument should only be used if the key is different from the default KMS-managed DynamoDB key, `alias/aws/dynamodb`. Note: This attribute will not be populated with the ARN of default keys. Note: Changing this value will recreate the replica.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `kms_key_arn` argument for the `replica` configuration in the `aws_dynamodb_table` resource allows users to specify a custom AWS KMS Customer Master Key (CMK) for encrypting the replica's data, instead of using the default KMS-managed DynamoDB key (`alias/aws/dynamodb`). Setting this argument enables fine-grained control over encryption, supporting compliance or security requirements, but changing its value will trigger the recreation of the replica."
+        },
+        {
+          "name": "point_in_time_recovery",
+          "description": "(Optional) Whether to enable Point In Time Recovery for the replica. Default is `false`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `point_in_time_recovery` argument for the `replica` configuration in the `aws_dynamodb_table` resource allows users to enable or disable Point In Time Recovery (PITR) for the replica table, providing the ability to restore data to any point within the last 35 days. This feature is typically used to enhance data durability and recovery capabilities, supporting disaster recovery and compliance requirements."
+        },
+        {
+          "name": "propagate_tags",
+          "description": "(Optional) Whether to propagate the global table's tags to a replica. Default is `false`. Changes to tags only move in one direction: from global (source) to replica. Tag drift on a replica will not trigger an update. Tag changes on the global table are propagated to replicas. Changing from `true` to `false` on a subsequent `apply` leaves replica tags as-is and no longer manages them.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `propagate_tags` argument for the `replica` configuration in the `aws_dynamodb_table` resource allows users to control whether tags applied to the global DynamoDB table are automatically propagated to its replicas. Enabling this functionality (`true`) ensures consistent tag management across replicas, aligning with common goals like resource organization and cost tracking, while disabling it (`false`) leaves replica tags unmanaged and unaffected by changes to the global table."
+        },
+        {
+          "name": "region_name",
+          "description": "(Required) Region name of the replica.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `region_name` argument specifies the AWS region where the replica of the DynamoDB table will be created, enabling multi-region replication for improved data durability, availability, and disaster recovery. By defining this required parameter, users can control the geographic location of the replica to align with compliance requirements, reduce latency for regional applications, or support cross-region failover strategies."
+        },
+        {
+          "name": "stream_arn",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `stream_arn` argument specifies the Amazon Resource Name (ARN) of the DynamoDB stream associated with the source table, enabling replication of stream data to the replica table. By configuring this argument, users can ensure that changes captured in the source table's stream are propagated to the replica, supporting use cases like cross-region replication and real-time data synchronization."
+        },
+        {
+          "name": "stream_label",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `stream_label` argument for the `replica` configuration in the `aws_dynamodb_table` resource allows users to specify a custom label for the DynamoDB stream associated with the replica table. This label helps uniquely identify the stream for replication purposes, enabling users to manage and differentiate stream data across multiple replicas in distributed environments."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `replica` configuration block in the `aws_dynamodb_table` resource enables the setup of DynamoDB Global Tables V2 (2019.11.21), facilitating multi-region replication for high availability and low-latency access. It encapsulates settings related to regional replication, allowing users to define and manage replicas in multiple AWS regions, ensuring data consistency and fault tolerance across geographically distributed environments."
+    },
+    {
+      "name": "server_side_encryption",
+      "description": "(Optional) Encryption at rest options. AWS DynamoDB tables are automatically encrypted at rest with an AWS-owned Customer Master Key if this argument isn't specified. Must be supplied for cross-region restores. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enabled",
+          "description": "(Required) Whether or not to enable encryption at rest using an AWS managed KMS customer master key (CMK). If `enabled` is `false` then server-side encryption is set to AWS-owned key (shown as `DEFAULT` in the AWS console). Potentially confusingly, if `enabled` is `true` and no `kms_key_arn` is specified then server-side encryption is set to the default KMS-managed key (shown as `KMS` in the AWS console). The AWS KMS documentation explains the difference between AWS-owned and KMS-managed keys.",
+          "required": true,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument for the `server_side_encryption` block in the `aws_dynamodb_table` resource specifies whether encryption at rest is activated for the table. Setting this to `true` ensures data is encrypted using either a default AWS KMS-managed key or a custom KMS customer master key (if provided), while `false` uses an AWS-owned key. This configuration is critical for securing sensitive data and aligning with compliance requirements for encryption standards."
+        },
+        {
+          "name": "kms_key_arn",
+          "description": "(Optional) ARN of the CMK that should be used for the AWS KMS encryption. This argument should only be used if the key is different from the default KMS-managed DynamoDB key, `alias/aws/dynamodb`. Note: This attribute will not be populated with the ARN of default keys.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `kms_key_arn` argument allows users to specify a custom AWS KMS Customer Master Key (CMK) for encrypting data in the DynamoDB table, instead of using the default KMS-managed key (`alias/aws/dynamodb`). By setting this argument, users can enforce stricter encryption controls, align with organizational security policies, or use a key with specific access permissions and auditing requirements."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `server_side_encryption` block in the `aws_dynamodb_table` resource configures encryption at rest for the table, allowing users to specify custom encryption settings using an AWS-managed or customer-managed key instead of the default AWS-owned key. This block is essential for enabling cross-region restores and provides enhanced control over data security and compliance requirements."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_dynamodb_table` resource allows users to specify the maximum duration (as a string, e.g., \"30m\") Terraform will wait for the creation of a DynamoDB table to complete. Configuring this timeout ensures users can control the provisioning behavior in cases where table creation might take longer due to factors like large initial configurations or AWS service delays, aligning resource deployment with operational expectations."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_dynamodb_table` resource allows users to specify the maximum duration (as a string, e.g., \"5m\" for 5 minutes) Terraform will wait for the deletion of a DynamoDB table to complete. Configuring this timeout ensures predictable behavior during resource destruction, helping users manage lifecycle operations and avoid prolonged or stalled delete processes in their infrastructure."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_dynamodb_table` resource allows users to specify the maximum duration (as a string, e.g., \"30m\") Terraform will wait for updates to the DynamoDB table to complete. Configuring this timeout ensures predictable behavior during table modifications, helping users manage long-running update operations and avoid premature failures in infrastructure provisioning workflows."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_dynamodb_table` resource defines customizable time limits for specific operations, such as creating, updating, or deleting a DynamoDB table. By configuring this block, users can manage operation durations to prevent long-running tasks or handle infrastructure provisioning delays, ensuring better control and reliability in deployment workflows."
+    },
+    {
+      "name": "ttl",
+      "description": "(Optional) Configuration block for TTL. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "attribute_name",
+          "description": "(Optional) Name of the table attribute to store the TTL timestamp in. Required if `enabled` is `true`, must not be set otherwise.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "Defines the name of the DynamoDB table attribute used to store TTL (Time-to-Live) timestamps, enabling automatic expiration and deletion of items based on the specified attribute when TTL is activated. This argument is essential for configuring item lifecycle management and must be set only when TTL is enabled."
+        },
+        {
+          "name": "enabled",
+          "description": "(Optional) Whether TTL is enabled. Default value is `false`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument for the `ttl` configuration in the `aws_dynamodb_table` resource allows users to control whether Time-to-Live (TTL) functionality is activated for the table. Enabling this feature facilitates automatic expiration and deletion of items based on a specified TTL attribute, helping optimize storage costs and manage data lifecycles effectively."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `ttl` configuration block in the `aws_dynamodb_table` resource enables Time-to-Live (TTL) management for items in the table, allowing automatic expiration and deletion of data based on a specified attribute. This block encapsulates settings related to lifecycle management, helping users optimize storage costs and maintain data freshness by defining expiration policies for table items."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN of the table",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "stream_arn",
+      "description": "ARN of the Table Stream. Only available when `stream_enabled = true`",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "stream_label",
+      "description": "Timestamp, in ISO 8601 format, for this stream. Note that this timestamp is not a unique identifier for the stream on its own. However, the combination of AWS customer ID, table name and this field is guaranteed to be unique. It can be used for creating CloudWatch Alarms. Only available when `stream_enabled = true`.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

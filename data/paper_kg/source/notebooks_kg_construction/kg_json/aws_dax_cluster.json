@@ -1,0 +1,179 @@
+{
+    "resource": {
+        "name": "aws_dax_cluster",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "availability_zones",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "cluster_endpoint_encryption_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "iam_role_arn",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "maintenance_window",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "node_type",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "notification_topic_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "parameter_group_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "replication_factor",
+            "description": "",
+            "required": true,
+            "type": "number"
+        },
+        {
+            "name": "security_group_ids",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "subnet_group_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "server_side_encryption",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "enabled",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_address",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "configuration_endpoint",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "nodes",
+            "description": "",
+            "optional": false,
+            "type": "list(object({address=string,availability_zone=string,id=string,port=number}))"
+        },
+        {
+            "name": "port",
+            "description": "",
+            "optional": false,
+            "type": "number"
+        }
+    ]
+}

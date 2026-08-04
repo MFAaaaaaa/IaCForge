@@ -1,0 +1,53 @@
+{
+  "resource": {
+    "name": "aws_dynamodb_table_item",
+    "description": "Provides a DynamoDB table item resource This resource is not meant to be used for managing large amounts of data in your table, it is not designed to scale. You should perform regular backups of all data in the table, see AWS docs for more.",
+    "llm_summary": "The `aws_dynamodb_table_item` resource enables the management of individual items within an AWS DynamoDB table, allowing users to create, update, or delete specific records programmatically. It is ideal for scenarios requiring fine-grained control over table data, such as initializing configuration records, managing metadata, or handling small-scale data operations. While not designed for large-scale data management, it supports precise item-level configurations, making it suitable for use cases like testing, prototyping, or maintaining critical key-value pairs in DynamoDB tables."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_dynamodb_table_item\" \"example\" {\n  table_name = aws_dynamodb_table.example.name\n  hash_key   = aws_dynamodb_table.example.hash_key\n\n  item = <<ITEM\n{\n  \"exampleHashKey\": {\"S\": \"something\"},\n  \"one\": {\"N\": \"11111\"},\n  \"two\": {\"N\": \"22222\"},\n  \"three\": {\"N\": \"33333\"},\n  \"four\": {\"N\": \"44444\"}\n}\nITEM\n}\n\nresource \"aws_dynamodb_table\" \"example\" {\n  name           = \"example-name\"\n  read_capacity  = 10\n  write_capacity = 10\n  hash_key       = \"exampleHashKey\"\n\n  attribute {\n    name = \"exampleHashKey\"\n    type = \"S\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure and insert items into an AWS DynamoDB table using the `aws_dynamodb_table_item` resource. It showcases defining a table with a hash key (`exampleHashKey`) and attributes, then populating it with structured data using the `item` argument in JSON format."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "hash_key",
+      "description": "(Required) Hash key to use for lookups and identification of the item",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `hash_key` argument specifies the primary key used to uniquely identify and retrieve items within the DynamoDB table, enabling efficient lookups and ensuring data integrity. By defining this required string value, users establish the foundational key for partitioning and querying data in the table, aligning with DynamoDB's schema design for fast and scalable access."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_dynamodb_table_item` resource allows users to specify a unique identifier for the item within the DynamoDB table, typically corresponding to the primary key or a composite key defined in the table schema. Setting this argument ensures precise identification and retrieval of the item, aligning with common user goals of managing and querying specific data entries in DynamoDB."
+    },
+    {
+      "name": "item",
+      "description": "(Required) JSON representation of a map of attribute name/value pairs, one for each attribute. Only the primary key attributes are required; you can optionally provide other attribute name-value pairs for the item.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `item` argument in the `aws_dynamodb_table_item` resource allows users to define the attributes of a DynamoDB table item as a JSON map, specifying key-value pairs for both primary key attributes (required) and optional additional attributes. By setting this argument, users can insert or update data in a DynamoDB table, enabling precise control over the structure and content of individual items to meet application-specific data storage and retrieval needs."
+    },
+    {
+      "name": "range_key",
+      "description": "(Optional) Range key to use for lookups and identification of the item. Required if there is range key defined in the table.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `range_key` argument in the `aws_dynamodb_table_item` resource allows users to specify the range key used for uniquely identifying and querying items within a DynamoDB table that has a composite primary key. Setting this argument enables precise lookups and operations on items when the table's schema includes a range key, aligning with common goals of efficient data retrieval and structured key-value storage."
+    },
+    {
+      "name": "table_name",
+      "description": "(Required) Name of the table to contain the item.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `table_name` argument specifies the name of the DynamoDB table where the item will be stored, enabling users to define the target table for data insertion or updates. This required parameter ensures the resource is linked to the correct table, aligning with user goals of managing and organizing structured data within AWS DynamoDB."
+    }
+  ],
+  "blocks": [],
+  "attributes": []
+}

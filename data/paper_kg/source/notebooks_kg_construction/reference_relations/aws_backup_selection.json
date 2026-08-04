@@ -1,0 +1,42 @@
+[
+    {
+        "argument_path": "iam_role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "plan_id",
+        "references_output": "aws_backup_plan.id",
+        "target_resource_type": "aws_backup_plan"
+    },
+    {
+        "argument_path": "resources",
+        "references_output": "aws_db_instance.arn",
+        "target_resource_type": "aws_db_instance"
+    },
+    {
+        "argument_path": "resources",
+        "references_output": "aws_ebs_volume.arn",
+        "target_resource_type": "aws_ebs_volume"
+    },
+    {
+        "argument_path": "resources",
+        "references_output": "aws_efs_file_system.arn",
+        "target_resource_type": "aws_efs_file_system"
+    },
+    {
+        "argument_path": "not_resources",
+        "references_output": "aws_db_instance.arn",
+        "target_resource_type": "aws_db_instance"
+    },
+    {
+        "argument_path": "not_resources",
+        "references_output": "aws_ebs_volume.arn",
+        "target_resource_type": "aws_ebs_volume"
+    },
+    {
+        "argument_path": "not_resources",
+        "references_output": "aws_efs_file_system.arn",
+        "target_resource_type": "aws_efs_file_system"
+    }
+]

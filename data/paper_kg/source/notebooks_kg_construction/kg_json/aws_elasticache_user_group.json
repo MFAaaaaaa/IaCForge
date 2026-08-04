@@ -1,0 +1,54 @@
+{
+    "resource": {
+        "name": "aws_elasticache_user_group",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "engine",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "user_group_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "user_ids",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

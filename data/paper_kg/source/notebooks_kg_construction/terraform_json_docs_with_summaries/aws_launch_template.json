@@ -1,0 +1,1349 @@
+{
+  "resource": {
+    "name": "aws_launch_template",
+    "description": "Provides an EC2 launch template resource. Can be used to create instances or auto scaling groups.",
+    "llm_summary": "The `aws_launch_template` resource enables the streamlined creation and management of EC2 instance configurations, serving as a reusable blueprint for deploying instances or auto scaling groups. It is commonly used for automating infrastructure provisioning, optimizing instance lifecycle management, and standardizing settings like AMI selection, instance types, networking, storage, and user data scripts. This resource is ideal for scenarios requiring consistent and scalable EC2 deployments, such as auto scaling, disaster recovery setups, or pre-configured environments for applications."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_launch_template\" \"foo\" {\n  name = \"foo\"\n\n  block_device_mappings {\n    device_name = \"/dev/sdf\"\n\n    ebs {\n      volume_size = 20\n    }\n  }\n\n  capacity_reservation_specification {\n    capacity_reservation_preference = \"open\"\n  }\n\n  cpu_options {\n    core_count       = 4\n    threads_per_core = 2\n  }\n\n  credit_specification {\n    cpu_credits = \"standard\"\n  }\n\n  disable_api_stop        = true\n  disable_api_termination = true\n\n  ebs_optimized = true\n\n  elastic_gpu_specifications {\n    type = \"test\"\n  }\n\n  elastic_inference_accelerator {\n    type = \"eia1.medium\"\n  }\n\n  iam_instance_profile {\n    name = \"test\"\n  }\n\n  image_id = \"ami-test\"\n\n  instance_initiated_shutdown_behavior = \"terminate\"\n\n  instance_market_options {\n    market_type = \"spot\"\n  }\n\n  instance_type = \"t2.micro\"\n\n  kernel_id = \"test\"\n\n  key_name = \"test\"\n\n  license_specification {\n    license_configuration_arn = \"arn:aws:license-manager:eu-west-1:123456789012:license-configuration:lic-0123456789abcdef0123456789abcdef\"\n  }\n\n  metadata_options {\n    http_endpoint               = \"enabled\"\n    http_tokens                 = \"required\"\n    http_put_response_hop_limit = 1\n    instance_metadata_tags      = \"enabled\"\n  }\n\n  monitoring {\n    enabled = true\n  }\n\n  network_interfaces {\n    associate_public_ip_address = true\n  }\n\n  placement {\n    availability_zone = \"us-west-2a\"\n  }\n\n  ram_disk_id = \"test\"\n\n  vpc_security_group_ids = [\"sg-12345678\"]\n\n  tag_specifications {\n    resource_type = \"instance\"\n\n    tags = {\n      Name = \"test\"\n    }\n  }\n\n  user_data = filebase64(\"${path.module}/example.sh\")\n}",
+      "llm_summary": "This example demonstrates the basic configuration of the `aws_launch_template` resource, showcasing how to define key attributes for EC2 instance provisioning, including block device mappings, CPU options, instance type, metadata options, and user data. It illustrates advanced settings such as spot instance market options, API termination protection, security group associations, and tagging, providing a comprehensive template for flexible and optimized instance deployment."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "default_version",
+      "description": "(Optional) Default Version of the launch template.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `default_version` argument in the `aws_launch_template` resource allows users to specify the default version of the launch template to be used when creating or managing instances. Setting this value ensures that a specific version is consistently applied, enabling precise control over instance configurations and simplifying version management for infrastructure deployments."
+    },
+    {
+      "name": "description",
+      "description": "(Optional) Description of the launch template.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_launch_template` resource allows users to define a human-readable summary or purpose for the launch template, aiding in identification and documentation of its intended use. While optional, setting this argument can improve resource management and clarity, especially in environments with multiple templates."
+    },
+    {
+      "name": "disable_api_stop",
+      "description": "(Optional) If true, enables EC2 Instance Stop Protection.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `disable_api_stop` argument in the `aws_launch_template` resource allows users to control EC2 Instance Stop Protection by specifying whether API calls to stop the instance are disabled. Setting this to `true` prevents the instance from being stopped via API actions, which is useful for ensuring critical workloads remain running and protected from accidental or unauthorized shutdowns."
+    },
+    {
+      "name": "disable_api_termination",
+      "description": "(Optional) If `true`, enables EC2 Instance Termination Protection",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `disable_api_termination` argument in the `aws_launch_template` resource allows users to control whether EC2 instances launched from the template are protected from accidental termination via API calls. Setting this to `true` enables termination protection, which is useful for safeguarding critical instances in production environments or preventing unintended disruptions during automated workflows."
+    },
+    {
+      "name": "ebs_optimized",
+      "description": "(Optional) If `true`, the launched EC2 instance will be EBS-optimized.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ebs_optimized` argument in the `aws_launch_template` resource allows users to specify whether the EC2 instances launched from the template should be optimized for Amazon Elastic Block Store (EBS) performance. Enabling this feature (`true`) configures the instance to use dedicated network bandwidth for EBS I/O, improving storage throughput and reducing latency, which is ideal for workloads requiring high disk performance."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument represents the unique identifier of the `aws_launch_template` resource, which is automatically generated upon creation. While not configurable, it is commonly used for referencing the launch template in other resources or outputs, enabling integration and dependency management within Terraform configurations."
+    },
+    {
+      "name": "image_id",
+      "description": "(Optional) The AMI from which to launch the instance or use a Systems Manager parameter convention e.g. `resolve:ssm:parameter-name`. See docs for more details.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `image_id` argument in the `aws_launch_template` resource allows users to specify the Amazon Machine Image (AMI) or a Systems Manager parameter that defines the base operating system and software configuration for instances launched using the template. By setting this argument, users can control the foundational environment of their EC2 instances, enabling customization of workloads, application deployment, or infrastructure consistency across environments."
+    },
+    {
+      "name": "instance_initiated_shutdown_behavior",
+      "description": "(Optional) Shutdown behavior for the instance. Can be `stop` or `terminate`. (Default: `stop`).",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `instance_initiated_shutdown_behavior` argument in the `aws_launch_template` resource allows users to define how an EC2 instance should behave when it is shut down from within the instance itself. By specifying either `stop` or `terminate` (default: `stop`), users can control whether the instance is preserved for later use or permanently deleted, enabling lifecycle management aligned with operational or cost optimization goals."
+    },
+    {
+      "name": "instance_type",
+      "description": "(Optional) The type of the instance. If present then `instance_requirements` cannot be present.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `instance_type` argument in the `aws_launch_template` resource allows users to specify the compute instance type (e.g., `t2.micro`, `m5.large`) for EC2 instances launched using the template. This defines the hardware configuration, including CPU, memory, and networking capacity, to meet workload requirements. Note that it cannot be used alongside `instance_requirements`, ensuring either explicit or flexible instance selection."
+    },
+    {
+      "name": "kernel_id",
+      "description": "(Optional) The kernel ID.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `kernel_id` argument in the `aws_launch_template` resource allows users to specify the kernel ID for the instance launched using the template. This enables customization of the operating system kernel, typically for advanced use cases such as running specialized workloads or custom kernels, providing greater control over the instance's runtime environment."
+    },
+    {
+      "name": "key_name",
+      "description": "(Optional) The key name to use for the instance.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `key_name` argument in the `aws_launch_template` resource allows users to specify the name of an existing SSH key pair to associate with instances launched using the template. This enables secure remote access to the instances by configuring the public key for authentication, aligning with common user goals of managing instance access and security."
+    },
+    {
+      "name": "name",
+      "description": "(Optional) The name of the launch template. If you leave this blank, Terraform will auto-generate a unique name.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument in the `aws_launch_template` resource allows users to define a custom, human-readable identifier for the launch template, facilitating easier organization and reference within AWS. If omitted, Terraform auto-generates a unique name, making this argument optional but useful for aligning templates with naming conventions or specific project requirements."
+    },
+    {
+      "name": "name_prefix",
+      "description": "(Optional) Creates a unique name beginning with the specified prefix. Conflicts with `name`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name_prefix` argument in the `aws_launch_template` resource allows users to define a unique name for the launch template that begins with a specified prefix, ensuring predictable naming conventions while avoiding conflicts with the `name` argument. This is particularly useful for dynamically generating resource names in environments where consistent naming patterns are required, such as multi-environment deployments or automated workflows."
+    },
+    {
+      "name": "ram_disk_id",
+      "description": "(Optional) The ID of the RAM disk.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ram_disk_id` argument in the `aws_launch_template` resource allows users to specify the ID of a RAM disk to attach to instances launched using the template. This is typically used for specialized workloads or legacy systems that require a specific RAM disk, enabling users to customize the instance's boot configuration to meet unique application or environment requirements."
+    },
+    {
+      "name": "security_group_names",
+      "description": "(Optional) A list of security group names to associate with. If you are creating Instances in a VPC, use `vpc_security_group_ids` instead.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "Defines a set of security group names to associate with instances launched using the template, enabling network access control at the instance level. Typically used in non-VPC environments, as VPC-based instances should instead use `vpc_security_group_ids` for specifying security groups."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the launch template. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument in the `aws_launch_template` resource allows users to define a map of key-value pairs to assign metadata tags to the launch template. This enables users to organize, categorize, and manage resources effectively by applying custom identifiers, such as environment, project, or cost center, with the ability to override provider-level default tags if configured."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument in the `aws_launch_template` resource allows users to define a comprehensive set of key-value tags that are automatically applied to the launch template and all associated resources created from it. This enables consistent tagging for resource organization, cost allocation, and governance, aligning with common user goals like enforcing tagging policies across cloud infrastructure."
+    },
+    {
+      "name": "update_default_version",
+      "description": "(Optional) Whether to update Default Version each update. Conflicts with `default_version`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `update_default_version` argument in the `aws_launch_template` resource allows users to control whether the default version of the launch template is automatically updated to the latest version upon each modification. Enabling this behavior ensures the most recent configuration is used as the default, simplifying version management but conflicting with manual `default_version` settings."
+    },
+    {
+      "name": "user_data",
+      "description": "(Optional) The base64-encoded user data to provide when launching the instance.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `user_data` argument in the `aws_launch_template` resource allows users to specify base64-encoded scripts or configuration data that is executed during instance initialization. This enables automation of tasks such as setting environment variables, installing software, or configuring services, streamlining instance provisioning and ensuring consistent setup across deployments."
+    },
+    {
+      "name": "vpc_security_group_ids",
+      "description": "(Optional) A list of security group IDs to associate with. Conflicts with `network_interfaces.security_groups`",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `vpc_security_group_ids` argument in the `aws_launch_template` resource allows users to specify a set of security group IDs to associate with the instances launched using the template. This configuration controls network-level access rules, enabling users to define inbound and outbound traffic permissions for the instances, which is essential for securing workloads and meeting compliance requirements."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "block_device_mappings",
+      "description": "(Optional) Specify volumes to attach to the instance besides the volumes specified by the AMI. See Block Devices below for details.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "device_name",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `device_name` argument in the `block_device_mappings` block of the `aws_launch_template` resource allows users to specify the name of the device to be attached to the instance, such as `/dev/xvda` or `/dev/sdb`. By defining this, users can control how storage devices are mapped to the instance, enabling precise configuration of disk layouts for tasks like boot volumes, data storage, or application-specific requirements."
+        },
+        {
+          "name": "no_device",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `no_device` argument in the `block_device_mappings` block of the `aws_launch_template` resource allows users to specify whether a block device mapping should be suppressed or excluded from the instance configuration. By setting this argument, users can prevent the automatic attachment of a specific device, enabling customization of storage configurations to exclude unwanted volumes or override default mappings."
+        },
+        {
+          "name": "virtual_name",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `virtual_name` argument in the `block_device_mappings` block of the `aws_launch_template` resource allows users to specify a name for ephemeral (instance store) volumes attached to the instance. By setting this argument, users can define the logical identifier for the ephemeral storage, enabling configuration of temporary, high-performance storage typically used for caching or transient data during instance runtime."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "ebs",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "delete_on_termination",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `delete_on_termination` argument in the `ebs` block of the `aws_launch_template` resource allows users to define whether the associated EBS volume should be automatically deleted when the instance using the launch template is terminated. Configuring this argument helps manage the lifecycle of EBS volumes, enabling users to control resource cleanup and avoid unnecessary storage costs."
+            },
+            {
+              "name": "encrypted",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `encrypted` argument in the `ebs` block of the `aws_launch_template` resource allows users to specify whether the EBS volume attached to the instance should be encrypted. Setting this argument enables data-at-rest encryption for the volume, enhancing security by protecting sensitive information and meeting compliance requirements."
+            },
+            {
+              "name": "iops",
+              "description": "",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `iops` argument in the `ebs` block of the `aws_launch_template` resource allows users to specify the number of input/output operations per second (IOPS) for the EBS volume, enabling fine-grained control over storage performance. This is particularly useful for provisioning high-performance volumes, such as those using the `io1` or `io2` volume types, to meet application-specific throughput and latency requirements."
+            },
+            {
+              "name": "kms_key_id",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `kms_key_id` argument in the `ebs` block of the `aws_launch_template` resource allows users to specify the AWS KMS key used to encrypt the EBS volumes created by the launch template. By setting this argument, users can enforce encryption for data at rest using a custom or default KMS key, aligning with security and compliance requirements for sensitive workloads."
+            },
+            {
+              "name": "snapshot_id",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `snapshot_id` argument in the `ebs` block of the `aws_launch_template` resource allows users to specify the ID of an existing EBS snapshot to initialize the volume. By setting this argument, users can create an EBS volume pre-populated with data from the specified snapshot, enabling scenarios like restoring data, cloning environments, or provisioning pre-configured storage for applications."
+            },
+            {
+              "name": "throughput",
+              "description": "",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `throughput` argument in the `ebs` block of the `aws_launch_template` resource allows users to specify the dedicated throughput in MiB/s for provisioned EBS volumes with the `io2` or `gp3` volume types. Configuring this parameter helps optimize performance for workloads requiring high and consistent disk throughput, such as large-scale databases or analytics applications."
+            },
+            {
+              "name": "volume_size",
+              "description": "",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `volume_size` argument in the `ebs` block of the `aws_launch_template` resource specifies the size (in GiB) of the EBS volume to be attached to the instance. This allows users to define the storage capacity for the volume, directly impacting the amount of data the instance can store and supporting common goals like configuring application storage or meeting performance requirements."
+            },
+            {
+              "name": "volume_type",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `volume_type` argument in the `ebs` block of the `aws_launch_template` resource allows users to specify the type of EBS volume to be attached to the instance, such as `gp2` (general-purpose SSD), `io1` (provisioned IOPS SSD), or `st1` (throughput-optimized HDD). Configuring this argument impacts storage performance and cost, enabling users to tailor the instance's disk characteristics to match workload requirements like high IOPS, throughput, or cost-efficiency."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The \"ebs\" configuration block within the \"block_device_mappings\" section of the \"aws_launch_template\" resource defines settings for Amazon Elastic Block Store (EBS) volumes attached to an instance. It encapsulates parameters such as volume size, type, encryption, and delete-on-termination behavior, enabling users to customize storage performance, security, and lifecycle management for instance-specific block devices. Configuring this block allows for precise control over EBS volume characteristics, ensuring optimal storage configurations tailored to application needs."
+        }
+      ],
+      "llm_summary": "The `block_device_mappings` configuration block in the `aws_launch_template` resource defines custom storage volumes to attach to an instance, supplementing or overriding the default volumes provided by the AMI. It enables detailed control over block device settings, such as volume type, size, and encryption, allowing users to tailor instance storage configurations to meet specific performance, security, or capacity requirements."
+    },
+    {
+      "name": "capacity_reservation_specification",
+      "description": "(Optional) Targeting for EC2 capacity reservations. See Capacity Reservation Specification below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "capacity_reservation_preference",
+          "description": "Indicates the instance's Capacity Reservation preferences. Can be `open` or `none`. (Default `none`).",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `capacity_reservation_preference` argument in the `capacity_reservation_specification` block of the `aws_launch_template` resource allows users to define how instances launched from the template interact with EC2 Capacity Reservations. By setting this argument to `open`, instances can utilize any available Capacity Reservation that matches their attributes, while `none` (default) ensures instances do not use Capacity Reservations, enabling users to control resource allocation strategies for cost optimization or workload placement."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "capacity_reservation_target",
+          "description": "Used to target a specific Capacity Reservation:  The capacity_reservation_target block supports the following:",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "capacity_reservation_id",
+              "description": "The ID of the Capacity Reservation in which to run the instance.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `capacity_reservation_id` argument allows users to specify the ID of a Capacity Reservation where the instance launched by the `aws_launch_template` should run, ensuring dedicated compute capacity is allocated for the instance. This configuration is useful for workloads requiring guaranteed resource availability within a specific Capacity Reservation."
+            },
+            {
+              "name": "capacity_reservation_resource_group_arn",
+              "description": "The ARN of the Capacity Reservation resource group in which to run the instance.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "Specifies the ARN of a Capacity Reservation resource group to control where the instance is launched, enabling users to target a specific group of reserved compute capacity for their workloads. This configuration helps ensure capacity availability within a predefined group, aligning with resource allocation and high-availability strategies."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `capacity_reservation_target` block within the `capacity_reservation_specification` of the `aws_launch_template` resource is used to specify and target a particular Capacity Reservation for EC2 instances. It encapsulates settings that define the association with a specific reservation, enabling users to ensure instances are launched into pre-allocated capacity, optimizing resource availability and cost management in reserved environments."
+        }
+      ],
+      "llm_summary": "The `capacity_reservation_specification` block in the `aws_launch_template` resource enables targeted management of EC2 capacity reservations, allowing users to specify how instances launched from the template utilize reserved capacity. This block encapsulates settings related to capacity reservation preferences, ensuring optimized resource allocation and availability for workloads requiring guaranteed compute capacity."
+    },
+    {
+      "name": "cpu_options",
+      "description": "(Optional) The CPU options for the instance. See CPU Options below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "amd_sev_snp",
+          "description": "Indicates whether to enable the instance for AMD SEV-SNP. AMD SEV-SNP is supported with M6a, R6a, and C6a instance types only. Valid values are `enabled` and `disabled`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `amd_sev_snp` argument in the `cpu_options` block of the `aws_launch_template` resource allows users to specify whether to enable AMD Secure Encrypted Virtualization-Secure Nested Paging (SEV-SNP) for the instance. This feature enhances security by providing memory encryption and integrity protection, and it is supported only on specific instance types (M6a, R6a, C6a). Valid values are `enabled` or `disabled`, enabling users to configure advanced security features for workloads requiring enhanced data protection."
+        },
+        {
+          "name": "core_count",
+          "description": "The number of CPU cores for the instance.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "\"Defines the number of physical CPU cores allocated to an instance, allowing users to optimize compute performance for workloads requiring specific core counts. This argument is part of the `cpu_options` configuration and is typically used to tailor instance hardware to match application requirements, such as high-performance computing or parallel processing tasks.\""
+        },
+        {
+          "name": "threads_per_core",
+          "description": "The number of threads per CPU core. To disable Intel Hyper-Threading Technology for the instance, specify a value of 1. Otherwise, specify the default value of 2. Both number of CPU cores and threads per core must be specified. Valid number of CPU cores and threads per core for the instance type can be found in the CPU Options Documentation",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `threads_per_core` argument in the `cpu_options` block of the `aws_launch_template` resource allows users to configure the threading behavior of the instance's CPU cores by specifying the number of threads per core. This setting enables control over Intel Hyper-Threading Technology, where a value of `1` disables hyper-threading for single-threaded performance optimization, and a value of `2` enables hyper-threading for multi-threaded workloads, aligning with the instance type's supported CPU configurations."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "\"Defines CPU options for instances launched via the `aws_launch_template`, enabling control over processor configurations such as core and thread count. This block allows users to optimize instance performance and tailor compute resources to workload requirements.\""
+    },
+    {
+      "name": "credit_specification",
+      "description": "(Optional) Customize the credit specification of the instance. See Credit Specification below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "cpu_credits",
+          "description": "The credit option for CPU usage. Can be `standard` or `unlimited`. T3 instances are launched as `unlimited` by default. T2 instances are launched as `standard` by default.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `cpu_credits` argument in the `credit_specification` block of the `aws_launch_template` resource allows users to define the CPU credit configuration for burstable EC2 instances (e.g., T2 and T3). By specifying `standard` or `unlimited`, users can control whether the instance operates with capped burst performance or unlimited CPU usage, impacting cost and performance optimization based on workload requirements."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `credit_specification` block in the `aws_launch_template` resource allows users to configure the CPU credit options for burstable performance instances (T-series). This block enables fine-grained control over instance performance by specifying whether the instance operates in standard or unlimited mode, optimizing cost and performance for workloads with variable CPU usage."
+    },
+    {
+      "name": "elastic_gpu_specifications",
+      "description": "(Optional) DEPRECATED The elastic GPU to attach to the instance. See Elastic GPU below for more details.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "type",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument in the `elastic_gpu_specifications` block of the `aws_launch_template` resource specifies the type of Elastic GPU to attach to the instance, allowing users to define the GPU's capabilities for graphics acceleration. Setting this argument ensures the instance is equipped with the appropriate GPU resources to support workloads like 3D rendering, visualization, or other GPU-intensive applications."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `elastic_gpu_specifications` block in the `aws_launch_template` resource configures the attachment of Elastic GPUs to an EC2 instance, enabling enhanced graphical processing capabilities for workloads requiring GPU acceleration. This block encapsulates settings related to GPU allocation, helping users optimize instance performance for graphics-intensive applications or machine learning tasks."
+    },
+    {
+      "name": "elastic_inference_accelerator",
+      "description": "(Optional) DEPRECATED Configuration block containing an Elastic Inference Accelerator to attach to the instance. See Elastic Inference Accelerator below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "type",
+          "description": "(Required) Accelerator type.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument for the `elastic_inference_accelerator` block in the `aws_launch_template` resource specifies the type of Elastic Inference Accelerator to attach to the instance, enabling users to define the level of GPU-powered inference performance for machine learning workloads. Setting this argument ensures the instance is provisioned with the appropriate accelerator type to optimize cost and performance for AI/ML applications."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `elastic_inference_accelerator` block in the `aws_launch_template` resource configures the attachment of Elastic Inference Accelerators to instances, enabling cost-effective acceleration for machine learning inference workloads. This block encapsulates settings related to the type and configuration of the accelerator, allowing users to optimize performance for AI/ML applications while managing resource efficiency."
+    },
+    {
+      "name": "enclave_options",
+      "description": "(Optional) Enable Nitro Enclaves on launched instances. See Enclave Options below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enabled",
+          "description": "If set to `true`, Nitro Enclaves will be enabled on the instance. For more information, see the documentation on Nitro Enclaves.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument in the `enclave_options` block of the `aws_launch_template` resource allows users to control whether Nitro Enclaves are activated for instances launched using the template. Setting this argument to `true` enables secure, isolated compute environments designed for sensitive data processing, aligning with user goals like enhancing security and workload isolation."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `enclave_options` block in the `aws_launch_template` resource enables and manages Nitro Enclaves on instances launched using the template. It encapsulates settings related to secure, isolated compute environments for sensitive workloads, allowing users to configure advanced security features for data protection and cryptographic operations."
+    },
+    {
+      "name": "hibernation_options",
+      "description": "(Optional) The hibernation options for the instance. See Hibernation Options below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "configured",
+          "description": "If set to `true`, the launched EC2 instance will hibernation enabled.",
+          "required": true,
+          "type": "bool",
+          "llm_summary": "The `configured` argument in the `hibernation_options` block of the `aws_launch_template` resource enables users to specify whether launched EC2 instances should support hibernation. Setting this to `true` ensures the instance can be paused and resumed, which is useful for preserving the instance state across stops and starts, aligning with cost-saving and state retention goals."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `hibernation_options` block in the `aws_launch_template` resource configures instance hibernation settings, enabling the ability to pause and resume instances while preserving their in-memory state. This block is used to define hibernation-related parameters, allowing users to optimize instance lifecycle management for workloads requiring fast recovery and state persistence."
+    },
+    {
+      "name": "iam_instance_profile",
+      "description": "(Optional) The IAM Instance Profile to launch the instance with. See Instance Profile below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "arn",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `arn` argument in the `iam_instance_profile` block of the `aws_launch_template` resource allows users to specify the Amazon Resource Name (ARN) of an IAM instance profile to associate with EC2 instances launched using the template. By setting this argument, users can define the IAM permissions and roles that the instances will inherit, enabling secure access to AWS resources and services based on the specified profile."
+        },
+        {
+          "name": "name",
+          "description": "(Optional) The name of the launch template. If you leave this blank, Terraform will auto-generate a unique name.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `name` argument in the `iam_instance_profile` block of the `aws_launch_template` resource allows users to specify a custom name for the launch template, providing a human-readable identifier for easier organization and management of cloud infrastructure. If left unset, Terraform auto-generates a unique name, which is useful for scenarios where explicit naming is not required or when avoiding naming conflicts."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `iam_instance_profile` block in the `aws_launch_template` resource specifies the IAM Instance Profile to associate with launched EC2 instances, enabling the assignment of AWS permissions via attached IAM roles. This configuration is essential for managing instance-level access to AWS services, ensuring secure and controlled resource interactions."
+    },
+    {
+      "name": "instance_market_options",
+      "description": "(Optional) The market (purchasing) option for the instance. See Market Options below for details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "market_type",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `market_type` argument in the `instance_market_options` block of the `aws_launch_template` resource allows users to specify whether the instance operates in the On-Demand or Spot market. Configuring this argument enables users to optimize cost by selecting Spot instances for variable workloads or On-Demand instances for predictable, uninterrupted usage, aligning with budget and availability requirements."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "spot_options",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "block_duration_minutes",
+              "description": "",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `block_duration_minutes` argument in the `spot_options` block of the `aws_launch_template` resource allows users to specify the duration, in minutes, for which a Spot Instance is reserved. By setting this value, users can define a fixed time window (e.g., 60 or 120 minutes) for the instance's lifecycle, ensuring predictable cost and availability for workloads that require short-term compute capacity without interruptions."
+            },
+            {
+              "name": "instance_interruption_behavior",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `instance_interruption_behavior` argument in the `spot_options` block of the `aws_launch_template` resource allows users to define how a Spot Instance should respond when interrupted, specifying whether it should terminate, stop, or hibernate. This configuration helps users manage the lifecycle and recovery behavior of Spot Instances during interruptions, aligning with workload resilience and cost optimization goals."
+            },
+            {
+              "name": "max_price",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `max_price` argument in the `spot_options` block of the `aws_launch_template` resource allows users to specify the maximum hourly price they are willing to pay for Spot Instances. By setting this value, users can control cost limits for Spot Instance provisioning, ensuring that instances are only launched if the Spot market price is within their defined budget."
+            },
+            {
+              "name": "spot_instance_type",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `spot_instance_type` argument in the `spot_options` block of the `aws_launch_template` resource allows users to specify the type of Spot Instance request, such as \"one-time\" or \"persistent.\" This configuration determines the behavior of the Spot Instance request, enabling users to control whether the instance runs until manually terminated or automatically re-requested after interruption, aligning with workload requirements and cost optimization strategies."
+            },
+            {
+              "name": "valid_until",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `valid_until` argument in the `spot_options` block of the `aws_launch_template` resource allows users to specify the expiration timestamp for the associated Spot Instance request. By setting this argument, users can define a lifecycle constraint, ensuring that the Spot Instance request automatically terminates after the specified time, which is useful for managing cost, resource availability, or time-bound workloads."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `spot_options` configuration block within the `instance_market_options` of the `aws_launch_template` resource defines settings for managing Spot Instance behavior, including bid strategies, interruption handling, and allocation preferences. By configuring this block, users can optimize cost savings and control the lifecycle of Spot Instances, ensuring tailored behavior for workloads running in the AWS Spot market."
+        }
+      ],
+      "llm_summary": "\"Defines purchasing options for instances within the `aws_launch_template`, enabling configuration of market-related settings such as spot instance behavior. This block allows users to optimize costs and manage instance availability by specifying market preferences like spot pricing strategies and allocation policies.\""
+    },
+    {
+      "name": "instance_requirements",
+      "description": "(Optional) The attribute requirements for the type of instance. If present then `instance_type` cannot be present.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "accelerator_manufacturers",
+          "description": "(Optional) List of accelerator manufacturer names. Default is any manufacturer. `Valid names: * amazon-web-services * amd * nvidia * xilinx`Copy",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `accelerator_manufacturers` argument in the `instance_requirements` block of the `aws_launch_template` resource allows users to specify a set of preferred hardware accelerator manufacturers (e.g., AWS, NVIDIA, AMD, Xilinx) for EC2 instances. This enables fine-grained control over the selection of instance types with compatible accelerators, aligning with workload requirements such as machine learning, high-performance computing, or GPU-intensive tasks."
+        },
+        {
+          "name": "accelerator_names",
+          "description": "(Optional) List of accelerator names. Default is any acclerator. `Valid names: * a100 - NVIDIA A100 GPUs * v100 - NVIDIA V100 GPUs * k80 - NVIDIA K80 GPUs * t4 - NVIDIA T4 GPUs * m60 - NVIDIA M60 GPUs * radeon-pro-v520 - AMD Radeon Pro V520 GPUs * vu9p - Xilinx VU9P FPGAs`Copy",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `accelerator_names` argument in the `instance_requirements` block of the `aws_launch_template` resource allows users to specify a set of GPU or FPGA accelerator types (e.g., NVIDIA A100, AMD Radeon Pro V520) that the EC2 instances must support. By defining this argument, users can tailor instance selection to meet specific computational needs, such as machine learning, high-performance computing, or graphics-intensive workloads, ensuring compatibility with desired hardware accelerators."
+        },
+        {
+          "name": "accelerator_types",
+          "description": "(Optional) List of accelerator types. Default is any accelerator type. `Valid types: * fpga * gpu * inference`Copy",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `accelerator_types` argument in the `instance_requirements` block of the `aws_launch_template` resource allows users to specify the types of hardware accelerators (e.g., FPGA, GPU, or inference) required for EC2 instances. By defining this argument, users can tailor instance selection to meet specific computational needs, such as machine learning, high-performance computing, or data processing workloads, ensuring optimal resource compatibility and performance."
+        },
+        {
+          "name": "allowed_instance_types",
+          "description": "(Optional) List of instance types to apply your specified attributes against. All other instance types are ignored, even if they match your specified attributes. You can use strings with one or more wild cards, represented by an asterisk (*), to allow an instance type, size, or generation. The following are examples: `m5.8xlarge`, `c5*.*`, `m5a.*`, `r*`, `*3*`. For example, if you specify `c5*`, you are allowing the entire C5 instance family, which includes all C5a and C5n instance types. If you specify `m5a.*`, you are allowing all the M5a instance types, but not the M5n instance types. Maximum of 400 entries in the list; each entry is limited to 30 characters. Default is all instance types. NOTE:If you specify `allowed_instance_types`, you can't specify `excluded_instance_types`.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `allowed_instance_types` argument in the `instance_requirements` block of the `aws_launch_template` resource allows users to define a specific set of EC2 instance types or families that meet their application's requirements. By specifying this list, users can control which instance types are considered during instance selection, enabling fine-grained optimization for performance, cost, or compatibility. Wildcard patterns can be used for flexibility, and setting this argument ensures only the allowed instance types are evaluated, overriding the default behavior of considering all instance types."
+        },
+        {
+          "name": "bare_metal",
+          "description": "(Optional) Indicate whether bare metal instace types should be `included`, `excluded`, or `required`. Default is `excluded`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `bare_metal` argument in the `instance_requirements` block of the `aws_launch_template` resource allows users to specify whether bare metal instance types should be included, excluded, or required when defining EC2 instance requirements. This configuration impacts the instance type selection process, enabling users to tailor their infrastructure for workloads that require direct hardware access or exclude bare metal options for virtualized environments."
+        },
+        {
+          "name": "burstable_performance",
+          "description": "(Optional) Indicate whether burstable performance instance types should be `included`, `excluded`, or `required`. Default is `excluded`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `burstable_performance` argument in the `instance_requirements` block of the `aws_launch_template` resource allows users to specify whether EC2 burstable performance instance types (e.g., T-series instances) should be included, excluded, or required when defining instance type constraints. This configuration helps control cost and performance trade-offs by aligning instance selection with workload requirements, such as optimizing for predictable performance or cost-efficient burst capacity."
+        },
+        {
+          "name": "cpu_manufacturers",
+          "description": "(Optional) List of CPU manufacturer names. Default is any manufacturer. NOTE:Don't confuse the CPU hardware manufacturer with the CPU hardware architecture. Instances will be launched with a compatible CPU architecture based on the Amazon Machine Image (AMI) that you specify in your launch template. `Valid names: * amazon-web-services * amd * intel`Copy",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `cpu_manufacturers` argument in the `instance_requirements` block of the `aws_launch_template` resource allows users to specify a set of preferred CPU manufacturers (`amazon-web-services`, `amd`, or `intel`) for the EC2 instances launched using the template. By defining this argument, users can control the compatibility of the instance's CPU hardware with their workload requirements, ensuring alignment with performance, cost, or vendor-specific optimizations while maintaining compatibility with the AMI's architecture."
+        },
+        {
+          "name": "excluded_instance_types",
+          "description": "(Optional) List of instance types to exclude. You can use strings with one or more wild cards, represented by an asterisk (*), to exclude an instance type, size, or generation. The following are examples: `m5.8xlarge`, `c5*.*`, `m5a.*`, `r*`, `*3*`. For example, if you specify `c5*`, you are excluding the entire C5 instance family, which includes all C5a and C5n instance types. If you specify `m5a.*`, you are excluding all the M5a instance types, but not the M5n instance types. Maximum of 400 entries in the list; each entry is limited to 30 characters. Default is no excluded instance types. NOTE:If you specify `excluded_instance_types`, you can't specify `allowed_instance_types`.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `excluded_instance_types` argument in the `instance_requirements` block of the `aws_launch_template` resource allows users to define a set of EC2 instance types to exclude from consideration during instance selection. By specifying exact types or using wildcard patterns (e.g., `c5*`, `m5a.*`), users can refine the instance provisioning process to avoid certain families, sizes, or generations, ensuring alignment with workload requirements or cost optimization strategies."
+        },
+        {
+          "name": "instance_generations",
+          "description": "(Optional) List of instance generation names. Default is any generation. `Valid names: * current - Recommended for best performance. * previous - For existing applications optimized for older instance types.`Copy",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `instance_generations` argument in the `instance_requirements` block of the `aws_launch_template` resource allows users to specify the preferred generation of EC2 instance types (`current` or `previous`) for their launch template. By defining this, users can optimize instance selection for either the latest performance capabilities (`current`) or compatibility with older, legacy applications (`previous`), aligning infrastructure provisioning with workload requirements."
+        },
+        {
+          "name": "local_storage",
+          "description": "(Optional) Indicate whether instance types with local storage volumes are `included`, `excluded`, or `required`. Default is `included`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `local_storage` argument in the `instance_requirements` block of the `aws_launch_template` resource allows users to specify whether instance types with local storage volumes should be included, excluded, or required when launching EC2 instances. This configuration impacts instance selection by controlling access to ephemeral storage, which is commonly used for temporary data processing or caching in high-performance workloads."
+        },
+        {
+          "name": "local_storage_types",
+          "description": "(Optional) List of local storage type names. Default any storage type. `Value names: * hdd - hard disk drive * ssd - solid state drive`Copy",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `local_storage_types` argument in the `instance_requirements` block of the `aws_launch_template` resource allows users to specify the preferred types of local storage (e.g., HDD or SSD) for EC2 instances that meet the defined requirements. By setting this argument, users can optimize instance performance or cost based on workload needs, ensuring the selected instances align with storage type preferences for applications like caching, data processing, or high-throughput tasks."
+        },
+        {
+          "name": "max_spot_price_as_percentage_of_optimal_on_demand_price",
+          "description": "(Optional) The price protection threshold for Spot Instances. This is the maximum you\u2019ll pay for a Spot Instance, expressed as a percentage higher than the cheapest M, C, or R instance type with your specified attributes. When Amazon EC2 Auto Scaling selects instance types with your attributes, we will exclude instance types whose price is higher than your threshold. The parameter accepts an integer, which Amazon EC2 Auto Scaling interprets as a percentage. To turn off price protection, specify a high value, such as 999999. Conflicts with `spot_max_price_percentage_over_lowest_price`",
+          "required": false,
+          "type": "number",
+          "llm_summary": "Defines the maximum price threshold for Spot Instances as a percentage above the cheapest M, C, or R instance types that meet specified attributes, allowing users to control cost optimization and price protection during instance selection. Configuring this argument helps ensure that EC2 Auto Scaling excludes overly expensive instance types, aligning with budget-conscious deployment strategies."
+        },
+        {
+          "name": "on_demand_max_price_percentage_over_lowest_price",
+          "description": "(Optional) The price protection threshold for On-Demand Instances. This is the maximum you\u2019ll pay for an On-Demand Instance, expressed as a percentage higher than the cheapest M, C, or R instance type with your specified attributes. When Amazon EC2 Auto Scaling selects instance types with your attributes, we will exclude instance types whose price is higher than your threshold. The parameter accepts an integer, which Amazon EC2 Auto Scaling interprets as a percentage. To turn off price protection, specify a high value, such as 999999. Default is 20. If you set DesiredCapacityType to vcpu or memory-mib, the price protection threshold is applied based on the per vCPU or per memory price instead of the per instance price.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "Defines the maximum price threshold, as a percentage above the lowest-priced compatible instance type, for selecting On-Demand Instances within the `instance_requirements` of an `aws_launch_template`. This argument enables cost control by excluding instance types that exceed the specified price limit, ensuring optimized instance selection based on budget constraints and resource attributes."
+        },
+        {
+          "name": "require_hibernate_support",
+          "description": "(Optional) Indicate whether instance types must support On-Demand Instance Hibernation, either `true` or `false`. Default is `false`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `require_hibernate_support` argument in the `instance_requirements` block of the `aws_launch_template` resource allows users to specify whether the selected instance types must support On-Demand Instance Hibernation. Setting this to `true` ensures that only instance types capable of hibernation are considered, which is useful for workloads requiring fast resume states, while leaving it as `false` (default) provides broader instance type flexibility."
+        },
+        {
+          "name": "spot_max_price_percentage_over_lowest_price",
+          "description": "(Optional) The price protection threshold for Spot Instances. This is the maximum you\u2019ll pay for a Spot Instance, expressed as a percentage higher than the cheapest M, C, or R instance type with your specified attributes. When Amazon EC2 Auto Scaling selects instance types with your attributes, we will exclude instance types whose price is higher than your threshold. The parameter accepts an integer, which Amazon EC2 Auto Scaling interprets as a percentage. To turn off price protection, specify a high value, such as 999999. Default is 100. Conflicts with `max_spot_price_as_percentage_of_optimal_on_demand_price` If you set DesiredCapacityType to vcpu or memory-mib, the price protection threshold is applied based on the per vCPU or per memory price instead of the per instance price.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `spot_max_price_percentage_over_lowest_price` argument in the `instance_requirements` block of the `aws_launch_template` resource allows users to define a price protection threshold for Spot Instances, expressed as a percentage above the lowest-priced compatible instance type. By setting this value, users can control cost optimization by excluding instance types that exceed the specified price limit, ensuring budget-conscious scaling while maintaining flexibility in instance selection."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "accelerator_count",
+          "description": "(Optional) Block describing the minimum and maximum number of accelerators (GPUs, FPGAs, or AWS Inferentia chips). Default is no minimum or maximum. `min` - (Optional) Minimum. `max` - (Optional) Maximum. Set to `0` to exclude instance types with accelerators.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "max",
+              "description": "(Optional) Maximum.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `max` argument within the `accelerator_count` block of the `aws_launch_template` resource allows users to specify the maximum number of GPU or hardware accelerators that can be attached to an instance. Configuring this value helps define resource limits for instances requiring specialized compute capabilities, supporting workloads like machine learning, high-performance computing, or graphics processing."
+            },
+            {
+              "name": "min",
+              "description": "(Required) Minimum.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `min` argument for the `accelerator_count` in the `aws_launch_template` resource specifies the minimum number of GPU accelerators required for the instance. Configuring this value ensures that the instance meets a baseline hardware requirement for workloads that depend on GPU resources, such as machine learning, high-performance computing, or graphics-intensive applications."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `accelerator_count` block within the `instance_requirements` configuration of the `aws_launch_template` resource defines the minimum and maximum number of hardware accelerators (e.g., GPUs, FPGAs, AWS Inferentia) required for instance selection. This block enables fine-grained control over instance type filtering by specifying accelerator constraints, allowing users to optimize workloads for specific computational needs or exclude instances with accelerators by setting both values to `0`."
+        },
+        {
+          "name": "accelerator_total_memory_mib",
+          "description": "(Optional) Block describing the minimum and maximum total memory of the accelerators. Default is no minimum or maximum. `min` - (Optional) Minimum. `max` - (Optional) Maximum.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "max",
+              "description": "(Optional) Maximum.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `max` argument for `accelerator_total_memory_mib` in the `aws_launch_template` resource allows users to specify the maximum amount of memory (in MiB) that GPU accelerators attached to the instance can utilize. Configuring this value helps define resource constraints for instances, ensuring they meet specific performance requirements or cost optimization goals by limiting GPU memory allocation."
+            },
+            {
+              "name": "min",
+              "description": "(Required) Minimum.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `min` argument for `accelerator_total_memory_mib` in the `aws_launch_template` resource allows users to specify the minimum amount of memory (in MiB) required for GPU accelerators attached to the instance. By setting this value, users can ensure that the instance meets specific hardware requirements for workloads that depend on GPU memory capacity, such as machine learning, high-performance computing, or graphics-intensive applications."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `accelerator_total_memory_mib` block within the `instance_requirements` section of the `aws_launch_template` resource defines constraints on the minimum and maximum total memory available to attached accelerators (e.g., GPUs) for EC2 instances. This configuration enables users to fine-tune instance selection based on specific hardware requirements, ensuring optimal performance for workloads that rely on accelerator memory capacity."
+        },
+        {
+          "name": "baseline_ebs_bandwidth_mbps",
+          "description": "(Optional) Block describing the minimum and maximum baseline EBS bandwidth, in Mbps. Default is no minimum or maximum. `min` - (Optional) Minimum. `max` - (Optional) Maximum.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "max",
+              "description": "(Optional) Maximum.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `max` argument within the `baseline_ebs_bandwidth_mbps` block of the `aws_launch_template` resource allows users to specify the maximum baseline EBS bandwidth (in Mbps) for the instance. This configuration helps define performance limits for EBS volumes, enabling users to optimize storage throughput for workloads with specific bandwidth requirements."
+            },
+            {
+              "name": "min",
+              "description": "(Required) Minimum.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `min` argument for the `baseline_ebs_bandwidth_mbps` in the `aws_launch_template` resource allows users to specify the minimum baseline bandwidth (in Mbps) allocated to Elastic Block Store (EBS) volumes attached to an instance. Configuring this value helps ensure consistent performance for EBS volumes, aligning with workload requirements and optimizing resource allocation for storage throughput."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `baseline_ebs_bandwidth_mbps` block within the `instance_requirements` section of the `aws_launch_template` resource defines the minimum and maximum baseline EBS bandwidth (in Mbps) for instances, enabling fine-grained control over storage performance requirements. By configuring this block, users can ensure that selected instances meet specific throughput criteria for optimized data transfer rates, aligning with workload demands and performance goals."
+        },
+        {
+          "name": "memory_gib_per_vcpu",
+          "description": "(Optional) Block describing the minimum and maximum amount of memory (GiB) per vCPU. Default is no minimum or maximum. `min` - (Optional) Minimum. May be a decimal number, e.g. `0.5`. `max` - (Optional) Maximum. May be a decimal number, e.g. `0.5`.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "max",
+              "description": "(Optional) Maximum.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `max` argument within the `memory_gib_per_vcpu` block of the `aws_launch_template` resource allows users to specify the maximum amount of memory (in GiB) per vCPU for EC2 instances launched using the template. This setting helps define upper memory constraints for instance types, enabling users to optimize resource selection based on workload requirements and cost efficiency."
+            },
+            {
+              "name": "min",
+              "description": "(Required) Minimum.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `min` argument for `memory_gib_per_vcpu` in the `aws_launch_template` resource allows users to specify the minimum amount of memory (in GiB) allocated per virtual CPU for instances launched using the template. This configuration helps ensure baseline memory requirements are met, optimizing instance performance and aligning with workload-specific resource needs."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `memory_gib_per_vcpu` block within the `instance_requirements` configuration of the `aws_launch_template` resource defines constraints on the minimum and maximum memory (in GiB) allocated per vCPU for EC2 instances. This block enables fine-grained control over instance selection by specifying memory-to-vCPU ratios, helping users optimize resource performance and cost efficiency based on workload requirements."
+        },
+        {
+          "name": "memory_mib",
+          "description": "(Required) Block describing the minimum and maximum amount of memory (MiB). Default is no maximum. `min` - (Required) Minimum. `max` - (Optional) Maximum.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "max",
+              "description": "(Optional) Maximum.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `max` argument within the `memory_mib` block of the `aws_launch_template` resource allows users to specify the maximum amount of memory (in MiB) that an EC2 instance can utilize. This configuration helps define upper memory limits for instance types, enabling users to optimize resource allocation and enforce constraints for workload performance or cost management."
+            },
+            {
+              "name": "min",
+              "description": "(Required) Minimum.",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `min` argument for the `memory_mib` block in the `aws_launch_template` resource specifies the minimum amount of memory (in MiB) that an EC2 instance must have to meet the requirements of the launch template. This ensures that the instance type selected during provisioning satisfies the defined memory constraints, helping users optimize resource allocation and enforce performance standards."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `memory_mib` block within the `instance_requirements` configuration of the `aws_launch_template` resource defines the minimum and optional maximum memory (in MiB) requirements for EC2 instances, enabling precise control over instance selection based on memory capacity. This block helps users optimize resource allocation by ensuring instances meet specific memory constraints for workload performance and cost efficiency."
+        },
+        {
+          "name": "network_bandwidth_gbps",
+          "description": "(Optional) Block describing the minimum and maximum amount of network bandwidth, in gigabits per second (Gbps). Default is no minimum or maximum. `min` - (Optional) Minimum. `max` - (Optional) Maximum.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "max",
+              "description": "(Optional) Maximum.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `max` argument in the `network_bandwidth_gbps` block of the `aws_launch_template` resource allows users to define the maximum network bandwidth (in Gbps) allocated to an instance. By setting this value, users can control the upper limit of network performance for instances launched using the template, optimizing resource allocation for workloads with specific bandwidth requirements."
+            },
+            {
+              "name": "min",
+              "description": "(Required) Minimum.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `min` argument for `network_bandwidth_gbps` in the `aws_launch_template` resource allows users to specify the minimum guaranteed network bandwidth (in Gbps) for instances launched using the template. This configuration ensures baseline network performance, supporting workloads that require consistent data transfer rates, such as high-throughput applications or latency-sensitive environments."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `network_bandwidth_gbps` block within the `instance_requirements` section of the `aws_launch_template` resource defines constraints for the minimum and maximum network bandwidth (in Gbps) that an EC2 instance must support. This block enables users to optimize instance selection based on specific networking performance requirements, ensuring instances meet workload demands for data transfer rates and connectivity."
+        },
+        {
+          "name": "network_interface_count",
+          "description": "(Optional) Block describing the minimum and maximum number of network interfaces. Default is no minimum or maximum. `min` - (Optional) Minimum. `max` - (Optional) Maximum.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "max",
+              "description": "(Optional) Maximum.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `max` argument in the `network_interface_count` block of the `aws_launch_template` resource allows users to define the maximum number of network interfaces that can be attached to an instance launched from the template. By setting this value, users can control the upper limit of network interface scalability for the instance, ensuring alignment with workload requirements or network architecture constraints."
+            },
+            {
+              "name": "min",
+              "description": "(Required) Minimum.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `min` argument for the `network_interface_count` in the `aws_launch_template` resource specifies the minimum number of network interfaces that must be attached to an instance launched using the template. This allows users to define a baseline for network connectivity, ensuring instances meet specific requirements for multi-interface configurations in scenarios like high-availability networking or specialized workloads."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "Defines the minimum and maximum number of network interfaces required for an instance, enabling precise control over network interface allocation within the \"instance_requirements\" of an AWS Launch Template. This block helps users ensure instances meet specific networking needs by setting constraints on the number of interfaces, optimizing resource compatibility and performance."
+        },
+        {
+          "name": "total_local_storage_gb",
+          "description": "(Optional) Block describing the minimum and maximum total local storage (GB). Default is no minimum or maximum. `min` - (Optional) Minimum. May be a decimal number, e.g. `0.5`. `max` - (Optional) Maximum. May be a decimal number, e.g. `0.5`.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "max",
+              "description": "(Optional) Maximum.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `max` argument for `total_local_storage_gb` in the `aws_launch_template` resource allows users to specify the maximum amount of local storage (in GB) that an instance can utilize. This helps define storage constraints for instance types, enabling users to optimize resource allocation and ensure compatibility with workload requirements."
+            },
+            {
+              "name": "min",
+              "description": "(Required) Minimum.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `min` argument for `total_local_storage_gb` in the `aws_launch_template` resource allows users to specify the minimum amount of local storage (in gigabytes) required for the instance. By setting this value, users can ensure that the instance meets baseline storage requirements, which is useful for workloads with specific storage capacity needs or performance constraints."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `total_local_storage_gb` block within the `instance_requirements` configuration of the `aws_launch_template` resource defines constraints for the minimum and maximum total local storage capacity (in GB) required for EC2 instances. This block enables users to fine-tune instance selection based on storage needs, ensuring compatibility with workloads that demand specific local storage capacities for optimal performance or cost efficiency."
+        },
+        {
+          "name": "vcpu_count",
+          "description": "(Required) Block describing the minimum and maximum number of vCPUs. Default is no maximum. `min` - (Required) Minimum. `max` - (Optional) Maximum.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "max",
+              "description": "(Optional) Maximum.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `max` argument within the `vcpu_count` block of the `aws_launch_template` resource allows users to specify the maximum number of vCPUs that can be allocated to an instance when using flexible instance types. This configuration is typically used to define upper resource limits for instance scaling, ensuring cost control and alignment with workload requirements."
+            },
+            {
+              "name": "min",
+              "description": "(Required) Minimum.",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `min` argument for the `vcpu_count` in the `aws_launch_template` resource specifies the minimum number of virtual CPUs (vCPUs) required for the instance type, ensuring baseline compute capacity for workloads. Setting this value helps users define resource constraints to optimize performance and cost while meeting application requirements."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `vcpu_count` block within the `instance_requirements` configuration of the `aws_launch_template` resource defines the minimum and optional maximum number of virtual CPUs (vCPUs) required for EC2 instances. This block enables precise control over instance sizing by specifying compute capacity constraints, helping users optimize resource allocation and ensure compatibility with workload requirements."
+        }
+      ],
+      "llm_summary": "The `instance_requirements` block in the `aws_launch_template` resource defines flexible attribute-based criteria for selecting EC2 instance types, such as CPU, memory, or storage requirements, instead of specifying a fixed `instance_type`. This configuration enables dynamic instance provisioning to optimize resource selection based on workload needs, ensuring adaptability and cost efficiency in cloud infrastructure deployments."
+    },
+    {
+      "name": "license_specification",
+      "description": "(Optional) A list of license specifications to associate with. See License Specification below for more details.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "license_configuration_arn",
+          "description": "(Required) ARN of the license configuration.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `license_configuration_arn` argument in the `license_specification` block of the `aws_launch_template` resource allows users to specify the Amazon Resource Name (ARN) of a license configuration to associate with the launch template. This enables the enforcement and management of software licensing rules for instances launched using the template, ensuring compliance with licensing agreements and streamlining license tracking across deployments."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `license_specification` block in the `aws_launch_template` resource allows users to associate specific license configurations with an EC2 instance launched using the template. It encapsulates settings related to license management, enabling compliance with software licensing requirements and facilitating the use of BYOL (Bring Your Own License) or other licensing models. Configuring this block ensures proper license tracking and enforcement for instances, aligning with organizational or vendor licensing policies."
+    },
+    {
+      "name": "maintenance_options",
+      "description": "(Optional) The maintenance options for the instance. See Maintenance Options below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "auto_recovery",
+          "description": "(Optional) Disables the automatic recovery behavior of your instance or sets it to default. Can be `\"default\"` or `\"disabled\"`. See Recover your instance for more details.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `auto_recovery` argument in the `maintenance_options` block of the `aws_launch_template` resource allows users to control the automatic recovery behavior of an EC2 instance in the event of system impairment. By setting this argument to `\"default\"` or `\"disabled\"`, users can define whether the instance should attempt self-recovery or disable this feature entirely, aligning with goals like ensuring high availability or customizing failure handling strategies."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `maintenance_options` block in the `aws_launch_template` resource configures instance maintenance behavior, such as enabling or managing host recovery options. This block allows users to define settings that ensure instances are automatically recovered or maintained during underlying hardware failures, enhancing availability and resilience for workloads."
+    },
+    {
+      "name": "metadata_options",
+      "description": "(Optional) Customize the metadata options for the instance. See Metadata Options below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "http_endpoint",
+          "description": "(Optional) Whether the metadata service is available. Can be `\"enabled\"` or `\"disabled\"`. (Default: `\"enabled\"`).",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `http_endpoint` argument in the `metadata_options` block of the `aws_launch_template` resource allows users to control whether the instance metadata service is accessible via HTTP. By setting this to `\"enabled\"` or `\"disabled\"`, users can define the availability of metadata for tasks like retrieving instance-specific information or configuring IAM roles, which is critical for securing or enabling dynamic instance behavior."
+        },
+        {
+          "name": "http_protocol_ipv6",
+          "description": "(Optional) Enables or disables the IPv6 endpoint for the instance metadata service. Can be `\"enabled\"` or `\"disabled\"`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `http_protocol_ipv6` argument in the `metadata_options` block of the `aws_launch_template` resource allows users to control whether the instance metadata service supports communication over IPv6. By setting this argument to `\"enabled\"` or `\"disabled\"`, users can define the availability of the IPv6 endpoint, which is useful for environments requiring IPv6-based metadata access or compliance with networking configurations that prioritize IPv6."
+        },
+        {
+          "name": "http_put_response_hop_limit",
+          "description": "(Optional) The desired HTTP PUT response hop limit for instance metadata requests. The larger the number, the further instance metadata requests can travel. Can be an integer from `1` to `64`. (Default: `1`).",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `http_put_response_hop_limit` argument in the `metadata_options` block of the `aws_launch_template` resource allows users to define the maximum number of network hops that instance metadata HTTP PUT response requests can traverse. By configuring this value (ranging from 1 to 64, defaulting to 1), users can control the accessibility and reach of instance metadata, which is particularly useful for managing security boundaries and network routing in environments with complex topologies."
+        },
+        {
+          "name": "http_tokens",
+          "description": "(Optional) Whether or not the metadata service requires session tokens, also referred to as Instance Metadata Service Version 2 (IMDSv2). Can be `\"optional\"` or `\"required\"`. (Default: `\"optional\"`).",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `http_tokens` argument in the `metadata_options` block of the `aws_launch_template` resource allows users to specify whether the EC2 instance metadata service requires session tokens (IMDSv2) for enhanced security. By setting this to `\"optional\"` or `\"required\"`, users can control the authentication method for accessing instance metadata, with `\"required\"` enforcing stricter security by mandating token-based access."
+        },
+        {
+          "name": "instance_metadata_tags",
+          "description": "(Optional) Enables or disables access to instance tags from the instance metadata service. Can be `\"enabled\"` or `\"disabled\"`. For more information, see the documentation on the Instance Metadata Service.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `instance_metadata_tags` argument in the `metadata_options` block of the `aws_launch_template` resource allows users to control whether instance tags are accessible via the Instance Metadata Service (IMDS). Setting this argument to `\"enabled\"` facilitates tag-based automation and metadata retrieval for instances, while `\"disabled\"` enhances security by restricting tag access through IMDS."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `metadata_options` block in the `aws_launch_template` resource allows users to customize instance metadata service (IMDS) settings, such as enabling or restricting metadata access and configuring hop limits. This block provides fine-grained control over instance metadata behavior, enhancing security and compliance by managing how applications or users interact with instance metadata."
+    },
+    {
+      "name": "monitoring",
+      "description": "(Optional) The monitoring option for the instance. See Monitoring below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enabled",
+          "description": "If `true`, the launched EC2 instance will have detailed monitoring enabled.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument in the `monitoring` context of the `aws_launch_template` resource allows users to specify whether detailed monitoring is activated for EC2 instances launched using the template. Enabling this feature provides enhanced metrics at 1-minute intervals, supporting use cases like performance analysis, resource optimization, and proactive alerting."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"monitoring\" configuration block in the \"aws_launch_template\" resource enables the management of instance-level monitoring settings, allowing users to specify whether detailed monitoring is enabled for EC2 instances launched using the template. Configuring this block helps users achieve enhanced visibility into instance performance metrics, such as CPU utilization and network activity, which is critical for optimizing resource usage and troubleshooting."
+    },
+    {
+      "name": "network_interfaces",
+      "description": "(Optional) Customize network interfaces to be attached at instance boot time. See Network Interfaces below for more details.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "associate_carrier_ip_address",
+          "description": "(Optional) Associate a Carrier IP address with `eth0` for a new network interface. Use this option when you launch an instance in a Wavelength Zone and want to associate a Carrier IP address with the network interface. Boolean value, can be left unset.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `associate_carrier_ip_address` argument in the `network_interfaces` block of the `aws_launch_template` resource allows users to specify whether to associate a Carrier IP address with the primary network interface (`eth0`) of an instance launched in a Wavelength Zone. This enables connectivity through a Carrier IP, typically used for low-latency applications in edge computing scenarios."
+        },
+        {
+          "name": "associate_public_ip_address",
+          "description": "(Optional) Associate a public ip address with the network interface. Boolean value, can be left unset.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "Controls whether the network interface in the launch template is assigned a public IP address upon instance creation. Setting this argument to `true` enables public internet access for the instance, typically used for scenarios requiring external connectivity, such as hosting web applications or accessing public APIs."
+        },
+        {
+          "name": "delete_on_termination",
+          "description": "(Optional) Whether the network interface should be destroyed on instance termination.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete_on_termination` argument in the `network_interfaces` block of the `aws_launch_template` resource allows users to define the lifecycle behavior of a network interface by specifying whether it should be automatically deleted when the associated EC2 instance is terminated. This configuration is useful for managing resource cleanup and ensuring ephemeral network interfaces are not retained unnecessarily, aligning with common goals of resource lifecycle management and cost optimization."
+        },
+        {
+          "name": "description",
+          "description": "(Optional) Description of the network interface.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `description` argument for the `network_interfaces` block in the `aws_launch_template` resource allows users to specify a human-readable text that describes the purpose or role of the network interface within the launch template. This helps document the configuration for clarity and aids in identifying the network interface's function in multi-interface setups or complex environments."
+        },
+        {
+          "name": "device_index",
+          "description": "(Optional) The integer index of the network interface attachment.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `device_index` argument in the `network_interfaces` block of the `aws_launch_template` resource allows users to specify the integer index that determines the attachment order of a network interface to the instance. By configuring this argument, users can control the mapping of network interfaces to specific device slots, enabling precise network interface placement for multi-interface instances or custom networking setups."
+        },
+        {
+          "name": "interface_type",
+          "description": "(Optional) The type of network interface. To create an Elastic Fabric Adapter (EFA), specify `efa`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `interface_type` argument in the `network_interfaces` block of the `aws_launch_template` resource allows users to specify the type of network interface to attach to an instance, such as enabling advanced networking capabilities by selecting `efa` for Elastic Fabric Adapter (EFA). Configuring this argument is typically used to optimize high-performance computing (HPC) workloads or applications requiring low-latency, high-bandwidth network communication."
+        },
+        {
+          "name": "ipv4_address_count",
+          "description": "(Optional) The number of secondary private IPv4 addresses to assign to a network interface. Conflicts with `ipv4_addresses`",
+          "required": false,
+          "type": "number",
+          "llm_summary": "\"Configures the number of secondary private IPv4 addresses to automatically assign to a network interface within the launch template, enabling users to define additional IP capacity for workloads requiring multiple private addresses. This argument is useful for scaling network connectivity and conflicts with manually specifying individual IPs via `ipv4_addresses`.\""
+        },
+        {
+          "name": "ipv4_addresses",
+          "description": "(Optional) One or more private IPv4 addresses to associate. Conflicts with `ipv4_address_count`",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `ipv4_addresses` argument allows users to explicitly specify one or more private IPv4 addresses to associate with a network interface in the launch template. This provides fine-grained control over IP address assignment, enabling users to define static IPs for instances, which is useful for scenarios requiring predictable network configurations or integration with existing systems."
+        },
+        {
+          "name": "ipv4_prefix_count",
+          "description": "(Optional) The number of IPv4 prefixes to be automatically assigned to the network interface. Conflicts with `ipv4_prefixes`",
+          "required": false,
+          "type": "number",
+          "llm_summary": "\"Defines the number of IPv4 prefixes to be automatically assigned to a network interface within the launch template, enabling dynamic allocation of IP address ranges for enhanced scalability and network configuration flexibility. Conflicts with `ipv4_prefixes`, ensuring users choose between automatic prefix assignment or manual specification.\""
+        },
+        {
+          "name": "ipv4_prefixes",
+          "description": "(Optional) One or more IPv4 prefixes to be assigned to the network interface. Conflicts with `ipv4_prefix_count`",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "\"Defines one or more specific IPv4 address prefixes to be assigned to a network interface within the launch template, enabling precise control over IP address allocation for the interface. This argument is useful for configuring custom network setups or ensuring compatibility with predefined subnet or routing requirements, and it cannot be used simultaneously with `ipv4_prefix_count`.\""
+        },
+        {
+          "name": "ipv6_address_count",
+          "description": "(Optional) The number of IPv6 addresses to assign to a network interface. Conflicts with `ipv6_addresses`",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `ipv6_address_count` argument in the `network_interfaces` block of the `aws_launch_template` resource allows users to specify the number of IPv6 addresses automatically assigned to a network interface. This configuration is useful for enabling IPv6 connectivity in environments where dynamic address allocation is preferred, and it simplifies network setup by avoiding manual assignment of individual IPv6 addresses."
+        },
+        {
+          "name": "ipv6_addresses",
+          "description": "(Optional) One or more specific IPv6 addresses from the IPv6 CIDR block range of your subnet. Conflicts with `ipv6_address_count`",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `ipv6_addresses` argument in the `network_interfaces` block of the `aws_launch_template` resource allows users to explicitly define one or more IPv6 addresses to assign to the network interface from the subnet's IPv6 CIDR block. This enables precise control over IP addressing for instances launched with the template, supporting scenarios like custom networking configurations or compliance with specific addressing schemes. Note that it conflicts with `ipv6_address_count`, which provides automatic assignment."
+        },
+        {
+          "name": "ipv6_prefix_count",
+          "description": "(Optional) The number of IPv6 prefixes to be automatically assigned to the network interface. Conflicts with `ipv6_prefixes`",
+          "required": false,
+          "type": "number",
+          "llm_summary": "\"Defines the number of IPv6 prefixes to be automatically assigned to a network interface within the launch template, enabling dynamic IPv6 address allocation for enhanced scalability and connectivity in IPv6-enabled environments. Conflicts with manual prefix specification via `ipv6_prefixes`, ensuring users can choose between automated or explicit configuration.\""
+        },
+        {
+          "name": "ipv6_prefixes",
+          "description": "(Optional) One or more IPv6 prefixes to be assigned to the network interface. Conflicts with `ipv6_prefix_count`",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `ipv6_prefixes` argument allows users to specify one or more IPv6 address prefixes to assign to a network interface within an AWS Launch Template, enabling precise control over IPv6 addressing for instances. This configuration is useful for defining custom IPv6 network ranges, supporting advanced networking setups, and ensuring compatibility with IPv6-enabled environments, but it cannot be used in conjunction with `ipv6_prefix_count`."
+        },
+        {
+          "name": "network_card_index",
+          "description": "(Optional) The index of the network card. Some instance types support multiple network cards. The primary network interface must be assigned to network card index 0. The default is network card index 0.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "\"Defines the index of the network card to which a network interface is attached, enabling configuration of multi-network card setups for instance types that support them. Typically used to specify the primary network interface (index 0) or assign additional interfaces to secondary network cards for advanced networking scenarios.\""
+        },
+        {
+          "name": "network_interface_id",
+          "description": "(Optional) The ID of the network interface to attach.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `network_interface_id` argument allows users to specify the ID of an existing network interface to attach to the launch template's instance configuration. By defining this, users can control the network connectivity of the instance, such as associating it with a pre-configured network interface for specific IP addresses, security groups, or subnet settings, enabling precise customization of network behavior and resource association."
+        },
+        {
+          "name": "primary_ipv6",
+          "description": "(Optional) Whether the first IPv6 GUA will be made the primary IPv6 address.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `primary_ipv6` argument in the `network_interfaces` block of the `aws_launch_template` resource allows users to specify whether the first IPv6 Global Unicast Address (GUA) assigned to the network interface should be designated as the primary IPv6 address. Configuring this argument impacts how IPv6 traffic is routed and prioritized, enabling users to define the primary address for applications or services requiring IPv6 connectivity."
+        },
+        {
+          "name": "private_ip_address",
+          "description": "(Optional) The primary private IPv4 address.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `private_ip_address` argument in the `network_interfaces` block of the `aws_launch_template` resource allows users to specify the primary private IPv4 address for the associated network interface. By setting this argument, users can control the static private IP assignment for the instance, ensuring predictable network communication and alignment with specific subnet or application requirements, such as fixed addressing for internal services or security configurations."
+        },
+        {
+          "name": "security_groups",
+          "description": "(Optional) A list of security group IDs to associate.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `security_groups` argument in the `network_interfaces` block of the `aws_launch_template` resource allows users to specify a set of security group IDs to control inbound and outbound traffic for the associated network interfaces. By defining this argument, users can enforce network access rules, such as restricting access to specific IP ranges or ports, to align with security and compliance requirements for their cloud environment."
+        },
+        {
+          "name": "subnet_id",
+          "description": "(Optional) The VPC Subnet ID to associate.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `subnet_id` argument in the `network_interfaces` block of the `aws_launch_template` resource allows users to specify the VPC Subnet ID where the network interface will be provisioned. By setting this argument, users can control the placement of the instance within a specific subnet, enabling network segmentation, access control, and alignment with security or routing requirements in their cloud environment."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "connection_tracking_specification",
+          "description": "(Optional) The Connection Tracking Configuration for the network interface. See Amazon EC2 security group connection tracking  The ena_srd_specification block supports the following:",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "tcp_established_timeout",
+              "description": "(Optional) Timeout (in seconds) for idle TCP connections in an established state. Min: 60 seconds. Max: 432000 seconds (5 days). Default: 432000 seconds. Recommended: Less than 432000 seconds.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `tcp_established_timeout` argument in the `connection_tracking_specification` of the `aws_launch_template` resource allows users to define the idle timeout duration (in seconds) for established TCP connections before they are terminated. By configuring this value, users can optimize connection tracking behavior to balance resource utilization and connection persistence, aligning with application-specific requirements for network performance and reliability."
+            },
+            {
+              "name": "udp_stream_timeout",
+              "description": "(Optional) Timeout (in seconds) for idle UDP flows that have seen traffic only in a single direction or a single request-response transaction. Min: 30 seconds. Max: 60 seconds. Default: 30 seconds.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `udp_stream_timeout` argument in the `connection_tracking_specification` of the `aws_launch_template` resource allows users to define the idle timeout duration (in seconds) for UDP flows that involve unidirectional traffic or single request-response transactions. By configuring this value, users can optimize connection tracking behavior for UDP streams, balancing resource efficiency and responsiveness in network traffic management."
+            },
+            {
+              "name": "udp_timeout",
+              "description": "(Optional) Timeout (in seconds) for idle UDP flows classified as streams which have seen more than one request-response transaction. Min: 60 seconds. Max: 180 seconds (3 minutes). Default: 180 seconds.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `udp_timeout` argument in the `connection_tracking_specification` of the `aws_launch_template` resource allows users to configure the idle timeout duration (in seconds) for UDP flows classified as streams with multiple request-response transactions. By setting this value, users can control how long idle UDP connections are retained before being terminated, optimizing connection tracking behavior for applications with specific network traffic patterns."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `connection_tracking_specification` block within the `network_interfaces` configuration of the `aws_launch_template` resource defines settings for managing connection tracking behavior, such as handling stateful or stateless packet flows. This block enables fine-grained control over how network traffic is tracked and processed, optimizing security and performance for EC2 instances by leveraging features like enhanced connection tracking or specific configurations for ENA SRD (Scalable Reliable Datagram)."
+        },
+        {
+          "name": "ena_srd_specification",
+          "description": "(Optional) Configuration for Elastic Network Adapter (ENA) Express settings. Applies to network interfaces that use the ena Express feature. See details below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "ena_srd_enabled",
+              "description": "(Optional) Whether to enable ENA Express. ENA Express uses AWS Scalable Reliable Datagram (SRD) technology to improve the performance of TCP traffic.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `ena_srd_enabled` argument in the `ena_srd_specification` block of the `aws_launch_template` resource allows users to control whether ENA Express, powered by AWS Scalable Reliable Datagram (SRD) technology, is enabled for enhanced TCP traffic performance. Enabling this feature optimizes network throughput and reduces latency, making it ideal for workloads requiring high-speed and reliable data transmission."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "ena_srd_udp_specification",
+              "description": "(Optional) Configuration for ENA Express UDP optimization. See details below.  The ena_srd_udp_specification block supports the following:",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "ena_srd_udp_enabled",
+                  "description": "(Optional) Whether to enable UDP traffic optimization through ENA Express. Requires `ena_srd_enabled` to be `true`. NOTE: ENA Express requires specific instance types and minimum bandwidth of 25 Gbps. The connection_tracking_specification block supports the following:",
+                  "required": false,
+                  "type": "bool",
+                  "llm_summary": "The `ena_srd_udp_enabled` argument in the `ena_srd_udp_specification` block of the `aws_launch_template` resource allows users to enable UDP traffic optimization via ENA Express for supported EC2 instances. This enhances network performance for UDP workloads but requires `ena_srd_enabled` to be `true`, specific instance types, and a minimum network bandwidth of 25 Gbps."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `ena_srd_udp_specification` block within the `ena_srd_specification` configuration of the `aws_launch_template` resource enables fine-tuned control over ENA Express UDP optimization settings, enhancing network performance for UDP traffic in EC2 instances. This block encapsulates related settings that optimize data transfer efficiency and reliability for applications relying on UDP, helping users achieve improved throughput and reduced latency in high-performance networking scenarios."
+            }
+          ],
+          "llm_summary": "The `ena_srd_specification` block within the `network_interfaces` configuration of the `aws_launch_template` resource enables advanced settings for Elastic Network Adapter (ENA) Express, optimizing high-performance, low-latency networking for supported instances. It encapsulates related parameters to fine-tune ENA Express features, allowing users to enhance network throughput and reliability for workloads requiring accelerated data transfer."
+        }
+      ],
+      "llm_summary": "The \"network_interfaces\" configuration block in the \"aws_launch_template\" resource allows users to define and customize the network interfaces attached to an instance at launch. It encapsulates settings related to network connectivity, such as interface properties, security groups, and subnet associations, enabling detailed control over instance-level networking to meet specific connectivity, security, and performance requirements."
+    },
+    {
+      "name": "placement",
+      "description": "(Optional) The placement of the instance. See Placement below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "affinity",
+          "description": "(Optional) The affinity setting for an instance on a Dedicated Host.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `affinity` argument in the `placement` block of the `aws_launch_template` resource allows users to specify the instance's affinity relationship with a Dedicated Host, enabling control over whether the instance is explicitly associated with a specific host. Configuring this argument helps optimize resource allocation and ensures consistent placement for workloads requiring host-level affinity, such as licensing or performance-sensitive applications."
+        },
+        {
+          "name": "availability_zone",
+          "description": "(Optional) The Availability Zone for the instance.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "Specifies the Availability Zone where the instance will be launched, allowing users to control the geographic placement of their resources for purposes such as reducing latency, achieving high availability, or meeting compliance requirements. If not set, the placement is determined automatically based on other configuration parameters."
+        },
+        {
+          "name": "group_name",
+          "description": "(Optional) The name of the placement group for the instance.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `group_name` argument in the `placement` block of the `aws_launch_template` resource allows users to specify the name of a placement group for the instance, enabling control over how instances are clustered within the AWS infrastructure. By setting this argument, users can optimize instance placement for specific workloads, such as achieving low-latency communication or high availability, aligning with goals like performance tuning or fault tolerance."
+        },
+        {
+          "name": "host_id",
+          "description": "(Optional) The ID of the Dedicated Host for the instance.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `host_id` argument in the `placement` block of the `aws_launch_template` resource allows users to specify the ID of a Dedicated Host on which the instance will be launched. This enables precise control over instance placement, typically used to optimize resource allocation, ensure compliance with licensing requirements, or achieve cost efficiency by utilizing pre-allocated Dedicated Hosts."
+        },
+        {
+          "name": "host_resource_group_arn",
+          "description": "(Optional) The ARN of the Host Resource Group in which to launch instances.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "Defines the ARN of the Host Resource Group where instances will be launched, enabling users to specify dedicated host placement for instances to optimize resource allocation, improve performance, or meet compliance requirements. This argument is typically used to configure instance placement within a managed group of dedicated hosts for enhanced control over infrastructure."
+        },
+        {
+          "name": "partition_number",
+          "description": "(Optional) The number of the partition the instance should launch in. Valid only if the placement group strategy is set to partition.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "\"Defines the specific partition within a partition placement group where the instance will be launched, enabling users to control instance distribution for workload isolation or fault tolerance in partitioned cluster environments. Applicable only when the placement group strategy is set to 'partition.'\""
+        },
+        {
+          "name": "spread_domain",
+          "description": "(Optional) Reserved for future use.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `spread_domain` argument in the `placement` block of the `aws_launch_template` resource is reserved for future use and does not currently enable any specific functionality. It is intended to potentially support advanced placement strategies, such as controlling the distribution of instances across failure domains or other logical groupings, aligning with user goals of optimizing availability and fault tolerance."
+        },
+        {
+          "name": "tenancy",
+          "description": "(Optional) The tenancy of the instance (if the instance is running in a VPC). Can be `default`, `dedicated`, or `host`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `tenancy` argument in the `placement` block of the `aws_launch_template` resource allows users to specify the instance's tenancy type within a VPC, controlling whether the instance runs on shared (`default`), dedicated (`dedicated`), or host-specific (`host`) hardware. This configuration impacts resource isolation and cost, enabling users to align instance placement with compliance, performance, or cost optimization goals."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"placement\" configuration block in the \"aws_launch_template\" resource defines instance placement settings, such as availability zone, affinity, and tenancy, enabling control over where and how instances are deployed within AWS infrastructure. Configuring this block helps users optimize resource distribution, enforce tenancy policies, and align instance placement with specific architectural or cost requirements."
+    },
+    {
+      "name": "private_dns_name_options",
+      "description": "(Optional) The options for the instance hostname. The default values are inherited from the subnet. See Private DNS Name Options below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enable_resource_name_dns_a_record",
+          "description": "(Optional) Indicates whether to respond to DNS queries for instance hostnames with DNS A records.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "Controls whether DNS A records are created for instance hostnames in the private DNS namespace, enabling users to configure DNS resolution for instances launched with the template. Setting this argument to `true` ensures instances can be resolved by their hostnames via DNS queries, supporting network connectivity and hostname-based access within private environments."
+        },
+        {
+          "name": "enable_resource_name_dns_aaaa_record",
+          "description": "(Optional) Indicates whether to respond to DNS queries for instance hostnames with DNS AAAA records.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "Controls whether the launch template's private DNS name options respond to DNS queries for instance hostnames with AAAA records, enabling IPv6 address resolution. This argument allows users to configure DNS behavior for instances, supporting environments that require IPv6 connectivity."
+        },
+        {
+          "name": "hostname_type",
+          "description": "(Optional) The type of hostname for Amazon EC2 instances. For IPv4 only subnets, an instance DNS name must be based on the instance IPv4 address. For IPv6 native subnets, an instance DNS name must be based on the instance ID. For dual-stack subnets, you can specify whether DNS names use the instance IPv4 address or the instance ID. Valid values: `ip-name` and `resource-name`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `hostname_type` argument in the `private_dns_name_options` block of the `aws_launch_template` resource allows users to specify the type of DNS hostname assigned to Amazon EC2 instances. It controls whether the instance's private DNS name is based on its IPv4 address (`ip-name`) or its instance ID (`resource-name`), enabling users to align DNS naming behavior with the network configuration of their subnets (e.g., IPv4-only, IPv6-native, or dual-stack)."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `private_dns_name_options` block in the `aws_launch_template` resource configures hostname-related settings for instances, allowing users to define how private DNS names are assigned and resolved. It encapsulates options for customizing instance hostnames, overriding default subnet behavior, and enabling granular control over DNS naming conventions to align with specific networking requirements."
+    },
+    {
+      "name": "tag_specifications",
+      "description": "(Optional) The tags to apply to the resources during launch. See Tag Specifications below for more details. Default tags are currently not propagated to ASG created resources so you may wish to inject your default tags into this variable against the relevant child resource types created.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "resource_type",
+          "description": "(Optional) The type of resource to tag.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `resource_type` argument in the `tag_specifications` block of the `aws_launch_template` resource allows users to specify the type of AWS resource (e.g., instance, volume) to which the defined tags should be applied. By setting this argument, users can ensure that tags are consistently associated with specific resource types, enabling streamlined resource organization, cost tracking, and policy enforcement across their infrastructure."
+        },
+        {
+          "name": "tags",
+          "description": "(Optional) A map of tags to assign to the resource.",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `tags` argument within `tag_specifications` for the `aws_launch_template` resource allows users to define a map of key-value pairs to assign metadata tags to associated AWS resources created by the launch template (e.g., EC2 instances, volumes). This enables users to organize, categorize, and manage resources effectively by specifying attributes like environment, cost center, or application, supporting common goals such as resource tracking, automation, and cost allocation."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `tag_specifications` block in the `aws_launch_template` resource allows users to define tags that are applied to specific resource types created during instance launch, such as volumes or network interfaces. This block enables granular control over resource tagging, helping users organize, track, and manage cloud resources effectively, especially in scenarios where default tags are not automatically propagated to Auto Scaling Group (ASG)-created resources."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) of the launch template.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "latest_version",
+      "description": "The latest version of the launch template.",
+      "optional": false,
+      "type": "number"
+    }
+  ]
+}

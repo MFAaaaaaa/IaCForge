@@ -1,0 +1,93 @@
+{
+  "resource": {
+    "name": "aws_internet_gateway",
+    "description": "Provides a resource to create a VPC Internet Gateway.",
+    "llm_summary": "The `aws_internet_gateway` Terraform resource enables the creation and management of an Internet Gateway, a critical component for connecting resources within a VPC to the public internet. Common use cases include enabling outbound internet access for EC2 instances, supporting public-facing applications, and facilitating hybrid cloud connectivity. Users can configure lifecycle settings, attach the gateway to specific VPCs, and manage dependencies for seamless integration with routing tables and NAT gateways."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_internet_gateway\" \"gw\" {\n  vpc_id = aws_vpc.main.id\n\n  tags = {\n    Name = \"main\"\n  }\n}",
+      "llm_summary": "\"Demonstrates the basic setup of an AWS Internet Gateway by associating it with a VPC using the `vpc_id` argument and adding a `tags` block for resource identification. This example helps users understand how to create and tag an Internet Gateway for enabling internet access in a VPC.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_internet_gateway` resource represents the unique identifier of the internet gateway, typically assigned by AWS upon creation. While not required for configuration, it is often used for referencing the gateway in other resources or outputs, enabling users to integrate it into broader infrastructure workflows or track its state within their environment."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level. It's recommended to denote that the AWS Instance or Elastic IP depends on the Internet Gateway. For example: ```hcl resource \"aws_internet_gateway\" \"gw\" { vpc_id = aws_vpc.main.id } resource \"aws_instance\" \"foo\" { # ... other arguments ... depends_on = [aws_internet_gateway.gw] } ```",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_internet_gateway` resource allows users to assign metadata in the form of key-value pairs to the Internet Gateway, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or automation workflows. By configuring this argument, users can ensure consistent tagging across their infrastructure and override provider-level default tags for more granular control."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_internet_gateway` resource allows users to define a comprehensive set of key-value tags that are automatically merged with resource-specific tags, enabling consistent metadata management across AWS resources. By configuring this argument, users can streamline tagging strategies for purposes like cost allocation, resource organization, or environment identification."
+    },
+    {
+      "name": "vpc_id",
+      "description": "(Optional) The VPC ID to create in. See the aws_internet_gateway_attachment resource for an alternate way to attach an Internet Gateway to a VPC.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `vpc_id` argument allows users to specify the ID of the VPC in which the Internet Gateway will be created, enabling direct association with a specific VPC. By setting this argument, users can control the network environment for the gateway, ensuring it is attached to the desired VPC for routing external traffic, though attachment can alternatively be managed using the `aws_internet_gateway_attachment` resource."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_internet_gateway` resource allows users to specify the maximum duration (in string format, e.g., \"5m\" for 5 minutes) Terraform should wait for the creation of an internet gateway to complete. By configuring this timeout, users can control the resource provisioning behavior to align with their infrastructure deployment expectations, ensuring smoother workflows in cases of network or API delays."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block for the `aws_internet_gateway` resource allows users to specify the maximum duration (as a string) Terraform should wait for the deletion of an internet gateway to complete. By configuring this timeout, users can control the lifecycle behavior during resource destruction, ensuring operations do not hang indefinitely or fail prematurely in cases of delayed API responses or dependencies."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_internet_gateway` resource allows users to specify the maximum duration (as a string) Terraform should wait for an update operation on the internet gateway to complete. By configuring this timeout, users can ensure smoother resource lifecycle management, particularly in scenarios where updates may take longer due to network or infrastructure delays."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_internet_gateway` resource allows users to define custom timeout durations for create, update, and delete operations, ensuring precise control over the resource's provisioning lifecycle. By configuring this block, users can optimize operation time limits to align with their infrastructure requirements and avoid potential delays or failures during resource management."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the Internet Gateway.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "owner_id",
+      "description": "The ID of the AWS account that owns the internet gateway.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

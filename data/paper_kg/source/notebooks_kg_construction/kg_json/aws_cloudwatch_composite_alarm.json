@@ -1,0 +1,108 @@
+{
+    "resource": {
+        "name": "aws_cloudwatch_composite_alarm",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "actions_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "alarm_actions",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "alarm_description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "alarm_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "alarm_rule",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "insufficient_data_actions",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "ok_actions",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "actions_suppressor",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "alarm",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "extension_period",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                },
+                {
+                    "name": "wait_period",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

@@ -1,0 +1,80 @@
+{
+  "resource": {
+    "name": "aws_placement_group",
+    "description": "Provides an EC2 placement group. Read more about placement groups in AWS Docs.",
+    "llm_summary": "The `aws_placement_group` Terraform resource enables the creation and management of EC2 placement groups, which optimize the placement of instances to improve network performance or reduce latency. Common use cases include configuring tightly-coupled workloads, such as high-performance computing (HPC), distributed databases, or applications requiring low-latency communication. Users can define placement strategies like `cluster`, `spread`, or `partition` to control instance distribution and enhance fault tolerance or performance based on workload requirements."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_placement_group\" \"web\" {\n  name     = \"hunky-dory-pg\"\n  strategy = \"cluster\"\n}",
+      "llm_summary": "\"Demonstrates the basic configuration of an `aws_placement_group` resource to optimize EC2 instance placement for high-performance workloads using the `cluster` strategy. Highlights key arguments such as `name` for identifying the placement group and `strategy` for defining the placement type.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_placement_group` resource allows users to specify a unique identifier for the placement group, enabling explicit control over its naming for reference or management purposes. While optional, setting this argument can help users ensure consistency and facilitate integration with other resources or workflows that depend on the placement group's identifier."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name of the placement group.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_placement_group` resource specifies the unique identifier for the placement group, allowing users to define a meaningful name that organizes and references the group within their AWS environment. Setting this argument enables the creation of a placement group that optimizes instance placement strategies, such as clustering or spreading, to improve performance or fault tolerance based on workload requirements."
+    },
+    {
+      "name": "partition_count",
+      "description": "(Optional) The number of partitions to create in the placement group. Can only be specified when the `strategy` is set to `partition`. Valid values are 1 - 7 (default is `2`).",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `partition_count` argument in the `aws_placement_group` resource allows users to define the number of partitions within a placement group when the `strategy` is set to `partition`. This configuration impacts how instances are distributed across partitions, enabling users to optimize workload isolation and fault tolerance, with valid values ranging from 1 to 7 (default is 2)."
+    },
+    {
+      "name": "spread_level",
+      "description": "(Optional) Determines how placement groups spread instances. Can only be used when the `strategy` is set to `spread`. Can be `host` or `rack`. `host` can only be used for Outpost placement groups. Defaults to `rack`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `spread_level` argument in the `aws_placement_group` resource specifies the granularity at which instances are distributed within a placement group when the `strategy` is set to `spread`. By setting this argument to either `host` (for Outpost placement groups) or `rack` (default), users can control the physical separation of instances to optimize fault tolerance and reduce the risk of correlated failures."
+    },
+    {
+      "name": "strategy",
+      "description": "(Required) The placement strategy. Can be `cluster`, `partition` or `spread`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `strategy` argument in the `aws_placement_group` resource specifies the placement strategy for grouping EC2 instances, allowing users to control how instances are distributed across underlying hardware to optimize performance or fault tolerance. By setting this required argument to `cluster`, `partition`, or `spread`, users can achieve goals such as minimizing latency, isolating workloads, or enhancing availability based on their application's needs."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Key-value map of resource tags. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_placement_group` resource allows users to define a key-value map of metadata to categorize, organize, and manage the placement group within AWS. By setting this argument, users can associate custom tags for purposes like cost allocation, environment identification (e.g., \"production\" or \"development\"), or resource tracking, with the ability to override provider-level default tags for enhanced control."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_placement_group` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to all resources associated with the placement group. This enables streamlined resource organization, cost allocation, and metadata management, supporting common user goals like tagging for environment identification, compliance, or billing purposes."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) of the placement group.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "placement_group_id",
+      "description": "The ID of the placement group.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

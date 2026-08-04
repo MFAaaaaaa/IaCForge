@@ -1,0 +1,168 @@
+{
+    "resource": {
+        "name": "aws_db_snapshot",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "db_instance_identifier",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "db_snapshot_identifier",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "shared_accounts",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "allocated_storage",
+            "description": "",
+            "optional": false,
+            "type": "number"
+        },
+        {
+            "name": "availability_zone",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "db_snapshot_arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "encrypted",
+            "description": "",
+            "optional": false,
+            "type": "bool"
+        },
+        {
+            "name": "engine",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "engine_version",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "iops",
+            "description": "",
+            "optional": false,
+            "type": "number"
+        },
+        {
+            "name": "kms_key_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "license_model",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "option_group_name",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "port",
+            "description": "",
+            "optional": false,
+            "type": "number"
+        },
+        {
+            "name": "snapshot_type",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "source_db_snapshot_identifier",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "source_region",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "status",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "storage_type",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "vpc_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

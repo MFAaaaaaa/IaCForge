@@ -1,0 +1,252 @@
+{
+    "resource": {
+        "name": "aws_cloudwatch_metric_alarm",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "actions_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "alarm_actions",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "alarm_description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "alarm_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "comparison_operator",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "datapoints_to_alarm",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "dimensions",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "evaluate_low_sample_count_percentiles",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "evaluation_periods",
+            "description": "",
+            "required": true,
+            "type": "number"
+        },
+        {
+            "name": "extended_statistic",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "insufficient_data_actions",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "metric_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "namespace",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ok_actions",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "period",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "statistic",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "threshold",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "threshold_metric_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "treat_missing_data",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "unit",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "metric_query",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "account_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "expression",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "id",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "label",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "period",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "return_data",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "metric",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "dimensions",
+                            "description": "",
+                            "required": false,
+                            "type": "map(string)"
+                        },
+                        {
+                            "name": "metric_name",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "namespace",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "period",
+                            "description": "",
+                            "required": true,
+                            "type": "number"
+                        },
+                        {
+                            "name": "stat",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "unit",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

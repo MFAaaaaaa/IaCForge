@@ -1,0 +1,57 @@
+[
+    {
+        "argument_path": "kafka_cluster.apache_kafka_cluster.bootstrap_servers",
+        "references_output": "aws_msk_cluster.bootstrap_brokers_tls",
+        "target_resource_type": "aws_msk_cluster"
+    },
+    {
+        "argument_path": "kafka_cluster.apache_kafka_cluster.vpc.security_groups",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "kafka_cluster.apache_kafka_cluster.vpc.subnets",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "plugin.custom_plugin.arn",
+        "references_output": "aws_mskconnect_custom_plugin.arn",
+        "target_resource_type": "aws_mskconnect_custom_plugin"
+    },
+    {
+        "argument_path": "plugin.custom_plugin.revision",
+        "references_output": "aws_mskconnect_custom_plugin.latest_revision",
+        "target_resource_type": "aws_mskconnect_custom_plugin"
+    },
+    {
+        "argument_path": "service_execution_role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "worker_configuration.arn",
+        "references_output": "aws_mskconnect_worker_configuration.arn",
+        "target_resource_type": "aws_mskconnect_worker_configuration"
+    },
+    {
+        "argument_path": "worker_configuration.revision",
+        "references_output": "aws_mskconnect_worker_configuration.revision",
+        "target_resource_type": "aws_mskconnect_worker_configuration"
+    },
+    {
+        "argument_path": "log_delivery.worker_log_delivery.cloudwatch_logs.log_group",
+        "references_output": "aws_cloudwatch_log_group.name",
+        "target_resource_type": "aws_cloudwatch_log_group"
+    },
+    {
+        "argument_path": "log_delivery.worker_log_delivery.firehose.delivery_stream",
+        "references_output": "aws_kinesis_firehose_delivery_stream.name",
+        "target_resource_type": "aws_kinesis_firehose_delivery_stream"
+    },
+    {
+        "argument_path": "log_delivery.worker_log_delivery.s3.bucket",
+        "references_output": "aws_s3_bucket.bucket",
+        "target_resource_type": "aws_s3_bucket"
+    }
+]

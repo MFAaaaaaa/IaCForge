@@ -1,0 +1,67 @@
+[
+    {
+        "argument_path": "service_execution_role",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "application_configuration.application_code_configuration.code_content.s3_content_location.bucket_arn",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "application_configuration.application_code_configuration.code_content.s3_content_location.file_key",
+        "references_output": "aws_s3_object.key",
+        "target_resource_type": "aws_s3_object"
+    },
+    {
+        "argument_path": "application_configuration.vpc_configuration.security_group_ids",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "application_configuration.vpc_configuration.subnet_ids",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "application_configuration.sql_application_configuration.input.kinesis_streams_input.resource_arn",
+        "references_output": "aws_kinesis_stream.arn",
+        "target_resource_type": "aws_kinesis_stream"
+    },
+    {
+        "argument_path": "application_configuration.sql_application_configuration.input.kinesis_firehose_input.resource_arn",
+        "references_output": "aws_kinesis_firehose_delivery_stream.arn",
+        "target_resource_type": "aws_kinesis_firehose_delivery_stream"
+    },
+    {
+        "argument_path": "application_configuration.sql_application_configuration.input.input_processing_configuration.input_lambda_processor.resource_arn",
+        "references_output": "aws_lambda_function.arn",
+        "target_resource_type": "aws_lambda_function"
+    },
+    {
+        "argument_path": "application_configuration.sql_application_configuration.output.lambda_output.resource_arn",
+        "references_output": "aws_lambda_function.arn",
+        "target_resource_type": "aws_lambda_function"
+    },
+    {
+        "argument_path": "application_configuration.sql_application_configuration.output.kinesis_streams_output.resource_arn",
+        "references_output": "aws_kinesis_stream.arn",
+        "target_resource_type": "aws_kinesis_stream"
+    },
+    {
+        "argument_path": "application_configuration.sql_application_configuration.output.kinesis_firehose_output.resource_arn",
+        "references_output": "aws_kinesis_firehose_delivery_stream.arn",
+        "target_resource_type": "aws_kinesis_firehose_delivery_stream"
+    },
+    {
+        "argument_path": "application_configuration.sql_application_configuration.reference_data_source.s3_reference_data_source.bucket_arn",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "cloudwatch_logging_options.log_stream_arn",
+        "references_output": "aws_cloudwatch_log_stream.arn",
+        "target_resource_type": "aws_cloudwatch_log_stream"
+    }
+]

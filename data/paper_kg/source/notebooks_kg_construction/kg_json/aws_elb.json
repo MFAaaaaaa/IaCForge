@@ -1,0 +1,273 @@
+{
+    "resource": {
+        "name": "aws_elb",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "availability_zones",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "connection_draining",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "connection_draining_timeout",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "cross_zone_load_balancing",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "desync_mitigation_mode",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "idle_timeout",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "instances",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "internal",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "security_groups",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "source_security_group",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "subnets",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "access_logs",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "bucket",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "bucket_prefix",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "enabled",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "interval",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "health_check",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "healthy_threshold",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                },
+                {
+                    "name": "interval",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                },
+                {
+                    "name": "target",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "timeout",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                },
+                {
+                    "name": "unhealthy_threshold",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "listener",
+            "description": "",
+            "cardinality": [
+                1,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "instance_port",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                },
+                {
+                    "name": "instance_protocol",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "lb_port",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                },
+                {
+                    "name": "lb_protocol",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "ssl_certificate_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "dns_name",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "source_security_group_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "zone_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

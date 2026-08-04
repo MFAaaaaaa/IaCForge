@@ -1,0 +1,57 @@
+[
+    {
+        "argument_path": "index_id",
+        "references_output": "aws_kendra_index.id",
+        "target_resource_type": "aws_kendra_index"
+    },
+    {
+        "argument_path": "role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "configuration.s3_configuration.bucket_name",
+        "references_output": "aws_s3_bucket.id",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "configuration.s3_configuration.access_control_list_configuration.key_path",
+        "references_output": "aws_s3_bucket.id",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "configuration.web_crawler_configuration.authentication_configuration.basic_authentication.credentials",
+        "references_output": "aws_secretsmanager_secret.arn",
+        "target_resource_type": "aws_secretsmanager_secret"
+    },
+    {
+        "argument_path": "configuration.web_crawler_configuration.proxy_configuration.credentials",
+        "references_output": "aws_secretsmanager_secret.arn",
+        "target_resource_type": "aws_secretsmanager_secret"
+    },
+    {
+        "argument_path": "custom_document_enrichment_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "custom_document_enrichment_configuration.pre_extraction_hook_configuration.lambda_arn",
+        "references_output": "aws_lambda_function.arn",
+        "target_resource_type": "aws_lambda_function"
+    },
+    {
+        "argument_path": "custom_document_enrichment_configuration.pre_extraction_hook_configuration.s3_bucket",
+        "references_output": "aws_s3_bucket.id",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "custom_document_enrichment_configuration.post_extraction_hook_configuration.lambda_arn",
+        "references_output": "aws_lambda_function.arn",
+        "target_resource_type": "aws_lambda_function"
+    },
+    {
+        "argument_path": "custom_document_enrichment_configuration.post_extraction_hook_configuration.s3_bucket",
+        "references_output": "aws_s3_bucket.id",
+        "target_resource_type": "aws_s3_bucket"
+    }
+]

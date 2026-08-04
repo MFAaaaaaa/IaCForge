@@ -1,0 +1,36 @@
+{
+    "resource": {
+        "name": "aws_route53_query_log",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "cloudwatch_log_group_arn",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "zone_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

@@ -1,0 +1,773 @@
+{
+    "resource": {
+        "name": "aws_s3_bucket",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "acceleration_status",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "acl",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "bucket",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "bucket_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "force_destroy",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "object_lock_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "policy",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "request_payer",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "cors_rule",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "allowed_headers",
+                    "description": "",
+                    "required": false,
+                    "type": "list(string)"
+                },
+                {
+                    "name": "allowed_methods",
+                    "description": "",
+                    "required": true,
+                    "type": "list(string)"
+                },
+                {
+                    "name": "allowed_origins",
+                    "description": "",
+                    "required": true,
+                    "type": "list(string)"
+                },
+                {
+                    "name": "expose_headers",
+                    "description": "",
+                    "required": false,
+                    "type": "list(string)"
+                },
+                {
+                    "name": "max_age_seconds",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "grant",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "permissions",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "type",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "uri",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "lifecycle_rule",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "abort_incomplete_multipart_upload_days",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "enabled",
+                    "description": "",
+                    "required": true,
+                    "type": "bool"
+                },
+                {
+                    "name": "id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "prefix",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "tags",
+                    "description": "",
+                    "required": false,
+                    "type": "map(string)"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "expiration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "date",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "days",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "expired_object_delete_marker",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "noncurrent_version_expiration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "days",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "noncurrent_version_transition",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        0
+                    ],
+                    "arguments": [
+                        {
+                            "name": "days",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "storage_class",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "transition",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        0
+                    ],
+                    "arguments": [
+                        {
+                            "name": "date",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "days",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "storage_class",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "logging",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "target_bucket",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "target_prefix",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "object_lock_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "object_lock_enabled",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "rule",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "default_retention",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "days",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "mode",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "years",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "replication_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "role",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "rules",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        0
+                    ],
+                    "arguments": [
+                        {
+                            "name": "delete_marker_replication_status",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "id",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "priority",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "status",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "destination",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "account_id",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "bucket",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "replica_kms_key_id",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "storage_class",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "access_control_translation",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "owner",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "metrics",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "minutes",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "status",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "replication_time",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "minutes",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "status",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        },
+                        {
+                            "name": "filter",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "prefix",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "tags",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "map(string)"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "source_selection_criteria",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [],
+                            "blocks": [
+                                {
+                                    "name": "sse_kms_encrypted_objects",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "enabled",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "bool"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "server_side_encryption_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "rule",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "bucket_key_enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "apply_server_side_encryption_by_default",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "kms_master_key_id",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "sse_algorithm",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "read",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "versioning",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "enabled",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "mfa_delete",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "website",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "error_document",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "index_document",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "redirect_all_requests_to",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "routing_rules",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "bucket_domain_name",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "bucket_regional_domain_name",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "hosted_zone_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "region",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "website_domain",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "website_endpoint",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

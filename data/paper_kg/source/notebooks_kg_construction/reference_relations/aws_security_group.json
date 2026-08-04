@@ -1,0 +1,27 @@
+[
+    {
+        "argument_path": "vpc_id",
+        "references_output": "aws_vpc.id",
+        "target_resource_type": "aws_vpc"
+    },
+    {
+        "argument_path": "ingress.prefix_list_ids",
+        "references_output": "aws_vpc_endpoint.prefix_list_id",
+        "target_resource_type": "aws_vpc_endpoint"
+    },
+    {
+        "argument_path": "egress.prefix_list_ids",
+        "references_output": "aws_vpc_endpoint.prefix_list_id",
+        "target_resource_type": "aws_vpc_endpoint"
+    },
+    {
+        "argument_path": "ingress.security_groups",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "egress.security_groups",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    }
+]

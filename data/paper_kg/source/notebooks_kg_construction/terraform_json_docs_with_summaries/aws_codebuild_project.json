@@ -1,0 +1,924 @@
+{
+  "resource": {
+    "name": "aws_codebuild_project",
+    "description": "Provides a CodeBuild Project resource. See also the aws_codebuild_webhook resource, which manages the webhook to the source (e.g., the \"rebuild every time a code change is pushed\" option in the CodeBuild web console).",
+    "llm_summary": "The `aws_codebuild_project` resource enables the creation and management of AWS CodeBuild projects, which automate software build and testing workflows in CI/CD pipelines. It supports configurations for source code integration (e.g., Git repositories), build environments, logging, caching, and artifact storage, allowing users to customize build processes for diverse programming languages and frameworks. Common use cases include setting up automated builds triggered by code changes, integrating with version control systems, and optimizing build performance with caching and environment variables."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"example\"\n}\n\nresource \"aws_s3_bucket_acl\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n  acl    = \"private\"\n}\n\ndata \"aws_iam_policy_document\" \"assume_role\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"codebuild.amazonaws.com\"]\n    }\n\n    actions = [\"sts:AssumeRole\"]\n  }\n}\n\nresource \"aws_iam_role\" \"example\" {\n  name               = \"example\"\n  assume_role_policy = data.aws_iam_policy_document.assume_role.json\n}\n\ndata \"aws_iam_policy_document\" \"example\" {\n  statement {\n    effect = \"Allow\"\n\n    actions = [\n      \"logs:CreateLogGroup\",\n      \"logs:CreateLogStream\",\n      \"logs:PutLogEvents\",\n    ]\n\n    resources = [\"*\"]\n  }\n\n  statement {\n    effect = \"Allow\"\n\n    actions = [\n      \"ec2:CreateNetworkInterface\",\n      \"ec2:DescribeDhcpOptions\",\n      \"ec2:DescribeNetworkInterfaces\",\n      \"ec2:DeleteNetworkInterface\",\n      \"ec2:DescribeSubnets\",\n      \"ec2:DescribeSecurityGroups\",\n      \"ec2:DescribeVpcs\",\n    ]\n\n    resources = [\"*\"]\n  }\n\n  statement {\n    effect    = \"Allow\"\n    actions   = [\"ec2:CreateNetworkInterfacePermission\"]\n    resources = [\"arn:aws:ec2:us-east-1:123456789012:network-interface/*\"]\n\n    condition {\n      test     = \"StringEquals\"\n      variable = \"ec2:Subnet\"\n\n      values = [\n        aws_subnet.example1.arn,\n        aws_subnet.example2.arn,\n      ]\n    }\n\n    condition {\n      test     = \"StringEquals\"\n      variable = \"ec2:AuthorizedService\"\n      values   = [\"codebuild.amazonaws.com\"]\n    }\n  }\n\n  statement {\n    effect  = \"Allow\"\n    actions = [\"s3:*\"]\n    resources = [\n      aws_s3_bucket.example.arn,\n      \"${aws_s3_bucket.example.arn}/*\",\n    ]\n  }\n\n  statement {\n    effect = \"Allow\"\n    actions = [\n      \"codeconnections:GetConnectionToken\",\n      \"codeconnections:GetConnection\"\n    ]\n    resources = [\"arn:aws:codestar-connections:us-east-1:123456789012:connection/guid-string\"]\n  }\n}\n\nresource \"aws_iam_role_policy\" \"example\" {\n  role   = aws_iam_role.example.name\n  policy = data.aws_iam_policy_document.example.json\n}\n\nresource \"aws_codebuild_project\" \"example\" {\n  name          = \"test-project\"\n  description   = \"test_codebuild_project\"\n  build_timeout = 5\n  service_role  = aws_iam_role.example.arn\n\n  artifacts {\n    type = \"NO_ARTIFACTS\"\n  }\n\n  cache {\n    type     = \"S3\"\n    location = aws_s3_bucket.example.bucket\n  }\n\n  environment {\n    compute_type                = \"BUILD_GENERAL1_SMALL\"\n    image                       = \"aws/codebuild/amazonlinux2-x86_64-standard:4.0\"\n    type                        = \"LINUX_CONTAINER\"\n    image_pull_credentials_type = \"CODEBUILD\"\n\n    environment_variable {\n      name  = \"SOME_KEY1\"\n      value = \"SOME_VALUE1\"\n    }\n\n    environment_variable {\n      name  = \"SOME_KEY2\"\n      value = \"SOME_VALUE2\"\n      type  = \"PARAMETER_STORE\"\n    }\n  }\n\n  logs_config {\n    cloudwatch_logs {\n      group_name  = \"log-group\"\n      stream_name = \"log-stream\"\n    }\n\n    s3_logs {\n      status   = \"ENABLED\"\n      location = \"${aws_s3_bucket.example.id}/build-log\"\n    }\n  }\n\n  source {\n    type            = \"GITHUB\"\n    location        = \"https://github.com/mitchellh/packer.git\"\n    git_clone_depth = 1\n\n    git_submodules_config {\n      fetch_submodules = true\n    }\n  }\n\n  source_version = \"master\"\n\n  vpc_config {\n    vpc_id = aws_vpc.example.id\n\n    subnets = [\n      aws_subnet.example1.id,\n      aws_subnet.example2.id,\n    ]\n\n    security_group_ids = [\n      aws_security_group.example1.id,\n      aws_security_group.example2.id,\n    ]\n  }\n\n  tags = {\n    Environment = \"Test\"\n  }\n}\n\nresource \"aws_codebuild_project\" \"project-with-cache\" {\n  name           = \"test-project-cache\"\n  description    = \"test_codebuild_project_cache\"\n  build_timeout  = 5\n  queued_timeout = 5\n\n  service_role = aws_iam_role.example.arn\n\n  artifacts {\n    type = \"NO_ARTIFACTS\"\n  }\n\n  cache {\n    type  = \"LOCAL\"\n    modes = [\"LOCAL_DOCKER_LAYER_CACHE\", \"LOCAL_SOURCE_CACHE\"]\n  }\n\n  environment {\n    compute_type                = \"BUILD_GENERAL1_SMALL\"\n    image                       = \"aws/codebuild/amazonlinux2-x86_64-standard:4.0\"\n    type                        = \"LINUX_CONTAINER\"\n    image_pull_credentials_type = \"CODEBUILD\"\n\n    environment_variable {\n      name  = \"SOME_KEY1\"\n      value = \"SOME_VALUE1\"\n    }\n  }\n\n  source {\n    type            = \"GITHUB\"\n    location        = \"https://github.com/mitchellh/packer.git\"\n    git_clone_depth = 1\n  }\n\n  tags = {\n    Environment = \"Test\"\n  }\n}\n\nresource \"aws_codebuild_project\" \"project-using-github-app\" {\n  name         = \"project-using-github-app\"\n  description  = \"gets_source_from_github_via_the_github_app\"\n  service_role = aws_iam_role.example.arn\n\n  artifacts {\n    type = \"NO_ARTIFACTS\"\n  }\n\n  environment {\n    compute_type                = \"BUILD_GENERAL1_SMALL\"\n    image                       = \"aws/codebuild/amazonlinux2-x86_64-standard:4.0\"\n    type                        = \"LINUX_CONTAINER\"\n    image_pull_credentials_type = \"CODEBUILD\"\n  }\n\n  source {\n    type     = \"GITHUB\"\n    location = \"https://github.com/example/example.git\"\n    auth {\n      type     = \"CODECONNECTIONS\"\n      resource = \"arn:aws:codestar-connections:us-east-1:123456789012:connection/guid-string\"\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates the configuration of multiple `aws_codebuild_project` resources, showcasing key features such as integration with GitHub repositories, VPC connectivity, S3 caching, local caching modes, and authentication via CodeStar Connections. It illustrates advanced settings like environment variables, logging configurations, and IAM roles/policies for granular permissions, enabling users to set up CodeBuild projects tailored to diverse build and deployment scenarios."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "badge_enabled",
+      "description": "(Optional) Generates a publicly-accessible URL for the projects build badge. Available as `badge_url` attribute when enabled.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `badge_enabled` argument in the `aws_codebuild_project` resource allows users to control whether a publicly accessible URL is generated for the project's build badge, which visually represents the build status. Enabling this feature is useful for integrating build status indicators into external platforms, such as documentation or repositories, to enhance visibility and transparency of project health."
+    },
+    {
+      "name": "build_timeout",
+      "description": "(Optional) Number of minutes, from 5 to 2160 (36 hours), for AWS CodeBuild to wait until timing out any related build that does not get marked as completed. The default is 60 minutes. The `build_timeout` property is not available on the `Lambda` compute type.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `build_timeout` argument in the `aws_codebuild_project` resource allows users to define the maximum duration, in minutes (5 to 2160), that AWS CodeBuild will wait for a build to complete before timing out. This configuration helps control build execution limits, ensuring efficient resource usage and preventing stalled builds, but is not applicable for projects using the `Lambda` compute type."
+    },
+    {
+      "name": "concurrent_build_limit",
+      "description": "(Optional) Specify a maximum number of concurrent builds for the project. The value specified must be greater than 0 and less than the account concurrent running builds limit.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `concurrent_build_limit` argument for the `aws_codebuild_project` resource allows users to define the maximum number of builds that can run concurrently for a specific CodeBuild project, ensuring controlled resource usage and preventing excessive parallel execution. This configuration is useful for optimizing build workflows, managing account-level concurrency limits, and aligning project build capacity with organizational policies or infrastructure constraints."
+    },
+    {
+      "name": "description",
+      "description": "(Optional) Short description of the project.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_codebuild_project` resource allows users to define a short, human-readable summary of the project's purpose or functionality. This optional metadata helps improve project organization and clarity, especially in environments with multiple CodeBuild projects."
+    },
+    {
+      "name": "encryption_key",
+      "description": "(Optional) AWS Key Management Service (AWS KMS) customer master key (CMK) to be used for encrypting the build project's build output artifacts.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `encryption_key` argument in the `aws_codebuild_project` resource allows users to specify an AWS KMS customer master key (CMK) for encrypting the build output artifacts of the CodeBuild project. By configuring this argument, users can enhance the security of their build artifacts, ensuring compliance with encryption requirements and protecting sensitive data during and after the build process."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_codebuild_project` resource specifies the unique identifier for the CodeBuild project, allowing users to reference and manage the project within Terraform configurations and other dependent resources. While optional, setting this argument can help ensure consistent identification and tracking of the project across infrastructure workflows."
+    },
+    {
+      "name": "name",
+      "description": "(Required) Project's name.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies the unique identifier for the CodeBuild project, allowing users to define a meaningful and recognizable name for the project. Setting this argument is essential for organizing and managing build configurations, enabling users to reference and distinguish the project within AWS services and workflows."
+    },
+    {
+      "name": "project_visibility",
+      "description": "(Optional) Specifies the visibility of the project's builds. Possible values are: `PUBLIC_READ` and `PRIVATE`. Default value is `PRIVATE`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `project_visibility` argument in the `aws_codebuild_project` resource allows users to define the accessibility of the project's build results, specifying whether they are publicly readable (`PUBLIC_READ`) or restricted to private access (`PRIVATE`). This configuration impacts the visibility of build outputs, aligning with user goals such as controlling access to build artifacts for security or collaboration purposes, with the default setting ensuring private access."
+    },
+    {
+      "name": "queued_timeout",
+      "description": "(Optional) Number of minutes, from 5 to 480 (8 hours), a build is allowed to be queued before it times out. The default is 8 hours. The `queued_timeout` property is not available on the `Lambda` compute type.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `queued_timeout` argument for the `aws_codebuild_project` resource allows users to define the maximum time, in minutes (5 to 480), that a build can remain in the queue before timing out. This setting helps control build lifecycle behavior by preventing excessively long queue times, ensuring efficient resource utilization and build pipeline management, but is not applicable when using the `Lambda` compute type."
+    },
+    {
+      "name": "resource_access_role",
+      "description": "(Optional) The ARN of the IAM role that enables CodeBuild to access the CloudWatch Logs and Amazon S3 artifacts for the project's builds in order to display them publicly. Only applicable if `project_visibility` is `PUBLIC_READ`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the ARN of an IAM role that grants CodeBuild permissions to access CloudWatch Logs and Amazon S3 artifacts for builds, specifically when the project's visibility is set to `PUBLIC_READ`. Configuring this argument ensures proper access control for publicly visible build outputs and logs, aligning with security and visibility requirements."
+    },
+    {
+      "name": "service_role",
+      "description": "(Required) Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that enables AWS CodeBuild to interact with dependent AWS services on behalf of the AWS account.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `service_role` argument specifies the IAM role (via its ARN) that grants AWS CodeBuild the necessary permissions to interact with other AWS services on behalf of the account. By defining this role, users enable CodeBuild to perform essential operations such as accessing source repositories, storing build artifacts, and managing dependent resources, ensuring secure and seamless integration with the broader AWS ecosystem."
+    },
+    {
+      "name": "source_version",
+      "description": "(Optional) Version of the build input to be built for this project. If not specified, the latest version is used.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `source_version` argument in the `aws_codebuild_project` resource allows users to specify the version of the source code to be built, such as a specific branch, tag, or commit in the source repository. By setting this argument, users can control which version of their code is used during the build process, enabling precise builds for testing, deployment, or CI/CD workflows."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_codebuild_project` resource allows users to define a map of key-value pairs to assign metadata tags to the CodeBuild project. This enables resource organization, cost allocation, and searchability by categorizing the project with labels such as environment, team, or purpose. If provider-level `default_tags` are configured, this argument allows overriding those tags for more granular control."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_codebuild_project` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to all resources associated with the CodeBuild project. This enables streamlined resource organization, cost allocation, and metadata management, aligning with common user goals like tagging for governance, billing, and searchability across AWS services."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "artifacts",
+      "description": "(Required) Configuration block. Detailed below.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "artifact_identifier",
+          "description": "(Optional) Artifact identifier. Must be the same specified inside the AWS CodeBuild build specification.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "Defines a unique identifier for the build artifact within the AWS CodeBuild project, ensuring alignment with the artifact configuration specified in the build specification file. This argument allows users to explicitly reference and manage specific artifacts during the build process, supporting workflows that require precise artifact tracking or differentiation."
+        },
+        {
+          "name": "bucket_owner_access",
+          "description": "(Optional) Specifies the bucket owner's access for objects that another account uploads to their Amazon S3 bucket. By default, only the account that uploads the objects to the bucket has access to these objects. This property allows you to give the bucket owner access to these objects. Valid values are `NONE`, `READ_ONLY`, and `FULL`. your CodeBuild service role must have the `s3:PutBucketAcl` permission. This permission allows CodeBuild to modify the access control list for the bucket.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `bucket_owner_access` argument in the `artifacts` block of the `aws_codebuild_project` resource allows users to specify the level of access granted to the Amazon S3 bucket owner for objects uploaded by CodeBuild. By setting this property (`NONE`, `READ_ONLY`, or `FULL`), users can control the bucket owner's permissions for these artifacts, ensuring compliance with access control requirements and enabling collaboration or ownership management for cross-account S3 buckets."
+        },
+        {
+          "name": "encryption_disabled",
+          "description": "(Optional) Whether to disable encrypting output artifacts. If `type` is set to `NO_ARTIFACTS`, this value is ignored. Defaults to `false`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `encryption_disabled` argument in the `artifacts` block of the `aws_codebuild_project` resource allows users to control whether output artifacts are encrypted. Setting this to `true` disables encryption, which may be useful for simplifying artifact handling in non-sensitive workflows, but is ignored if `type` is set to `NO_ARTIFACTS`."
+        },
+        {
+          "name": "location",
+          "description": "(Optional) Information about the build output artifact location. If `type` is set to `CODEPIPELINE` or `NO_ARTIFACTS`, this value is ignored. If `type` is set to `S3`, this is the name of the output bucket.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `location` argument in the `artifacts` block of the `aws_codebuild_project` resource specifies the name of the S3 bucket where build output artifacts are stored when the artifact `type` is set to `S3`. This allows users to define the storage destination for build outputs, enabling integration with S3 for artifact management and retrieval."
+        },
+        {
+          "name": "name",
+          "description": "(Optional) Name of the project. If `type` is set to `S3`, this is the name of the output artifact object",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `name` argument in the `artifacts` block of the `aws_codebuild_project` resource allows users to specify the name of the output artifact object when the artifact `type` is set to `S3`. This enables users to define a custom identifier for the artifact stored in the S3 bucket, supporting better organization and retrieval of build outputs in cloud storage."
+        },
+        {
+          "name": "namespace_type",
+          "description": "(Optional) Namespace to use in storing build artifacts. If `type` is set to `S3`, then valid values are `BUILD_ID`, `NONE`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `namespace_type` argument in the `artifacts` block of the `aws_codebuild_project` resource allows users to define how build artifacts are organized within an S3 bucket. By specifying `BUILD_ID`, artifacts are stored in a unique namespace tied to the build ID, enabling traceability and isolation for individual builds, while `NONE` disables namespace creation, storing artifacts directly in the specified bucket path. This configuration helps users control artifact storage structure to align with their build management and retention strategies."
+        },
+        {
+          "name": "override_artifact_name",
+          "description": "(Optional) Whether a name specified in the build specification overrides the artifact name.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `override_artifact_name` argument in the `artifacts` block of the `aws_codebuild_project` resource allows users to control whether the artifact name defined in the build specification file takes precedence over the default artifact name configured in the project. Setting this to `true` enables dynamic artifact naming based on the build specification, which is useful for customizing artifact outputs to align with specific build or deployment workflows."
+        },
+        {
+          "name": "packaging",
+          "description": "(Optional) Type of build output artifact to create. If `type` is set to `S3`, valid values are `NONE`, `ZIP`",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `packaging` argument in the `artifacts` block of the `aws_codebuild_project` resource allows users to specify the format of the build output artifact when the artifact type is set to `S3`. By setting this argument to either `NONE` or `ZIP`, users can control whether the output is stored as individual files or compressed into a single ZIP archive, enabling customization of artifact storage and retrieval based on project requirements."
+        },
+        {
+          "name": "path",
+          "description": "(Optional) If `type` is set to `S3`, this is the path to the output artifact.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `path` argument in the `artifacts` block of the `aws_codebuild_project` resource allows users to specify the S3 path where the output artifacts from the CodeBuild project will be stored. By defining this path, users can control the organization and location of build outputs in their S3 bucket, enabling structured artifact management and facilitating retrieval or integration with downstream workflows."
+        },
+        {
+          "name": "type",
+          "description": "(Required) Build output artifact's type. Valid values: `CODEPIPELINE`, `NO_ARTIFACTS`, `S3`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument in the `artifacts` block of the `aws_codebuild_project` resource specifies the output artifact's storage and delivery method, allowing users to define how build results are handled. By setting this required argument to one of the valid values (`CODEPIPELINE`, `NO_ARTIFACTS`, or `S3`), users can configure whether artifacts are integrated with AWS CodePipeline, omitted entirely, or stored in an S3 bucket, aligning the build process with their deployment or storage strategy."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `artifacts` configuration block in the `aws_codebuild_project` resource defines how build output artifacts are managed, including their type, location, encryption, and packaging. This block enables users to specify where and how build results are stored, ensuring proper delivery and accessibility of build outputs, such as archives or files, to downstream processes or storage systems."
+    },
+    {
+      "name": "build_batch_config",
+      "description": "(Optional) Defines the batch build options for the project.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "combine_artifacts",
+          "description": "(Optional) Specifies if the build artifacts for the batch build should be combined into a single artifact location.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `combine_artifacts` argument in the `build_batch_config` of the `aws_codebuild_project` resource allows users to control whether the artifacts generated by individual builds in a batch are merged into a single artifact location. Setting this to `true` simplifies artifact management by consolidating outputs, which is useful for workflows requiring unified build results, such as packaging or deployment pipelines."
+        },
+        {
+          "name": "service_role",
+          "description": "(Required) Specifies the service role ARN for the batch build project.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `service_role` argument in the `build_batch_config` of the `aws_codebuild_project` resource specifies the IAM role ARN that grants permissions for CodeBuild to execute batch builds. By defining this required role, users ensure the batch build process can access necessary AWS resources, such as source repositories, artifacts, and logs, aligning with security and operational requirements."
+        },
+        {
+          "name": "timeout_in_mins",
+          "description": "(Optional) Specifies the maximum amount of time, in minutes, that the batch build must be completed in.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "\"Defines the maximum duration, in minutes, for completing a batch build within the `build_batch_config` of an `aws_codebuild_project`, allowing users to control build execution time limits to prevent prolonged or stalled batch processes and align with project time constraints or resource optimization goals.\""
+        }
+      ],
+      "blocks": [
+        {
+          "name": "restrictions",
+          "description": "(Optional) Configuration block specifying the restrictions for the batch build. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "compute_types_allowed",
+              "description": "(Optional) An array of strings that specify the compute types that are allowed for the batch build. See Build environment compute types in the AWS CodeBuild User Guide for these values.",
+              "required": false,
+              "type": "list(string)",
+              "llm_summary": "Defines a list of allowed compute types for batch builds within the AWS CodeBuild project, enabling users to restrict the build environment to specific instance types for resource optimization or compliance purposes. This argument helps control the scalability and cost-efficiency of the build process by specifying which compute resources can be utilized."
+            },
+            {
+              "name": "maximum_builds_allowed",
+              "description": "(Optional) Specifies the maximum number of builds allowed.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "Defines the maximum number of concurrent builds permitted for the CodeBuild project, allowing users to control resource utilization and enforce limits on build execution. This argument helps manage project scalability and prevent overconsumption of build resources, aligning with operational or cost management goals."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The \"restrictions\" configuration block within the \"build_batch_config\" of the \"aws_codebuild_project\" resource defines constraints for batch builds, such as limiting resource usage or controlling execution parameters. It enables users to enforce specific rules or boundaries for batch build operations, ensuring compliance with organizational policies or optimizing resource allocation."
+        }
+      ],
+      "llm_summary": "The `build_batch_config` block in the `aws_codebuild_project` resource defines batch build settings, enabling the execution of multiple builds concurrently as part of a batch process. It encapsulates options such as batch build behavior, dependencies, and configurations, allowing users to optimize build workflows for parallel execution and manage complex build pipelines efficiently."
+    },
+    {
+      "name": "cache",
+      "description": "(Optional) Configuration block. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "location",
+          "description": "(Required when cache type is `S3`) Location where the AWS CodeBuild project stores cached resources. For type `S3`, the value must be a valid S3 bucket name/prefix.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `location` argument for the `aws_codebuild_project` resource's `cache` block specifies the S3 bucket and optional prefix where cached build resources are stored when the cache type is set to `S3`. Configuring this argument enables users to define the storage location for reusable build artifacts, optimizing build performance and reducing redundant resource downloads."
+        },
+        {
+          "name": "modes",
+          "description": "(Required when cache type is `LOCAL`) Specifies settings that AWS CodeBuild uses to store and reuse build dependencies. Valid values: `LOCAL_SOURCE_CACHE`, `LOCAL_DOCKER_LAYER_CACHE`, `LOCAL_CUSTOM_CACHE`.",
+          "required": false,
+          "type": "list(string)",
+          "llm_summary": "The `modes` argument for the `cache` configuration in the `aws_codebuild_project` resource specifies the caching strategies AWS CodeBuild uses to optimize build performance by storing and reusing build dependencies. By defining valid modes such as `LOCAL_SOURCE_CACHE`, `LOCAL_DOCKER_LAYER_CACHE`, or `LOCAL_CUSTOM_CACHE`, users can control how build artifacts, Docker layers, or custom data are cached locally, reducing build times and improving resource efficiency."
+        },
+        {
+          "name": "type",
+          "description": "(Optional) Type of storage that will be used for the AWS CodeBuild project cache. Valid values: `NO_CACHE`, `LOCAL`, `S3`. Defaults to `NO_CACHE`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `type` argument in the `cache` block of the `aws_codebuild_project` resource specifies the storage mechanism for the build cache, allowing users to define whether caching is disabled (`NO_CACHE`), uses local ephemeral storage (`LOCAL`), or leverages an S3 bucket (`S3`). Configuring this argument impacts build performance and cost optimization by enabling or customizing caching behavior to reduce build times and resource usage."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `cache` configuration block in the `aws_codebuild_project` resource defines caching mechanisms to optimize build performance by storing reusable build artifacts, such as dependencies or intermediate files. It encapsulates settings for cache type (e.g., S3 or local) and location, enabling users to reduce build times and improve efficiency by reusing data across builds."
+    },
+    {
+      "name": "environment",
+      "description": "(Required) Configuration block. Detailed below.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "certificate",
+          "description": "(Optional) ARN of the S3 bucket, path prefix and object key that contains the PEM-encoded certificate.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `certificate` argument in the `environment` block of the `aws_codebuild_project` resource allows users to specify the ARN of an S3 object containing a PEM-encoded certificate. This certificate is used to configure secure connections or authentication mechanisms within the build environment, enabling enhanced security for build processes that require trusted certificates."
+        },
+        {
+          "name": "compute_type",
+          "description": "(Required) Information about the compute resources the build project will use. Valid values: `BUILD_GENERAL1_SMALL`, `BUILD_GENERAL1_MEDIUM`, `BUILD_GENERAL1_LARGE`, `BUILD_GENERAL1_2XLARGE`, `BUILD_LAMBDA_1GB`, `BUILD_LAMBDA_2GB`, `BUILD_LAMBDA_4GB`, `BUILD_LAMBDA_8GB`, `BUILD_LAMBDA_10GB`. `BUILD_GENERAL1_SMALL` is only valid if `type` is set to `LINUX_CONTAINER`. When `type` is set to `LINUX_GPU_CONTAINER`, `compute_type` must be `BUILD_GENERAL1_LARGE`. When `type` is set to `LINUX_LAMBDA_CONTAINER` or `ARM_LAMBDA_CONTAINER`, `compute_type` must be `BUILD_LAMBDA_XGB`.`",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `compute_type` argument specifies the type and size of compute resources allocated for the build environment in an AWS CodeBuild project, directly impacting the performance and cost of build operations. It allows users to tailor the environment to their workload requirements, such as selecting general-purpose, GPU-optimized, or Lambda-based compute types, ensuring compatibility with the build environment's `type` and optimizing resource utilization for tasks like containerized builds or serverless workflows."
+        },
+        {
+          "name": "image",
+          "description": "(Required) Docker image to use for this build project. Valid values include Docker images provided by CodeBuild ( e.g `aws/codebuild/amazonlinux2-x86_64-standard:4.0`), Docker Hub images (e.g., `hashicorp/terraform:latest`), and full Docker repository URIs such as those for ECR (e.g., `137112412989.dkr.ecr.us-west-2.amazonaws.com/amazonlinux:latest`).",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `image` argument specifies the Docker image used to define the runtime environment for the build process in an AWS CodeBuild project. By setting this required parameter, users control the software stack and dependencies available during the build, enabling compatibility with specific tools, frameworks, or operating systems necessary for their CI/CD workflows."
+        },
+        {
+          "name": "image_pull_credentials_type",
+          "description": "(Optional) Type of credentials AWS CodeBuild uses to pull images in your build. Valid values: `CODEBUILD`, `SERVICE_ROLE`. When you use a cross-account or private registry image, you must use SERVICE_ROLE credentials. When you use an AWS CodeBuild curated image, you must use CodeBuild credentials. Defaults to `CODEBUILD`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `image_pull_credentials_type` argument specifies the type of credentials AWS CodeBuild uses to authenticate when pulling container images for the build environment. It allows users to control whether CodeBuild uses its own managed credentials (`CODEBUILD`) or credentials tied to a service role (`SERVICE_ROLE`), which is required for cross-account or private registry images. This configuration ensures proper access management for image sources, aligning with user goals like securing build environments and enabling private or external image usage."
+        },
+        {
+          "name": "privileged_mode",
+          "description": "(Optional) Whether to enable running the Docker daemon inside a Docker container. Defaults to `false`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `privileged_mode` argument in the `environment` block of the `aws_codebuild_project` resource allows users to control whether the Docker daemon can run inside a Docker container during build execution. Enabling this functionality (`true`) is typically required for builds that involve Docker-in-Docker workflows, such as building or testing container images, providing enhanced flexibility for containerized CI/CD pipelines."
+        },
+        {
+          "name": "type",
+          "description": "(Required) Type of build environment to use for related builds. Valid values: `LINUX_CONTAINER`, `LINUX_GPU_CONTAINER`, `WINDOWS_CONTAINER` (deprecated), `WINDOWS_SERVER_2019_CONTAINER`, `ARM_CONTAINER`, `LINUX_LAMBDA_CONTAINER`, `ARM_LAMBDA_CONTAINER`. For additional information, see the CodeBuild User Guide.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument specifies the build environment's underlying platform and runtime configuration for the `aws_codebuild_project`, allowing users to define the operating system, container type, and architecture used during builds. Setting this argument ensures compatibility with specific workloads, such as Linux, Windows, GPU-based, ARM-based, or Lambda-based builds, aligning the environment with the project's requirements and execution goals."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "environment_variable",
+          "description": "(Optional) Configuration block. Detailed below.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "name",
+              "description": "(Required) Environment variable's name or key.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `name` argument specifies the unique identifier or key for an environment variable within an AWS CodeBuild project's build environment. By defining this required string, users can configure custom environment variables to pass dynamic values, secrets, or configuration data into the build process, enabling tailored build behavior and automation."
+            },
+            {
+              "name": "type",
+              "description": "(Optional) Type of environment variable. Valid values: `PARAMETER_STORE`, `PLAINTEXT`, `SECRETS_MANAGER`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `type` argument for the `environment_variable` in the `aws_codebuild_project` resource specifies the source of the environment variable, allowing users to define whether the variable is plaintext (`PLAINTEXT`), retrieved securely from AWS Systems Manager Parameter Store (`PARAMETER_STORE`), or managed via AWS Secrets Manager (`SECRETS_MANAGER`). This enables users to control how sensitive data or configuration values are stored and accessed during CodeBuild project execution, aligning with security and operational requirements."
+            },
+            {
+              "name": "value",
+              "description": "(Required) Environment variable's value.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `value` argument specifies the actual content or data assigned to an environment variable in the `aws_codebuild_project` resource, enabling users to define dynamic configuration values such as credentials, paths, or runtime settings for CodeBuild build environments. By setting this argument, users can control the behavior of their build processes and ensure the necessary variables are available during execution."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `environment_variable` configuration block within the `environment` context of the `aws_codebuild_project` resource defines key-value pairs for custom environment variables used during the build process. This block enables users to inject dynamic or static values into the build environment, facilitating customization of build behavior, integration with external systems, or secure handling of sensitive data like API keys and credentials."
+        },
+        {
+          "name": "fleet",
+          "description": "(Optional) Configuration block. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "fleet_arn",
+              "description": "(Optional) Compute fleet ARN for the build project.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `fleet_arn` argument for the `aws_codebuild_project` resource allows users to specify the Amazon Resource Name (ARN) of a compute fleet to be associated with the build project. By setting this argument, users can define the fleet that provides the underlying compute resources for build execution, enabling customized resource allocation and scaling for build processes."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The \"fleet\" configuration block within the \"environment\" context of the `aws_codebuild_project` resource is used to define and manage settings related to the compute fleet used for build execution. It encapsulates parameters that control the type, size, and provisioning of the underlying compute resources, enabling users to optimize build performance and resource allocation for their CodeBuild projects. Configuring this block allows for tailored compute environments that align with specific build requirements, such as scaling or specialized hardware needs."
+        },
+        {
+          "name": "registry_credential",
+          "description": "(Optional) Configuration block. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "credential",
+              "description": "(Required) ARN or name of credentials created using AWS Secrets Manager.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `credential` argument specifies the ARN or name of credentials stored in AWS Secrets Manager, enabling the CodeBuild project to authenticate with a private Docker registry. By configuring this required parameter, users can securely manage access to container images during the build process, aligning with common goals like setting up secure environment dependencies and integrating private registries."
+            },
+            {
+              "name": "credential_provider",
+              "description": "(Required) Service that created the credentials to access a private Docker registry. Valid value: `SECRETS_MANAGER` (AWS Secrets Manager).",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `credential_provider` argument specifies the service responsible for managing credentials used to authenticate with a private Docker registry in the `registry_credential` configuration of an `aws_codebuild_project`. By setting this required argument to `SECRETS_MANAGER`, users enable secure integration with AWS Secrets Manager, ensuring sensitive registry credentials are retrieved and managed securely during the build process."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `registry_credential` block within the `environment` configuration of the `aws_codebuild_project` resource defines authentication details for accessing private container image registries. It encapsulates settings such as credential type and the ARN of the secret storing the credentials, enabling secure integration with private registries to pull container images during the build process. Configuring this block ensures seamless and secure access to private images, supporting advanced build workflows in CodeBuild."
+        }
+      ],
+      "llm_summary": "The \"environment\" configuration block in the \"aws_codebuild_project\" resource defines the runtime environment for CodeBuild projects, including compute type, image, and environment variables. It enables users to specify build settings such as the operating system, programming language runtime, and custom configurations, ensuring the build process runs in a tailored and controlled environment."
+    },
+    {
+      "name": "file_system_locations",
+      "description": "(Optional) A set of file system locations to mount inside the build. File system locations are documented below.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "identifier",
+          "description": "(Optional) The name used to access a file system created by Amazon EFS. CodeBuild creates an environment variable by appending the identifier in all capital letters to CODEBUILD_. For example, if you specify my-efs for identifier, a new environment variable is create named CODEBUILD_MY-EFS.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `identifier` argument in the `file_system_locations` block of the `aws_codebuild_project` resource allows users to define a custom name for accessing an Amazon EFS file system within the CodeBuild environment. This name is used to automatically create an environment variable (`CODEBUILD_<IDENTIFIER>`) that simplifies referencing the file system during build processes, enabling streamlined integration with EFS for tasks like caching or file storage."
+        },
+        {
+          "name": "location",
+          "description": "(Optional) A string that specifies the location of the file system created by Amazon EFS. Its format is `efs-dns-name:/directory-path`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `location` argument in the `file_system_locations` block of the `aws_codebuild_project` resource allows users to specify the Amazon EFS file system's DNS name and directory path (`efs-dns-name:/directory-path`) to be mounted during the build process. Configuring this argument enables CodeBuild to access and utilize persistent storage for build artifacts, dependencies, or caching, supporting workflows that require shared or durable file system access."
+        },
+        {
+          "name": "mount_options",
+          "description": "(Optional) The mount options for a file system created by AWS EFS.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "\"Defines custom mount options for an AWS EFS file system used in CodeBuild, allowing users to control file system behavior such as access permissions, caching, or performance settings during build execution.\""
+        },
+        {
+          "name": "mount_point",
+          "description": "(Optional) The location in the container where you mount the file system.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `mount_point` argument in the `file_system_locations` block of the `aws_codebuild_project` resource specifies the directory path within the build container where the associated file system will be mounted. Configuring this argument allows users to define the container's access point for file system storage, enabling seamless integration of external file systems for build processes, such as caching, artifact storage, or shared data access."
+        },
+        {
+          "name": "type",
+          "description": "(Optional) The type of the file system. The one supported type is `EFS`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `type` argument in the `file_system_locations` block of the `aws_codebuild_project` resource specifies the type of file system to be used for the CodeBuild project, with the supported option being `EFS` (Elastic File System). This allows users to define the file system integration for their build environment, enabling persistent storage for build artifacts or shared data across build processes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `file_system_locations` block in the `aws_codebuild_project` resource configures file system mounts for builds, enabling access to external file systems during the build process. This block encapsulates settings related to mounting and managing file system locations, allowing users to integrate persistent storage or shared data into their build environments for tasks like caching, artifact storage, or dependency management."
+    },
+    {
+      "name": "logs_config",
+      "description": "(Optional) Configuration block. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "cloudwatch_logs",
+          "description": "(Optional) Configuration block. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "group_name",
+              "description": "(Optional) Group name of the logs in CloudWatch Logs.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `group_name` argument for the `cloudwatch_logs` configuration in the `aws_codebuild_project` resource allows users to specify the name of the CloudWatch Logs group where build logs will be stored. By defining this, users can organize and direct log data to a specific log group for easier monitoring, troubleshooting, and integration with other logging workflows, supporting common goals like centralized log management and observability."
+            },
+            {
+              "name": "status",
+              "description": "(Optional) Current status of logs in CloudWatch Logs for a build project. Valid values: `ENABLED`, `DISABLED`. Defaults to `ENABLED`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `status` argument in the `cloudwatch_logs` context of the `aws_codebuild_project` resource allows users to control whether CloudWatch Logs are enabled or disabled for a build project. By setting this argument to `ENABLED` or `DISABLED`, users can define the logging behavior, impacting the visibility and monitoring of build execution details, which is essential for debugging and operational insights."
+            },
+            {
+              "name": "stream_name",
+              "description": "(Optional) Prefix of the log stream name of the logs in CloudWatch Logs.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `stream_name` argument for the `cloudwatch_logs` configuration in the `aws_codebuild_project` resource allows users to define a custom prefix for the log stream name in CloudWatch Logs. This enables users to organize and identify build logs more effectively, aligning with common goals like monitoring and debugging build processes by creating meaningful and structured log stream naming conventions."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `cloudwatch_logs` configuration block within the `logs_config` of the `aws_codebuild_project` resource enables integration with Amazon CloudWatch Logs for capturing and monitoring build output logs. It encapsulates settings related to log group and stream management, allowing users to define where build logs are stored and how they are organized. Configuring this block helps users achieve centralized logging and real-time visibility into build processes for debugging, auditing, and performance monitoring."
+        },
+        {
+          "name": "s3_logs",
+          "description": "(Optional) Configuration block. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "bucket_owner_access",
+              "description": "(Optional) Specifies the bucket owner's access for objects that another account uploads to their Amazon S3 bucket. By default, only the account that uploads the objects to the bucket has access to these objects. This property allows you to give the bucket owner access to these objects. Valid values are `NONE`, `READ_ONLY`, and `FULL`. your CodeBuild service role must have the `s3:PutBucketAcl` permission. This permission allows CodeBuild to modify the access control list for the bucket.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `bucket_owner_access` argument in the `s3_logs` configuration for the `aws_codebuild_project` resource allows users to define the level of access granted to the Amazon S3 bucket owner for objects uploaded by CodeBuild. By specifying values such as `NONE`, `READ_ONLY`, or `FULL`, users can control object permissions to align with cross-account access requirements, ensuring the bucket owner can manage or read these objects as needed."
+            },
+            {
+              "name": "encryption_disabled",
+              "description": "(Optional) Whether to disable encrypting S3 logs. Defaults to `false`.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `encryption_disabled` argument for the `s3_logs` configuration in the `aws_codebuild_project` resource allows users to control whether S3 logs generated by the CodeBuild project are encrypted. Setting this to `true` disables encryption, which may be useful for specific compliance or debugging scenarios, but defaults to `false` to ensure logs are encrypted for security best practices."
+            },
+            {
+              "name": "location",
+              "description": "(Optional) Name of the S3 bucket and the path prefix for S3 logs. Must be set if status is `ENABLED`, otherwise it must be empty.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `location` argument for the `s3_logs` configuration in the `aws_codebuild_project` resource specifies the S3 bucket name and path prefix where build logs should be stored when logging is enabled (`status = \"ENABLED\"`). This allows users to define the storage location for build logs, supporting goals like centralized log management, auditability, and integration with other S3-based workflows."
+            },
+            {
+              "name": "status",
+              "description": "(Optional) Current status of logs in S3 for a build project. Valid values: `ENABLED`, `DISABLED`. Defaults to `DISABLED`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `status` argument in the `s3_logs` configuration for the `aws_codebuild_project` resource allows users to control whether S3 logging for build project activity is enabled or disabled. By setting this argument to `ENABLED`, users can activate log storage in S3 for build events, supporting auditing and debugging workflows, while leaving it as `DISABLED` (default) disables this functionality."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `s3_logs` configuration block within the `logs_config` section of the `aws_codebuild_project` resource enables the setup of Amazon S3-based logging for CodeBuild projects. It encapsulates settings related to storing build logs in an S3 bucket, providing users with a centralized and persistent log storage solution for auditing, debugging, and compliance purposes. Configuring this block allows users to define the S3 bucket and log file prefix, ensuring detailed control over where and how build logs are stored."
+        }
+      ],
+      "llm_summary": "The `logs_config` block in the `aws_codebuild_project` resource configures logging settings for build projects, enabling users to define how and where build logs are stored and accessed. It encapsulates related settings for managing log destinations, such as CloudWatch Logs or S3, providing detailed control over log retention and visibility to monitor and debug build processes effectively."
+    },
+    {
+      "name": "secondary_artifacts",
+      "description": "(Optional) Configuration block. Detailed below.",
+      "cardinality": [
+        0,
+        12
+      ],
+      "arguments": [
+        {
+          "name": "artifact_identifier",
+          "description": "(Required) Artifact identifier. Must be the same specified inside the AWS CodeBuild build specification.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `artifact_identifier` argument in the `secondary_artifacts` block of the `aws_codebuild_project` resource specifies a unique identifier for a secondary artifact, ensuring alignment with the artifact name defined in the AWS CodeBuild build specification. This required configuration enables users to manage and reference multiple output artifacts from a single build process, supporting workflows that involve distinct artifact packaging or deployment targets."
+        },
+        {
+          "name": "bucket_owner_access",
+          "description": "(Optional) Specifies the bucket owner's access for objects that another account uploads to their Amazon S3 bucket. By default, only the account that uploads the objects to the bucket has access to these objects. This property allows you to give the bucket owner access to these objects. Valid values are `NONE`, `READ_ONLY`, and `FULL`. The CodeBuild service role must have the `s3:PutBucketAcl` permission. This permission allows CodeBuild to modify the access control list for the bucket.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `bucket_owner_access` argument in the `secondary_artifacts` block of the `aws_codebuild_project` resource allows users to define the level of access granted to the owner of an Amazon S3 bucket for objects uploaded by CodeBuild. By specifying values like `NONE`, `READ_ONLY`, or `FULL`, users can control object permissions to align with cross-account access requirements, ensuring proper collaboration or compliance while leveraging the CodeBuild service role's `s3:PutBucketAcl` permission."
+        },
+        {
+          "name": "encryption_disabled",
+          "description": "(Optional) Whether to disable encrypting output artifacts. If `type` is set to `NO_ARTIFACTS`, this value is ignored. Defaults to `false`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `encryption_disabled` argument in the `secondary_artifacts` block of the `aws_codebuild_project` resource allows users to control whether output artifacts are encrypted during storage. Setting this to `true` disables encryption, which may be useful for simplifying artifact handling in non-sensitive workflows, while leaving it as `false` (default) ensures artifacts are securely encrypted. This argument is ignored if the artifact type is set to `NO_ARTIFACTS`."
+        },
+        {
+          "name": "location",
+          "description": "(Optional) Information about the build output artifact location. If `type` is set to `CODEPIPELINE` or `NO_ARTIFACTS`, this value is ignored if specified. If `type` is set to `S3`, this is the name of the output bucket. If `path` is not specified, `location` can specify the path of the output artifact in the output bucket.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `location` argument in the `secondary_artifacts` block of the `aws_codebuild_project` resource specifies the storage destination for build output artifacts when the artifact `type` is set to `S3`. It allows users to define the name of the S3 bucket and optionally the path within the bucket where the artifacts will be stored, enabling precise control over artifact organization and retrieval. This argument is ignored for artifact types `CODEPIPELINE` or `NO_ARTIFACTS`."
+        },
+        {
+          "name": "name",
+          "description": "(Optional) Name of the project. If `type` is set to `CODEPIPELINE` or `NO_ARTIFACTS`, this value is ignored if specified. If `type` is set to `S3`, this is the name of the output artifact object.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "Defines the name of the output artifact object for a secondary artifact when the `type` is set to `S3`, allowing users to specify a unique identifier for the artifact in the S3 bucket. This argument is ignored for `CODEPIPELINE` or `NO_ARTIFACTS` types, making it relevant only for configuring S3-based artifact storage."
+        },
+        {
+          "name": "namespace_type",
+          "description": "(Optional) Namespace to use in storing build artifacts. If `type` is set to `CODEPIPELINE` or `NO_ARTIFACTS`, this value is ignored if specified. If `type` is set to `S3`, valid values are `BUILD_ID` or `NONE`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `namespace_type` argument in the `secondary_artifacts` block of the `aws_codebuild_project` resource specifies how build artifacts are organized within an S3 bucket when the artifact `type` is set to `S3`. It allows users to control whether artifacts are stored under a unique build-specific namespace (`BUILD_ID`) or without any namespace (`NONE`), enabling better organization or simplified access depending on the user's artifact management strategy."
+        },
+        {
+          "name": "override_artifact_name",
+          "description": "(Optional) Whether a name specified in the build specification overrides the artifact name.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `override_artifact_name` argument in the `secondary_artifacts` block of the `aws_codebuild_project` resource allows users to control whether the artifact name specified in the build specification takes precedence over the default artifact name defined in the project configuration. Setting this to `true` enables dynamic artifact naming based on the build specification, which is useful for customizing artifact outputs in scenarios like versioning or environment-specific builds."
+        },
+        {
+          "name": "packaging",
+          "description": "(Optional) Type of build output artifact to create. If `type` is set to `CODEPIPELINE` or `NO_ARTIFACTS`, this value is ignored if specified. If `type` is set to `S3`, valid values are `NONE` or `ZIP`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `packaging` argument in the `secondary_artifacts` block of the `aws_codebuild_project` resource specifies the format of the build output artifact when the artifact type is set to `S3`, allowing users to control whether the output is stored as a plain file (`NONE`) or compressed into a ZIP archive (`ZIP`). This configuration is ignored for artifact types `CODEPIPELINE` or `NO_ARTIFACTS` and is typically used to define how build outputs are packaged for storage or distribution in S3."
+        },
+        {
+          "name": "path",
+          "description": "(Optional) Along with `namespace_type` and `name`, the pattern that AWS CodeBuild uses to name and store the output artifact. If `type` is set to `CODEPIPELINE` or `NO_ARTIFACTS`, this value is ignored if specified. If `type` is set to `S3`, this is the path to the output artifact.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `path` argument in the `secondary_artifacts` block of the `aws_codebuild_project` resource allows users to define the storage path for output artifacts when the artifact type is set to `S3`. This configuration helps control the organization and naming structure of build outputs, enabling users to specify where artifacts are stored within the S3 bucket for better management and retrieval."
+        },
+        {
+          "name": "type",
+          "description": "(Required) Build output artifact's type. Valid values `CODEPIPELINE`, `NO_ARTIFACTS`, and `S3`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument in the `secondary_artifacts` block of the `aws_codebuild_project` resource specifies the output artifact's storage destination or integration method, allowing users to define whether the build outputs are sent to an S3 bucket, integrated with AWS CodePipeline, or omitted entirely (`NO_ARTIFACTS`). This configuration is essential for controlling how and where secondary build artifacts are stored or utilized, aligning with common goals like enabling CI/CD workflows or managing artifact storage."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `secondary_artifacts` configuration block in the `aws_codebuild_project` resource defines additional output artifacts generated by a CodeBuild project, enabling users to specify multiple artifact destinations or formats beyond the primary artifact. This block encapsulates settings related to artifact type, location, encryption, and packaging, allowing users to manage complex build workflows that produce multiple outputs for deployment, storage, or further processing."
+    },
+    {
+      "name": "secondary_source_version",
+      "description": "(Optional) Configuration block. Detailed below.",
+      "cardinality": [
+        0,
+        12
+      ],
+      "arguments": [
+        {
+          "name": "source_identifier",
+          "description": "(Required) An identifier for a source in the build project.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `source_identifier` argument specifies the unique identifier for a secondary source within the CodeBuild project, enabling users to define which source repository or artifact to associate with the `secondary_source_version`. By setting this required value, users can precisely target and manage multiple source inputs for complex build workflows, supporting scenarios like multi-repository builds or version-specific dependencies."
+        },
+        {
+          "name": "source_version",
+          "description": "(Required) The source version for the corresponding source identifier. See AWS docs for more details.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `source_version` argument specifies the exact version or revision of the secondary source code repository to be used in the CodeBuild project, enabling users to define which branch, tag, or commit should be built. This is essential for ensuring the project builds the intended code version, supporting workflows like multi-repository builds, version control, and CI/CD pipelines."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `secondary_source_version` block in the `aws_codebuild_project` resource specifies version information for secondary sources used in a CodeBuild project, such as branches, tags, or commit IDs. This block enables precise control over the version of additional source repositories, ensuring builds use the correct codebase for multi-source configurations."
+    },
+    {
+      "name": "secondary_sources",
+      "description": "(Optional) Configuration block. Detailed below.",
+      "cardinality": [
+        0,
+        12
+      ],
+      "arguments": [
+        {
+          "name": "buildspec",
+          "description": "(Optional) The build spec declaration to use for this build project's related builds. This must be set when `type` is `NO_SOURCE`. It can either be a path to a file residing in the repository to be built or a local file path leveraging the `file()` built-in.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `buildspec` argument in the `secondary_sources` context of the `aws_codebuild_project` resource allows users to define the build specification for builds associated with a secondary source. This can be a file path within the source repository or a local file path (using the `file()` function) and is required when the source type is `NO_SOURCE`. By configuring this, users can specify custom build instructions, enabling precise control over the build process for secondary sources."
+        },
+        {
+          "name": "git_clone_depth",
+          "description": "(Optional) Truncate git history to this many commits. Use `0` for a `Full` checkout which you need to run commands like `git branch --show-current`. See AWS CodePipeline User Guide: Tutorial: Use full clone with a GitHub pipeline source for details.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `git_clone_depth` argument in the `secondary_sources` block of the `aws_codebuild_project` resource allows users to control the depth of the Git history retrieved during source cloning. By specifying the number of commits to fetch, it optimizes build performance for shallow clones or enables full repository access (using `0`) for advanced Git operations like branch detection, aligning with common goals of source versioning and pipeline efficiency."
+        },
+        {
+          "name": "insecure_ssl",
+          "description": "(Optional) Ignore SSL warnings when connecting to source control.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `insecure_ssl` argument for the `secondary_sources` configuration in the `aws_codebuild_project` resource allows users to control whether SSL certificate validation warnings are ignored when connecting to the specified secondary source control repository. Setting this to `true` enables builds to proceed despite SSL issues, which can be useful for non-production environments or when working with repositories that use self-signed certificates, but it may introduce security risks."
+        },
+        {
+          "name": "location",
+          "description": "(Optional) Location of the source code from git or s3.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `location` argument in the `secondary_sources` block of the `aws_codebuild_project` resource allows users to specify the URL or path to the source code repository, such as a Git repository or an S3 bucket, for an additional code source used in the build process. Configuring this argument enables CodeBuild to retrieve and integrate secondary source code, supporting multi-repository workflows or supplemental build inputs."
+        },
+        {
+          "name": "report_build_status",
+          "description": "(Optional) Whether to report the status of a build's start and finish to your source provider. This option is valid only when your source provider is GitHub, GitHub Enterprise, GitLab, GitLab Self Managed, or Bitbucket.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `report_build_status` argument in the `secondary_sources` block of the `aws_codebuild_project` resource allows users to control whether the build's start and finish statuses are reported back to the source provider (e.g., GitHub, GitLab, Bitbucket). Enabling this functionality helps users integrate build status notifications into their version control workflows, enhancing visibility and traceability for CI/CD pipelines."
+        },
+        {
+          "name": "source_identifier",
+          "description": "(Required) An identifier for this project source. The identifier can only contain alphanumeric characters and underscores, and must be less than 128 characters in length.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `source_identifier` argument defines a unique, user-specified identifier for a secondary source in an AWS CodeBuild project, enabling users to distinguish and reference multiple source configurations within the project. By setting this required string, users can manage complex build workflows involving multiple repositories or input sources, ensuring proper association and tracking of each source during the build process."
+        },
+        {
+          "name": "type",
+          "description": "(Required) Type of repository that contains the source code to be built. Valid values: `BITBUCKET`, `CODECOMMIT`, `CODEPIPELINE`, `GITHUB`, `GITHUB_ENTERPRISE`, `GITLAB`, `GITLAB_SELF_MANAGED`, `NO_SOURCE`, `S3`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument in the `secondary_sources` block of the `aws_codebuild_project` resource specifies the type of repository that hosts the secondary source code for the build process. By defining this argument, users configure the integration with a specific source control or storage system (e.g., GitHub, S3, CodeCommit), enabling CodeBuild to retrieve and use additional source code repositories during the build."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "build_status_config",
+          "description": "(Optional) Configuration block that contains information that defines how the build project reports the build status to the source provider. This option is only used when the source provider is GitHub, GitHub Enterprise, GitLab, GitLab Self Managed, or Bitbucket. `build_status_config` blocks are documented below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "context",
+              "description": "(Optional) Specifies the context of the build status CodeBuild sends to the source provider. The usage of this parameter depends on the source provider.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `context` argument in the `build_status_config` block of the `aws_codebuild_project` resource allows users to define a custom identifier or label for the build status updates sent to the source provider. This helps distinguish and organize build status notifications, particularly in workflows involving multiple builds or integrations with source control systems like GitHub."
+            },
+            {
+              "name": "target_url",
+              "description": "(Optional) Specifies the target url of the build status CodeBuild sends to the source provider. The usage of this parameter depends on the source provider.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `target_url` argument in the `build_status_config` block of the `aws_codebuild_project` resource allows users to specify a URL that CodeBuild includes in the build status updates sent to the source provider. This URL typically serves as a link to additional build details or logs, enabling better traceability and integration with external systems or CI/CD workflows."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `build_status_config` block within the `secondary_sources` configuration of the `aws_codebuild_project` resource defines how build status updates are reported back to the source provider (e.g., GitHub, GitLab, Bitbucket). This block encapsulates settings for integrating build status notifications, enabling users to track and display the success or failure of builds directly in their source control system, enhancing visibility and collaboration in CI/CD workflows."
+        },
+        {
+          "name": "git_submodules_config",
+          "description": "(Optional) Configuration block. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "fetch_submodules",
+              "description": "(Required) Whether to fetch Git submodules for the AWS CodeBuild build project.",
+              "required": true,
+              "type": "bool",
+              "llm_summary": "The `fetch_submodules` argument in the `git_submodules_config` block of the `aws_codebuild_project` resource specifies whether Git submodules should be retrieved during the build process. Setting this required boolean enables the inclusion of submodule repositories in the source code, ensuring builds can access and utilize nested dependencies, which is essential for projects relying on modular Git structures."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `git_submodules_config` block within the `secondary_sources` configuration of the `aws_codebuild_project` resource enables the management of Git submodules for a secondary source repository. It encapsulates settings that control whether submodules are fetched and included during the build process, allowing users to ensure that dependent repositories are properly integrated and available for builds."
+        }
+      ],
+      "llm_summary": "The `secondary_sources` configuration block in the `aws_codebuild_project` resource allows users to define additional source code repositories for a CodeBuild project, complementing the primary source. It encapsulates settings such as repository type, location, and authentication, enabling multi-repository builds and facilitating complex workflows that require integrating or building from multiple code sources."
+    },
+    {
+      "name": "source",
+      "description": "(Required) Configuration block. Detailed below.  The following arguments are optional:",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "buildspec",
+          "description": "(Optional) Build specification to use for this build project's related builds. This must be set when `type` is `NO_SOURCE`. Also, if a non-default buildspec file name or file path aside from the root is used, it must be specified.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `buildspec` argument in the `aws_codebuild_project` resource allows users to define the build specification file that outlines the build commands, environment settings, and phases for CodeBuild projects. It is essential for projects with `NO_SOURCE` type or when using a non-default buildspec file path, enabling precise control over the build process and customization of build behavior."
+        },
+        {
+          "name": "git_clone_depth",
+          "description": "(Optional) Truncate git history to this many commits. Use `0` for a `Full` checkout which you need to run commands like `git branch --show-current`. See AWS CodePipeline User Guide: Tutorial: Use full clone with a GitHub pipeline source for details.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `git_clone_depth` argument in the `source` block of the `aws_codebuild_project` resource allows users to control the depth of the Git history retrieved during the source code checkout process. By specifying the number of commits to fetch (or using `0` for a full clone), users can optimize build performance for shallow clones or enable full repository functionality, such as branch detection, depending on their pipeline requirements."
+        },
+        {
+          "name": "insecure_ssl",
+          "description": "(Optional) Ignore SSL warnings when connecting to source control.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `insecure_ssl` argument for the `aws_codebuild_project` resource's `source` block allows users to control whether SSL certificate validation warnings are ignored when connecting to the source control repository. Setting this to `true` can enable builds to proceed despite SSL issues, which may be useful for testing or working with repositories that have self-signed or invalid certificates, but it introduces potential security risks."
+        },
+        {
+          "name": "location",
+          "description": "(Optional) Location of the source code from git or s3.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `location` argument in the `source` block of the `aws_codebuild_project` resource allows users to specify the URL or path to the source code repository, such as a Git repository or an S3 bucket. By configuring this argument, users define the exact location from which CodeBuild will fetch the source code, enabling the project to build and test applications using the specified codebase."
+        },
+        {
+          "name": "report_build_status",
+          "description": "(Optional) Whether to report the status of a build's start and finish to your source provider. This option is valid only when your source provider is GitHub, GitHub Enterprise, GitLab, GitLab Self Managed, or Bitbucket.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `report_build_status` argument in the `aws_codebuild_project` resource allows users to control whether the build's start and completion statuses are reported back to the source provider, such as GitHub, GitLab, or Bitbucket. Enabling this functionality helps users track build progress directly within their source control platform, supporting workflows that require visibility into CI/CD pipeline events."
+        },
+        {
+          "name": "type",
+          "description": "(Required) Type of repository that contains the source code to be built. Valid values: `BITBUCKET`, `CODECOMMIT`, `CODEPIPELINE`, `GITHUB`, `GITHUB_ENTERPRISE`, `GITLAB`, `GITLAB_SELF_MANAGED`, `NO_SOURCE`, `S3`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument specifies the repository type that serves as the source for the build process in an `aws_codebuild_project`, such as `GITHUB`, `S3`, or `CODECOMMIT`. Setting this argument determines how CodeBuild integrates with the source code, enabling users to define the origin of their build artifacts and configure the connection to their version control or storage system."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "build_status_config",
+          "description": "(Optional) Configuration block that contains information that defines how the build project reports the build status to the source provider. This option is only used when the source provider is GitHub, GitHub Enterprise, GitLab, GitLab Self Managed, or Bitbucket. `build_status_config` blocks are documented below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "context",
+              "description": "(Optional) Specifies the context of the build status CodeBuild sends to the source provider. The usage of this parameter depends on the source provider.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `context` argument in the `build_status_config` block of the `aws_codebuild_project` resource allows users to define a custom identifier or label for the build status updates sent to the source provider. This helps distinguish and organize build status notifications, particularly in workflows involving multiple builds or integrations with source control systems like GitHub."
+            },
+            {
+              "name": "target_url",
+              "description": "(Optional) Specifies the target url of the build status CodeBuild sends to the source provider. The usage of this parameter depends on the source provider.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `target_url` argument in the `build_status_config` block of the `aws_codebuild_project` resource allows users to specify the URL where the build status information is sent by CodeBuild to the source provider. Configuring this parameter enables integration with external systems or source control platforms, providing visibility into build results and facilitating workflows that depend on build status updates."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `build_status_config` block in the `aws_codebuild_project` resource defines how build status updates are reported to supported source providers (GitHub, GitHub Enterprise, GitLab, GitLab Self Managed, or Bitbucket). It encapsulates settings for integrating build status notifications, enabling users to track and communicate the success or failure of builds directly within their source control platform, streamlining CI/CD workflows."
+        },
+        {
+          "name": "git_submodules_config",
+          "description": "(Optional) Configuration block. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "fetch_submodules",
+              "description": "(Required) Whether to fetch Git submodules for the AWS CodeBuild build project.",
+              "required": true,
+              "type": "bool",
+              "llm_summary": "The `fetch_submodules` argument in the `git_submodules_config` block of the `aws_codebuild_project` resource specifies whether AWS CodeBuild should automatically retrieve Git submodules during the build process. Setting this required boolean enables seamless integration of submodule dependencies, ensuring that all nested repositories are fetched and available for the build, which is essential for projects relying on modular or multi-repository code structures."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `git_submodules_config` block within the `source` configuration of the `aws_codebuild_project` resource enables management of Git submodules for the project's source repository. It encapsulates settings that control whether submodules are fetched and included during the build process, allowing users to ensure proper dependency resolution and integration of nested repositories in their CodeBuild workflows."
+        }
+      ],
+      "llm_summary": "The `source` configuration block in the `aws_codebuild_project` resource defines the source code repository and related settings for the CodeBuild project, enabling integration with repositories such as GitHub, S3, or CodeCommit. This block allows users to specify repository type, location, branch, and authentication details, ensuring the build process pulls the correct source code and supports version control integration for automated CI/CD workflows."
+    },
+    {
+      "name": "vpc_config",
+      "description": "(Optional) Configuration block. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "security_group_ids",
+          "description": "(Required) Security group IDs to assign to running builds.",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `security_group_ids` argument in the `vpc_config` block of the `aws_codebuild_project` resource allows users to specify the security groups that control network access for builds running within a VPC. By defining this set of IDs, users can enforce inbound and outbound traffic rules, ensuring secure communication and compliance with network policies for build environments."
+        },
+        {
+          "name": "subnets",
+          "description": "(Required) Subnet IDs within which to run builds.",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `subnets` argument in the `vpc_config` block of the `aws_codebuild_project` resource specifies the set of subnet IDs where CodeBuild builds will execute within a VPC. By defining this, users ensure that build processes are securely isolated within specific network segments, enabling control over network access, routing, and connectivity to resources such as databases or caches within the VPC."
+        },
+        {
+          "name": "vpc_id",
+          "description": "(Required) ID of the VPC within which to run builds.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `vpc_id` argument specifies the ID of the VPC in which AWS CodeBuild will execute build processes, enabling users to control the network isolation and security of their builds. By setting this required parameter, users can ensure builds run within a defined private network, supporting common goals like restricting access to resources, integrating with private subnets, or adhering to organizational compliance requirements."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `vpc_config` block in the `aws_codebuild_project` resource enables integration of the CodeBuild project with a specific VPC, allowing builds to securely access resources within private subnets. It encapsulates settings such as subnet IDs, security group IDs, and VPC ID, providing users with control over network isolation and connectivity for their build environments. Configuring this block is essential for projects requiring access to private resources or enhanced security within a VPC."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN of the CodeBuild project.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "badge_url",
+      "description": "URL of the build badge when `badge_enabled` is enabled.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "public_project_alias",
+      "description": "The project identifier used with the public build APIs.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

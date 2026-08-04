@@ -1,0 +1,3132 @@
+{
+    "resource": {
+        "name": "aws_kinesis_firehose_delivery_stream",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "destination",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "destination_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "version_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "elasticsearch_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "buffering_interval",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "buffering_size",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "cluster_endpoint",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "domain_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "index_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "index_rotation_period",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "retry_duration",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "role_arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "s3_backup_mode",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "type_name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "cloudwatch_logging_options",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "log_group_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "log_stream_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "processing_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "processors",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                0
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "parameters",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        0
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "parameter_name",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "parameter_value",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "s3_configuration",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "bucket_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "buffering_interval",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "buffering_size",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "compression_format",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "error_output_prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "kms_key_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "cloudwatch_logging_options",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "enabled",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "log_group_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "log_stream_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "vpc_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "security_group_ids",
+                            "description": "",
+                            "required": true,
+                            "type": "set(string)"
+                        },
+                        {
+                            "name": "subnet_ids",
+                            "description": "",
+                            "required": true,
+                            "type": "set(string)"
+                        },
+                        {
+                            "name": "vpc_id",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "extended_s3_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "bucket_arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "buffering_interval",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "buffering_size",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "compression_format",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "custom_time_zone",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "error_output_prefix",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "file_extension",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "kms_key_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "prefix",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "role_arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "s3_backup_mode",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "cloudwatch_logging_options",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "log_group_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "log_stream_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "data_format_conversion_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "input_format_configuration",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [],
+                            "blocks": [
+                                {
+                                    "name": "deserializer",
+                                    "description": "",
+                                    "cardinality": [
+                                        1,
+                                        1
+                                    ],
+                                    "arguments": [],
+                                    "blocks": [
+                                        {
+                                            "name": "hive_json_ser_de",
+                                            "description": "",
+                                            "cardinality": [
+                                                0,
+                                                1
+                                            ],
+                                            "arguments": [
+                                                {
+                                                    "name": "timestamp_formats",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "list(string)"
+                                                }
+                                            ],
+                                            "blocks": []
+                                        },
+                                        {
+                                            "name": "open_x_json_ser_de",
+                                            "description": "",
+                                            "cardinality": [
+                                                0,
+                                                1
+                                            ],
+                                            "arguments": [
+                                                {
+                                                    "name": "case_insensitive",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "bool"
+                                                },
+                                                {
+                                                    "name": "column_to_json_key_mappings",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "map(string)"
+                                                },
+                                                {
+                                                    "name": "convert_dots_in_json_keys_to_underscores",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "bool"
+                                                }
+                                            ],
+                                            "blocks": []
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "output_format_configuration",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [],
+                            "blocks": [
+                                {
+                                    "name": "serializer",
+                                    "description": "",
+                                    "cardinality": [
+                                        1,
+                                        1
+                                    ],
+                                    "arguments": [],
+                                    "blocks": [
+                                        {
+                                            "name": "orc_ser_de",
+                                            "description": "",
+                                            "cardinality": [
+                                                0,
+                                                1
+                                            ],
+                                            "arguments": [
+                                                {
+                                                    "name": "block_size_bytes",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "number"
+                                                },
+                                                {
+                                                    "name": "bloom_filter_columns",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "list(string)"
+                                                },
+                                                {
+                                                    "name": "bloom_filter_false_positive_probability",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "number"
+                                                },
+                                                {
+                                                    "name": "compression",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "name": "dictionary_key_threshold",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "number"
+                                                },
+                                                {
+                                                    "name": "enable_padding",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "bool"
+                                                },
+                                                {
+                                                    "name": "format_version",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "name": "padding_tolerance",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "number"
+                                                },
+                                                {
+                                                    "name": "row_index_stride",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "number"
+                                                },
+                                                {
+                                                    "name": "stripe_size_bytes",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "number"
+                                                }
+                                            ],
+                                            "blocks": []
+                                        },
+                                        {
+                                            "name": "parquet_ser_de",
+                                            "description": "",
+                                            "cardinality": [
+                                                0,
+                                                1
+                                            ],
+                                            "arguments": [
+                                                {
+                                                    "name": "block_size_bytes",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "number"
+                                                },
+                                                {
+                                                    "name": "compression",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "name": "enable_dictionary_compression",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "bool"
+                                                },
+                                                {
+                                                    "name": "max_padding_bytes",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "number"
+                                                },
+                                                {
+                                                    "name": "page_size_bytes",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "number"
+                                                },
+                                                {
+                                                    "name": "writer_version",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "string"
+                                                }
+                                            ],
+                                            "blocks": []
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "name": "schema_configuration",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "catalog_id",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "database_name",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "region",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "role_arn",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "table_name",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "version_id",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "dynamic_partitioning_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "retry_duration",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "processing_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "processors",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                0
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "parameters",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        0
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "parameter_name",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "parameter_value",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "s3_backup_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "bucket_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "buffering_interval",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "buffering_size",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "compression_format",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "error_output_prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "kms_key_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "cloudwatch_logging_options",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "enabled",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "log_group_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "log_stream_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "http_endpoint_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "access_key",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "buffering_interval",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "buffering_size",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "retry_duration",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "role_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "s3_backup_mode",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "url",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "cloudwatch_logging_options",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "log_group_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "log_stream_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "processing_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "processors",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                0
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "parameters",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        0
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "parameter_name",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "parameter_value",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "request_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "content_encoding",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "common_attributes",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                0
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "name",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "value",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "s3_configuration",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "bucket_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "buffering_interval",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "buffering_size",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "compression_format",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "error_output_prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "kms_key_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "cloudwatch_logging_options",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "enabled",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "log_group_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "log_stream_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "secrets_manager_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "secret_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "iceberg_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "buffering_interval",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "buffering_size",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "catalog_arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "retry_duration",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "role_arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "s3_backup_mode",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "cloudwatch_logging_options",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "log_group_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "log_stream_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "destination_table_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        0
+                    ],
+                    "arguments": [
+                        {
+                            "name": "database_name",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "s3_error_output_prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "table_name",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "unique_keys",
+                            "description": "",
+                            "required": false,
+                            "type": "list(string)"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "processing_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "processors",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                0
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "parameters",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        0
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "parameter_name",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "parameter_value",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "s3_configuration",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "bucket_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "buffering_interval",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "buffering_size",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "compression_format",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "error_output_prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "kms_key_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "cloudwatch_logging_options",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "enabled",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "log_group_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "log_stream_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "kinesis_source_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "kinesis_stream_arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "role_arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "msk_source_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "msk_cluster_arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "topic_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "authentication_configuration",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "connectivity",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "opensearch_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "buffering_interval",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "buffering_size",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "cluster_endpoint",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "domain_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "index_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "index_rotation_period",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "retry_duration",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "role_arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "s3_backup_mode",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "type_name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "cloudwatch_logging_options",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "log_group_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "log_stream_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "document_id_options",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "default_document_id_format",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "processing_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "processors",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                0
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "parameters",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        0
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "parameter_name",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "parameter_value",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "s3_configuration",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "bucket_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "buffering_interval",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "buffering_size",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "compression_format",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "error_output_prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "kms_key_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "cloudwatch_logging_options",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "enabled",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "log_group_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "log_stream_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "vpc_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "security_group_ids",
+                            "description": "",
+                            "required": true,
+                            "type": "set(string)"
+                        },
+                        {
+                            "name": "subnet_ids",
+                            "description": "",
+                            "required": true,
+                            "type": "set(string)"
+                        },
+                        {
+                            "name": "vpc_id",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "opensearchserverless_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "buffering_interval",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "buffering_size",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "collection_endpoint",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "index_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "retry_duration",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "role_arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "s3_backup_mode",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "cloudwatch_logging_options",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "log_group_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "log_stream_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "processing_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "processors",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                0
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "parameters",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        0
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "parameter_name",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "parameter_value",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "s3_configuration",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "bucket_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "buffering_interval",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "buffering_size",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "compression_format",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "error_output_prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "kms_key_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "cloudwatch_logging_options",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "enabled",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "log_group_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "log_stream_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "vpc_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "security_group_ids",
+                            "description": "",
+                            "required": true,
+                            "type": "set(string)"
+                        },
+                        {
+                            "name": "subnet_ids",
+                            "description": "",
+                            "required": true,
+                            "type": "set(string)"
+                        },
+                        {
+                            "name": "vpc_id",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "redshift_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "cluster_jdbcurl",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "copy_options",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "data_table_columns",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "data_table_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "password",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "retry_duration",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "role_arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "s3_backup_mode",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "username",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "cloudwatch_logging_options",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "log_group_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "log_stream_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "processing_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "processors",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                0
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "parameters",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        0
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "parameter_name",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "parameter_value",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "s3_backup_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "bucket_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "buffering_interval",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "buffering_size",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "compression_format",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "error_output_prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "kms_key_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "cloudwatch_logging_options",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "enabled",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "log_group_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "log_stream_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "s3_configuration",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "bucket_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "buffering_interval",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "buffering_size",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "compression_format",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "error_output_prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "kms_key_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "cloudwatch_logging_options",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "enabled",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "log_group_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "log_stream_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "secrets_manager_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "secret_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "server_side_encryption",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "enabled",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "key_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "key_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "snowflake_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "account_url",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "buffering_interval",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "buffering_size",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "content_column_name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "data_loading_option",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "database",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "key_passphrase",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "metadata_column_name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "private_key",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "retry_duration",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "role_arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "s3_backup_mode",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "schema",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "table",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "user",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "cloudwatch_logging_options",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "log_group_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "log_stream_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "processing_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "processors",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                0
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "parameters",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        0
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "parameter_name",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "parameter_value",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "s3_configuration",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "bucket_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "buffering_interval",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "buffering_size",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "compression_format",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "error_output_prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "kms_key_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "cloudwatch_logging_options",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "enabled",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "log_group_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "log_stream_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "secrets_manager_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "secret_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "snowflake_role_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "snowflake_role",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "snowflake_vpc_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "private_link_vpce_id",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "splunk_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "buffering_interval",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "buffering_size",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "hec_acknowledgment_timeout",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "hec_endpoint",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "hec_endpoint_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "hec_token",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "retry_duration",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "s3_backup_mode",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "cloudwatch_logging_options",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "log_group_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "log_stream_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "processing_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "processors",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                0
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "parameters",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        0
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "parameter_name",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "parameter_value",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "s3_configuration",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "bucket_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "buffering_interval",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "buffering_size",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "compression_format",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "error_output_prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "kms_key_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "prefix",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "cloudwatch_logging_options",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "enabled",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "log_group_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "log_stream_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "secrets_manager_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "role_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "secret_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": []
+}

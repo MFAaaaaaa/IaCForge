@@ -1,0 +1,17 @@
+[
+    {
+        "argument_path": "intent.intent_name",
+        "references_output": "aws_lex_intent.name",
+        "target_resource_type": "aws_lex_intent"
+    },
+    {
+        "argument_path": "intent.intent_version",
+        "references_output": "aws_lex_intent.version",
+        "target_resource_type": "aws_lex_intent"
+    },
+    {
+        "argument_path": "voice_id",
+        "references_output": "aws_polly_voice.id",
+        "target_resource_type": "aws_polly_voice"
+    }
+]

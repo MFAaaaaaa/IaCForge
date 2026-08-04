@@ -1,0 +1,80 @@
+{
+  "resource": {
+    "name": "aws_iam_user",
+    "description": "Provides an IAM user. NOTE: If policies are attached to the user via the aws_iam_policy_attachment resource and you are modifying the user name or path, the force_destroy argument must be set to true and applied before attempting the operation otherwise you will encounter a DeleteConflict error. The aws_iam_user_policy_attachment resource (recommended) does not have this requirement.",
+    "llm_summary": "The `aws_iam_user` Terraform resource enables the creation and management of AWS IAM users, allowing fine-grained control over user identities and access within an AWS account. Common use cases include setting up individual user accounts for team members, managing permissions through policy attachments, and enforcing lifecycle rules for user updates or deletions. It supports configurations such as user name and path management, policy attachment via `aws_iam_user_policy_attachment`, and lifecycle handling with `force_destroy` to resolve conflicts during updates or deletions."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_iam_user\" \"lb\" {\n  name = \"loadbalancer\"\n  path = \"/system/\"\n\n  tags = {\n    tag-key = \"tag-value\"\n  }\n}\n\nresource \"aws_iam_access_key\" \"lb\" {\n  user = aws_iam_user.lb.name\n}\n\ndata \"aws_iam_policy_document\" \"lb_ro\" {\n  statement {\n    effect    = \"Allow\"\n    actions   = [\"ec2:Describe*\"]\n    resources = [\"*\"]\n  }\n}\n\nresource \"aws_iam_user_policy\" \"lb_ro\" {\n  name   = \"test\"\n  user   = aws_iam_user.lb.name\n  policy = data.aws_iam_policy_document.lb_ro.json\n}",
+      "llm_summary": "This example demonstrates how to create an AWS IAM user with a custom path and tags, generate an access key for the user, and attach a read-only policy using a policy document to restrict actions to EC2 resource descriptions. It illustrates key configurations for `aws_iam_user`, `aws_iam_access_key`, and `aws_iam_user_policy`, showcasing user creation, access management, and policy attachment."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "force_destroy",
+      "description": "(Optional, default false) When destroying this user, destroy even if it has non-Terraform-managed IAM access keys, login profile or MFA devices. Without `force_destroy` a user with non-Terraform-managed access keys and login profile will fail to be destroyed.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `force_destroy` argument for the `aws_iam_user` resource controls whether the user can be forcibly deleted, even if it has non-Terraform-managed resources like access keys, login profiles, or MFA devices. Enabling this option (`true`) ensures the user and its associated resources are removed during destruction, supporting lifecycle management in scenarios where manual cleanup of unmanaged resources is not feasible."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_iam_user` resource allows users to specify a unique identifier for the IAM user, typically used to reference or manage the user programmatically within Terraform configurations. While optional, setting this argument can help ensure consistent identification of the user across resources and workflows, supporting scenarios like automation or integration with external systems."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The user's name. The name must consist of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: `=,.@-_.`. User names are not distinguished by case. For example, you cannot create users named both \"TESTUSER\" and \"testuser\".",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_iam_user` resource specifies the unique identifier for the IAM user, allowing users to define a human-readable name that adheres to specific character constraints. This name serves as the primary reference for managing and identifying the IAM user within AWS, supporting common tasks like assigning permissions, policies, and roles to control access to cloud resources."
+    },
+    {
+      "name": "path",
+      "description": "(Optional, default \"/\") Path in which to create the user.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `path` argument in the `aws_iam_user` resource allows users to define the hierarchical namespace under which the IAM user is created, enabling organization and categorization of users within a structured path. By setting this argument, users can group IAM users for easier management, such as aligning them with specific environments, teams, or roles, with the default path being `/`."
+    },
+    {
+      "name": "permissions_boundary",
+      "description": "(Optional) The ARN of the policy that is used to set the permissions boundary for the user.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `permissions_boundary` argument for the `aws_iam_user` resource allows users to specify the ARN of an IAM policy that acts as a permissions boundary, limiting the maximum permissions the user can have. This configuration is typically used to enforce security controls by restricting the scope of actions and resources accessible to the IAM user, ensuring compliance with organizational policies."
+    },
+    {
+      "name": "tags",
+      "description": "Key-value map of tags for the IAM user. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_iam_user` resource allows users to define a key-value map of metadata to categorize and manage the IAM user, such as assigning environment labels, ownership details, or compliance tags. Configuring this argument helps streamline resource organization, tracking, and governance, with provider-level `default_tags` being overridden by explicitly defined tags for enhanced customization."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_iam_user` resource allows users to define a comprehensive set of key-value tags that are applied to the IAM user, including inherited tags from the provider's default configuration. This enables consistent resource tagging for purposes like cost allocation, organization, or environment identification, ensuring alignment with tagging policies across AWS resources."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN assigned by AWS for this user.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "unique_id",
+      "description": "The unique ID assigned by AWS.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "resource": {
+    "name": "aws_elasticache_user_group_association",
+    "description": "Associate an existing ElastiCache user and an existing user group. Terraform will detect changes in the aws_elasticache_user_group since aws_elasticache_user_group_association changes the user IDs associated with the user group. You can ignore these changes with the lifecycle ignore_changes meta argument as shown in the example.",
+    "llm_summary": "The `aws_elasticache_user_group_association` resource enables the association of an existing ElastiCache user with a user group, facilitating fine-grained access control and permissions management for ElastiCache clusters. Common use cases include configuring secure multi-user environments, managing user roles, and enforcing access policies for caching workloads. This resource supports lifecycle management, allowing users to handle changes in user group associations effectively, with options to ignore updates for seamless infrastructure stability."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_elasticache_user\" \"default\" {\n  user_id       = \"defaultUserID\"\n  user_name     = \"default\"\n  access_string = \"on ~app::* -@all +@read +@hash +@bitmap +@geo -setbit -bitfield -hset -hsetnx -hmset -hincrby -hincrbyfloat -hdel -bitop -geoadd -georadius -georadiusbymember\"\n  engine        = \"REDIS\"\n  passwords     = [\"password123456789\"]\n}\n\nresource \"aws_elasticache_user_group\" \"example\" {\n  engine        = \"REDIS\"\n  user_group_id = \"userGroupId\"\n  user_ids      = [aws_elasticache_user.default.user_id]\n\n  lifecycle {\n    ignore_changes = [user_ids]\n  }\n}\n\nresource \"aws_elasticache_user\" \"example\" {\n  user_id       = \"exampleUserID\"\n  user_name     = \"exampleuser\"\n  access_string = \"on ~app::* -@all +@read +@hash +@bitmap +@geo -setbit -bitfield -hset -hsetnx -hmset -hincrby -hincrbyfloat -hdel -bitop -geoadd -georadius -georadiusbymember\"\n  engine        = \"REDIS\"\n  passwords     = [\"password123456789\"]\n}\n\nresource \"aws_elasticache_user_group_association\" \"example\" {\n  user_group_id = aws_elasticache_user_group.example.user_group_id\n  user_id       = aws_elasticache_user.example.user_id\n}",
+      "llm_summary": "This example demonstrates how to associate an AWS ElastiCache user with a user group using the `aws_elasticache_user_group_association` resource. It showcases the creation of ElastiCache users and user groups with specific access strings and lifecycle configurations, enabling fine-grained access control for Redis clusters."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_elasticache_user_group_association` resource specifies a unique identifier for the association between an ElastiCache user group and a specific user. While optional, setting this argument allows users to define or reference the association explicitly, facilitating resource management and tracking within Terraform configurations."
+    },
+    {
+      "name": "user_group_id",
+      "description": "(Required) ID of the user group.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `user_group_id` argument specifies the unique identifier of the ElastiCache user group to associate with the target resource, enabling fine-grained access control by linking the user group\u2019s permissions to the associated ElastiCache cluster. This is a required parameter to define which user group governs authentication and authorization for the cache environment."
+    },
+    {
+      "name": "user_id",
+      "description": "(Required) ID of the user to associated with the user group.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `user_id` argument specifies the unique identifier of an individual ElastiCache user to associate with a user group in the `aws_elasticache_user_group_association` resource. By defining this argument, users can control which specific user gains access to the permissions and settings defined by the associated user group, enabling fine-grained access management for ElastiCache resources."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_elasticache_user_group_association` resource allows users to specify the maximum duration (in string format, e.g., \"10m\") Terraform should wait for the creation of the association between an ElastiCache user group and a user. Configuring this timeout ensures predictable provisioning behavior, helping users manage resource lifecycle operations and avoid prolonged or indefinite waits during deployment."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block for the `aws_elasticache_user_group_association` resource allows users to specify the maximum duration (in string format, e.g., \"5m\" for 5 minutes) Terraform will wait for the deletion of an association between an ElastiCache user group and a user. Configuring this argument helps control the timeout behavior during resource destruction, ensuring smoother lifecycle management and avoiding prolonged operations in cases where deletion might take longer than expected."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_elasticache_user_group_association` resource defines customizable time limits for operations such as creating, updating, or deleting the association between an ElastiCache user group and users. By configuring this block, users can manage operation durations to prevent long-running tasks or adapt timeout settings to align with specific infrastructure requirements, ensuring smoother resource lifecycle management."
+    }
+  ],
+  "attributes": []
+}

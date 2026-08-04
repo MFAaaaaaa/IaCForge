@@ -1,0 +1,17 @@
+[
+    {
+        "argument_path": "allocation_id",
+        "references_output": "aws_eip.id",
+        "target_resource_type": "aws_eip"
+    },
+    {
+        "argument_path": "subnet_id",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "secondary_allocation_ids",
+        "references_output": "aws_eip.id",
+        "target_resource_type": "aws_eip"
+    }
+]

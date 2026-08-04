@@ -1,0 +1,154 @@
+{
+  "resource": {
+    "name": "aws_eks_identity_provider_config",
+    "description": "Manages an EKS Identity Provider Configuration.",
+    "llm_summary": "The `aws_eks_identity_provider_config` resource manages the integration of external identity providers with Amazon EKS clusters, enabling secure authentication and access control for Kubernetes workloads. Common use cases include configuring OIDC-based identity providers, such as AWS Cognito or third-party services, to streamline user authentication and role-based access management. This resource supports defining provider settings, lifecycle management, and seamless integration with EKS for enhanced security and scalability in cloud-native applications."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_eks_identity_provider_config\" \"example\" {\n  cluster_name = aws_eks_cluster.example.name\n\n  oidc {\n    client_id                     = \"your client_id\"\n    identity_provider_config_name = \"example\"\n    issuer_url                    = \"your issuer_url\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an OIDC identity provider for an Amazon EKS cluster using the `aws_eks_identity_provider_config` resource, showcasing key arguments such as `client_id`, `issuer_url`, and `identity_provider_config_name` within the `oidc` block to enable external authentication integration.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "cluster_name",
+      "description": "\u2013 (Required) Name of the EKS Cluster.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `cluster_name` argument specifies the name of the Amazon EKS cluster to which the identity provider configuration will be applied. By defining this required parameter, users associate the identity provider with a specific cluster, enabling authentication and access control integration for that cluster."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_eks_identity_provider_config` resource specifies a unique identifier for the identity provider configuration associated with an Amazon EKS cluster. This argument allows users to reference or manage the specific identity provider setup, enabling integration with external authentication systems like OIDC for cluster access control."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Key-value map of resource tags. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument in the `aws_eks_identity_provider_config` resource allows users to define a key-value map of resource tags, enabling the organization, categorization, and identification of the identity provider configuration within their AWS environment. By setting this argument, users can apply metadata for cost allocation, environment labeling (e.g., \"dev\" or \"prod\"), or compliance tracking, with the ability to override provider-level default tags for more granular control."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument in the `aws_eks_identity_provider_config` resource allows users to define a comprehensive set of key-value tags that are applied to the identity provider configuration and inherited by all associated resources. This facilitates consistent resource tagging for purposes such as cost allocation, organization, and searchability across AWS services, aligning with common user goals like resource management and governance."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "oidc",
+      "description": "(Required) Nested attribute containing OpenID Connect identity provider information for the cluster. Detailed below.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "client_id",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `client_id` argument specifies the unique identifier for the OpenID Connect (OIDC) client application that integrates with the EKS cluster's identity provider configuration. Setting this value enables the authentication flow by defining the client application that users or workloads will use to obtain tokens for accessing the cluster, ensuring secure and seamless identity federation."
+        },
+        {
+          "name": "groups_claim",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `groups_claim` argument in the `oidc` configuration of the `aws_eks_identity_provider_config` resource specifies the claim within the OIDC identity token that maps to user group membership. By setting this argument, users can define how group information is extracted from the identity token, enabling role-based access control (RBAC) in EKS based on group claims for fine-grained permissions management."
+        },
+        {
+          "name": "groups_prefix",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `groups_prefix` argument in the `oidc` configuration of the `aws_eks_identity_provider_config` resource allows users to define a string prefix that is appended to group claims from the OIDC identity provider. This enables users to control how group names are mapped within the EKS cluster, ensuring consistent naming conventions and avoiding conflicts with existing Kubernetes group names."
+        },
+        {
+          "name": "identity_provider_config_name",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `identity_provider_config_name` argument specifies the unique name for the OIDC identity provider configuration within an Amazon EKS cluster. By defining this required string, users establish a distinct identifier for the configuration, enabling seamless integration of external identity providers for authentication and access control in Kubernetes workloads."
+        },
+        {
+          "name": "issuer_url",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `issuer_url` argument specifies the URL of the OpenID Connect (OIDC) identity provider that the Amazon EKS cluster will use for authentication. By defining this required string, users enable OIDC-based federated authentication for their Kubernetes workloads, allowing seamless integration with external identity providers for secure access control and token issuance."
+        },
+        {
+          "name": "required_claims",
+          "description": "",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `required_claims` argument in the `oidc` configuration of the `aws_eks_identity_provider_config` resource allows users to define a set of key-value pairs that specify mandatory claims in the OIDC identity token for authentication. By configuring this argument, users can enforce stricter access control by ensuring that only tokens containing specific claims (e.g., roles, groups, or permissions) are accepted by the EKS cluster, aligning with security and compliance requirements."
+        },
+        {
+          "name": "username_claim",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `username_claim` argument in the `oidc` configuration of the `aws_eks_identity_provider_config` resource allows users to specify the claim from the OIDC identity token that will be used as the username for Kubernetes authentication. By setting this argument, users can control how identities are mapped to Kubernetes usernames, enabling customized access control and integration with external identity providers."
+        },
+        {
+          "name": "username_prefix",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `username_prefix` argument in the `oidc` configuration of the `aws_eks_identity_provider_config` resource allows users to define a custom prefix that is prepended to usernames derived from the OIDC identity provider during authentication. This helps ensure unique and consistent username formatting within the EKS cluster, supporting user identity management and avoiding potential conflicts with existing usernames."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `oidc` configuration block within the `aws_eks_identity_provider_config` resource defines OpenID Connect (OIDC) identity provider settings for an Amazon EKS cluster, enabling integration with external authentication systems. This block encapsulates attributes required to configure OIDC-based authentication, allowing users to securely manage access control and streamline identity federation for Kubernetes workloads."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_eks_identity_provider_config` resource allows users to specify the maximum duration (in string format, e.g., \"10m\") Terraform will wait for the creation of an EKS identity provider configuration to complete. Configuring this timeout ensures predictable provisioning behavior, helping users manage deployment delays or avoid indefinite hangs during resource creation."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_eks_identity_provider_config` resource allows users to specify the maximum duration (in string format, e.g., \"5m\" for 5 minutes) Terraform will wait for the deletion of an EKS identity provider configuration. By setting this value, users can control the timeout behavior for resource cleanup operations, ensuring predictable and efficient management of the resource lifecycle during infrastructure changes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_eks_identity_provider_config` resource defines customizable time limits for operations related to creating, updating, or deleting an EKS identity provider configuration. This block enables users to manage operation durations, ensuring better control over resource provisioning and lifecycle management in scenarios where default timeout settings may not suffice."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) of the EKS Identity Provider Configuration.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "description": "Status of the EKS Identity Provider Configuration.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

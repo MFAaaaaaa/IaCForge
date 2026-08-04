@@ -1,0 +1,412 @@
+{
+    "resource": {
+        "name": "aws_redshift_cluster",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "allow_version_upgrade",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "apply_immediately",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "aqua_configuration_status",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "automated_snapshot_retention_period",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "availability_zone",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "availability_zone_relocation_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "cluster_identifier",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "cluster_parameter_group_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_public_key",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_revision_number",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_subnet_group_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_version",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "database_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "default_iam_role_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "elastic_ip",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "encrypted",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "endpoint",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "enhanced_vpc_routing",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "final_snapshot_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "iam_roles",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "kms_key_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "maintenance_track_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "manage_master_password",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "manual_snapshot_retention_period",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "master_password",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "master_password_secret_kms_key_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "master_password_wo",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "master_password_wo_version",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "master_username",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "multi_az",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "node_type",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "number_of_nodes",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "owner_account",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "port",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "preferred_maintenance_window",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "publicly_accessible",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "skip_final_snapshot",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "snapshot_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "snapshot_cluster_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "snapshot_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "vpc_security_group_ids",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "logging",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "bucket_name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "enable",
+                    "description": "",
+                    "required": true,
+                    "type": "bool"
+                },
+                {
+                    "name": "log_destination_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "log_exports",
+                    "description": "",
+                    "required": false,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "s3_key_prefix",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "snapshot_copy",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "destination_region",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "grant_name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "retention_period",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_namespace_arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_nodes",
+            "description": "",
+            "optional": false,
+            "type": "list(object({node_role=string,private_ip_address=string,public_ip_address=string}))"
+        },
+        {
+            "name": "dns_name",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "master_password_secret_arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

@@ -1,0 +1,83 @@
+{
+    "resource": {
+        "name": "aws_lambda_permission",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "action",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "event_source_token",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "function_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "function_url_auth_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "principal",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "principal_org_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "qualifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "source_account",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "source_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "statement_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "statement_id_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": []
+}

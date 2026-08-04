@@ -1,0 +1,67 @@
+[
+    {
+        "argument_path": "placement_group",
+        "references_output": "aws_placement_group.id",
+        "target_resource_type": "aws_placement_group"
+    },
+    {
+        "argument_path": "launch_configuration",
+        "references_output": "aws_launch_configuration.name",
+        "target_resource_type": "aws_launch_configuration"
+    },
+    {
+        "argument_path": "vpc_zone_identifier",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "launch_template.id",
+        "references_output": "aws_launch_template.id",
+        "target_resource_type": "aws_launch_template"
+    },
+    {
+        "argument_path": "launch_template.version",
+        "references_output": "aws_launch_template.latest_version",
+        "target_resource_type": "aws_launch_template"
+    },
+    {
+        "argument_path": "mixed_instances_policy.launch_template.launch_template_specification.launch_template_id",
+        "references_output": "aws_launch_template.id",
+        "target_resource_type": "aws_launch_template"
+    },
+    {
+        "argument_path": "mixed_instances_policy.launch_template.launch_template_specification.launch_template_name",
+        "references_output": "aws_launch_template.name",
+        "target_resource_type": "aws_launch_template"
+    },
+    {
+        "argument_path": "mixed_instances_policy.launch_template.override.launch_template_specification.launch_template_id",
+        "references_output": "aws_launch_template.id",
+        "target_resource_type": "aws_launch_template"
+    },
+    {
+        "argument_path": "mixed_instances_policy.launch_template.override.launch_template_specification.launch_template_name",
+        "references_output": "aws_launch_template.name",
+        "target_resource_type": "aws_launch_template"
+    },
+    {
+        "argument_path": "target_group_arns",
+        "references_output": "aws_alb_target_group.arn",
+        "target_resource_type": "aws_alb_target_group"
+    },
+    {
+        "argument_path": "traffic_source.identifier",
+        "references_output": "aws_vpclattice_target_group.arn",
+        "target_resource_type": "aws_vpclattice_target_group"
+    },
+    {
+        "argument_path": "traffic_source.identifier",
+        "references_output": "aws_lb_target_group.arn",
+        "target_resource_type": "aws_lb_target_group"
+    },
+    {
+        "argument_path": "traffic_source.identifier",
+        "references_output": "aws_elb.name",
+        "target_resource_type": "aws_elb"
+    }
+]

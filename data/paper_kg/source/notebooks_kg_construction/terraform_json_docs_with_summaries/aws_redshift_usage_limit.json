@@ -1,0 +1,88 @@
+{
+  "resource": {
+    "name": "aws_redshift_usage_limit",
+    "description": "Creates a new Amazon Redshift Usage Limit.",
+    "llm_summary": "The `aws_redshift_usage_limit` Terraform resource enables the creation and management of usage limits for Amazon Redshift clusters, allowing users to control resource consumption and costs. Common use cases include setting thresholds for data scanned, query execution time, or concurrency to enforce budget constraints and optimize cluster performance. Users can configure limits based on specific metrics, define action triggers when limits are exceeded, and ensure compliance with organizational cost management policies."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_redshift_usage_limit\" \"example\" {\n  cluster_identifier = aws_redshift_cluster.example.id\n  feature_type       = \"concurrency-scaling\"\n  limit_type         = \"time\"\n  amount             = 60\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_redshift_usage_limit` resource to enforce a concurrency-scaling time limit on an Amazon Redshift cluster. Highlights key arguments such as `cluster_identifier`, `feature_type`, `limit_type`, and `amount` to define usage restrictions effectively.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "amount",
+      "description": "(Required) The limit amount. If time-based, this amount is in minutes. If data-based, this amount is in terabytes (TB). The value must be a positive number.",
+      "required": true,
+      "type": "number",
+      "llm_summary": "The `amount` argument in the `aws_redshift_usage_limit` resource specifies the maximum allowable usage threshold for a Redshift resource, either in minutes for time-based limits or terabytes (TB) for data-based limits. By defining this value, users can enforce resource consumption boundaries to optimize cost management and prevent overuse, aligning with operational or budgetary constraints."
+    },
+    {
+      "name": "breach_action",
+      "description": "(Optional) The action that Amazon Redshift takes when the limit is reached. The default is `log`. Valid values are `log`, `emit-metric`, and `disable`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `breach_action` argument in the `aws_redshift_usage_limit` resource allows users to define the behavior Amazon Redshift should take when a usage limit is exceeded. By specifying values such as `log`, `emit-metric`, or `disable`, users can configure whether Redshift logs the breach, emits a CloudWatch metric, or disables the associated resource, enabling tailored responses to resource usage thresholds for monitoring or operational control."
+    },
+    {
+      "name": "cluster_identifier",
+      "description": "(Required) The identifier of the cluster that you want to limit usage.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `cluster_identifier` argument specifies the unique identifier of the Amazon Redshift cluster for which usage limits are being configured. By setting this required value, users can target a specific cluster to enforce resource consumption constraints, such as data transfer or query execution limits, aligning with cost management and operational control goals."
+    },
+    {
+      "name": "feature_type",
+      "description": "(Required) The Amazon Redshift feature that you want to limit. Valid values are `spectrum`, `concurrency-scaling`, and `cross-region-datasharing`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `feature_type` argument in the `aws_redshift_usage_limit` resource specifies the Amazon Redshift feature to which the usage limit applies, allowing users to control resource consumption for features like `spectrum`, `concurrency-scaling`, or `cross-region-datasharing`. By defining this argument, users can enforce limits on specific Redshift functionalities to optimize costs, manage performance, or align with organizational policies."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_redshift_usage_limit` resource specifies a unique identifier for the usage limit configuration, allowing users to reference or manage the resource programmatically. While optional, setting this argument can help ensure consistent tracking and interaction with the usage limit, aligning with common goals like resource identification and lifecycle management."
+    },
+    {
+      "name": "limit_type",
+      "description": "(Required) The type of limit. Depending on the feature type, this can be based on a time duration or data size. If FeatureType is `spectrum`, then LimitType must be `data-scanned`. If FeatureType is `concurrency-scaling`, then LimitType must be `time`. If FeatureType is `cross-region-datasharing`, then LimitType must be `data-scanned`. Valid values are `data-scanned`, and `time`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `limit_type` argument in the `aws_redshift_usage_limit` resource specifies the type of usage limit to enforce, allowing users to control resource consumption based on either data scanned (`data-scanned`) or time duration (`time`). This argument is essential for defining usage restrictions tied to specific Redshift features, such as Spectrum, concurrency scaling, or cross-region data sharing, helping users optimize costs and manage resource utilization effectively."
+    },
+    {
+      "name": "period",
+      "description": "(Optional) The time period that the amount applies to. A weekly period begins on Sunday. The default is `monthly`. Valid values are `daily`, `weekly`, and `monthly`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `period` argument in the `aws_redshift_usage_limit` resource allows users to define the time interval (`daily`, `weekly`, or `monthly`) over which the usage limit is enforced. This configuration helps control and manage Redshift resource consumption by aligning usage monitoring with specific billing or operational cycles, such as weekly or monthly budgets."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_redshift_usage_limit` resource allows users to assign metadata in the form of key-value pairs to the resource, enabling organization, categorization, and identification of the usage limit within their AWS environment. By configuring this argument, users can streamline resource management, support cost allocation, and integrate with tagging-based workflows, such as governance or automation policies."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_redshift_usage_limit` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to the resource and any associated resources. This enables streamlined resource organization, cost allocation, and metadata management, supporting common user goals like tagging for environments, ownership, or compliance tracking."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) of the Redshift Usage Limit.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

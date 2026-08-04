@@ -1,0 +1,46 @@
+{
+  "resource": {
+    "name": "aws_dynamodb_kinesis_streaming_destination",
+    "description": "Enables a Kinesis streaming destination for data replication of a DynamoDB table.",
+    "llm_summary": "The `aws_dynamodb_kinesis_streaming_destination` resource enables seamless integration between DynamoDB tables and Kinesis Data Streams for real-time data replication and streaming. It is commonly used to set up event-driven architectures, analytics pipelines, or data processing workflows by replicating changes in DynamoDB tables to Kinesis for downstream consumption. Users can configure the streaming destination, manage the association lifecycle, and optimize data flow for applications requiring real-time insights or processing."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_dynamodb_table\" \"example\" {\n  name     = \"orders\"\n  hash_key = \"id\"\n\n  attribute {\n    name = \"id\"\n    type = \"S\"\n  }\n}\n\nresource \"aws_kinesis_stream\" \"example\" {\n  name        = \"order_item_changes\"\n  shard_count = 1\n}\n\nresource \"aws_dynamodb_kinesis_streaming_destination\" \"example\" {\n  stream_arn                               = aws_kinesis_stream.example.arn\n  table_name                               = aws_dynamodb_table.example.name\n  approximate_creation_date_time_precision = \"MICROSECOND\"\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS DynamoDB table to stream data changes to an AWS Kinesis stream using the `aws_dynamodb_kinesis_streaming_destination` resource. It showcases key configurations such as linking the `stream_arn` of the Kinesis stream to the DynamoDB table's `table_name` and setting the `approximate_creation_date_time_precision` for fine-grained timestamp precision."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "approximate_creation_date_time_precision",
+      "description": "(Optional) Toggle for the precision of Kinesis data stream timestamp. Valid values: `MILLISECOND` and `MICROSECOND`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `approximate_creation_date_time_precision` argument allows users to specify the precision level (`MILLISECOND` or `MICROSECOND`) for timestamps associated with the Kinesis data stream linked to the DynamoDB table. Configuring this setting impacts the granularity of timestamp data, enabling more precise event tracking or analytics in use cases requiring fine-grained temporal accuracy."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_dynamodb_kinesis_streaming_destination` resource specifies the unique identifier for the streaming destination configuration, typically representing the association between a DynamoDB table and a Kinesis data stream. While optional, setting this argument allows users to reference or manage the specific streaming destination instance, enabling precise control over its lifecycle and integration within their infrastructure."
+    },
+    {
+      "name": "stream_arn",
+      "description": "(Required) The ARN for a Kinesis data stream. This must exist in the same account and region as the DynamoDB table.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `stream_arn` argument specifies the Amazon Resource Name (ARN) of the Kinesis data stream to be linked to the DynamoDB table, enabling real-time streaming of table updates to the specified stream. By configuring this required parameter, users establish the integration between DynamoDB and Kinesis, facilitating use cases like event-driven architectures, analytics, and data processing workflows."
+    },
+    {
+      "name": "table_name",
+      "description": "(Required) The name of the DynamoDB table. There can only be one Kinesis streaming destination for a given DynamoDB table.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `table_name` argument specifies the name of the DynamoDB table for which a Kinesis streaming destination is being configured. This required parameter links the DynamoDB table to the Kinesis data stream, enabling real-time streaming of item-level changes from the specified table to the associated Kinesis stream, supporting use cases like analytics, monitoring, and event-driven architectures."
+    }
+  ],
+  "blocks": [],
+  "attributes": []
+}

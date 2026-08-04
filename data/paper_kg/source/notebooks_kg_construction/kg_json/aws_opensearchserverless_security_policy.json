@@ -1,0 +1,48 @@
+{
+    "resource": {
+        "name": "aws_opensearchserverless_security_policy",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "policy",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "type",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "policy_version",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

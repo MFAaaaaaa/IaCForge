@@ -1,93 +1,93 @@
 # Architecture
 
-## Offline layer
-
-The offline layer is version aligned:
+## Stage Contracts
 
 ```text
-AWS Provider Schema 5.90.0
-+ AWS Provider Docs 5.90.0
-+ Official HCL examples
-  -> stable typed Provider KG
-  -> resource semantic index
-  -> dependency evidence index
-  -> exact schema index
-  -> provenance-complete prompt cache
+Prompt
+  -> KG profile selector
+  -> optional PlannerEvidence projection
+  -> Graph IR generation and safe parsing
+  -> IR/schema consistency check
+  -> exact SchemaProjection
+  -> optional instance-level ProviderContract
+  -> HCL generation and normalization
+  -> validate -> plan
+  -> optional local repair after plan failure
+  -> final validate/plan -> OPA
 ```
 
-Typed IDs use forms such as:
+The evaluator uses four primary typed boundaries:
 
-```text
-aws@5.90.0::resource::aws_subnet
-aws@5.90.0::resource::aws_subnet::argument::vpc_id
-aws@5.90.0::resource::aws_vpc::attribute::id
-```
+1. `Prompt + optional PlannerEvidence -> GraphIR`
+2. `GraphIR -> SchemaProjection`
+3. `GraphIR + SchemaProjection + optional KG -> ProviderContract`
+4. `Prompt + GraphIR + SchemaProjection + optional ProviderContract -> HCL`
 
-Reference edges record source/target paths, provenance, supporting document,
-support count, confidence and provider version. Most edges mean
-`REQUIRES_VALUE_OF_TYPE`; they do not imply managed-resource creation.
+`IAC_KG_INJECTION_STAGE=ir` enables only planner evidence. `hcl` enables only
+the KG-derived Provider Contract. `both` enables both interfaces. Schema
+grounding is separate from KG selection.
 
-## Online layer
+## KG Adapters
 
-The online pipeline has four typed boundaries:
+`evaluation/eval_verigraph.py` selects one evidence adapter:
 
-1. `Prompt -> PlannerEvidence`
-2. `PlannerEvidence -> GraphIR v2`
-3. `GraphIR -> SchemaProjection`
-4. `GraphIR + SchemaProjection + KG -> ProviderContract v2`
+- `clean_multigranular`: version-aligned public provider KG and offline cache.
+- `paper`: paper replication JSON, Chroma, lexical fallback, reranking, and
+  reference expansion.
+- `hybrid_cached_evidence_rebuilt_kg`: immutable first-build evidence used for
+  historical comparability, with the second reconstructed KG kept alongside
+  it for provenance and future rebuilding.
 
-The planner never receives full optional/computed fields, nested-block
-inventories or HCL examples. The compiler receives only Graph IR instances and
-their exact task-specific contract, not the original broad candidate set.
+The paper adapter defaults to top-2 resources and can expand dependencies from
+`reference_relations`. Optional arguments/blocks are retrieved from the
+`terraform_arguments_blocks` Chroma collection. The clean profile uses stable
+typed nodes/edges, exact aliases, BM25, optional dense retrieval, and graph
+expansion.
 
-## Graph IR v2
+## Graph IR and Schema
 
-Graph IR v2 contains:
+Graph IR v2 represents resource, data-source, and external-input instances;
+field-level bindings; structured constraints; explicit dependencies; and
+unresolved requirements. Invalid model text becomes a canonical empty IR and
+is marked as an IR generation failure.
 
-- instance nodes with `resource`, `data_source` or `external_input` kind;
-- field-level `bindings`;
-- structured constraints and unresolved semantic constraints;
-- true `explicit_dependencies`;
-- requirement-to-implementation coverage.
-
-Legacy v1 IR is readable and normalized to v2. Invalid model text becomes an
-empty canonical v2 object and is marked `ir_generation_failure`.
-
-## Schema consistency
-
-`IRSchemaChecker` checks:
-
-- provider type and node kind;
-- source argument existence/assignability;
-- target attribute existence/exportability;
-- approximate provider-schema type compatibility;
-- declared binding endpoints.
-
-Only a unique, high-confidence field-name correction is applied. Structural
-resource changes are never performed automatically.
+`IRSchemaChecker` checks provider type/kind, assignable source fields,
+exportable target attributes, approximate type compatibility, and binding
+endpoints. It applies only unique high-confidence field-name corrections.
+`schema_rag.py` then creates the task-relevant schema context.
 
 ## Provider Contract
 
-The canonical contract is instance-level. It contains:
+When HCL-stage KG injection is enabled, `provider_contract.py` compiles the
+normalized IR, schema projection, and KG evidence into an instance-level
+contract. It contains required/allowed assignments, references, relevant
+nested blocks, explicit dependencies, forbidden computed assignments, and
+unresolved constraints. It may also produce a deterministic HCL skeleton.
 
-- required and allowed assignments;
-- `must_assign` reference expressions;
-- visible-prompt and structured-constraint `should_assign` values;
-- computed-only forbidden assignments;
-- relevant nested blocks;
-- explicit dependencies;
-- unresolved requirements and constraints.
+The broad raw candidate KG is not passed directly to the HCL model. The model
+receives the projected Provider Contract.
 
-The HCL prompt, log record and contract validator all consume these exact field
-names.
+## Local Repair
 
-## Evaluation
+`evaluation/local_repair.py` implements a strict policy:
 
-All modes share exactly the same HCL extraction and normalization function.
-The log distinguishes raw model HCL from normalized HCL and stores a unified
-diff. Before Terraform, structural metrics report IR node/binding realization,
-extra/missing resources and schema contract violations.
+- trigger only after the first Terraform plan fails;
+- at most one repair model call;
+- inputs: visible Prompt, normalized Graph IR, provider schema context,
+  current HCL, and Terraform plan diagnostic;
+- no raw KG evidence;
+- no KG-derived Provider Contract;
+- no OPA policy or result.
 
-OPA remains post-generation evaluation. It never influences strict generation.
-`full_repair1` may use one Terraform validation/plan diagnostic, but never OPA
-feedback.
+The repaired candidate is normalized, validated, and planned again. Validation
+failure before the first plan does not trigger repair. Graph IR and HCL may
+carry indirect upstream KG influence, so this is a no-direct-KG repair
+boundary, not a claim that all causal KG influence has been removed.
+
+## Evaluation and Logging
+
+All modes share the same HCL extraction and normalization path. Logs preserve
+raw/normalized IR and HCL, normalization diffs, request parameters, token use,
+latencies, KG profile and injection stage, retrieval provenance, and repair
+policy. OPA is evaluation-only and runs after generation and planning.
+

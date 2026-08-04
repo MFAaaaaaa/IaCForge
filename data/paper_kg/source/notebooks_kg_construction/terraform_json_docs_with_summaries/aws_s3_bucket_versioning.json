@@ -1,0 +1,83 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_versioning",
+    "description": "Provides a resource for controlling versioning on an S3 bucket. Deleting this resource will either suspend versioning on the associated S3 bucket or simply remove the resource from Terraform state if the associated S3 bucket is unversioned. For more information, see How S3 versioning works. If you are enabling versioning on the bucket for the first time, AWS recommends that you wait for 15 minutes after enabling versioning before issuing write operations (PUT or DELETE) on objects in the bucket. This resource cannot be used with S3 directory buckets.",
+    "llm_summary": "Manages the configuration of S3 bucket versioning, enabling users to control object versioning for data protection, recovery, and change tracking. Common use cases include enabling versioning to safeguard against accidental deletions, maintaining object history, and supporting compliance or backup strategies. This resource allows users to enable, suspend, or manage versioning states, ensuring precise control over bucket versioning behavior while integrating seamlessly with other S3 features."
+  },
+  "examples": [
+    {
+      "title": "With Versioning Enabled",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"example-bucket\"\n}\n\nresource \"aws_s3_bucket_acl\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n  acl    = \"private\"\n}\n\nresource \"aws_s3_bucket_versioning\" \"versioning_example\" {\n  bucket = aws_s3_bucket.example.id\n  versioning_configuration {\n    status = \"Enabled\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to enable versioning for an S3 bucket using the `aws_s3_bucket_versioning` resource, with the `status` argument set to `\"Enabled\"`. It also includes the creation of an S3 bucket and configuration of a private ACL, showcasing a complete setup for managing versioned objects in a secure bucket."
+    },
+    {
+      "title": "With Versioning Disabled",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"example-bucket\"\n}\n\nresource \"aws_s3_bucket_acl\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n  acl    = \"private\"\n}\n\nresource \"aws_s3_bucket_versioning\" \"versioning_example\" {\n  bucket = aws_s3_bucket.example.id\n  versioning_configuration {\n    status = \"Disabled\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_s3_bucket_versioning` resource with versioning explicitly disabled for an S3 bucket. It showcases the use of the `versioning_configuration` block with the `status` argument set to `\"Disabled\"`, alongside the creation of a private S3 bucket and its ACL configuration. Users can learn how to set up an S3 bucket without versioning for scenarios where object versioning is not required."
+    },
+    {
+      "title": "Object Dependency On Versioning",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"yotto\"\n}\n\nresource \"aws_s3_bucket_versioning\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n\n  versioning_configuration {\n    status = \"Enabled\"\n  }\n}\n\nresource \"aws_s3_object\" \"example\" {\n  bucket = aws_s3_bucket_versioning.example.id\n  key    = \"droeloe\"\n  source = \"example.txt\"\n}",
+      "llm_summary": "This example demonstrates how to enable versioning on an S3 bucket using the `aws_s3_bucket_versioning` resource and configure an S3 object to depend on the versioned bucket. It highlights the use of the `versioning_configuration` block with the `status` argument set to `\"Enabled\"` and showcases resource dependency management for objects stored in a versioned bucket."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bucket",
+      "description": "(Required, Forces new resource) Name of the S3 bucket.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket` argument specifies the name of the S3 bucket for which versioning is being configured in the `aws_s3_bucket_versioning` resource. By defining this required parameter, users associate versioning settings with a specific bucket, enabling features like object version tracking and recovery to support data integrity, backup, and lifecycle management goals."
+    },
+    {
+      "name": "expected_bucket_owner",
+      "description": "(Optional, Forces new resource) Account ID of the expected bucket owner.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `expected_bucket_owner` argument allows users to specify the AWS account ID of the expected owner of the S3 bucket associated with the `aws_s3_bucket_versioning` resource. This ensures that versioning configuration changes are applied only if the bucket is owned by the specified account, enhancing security and preventing accidental modifications to buckets owned by unintended accounts."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_s3_bucket_versioning` resource represents the unique identifier for the S3 bucket associated with versioning configuration. While optional, it can be used to explicitly reference or track the bucket in Terraform state, aiding in resource management and ensuring accurate linkage between the versioning settings and the bucket."
+    },
+    {
+      "name": "mfa",
+      "description": "(Optional, Required if `versioning_configuration` `mfa_delete` is enabled) Concatenation of the authentication device's serial number, a space, and the value that is displayed on your authentication device.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `mfa` argument in the `aws_s3_bucket_versioning` resource allows users to specify the multi-factor authentication (MFA) credentials required to enable or manage `mfa_delete` functionality for S3 bucket versioning. By providing the concatenated serial number and authentication code from an MFA device, users can enforce stricter access controls for deleting object versions, enhancing security and compliance for sensitive data."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "versioning_configuration",
+      "description": "(Required) Configuration block for the versioning parameters. See below.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "mfa_delete",
+          "description": "(Optional) Specifies whether MFA delete is enabled in the bucket versioning configuration. Valid values: `Enabled` or `Disabled`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `mfa_delete` argument in the `versioning_configuration` of the `aws_s3_bucket_versioning` resource allows users to specify whether Multi-Factor Authentication (MFA) is required to permanently delete objects or disable versioning in the S3 bucket. Setting this to `Enabled` enhances security by enforcing MFA for critical actions, aligning with user goals of protecting sensitive data and preventing accidental or unauthorized deletions."
+        },
+        {
+          "name": "status",
+          "description": "(Required) Versioning state of the bucket. Valid values: `Enabled`, `Suspended`, or `Disabled`. `Disabled` should only be used when creating or importing resources that correspond to unversioned S3 buckets.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `status` argument in the `versioning_configuration` of the `aws_s3_bucket_versioning` resource specifies the versioning state of an S3 bucket, allowing users to control whether object versioning is enabled (`Enabled`), suspended (`Suspended`), or disabled (`Disabled`). Setting this argument impacts the bucket's ability to retain previous versions of objects, which is critical for use cases like data recovery, auditing, or managing object lifecycle policies."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `versioning_configuration` block within the `aws_s3_bucket_versioning` resource enables the management of versioning settings for an S3 bucket, allowing users to control how object versions are retained and protected. This block encapsulates related settings such as enabling or suspending versioning, helping users achieve data durability, recovery from accidental deletions, and support for object lifecycle management."
+    }
+  ],
+  "attributes": []
+}

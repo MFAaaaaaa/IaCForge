@@ -1,0 +1,24 @@
+{
+    "resource": {
+        "name": "null_resource",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "triggers",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

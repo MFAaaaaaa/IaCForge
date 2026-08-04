@@ -1,0 +1,385 @@
+{
+    "resource": {
+        "name": "aws_lambda_event_source_mapping",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "batch_size",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "bisect_batch_on_function_error",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "event_source_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "function_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "function_response_types",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "kms_key_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "maximum_batching_window_in_seconds",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "maximum_record_age_in_seconds",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "maximum_retry_attempts",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "parallelization_factor",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "queues",
+            "description": "",
+            "required": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "starting_position",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "starting_position_timestamp",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "topics",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "tumbling_window_in_seconds",
+            "description": "",
+            "required": false,
+            "type": "number"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "amazon_managed_kafka_event_source_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "consumer_group_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "destination_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "on_failure",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "destination_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "document_db_event_source_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "collection_name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "database_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "full_document",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "filter_criteria",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "filter",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        10
+                    ],
+                    "arguments": [
+                        {
+                            "name": "pattern",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "metrics_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "metrics",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "provisioned_poller_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "maximum_pollers",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "minimum_pollers",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "scaling_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "maximum_concurrency",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "self_managed_event_source",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "endpoints",
+                    "description": "",
+                    "required": true,
+                    "type": "map(string)"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "self_managed_kafka_event_source_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "consumer_group_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "source_access_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                22
+            ],
+            "arguments": [
+                {
+                    "name": "type",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "uri",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "function_arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "last_modified",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "last_processing_result",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "state",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "state_transition_reason",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "uuid",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

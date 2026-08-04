@@ -1,0 +1,67 @@
+[
+    {
+        "argument_path": "vpc_id",
+        "references_output": "aws_vpc.id",
+        "target_resource_type": "aws_vpc"
+    },
+    {
+        "argument_path": "route.cidr_block",
+        "references_output": "aws_vpc.cidr_block",
+        "target_resource_type": "aws_vpc"
+    },
+    {
+        "argument_path": "route.gateway_id",
+        "references_output": "aws_internet_gateway.id",
+        "target_resource_type": "aws_internet_gateway"
+    },
+    {
+        "argument_path": "route.egress_only_gateway_id",
+        "references_output": "aws_egress_only_internet_gateway.id",
+        "target_resource_type": "aws_egress_only_internet_gateway"
+    },
+    {
+        "argument_path": "route.network_interface_id",
+        "references_output": "aws_network_interface.id",
+        "target_resource_type": "aws_network_interface"
+    },
+    {
+        "argument_path": "route.nat_gateway_id",
+        "references_output": "aws_nat_gateway.id",
+        "target_resource_type": "aws_nat_gateway"
+    },
+    {
+        "argument_path": "route.transit_gateway_id",
+        "references_output": "aws_transit_gateway.id",
+        "target_resource_type": "aws_transit_gateway"
+    },
+    {
+        "argument_path": "route.vpc_endpoint_id",
+        "references_output": "aws_vpc_endpoint.id",
+        "target_resource_type": "aws_vpc_endpoint"
+    },
+    {
+        "argument_path": "route.vpc_peering_connection_id",
+        "references_output": "aws_vpc_peering_connection.id",
+        "target_resource_type": "aws_vpc_peering_connection"
+    },
+    {
+        "argument_path": "route.carrier_gateway_id",
+        "references_output": "aws_carrier_gateway.id",
+        "target_resource_type": "aws_carrier_gateway"
+    },
+    {
+        "argument_path": "route.local_gateway_id",
+        "references_output": "aws_local_gateway.id",
+        "target_resource_type": "aws_local_gateway"
+    },
+    {
+        "argument_path": "route.core_network_arn",
+        "references_output": "aws_network_manager_core_network.arn",
+        "target_resource_type": "aws_network_manager_core_network"
+    },
+    {
+        "argument_path": "propagating_vgws",
+        "references_output": "aws_vpn_gateway.id",
+        "target_resource_type": "aws_vpn_gateway"
+    }
+]

@@ -1,0 +1,7 @@
+[
+    {
+        "argument_path": "user_ids",
+        "references_output": "aws_elasticache_user.user_id",
+        "target_resource_type": "aws_elasticache_user"
+    }
+]

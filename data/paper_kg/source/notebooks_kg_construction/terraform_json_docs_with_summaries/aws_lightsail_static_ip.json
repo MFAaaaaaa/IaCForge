@@ -1,0 +1,51 @@
+{
+  "resource": {
+    "name": "aws_lightsail_static_ip",
+    "description": "Allocates a static IP address. Lightsail is currently only supported in a limited number of AWS Regions, please see \"Regions and Availability Zones in Amazon Lightsail\" for more details",
+    "llm_summary": "The `aws_lightsail_static_ip` Terraform resource enables the allocation and management of static IP addresses within Amazon Lightsail, providing a fixed, reliable IP for connecting to Lightsail instances. Common use cases include ensuring consistent access to web applications, services, or servers hosted on Lightsail, even during instance restarts or changes. This resource is ideal for configuring stable networking setups in supported AWS regions, simplifying DNS management and enabling seamless integration with Lightsail workloads."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_lightsail_static_ip\" \"test\" {\n  name = \"example\"\n}",
+      "llm_summary": "\"Demonstrates the basic setup of an AWS Lightsail static IP using the `aws_lightsail_static_ip` resource, showcasing how to define a static IP with the required `name` argument for identification.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_lightsail_static_ip` resource allows users to specify a unique identifier for the static IP, typically used to reference or manage the resource programmatically within Terraform configurations. While optional, setting this argument can help ensure consistent tracking and integration of the static IP across dependent resources or workflows."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name for the allocated static IP",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_lightsail_static_ip` resource specifies the unique identifier for the allocated static IP, allowing users to define a human-readable name for easier management and reference within their Lightsail environment. Setting this argument ensures the static IP is distinguishable and can be associated with specific resources or workflows, supporting common goals like organizing infrastructure and simplifying resource tracking."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the Lightsail static IP",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "ip_address",
+      "description": "The allocated static IP address",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "support_code",
+      "description": "The support code.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

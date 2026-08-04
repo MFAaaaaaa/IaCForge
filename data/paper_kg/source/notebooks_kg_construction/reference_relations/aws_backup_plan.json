@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "rule.target_vault_name",
+        "references_output": "aws_backup_vault.name",
+        "target_resource_type": "aws_backup_vault"
+    },
+    {
+        "argument_path": "copy_action.destination_vault_arn",
+        "references_output": "aws_backup_vault.arn",
+        "target_resource_type": "aws_backup_vault"
+    }
+]

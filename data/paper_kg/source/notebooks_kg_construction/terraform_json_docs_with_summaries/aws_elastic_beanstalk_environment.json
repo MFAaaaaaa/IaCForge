@@ -1,0 +1,218 @@
+{
+  "resource": {
+    "name": "aws_elastic_beanstalk_environment",
+    "description": "Provides an Elastic Beanstalk Environment Resource. Elastic Beanstalk allows you to deploy and manage applications in the AWS cloud without worrying about the infrastructure that runs those applications. Environments are often things such as development, integration, or production.",
+    "llm_summary": "The `aws_elastic_beanstalk_environment` resource enables the creation and management of Elastic Beanstalk environments, simplifying application deployment and scaling in AWS without requiring direct infrastructure management. Common use cases include setting up development, integration, or production environments for web applications, APIs, or backend services. Users can configure application versions, instance types, scaling policies, logging, monitoring, and environment variables, making it ideal for lifecycle management, automated deployments, and seamless integration with CI/CD pipelines."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_elastic_beanstalk_application\" \"tftest\" {\n  name        = \"tf-test-name\"\n  description = \"tf-test-desc\"\n}\n\nresource \"aws_elastic_beanstalk_environment\" \"tfenvtest\" {\n  name                = \"tf-test-name\"\n  application         = aws_elastic_beanstalk_application.tftest.name\n  solution_stack_name = \"64bit Amazon Linux 2015.03 v2.0.3 running Go 1.4\"\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Elastic Beanstalk environment (`aws_elastic_beanstalk_environment`) linked to an Elastic Beanstalk application (`aws_elastic_beanstalk_application`) with a specified `solution_stack_name`. It illustrates the basic setup required to define an environment and associate it with an application, showcasing key arguments like `name`, `application`, and `solution_stack_name` for deployment."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "application",
+      "description": "\u2013 (Required) Name of the application that contains the version to be deployed",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `application` argument specifies the name of the Elastic Beanstalk application associated with the environment being created or managed. By setting this required value, users define the application context for the environment, enabling deployment of application versions and ensuring the environment is linked to the correct application for scaling, updates, and resource management."
+    },
+    {
+      "name": "cname_prefix",
+      "description": "(Optional) Prefix to use for the fully qualified DNS name of the Environment.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cname_prefix` argument allows users to define a custom prefix for the fully qualified DNS name of the Elastic Beanstalk environment, enabling control over the environment's public-facing URL. By setting this argument, users can create a more recognizable or domain-specific subdomain for their application, aligning with branding or organizational requirements."
+    },
+    {
+      "name": "description",
+      "description": "(Optional) Short description of the Environment",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines a short, optional text description for the Elastic Beanstalk environment, allowing users to provide contextual information or metadata about the environment's purpose, configuration, or role within their application architecture. This argument is useful for improving clarity and documentation, especially in environments with multiple deployments or complex setups."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_elastic_beanstalk_environment` resource represents the unique identifier of the Elastic Beanstalk environment. While optional, it is typically used to reference or retrieve the environment's ID for integration with other resources or workflows, enabling users to programmatically manage and track the environment within their infrastructure."
+    },
+    {
+      "name": "name",
+      "description": "(Required) A unique name for this Environment. This name is used in the application URL",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies a unique identifier for the Elastic Beanstalk environment, which is used to define the environment's identity and forms part of its application URL. Setting this argument allows users to distinguish and access the environment within their application, supporting common goals like organizing multiple environments (e.g., development, staging, production) and enabling URL-based access."
+    },
+    {
+      "name": "platform_arn",
+      "description": "\u2013 (Optional) The ARN of the Elastic Beanstalk Platform to use in deployment",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `platform_arn` argument allows users to specify the Amazon Resource Name (ARN) of the Elastic Beanstalk platform version to be used for the environment, enabling precise control over the runtime stack, including the operating system, programming language, and application server configuration. By setting this argument, users can ensure compatibility with specific application requirements or leverage pre-configured platform versions for optimized deployment."
+    },
+    {
+      "name": "poll_interval",
+      "description": "\u2013 The time between polling the AWS API to check if changes have been applied. Use this to adjust the rate of API calls for any `create` or `update` action. Minimum `10s`, maximum `180s`. Omit this to use the default behavior, which is an exponential backoff",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `poll_interval` argument for the `aws_elastic_beanstalk_environment` resource allows users to control the frequency of API polling during `create` or `update` operations, enabling customization of the time interval between checks for applied changes. By adjusting this value (within the range of 10 to 180 seconds), users can optimize API call rates to balance responsiveness and throttling concerns, aligning with deployment performance goals."
+    },
+    {
+      "name": "solution_stack_name",
+      "description": "\u2013 (Optional) A solution stack to base your environment off of. Example stacks can be found in the Amazon API documentation",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `solution_stack_name` argument allows users to specify the predefined platform configuration (e.g., runtime, operating system, and application server) for their Elastic Beanstalk environment. By setting this argument, users can define the foundational technology stack their application will run on, enabling compatibility with specific frameworks or languages such as Java, Python, or Node.js."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A set of tags to apply to the Environment. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument allows users to define a set of key-value pairs to categorize and organize the Elastic Beanstalk environment for cost allocation, resource management, or automation purposes. When specified, these tags can override provider-level default tags, enabling granular control over resource metadata and alignment with tagging strategies."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_elastic_beanstalk_environment` resource allows users to define a comprehensive set of key-value tags that are applied to the Elastic Beanstalk environment and its associated resources. This enables streamlined resource organization, cost allocation, and management by categorizing and tracking resources using metadata for purposes such as billing, access control, or automation workflows."
+    },
+    {
+      "name": "template_name",
+      "description": "\u2013 (Optional) The name of the Elastic Beanstalk Configuration template to use in deployment",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `template_name` argument allows users to specify the name of an Elastic Beanstalk configuration template to define pre-configured settings for the environment, such as instance types, scaling policies, and software configurations. By setting this argument, users can streamline deployment by reusing standardized templates, ensuring consistency and reducing manual configuration effort."
+    },
+    {
+      "name": "tier",
+      "description": "(Optional) Elastic Beanstalk Environment tier. Valid values are `Worker` or `WebServer`. If tier is left blank `WebServer` will be used.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `tier` argument in the `aws_elastic_beanstalk_environment` resource allows users to specify the operational tier of the Elastic Beanstalk environment, defining whether it functions as a `WebServer` for handling HTTP requests or a `Worker` for background task processing. By setting this argument, users can tailor the environment to align with their application's workload type, with `WebServer` being the default if left unspecified."
+    },
+    {
+      "name": "version_label",
+      "description": "(Optional) The name of the Elastic Beanstalk Application Version to use in deployment.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `version_label` argument allows users to specify the name of the Elastic Beanstalk Application Version to deploy in the environment, enabling precise control over which application version is used. This is commonly used to manage application updates, rollbacks, or deployments by explicitly defining the version to be deployed within the Elastic Beanstalk environment."
+    },
+    {
+      "name": "wait_for_ready_timeout",
+      "description": "(Default `20m`) The maximum duration that Terraform should wait for an Elastic Beanstalk Environment to be in a ready state before timing out.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `wait_for_ready_timeout` argument allows users to define the maximum duration Terraform will wait for the Elastic Beanstalk environment to reach a ready state during deployment or updates. This setting helps control deployment timeouts, ensuring alignment with user expectations for environment readiness and preventing indefinite waits in case of delays or issues."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "setting",
+      "description": "\u2013 (Optional) Option settings to configure the new Environment. These override specific values that are set as defaults. The format is detailed below in Option Settings",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "name",
+          "description": "(Required) A unique name for this Environment. This name is used in the application URL",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `name` argument specifies a unique identifier for the Elastic Beanstalk environment, which is used to define the environment's application URL and distinguish it from other environments within the same application. Setting this argument ensures proper routing and access to the environment, aligning with user goals of managing multiple deployment stages or isolated environments effectively."
+        },
+        {
+          "name": "namespace",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `namespace` argument specifies the configuration namespace within the Elastic Beanstalk environment settings, allowing users to define the scope or category of settings being applied (e.g., environment variables, instance settings, or resource limits). By setting this argument, users can target specific functional areas of the environment to customize behavior, optimize resource usage, or enable advanced features."
+        },
+        {
+          "name": "resource",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `resource` argument within the `setting` block of the `aws_elastic_beanstalk_environment` resource specifies the associated AWS resource or component that the configuration setting applies to. This allows users to target specific Elastic Beanstalk resources (e.g., instances, load balancers) for fine-grained customization, enabling precise control over environment behavior and resource-specific settings."
+        },
+        {
+          "name": "value",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `value` argument in the `setting` block of the `aws_elastic_beanstalk_environment` resource specifies the configuration value for a particular environment setting, allowing users to define parameters such as environment variables, application behavior, or platform-specific options. By setting this argument, users can customize the operational characteristics of their Elastic Beanstalk environment to align with application requirements or deployment goals."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `setting` configuration block within the `aws_elastic_beanstalk_environment` resource allows users to define and override specific environment option settings, enabling granular control over application behavior and infrastructure configurations. This block encapsulates key environment parameters, such as instance types, scaling policies, and software settings, helping users customize Elastic Beanstalk environments to meet application-specific requirements and optimize performance."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "all_settings",
+      "description": "",
+      "optional": false,
+      "type": "set(object({name=string,namespace=string,resource=string,value=string}))"
+    },
+    {
+      "name": "arn",
+      "description": "",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "autoscaling_groups",
+      "description": "The autoscaling groups used by this Environment.",
+      "optional": false,
+      "type": "list(string)"
+    },
+    {
+      "name": "cname",
+      "description": "Fully qualified DNS name for this Environment.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "endpoint_url",
+      "description": "The URL to the Load Balancer for this Environment",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "instances",
+      "description": "Instances used by this Environment.",
+      "optional": false,
+      "type": "list(string)"
+    },
+    {
+      "name": "launch_configurations",
+      "description": "Launch configurations in use by this Environment.",
+      "optional": false,
+      "type": "list(string)"
+    },
+    {
+      "name": "load_balancers",
+      "description": "Elastic load balancers in use by this Environment.",
+      "optional": false,
+      "type": "list(string)"
+    },
+    {
+      "name": "queues",
+      "description": "SQS queues in use by this Environment.",
+      "optional": false,
+      "type": "list(string)"
+    },
+    {
+      "name": "triggers",
+      "description": "Autoscaling triggers in use by this Environment.",
+      "optional": false,
+      "type": "list(string)"
+    }
+  ]
+}

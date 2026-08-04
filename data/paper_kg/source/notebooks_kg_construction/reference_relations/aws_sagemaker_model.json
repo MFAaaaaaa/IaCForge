@@ -1,0 +1,47 @@
+[
+    {
+        "argument_path": "execution_role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "primary_container.image",
+        "references_output": "data.aws_sagemaker_prebuilt_ecr_image.registry_path",
+        "target_resource_type": "data.aws_sagemaker_prebuilt_ecr_image"
+    },
+    {
+        "argument_path": "primary_container.model_data_url",
+        "references_output": "aws_s3_bucket_object.url",
+        "target_resource_type": "aws_s3_bucket_object"
+    },
+    {
+        "argument_path": "primary_container.model_package_name",
+        "references_output": "aws_sagemaker_model_package.arn",
+        "target_resource_type": "aws_sagemaker_model_package"
+    },
+    {
+        "argument_path": "vpc_config.vpc_id",
+        "references_output": "aws_vpc.id",
+        "target_resource_type": "aws_vpc"
+    },
+    {
+        "argument_path": "vpc_config.subnet_ids",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "vpc_config.security_group_ids",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "image_config.repository_auth_config.repository_credentials_provider_arn",
+        "references_output": "aws_lambda_function.arn",
+        "target_resource_type": "aws_lambda_function"
+    },
+    {
+        "argument_path": "model_data_source.s3_data_source.s3_uri",
+        "references_output": "aws_s3_bucket_object.bucket",
+        "target_resource_type": "aws_s3_bucket_object"
+    }
+]

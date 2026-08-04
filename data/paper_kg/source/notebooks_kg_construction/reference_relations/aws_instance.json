@@ -1,0 +1,77 @@
+[
+    {
+        "argument_path": "ami",
+        "references_output": "data.aws_ami.id",
+        "target_resource_type": "data.aws_ami"
+    },
+    {
+        "argument_path": "subnet_id",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "vpc_security_group_ids",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "network_interface.network_interface_id",
+        "references_output": "aws_network_interface.id",
+        "target_resource_type": "aws_network_interface"
+    },
+    {
+        "argument_path": "host_id",
+        "references_output": "aws_dedicated_host.id",
+        "target_resource_type": "aws_dedicated_host"
+    },
+    {
+        "argument_path": "host_resource_group_arn",
+        "references_output": "aws_resource_group.arn",
+        "target_resource_type": "aws_resource_group"
+    },
+    {
+        "argument_path": "iam_instance_profile",
+        "references_output": "aws_iam_instance_profile.name",
+        "target_resource_type": "aws_iam_instance_profile"
+    },
+    {
+        "argument_path": "placement_group",
+        "references_output": "aws_placement_group.name",
+        "target_resource_type": "aws_placement_group"
+    },
+    {
+        "argument_path": "launch_template.id",
+        "references_output": "aws_launch_template.id",
+        "target_resource_type": "aws_launch_template"
+    },
+    {
+        "argument_path": "launch_template.name",
+        "references_output": "aws_launch_template.name",
+        "target_resource_type": "aws_launch_template"
+    },
+    {
+        "argument_path": "capacity_reservation_specification.capacity_reservation_target.capacity_reservation_id",
+        "references_output": "aws_ec2_capacity_reservation.id",
+        "target_resource_type": "aws_ec2_capacity_reservation"
+    },
+    {
+        "argument_path": "capacity_reservation_specification.capacity_reservation_target.capacity_reservation_resource_group_arn",
+        "references_output": "aws_resource_group.arn",
+        "target_resource_type": "aws_resource_group"
+    },
+    {
+        "argument_path": "ebs_block_device.kms_key_id",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "root_block_device.kms_key_id",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "key_name",
+        "references_output": "aws_key_pair.key_name",
+        "target_resource_type": "aws_key_pair"
+    }
+]

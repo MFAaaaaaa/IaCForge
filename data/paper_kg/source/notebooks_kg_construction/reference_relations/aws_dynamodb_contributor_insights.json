@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "table_name",
+        "references_output": "aws_dynamodb_table.name",
+        "target_resource_type": "aws_dynamodb_table"
+    },
+    {
+        "argument_path": "index_name",
+        "references_output": "aws_dynamodb_table.global_secondary_index.name",
+        "target_resource_type": "aws_dynamodb_table"
+    }
+]

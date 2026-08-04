@@ -1,0 +1,17 @@
+[
+    {
+        "argument_path": "cluster_identifier",
+        "references_output": "aws_neptune_cluster.id",
+        "target_resource_type": "aws_neptune_cluster"
+    },
+    {
+        "argument_path": "neptune_subnet_group_name",
+        "references_output": "aws_neptune_subnet_group.name",
+        "target_resource_type": "aws_neptune_subnet_group"
+    },
+    {
+        "argument_path": "neptune_parameter_group_name",
+        "references_output": "aws_neptune_parameter_group.name",
+        "target_resource_type": "aws_neptune_parameter_group"
+    }
+]

@@ -1,0 +1,35 @@
+{
+    "resource": {
+        "name": "aws_iam_group_membership",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "group",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "users",
+            "description": "",
+            "required": true,
+            "type": "set(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": []
+}

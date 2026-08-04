@@ -1,0 +1,151 @@
+{
+  "resource": {
+    "name": "aws_lambda_layer_version",
+    "description": "Provides a Lambda Layer Version resource. Lambda Layers allow you to reuse shared bits of code across multiple lambda functions. For information about Lambda Layers and how to use them, see AWS Lambda Layers. Setting skip_destroy to true means that the AWS Provider will not destroy any layer version, even when running terraform destroy. Layer versions are thus intentional dangling resources that are not managed by Terraform and may incur extra expense in your AWS account.",
+    "llm_summary": "The `aws_lambda_layer_version` resource enables the creation and management of AWS Lambda Layer versions, allowing users to share and reuse common code, libraries, or dependencies across multiple Lambda functions. It is commonly used to streamline function development by centralizing shared components, such as SDKs, utilities, or custom runtimes, reducing duplication and maintenance overhead. Key configurations include versioning, lifecycle management with the option to prevent destruction (`skip_destroy`), and integration with Lambda functions for modular and efficient serverless application design."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_lambda_layer_version\" \"lambda_layer\" {\n  filename   = \"lambda_layer_payload.zip\"\n  layer_name = \"lambda_layer_name\"\n\n  compatible_runtimes = [\"nodejs20.x\"]\n}",
+      "llm_summary": "\"Demonstrates the basic setup of an AWS Lambda layer version using the `aws_lambda_layer_version` resource, including specifying the `filename` for the layer's payload, `layer_name`, and `compatible_runtimes` to define supported runtime environments (e.g., `nodejs20.x`). This example helps users configure reusable Lambda layer code for specific runtime compatibility.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "compatible_architectures",
+      "description": "(Optional) List of Architectures this layer is compatible with. Currently `x86_64` and `arm64` can be specified.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `compatible_architectures` argument for the `aws_lambda_layer_version` resource allows users to specify the processor architectures (`x86_64` or `arm64`) that the Lambda layer is compatible with. By defining this, users ensure the layer can be used by Lambda functions running on the specified architectures, aligning with deployment requirements and optimizing compatibility for their workloads."
+    },
+    {
+      "name": "compatible_runtimes",
+      "description": "(Optional) List of Runtimes this layer is compatible with. Up to 15 runtimes can be specified.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `compatible_runtimes` argument for the `aws_lambda_layer_version` resource allows users to specify a set of AWS Lambda runtime environments (e.g., Python, Node.js) that the layer is compatible with. By defining this, users ensure the layer can be used only with functions running on the specified runtimes, enabling targeted compatibility and preventing runtime mismatches."
+    },
+    {
+      "name": "description",
+      "description": "(Optional) Description of what your Lambda Layer does.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_lambda_layer_version` resource allows users to define a human-readable summary of the purpose or functionality of the Lambda layer. Setting this argument helps document the layer's intent, making it easier to manage and identify layers in environments with multiple versions or layers, aligning with common user goals like improving resource organization and clarity."
+    },
+    {
+      "name": "filename",
+      "description": "(Optional) Path to the function's deployment package within the local filesystem. If defined, The `s3_`-prefixed options cannot be used.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `filename` argument in the `aws_lambda_layer_version` resource allows users to specify the local file path of the deployment package for the Lambda layer. By setting this argument, users can directly upload a layer's code from their local filesystem, enabling streamlined deployment without relying on S3-based storage options."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_lambda_layer_version` resource represents the unique identifier of the created Lambda layer version. While not explicitly configurable, it is typically used for referencing the specific layer version in dependent resources or outputs, enabling users to integrate the layer into Lambda functions or track its lifecycle within their infrastructure."
+    },
+    {
+      "name": "layer_name",
+      "description": "(Required) Unique name for your Lambda Layer The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `layer_name` argument in the `aws_lambda_layer_version` resource specifies a unique identifier for the Lambda layer, allowing users to define a distinct name for organizing and referencing the layer within their AWS environment. Setting this argument ensures the layer can be easily managed, reused across multiple Lambda functions, and distinguished from other layers in the account."
+    },
+    {
+      "name": "license_info",
+      "description": "(Optional) License info for your Lambda Layer. See License Info.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `license_info` argument for the `aws_lambda_layer_version` resource allows users to specify licensing details for the Lambda layer, such as the type or terms of the license associated with the layer's content. Setting this argument helps ensure compliance with software licensing requirements and provides transparency about the usage terms of the layer for downstream consumers."
+    },
+    {
+      "name": "s3_bucket",
+      "description": "(Optional) S3 bucket location containing the function's deployment package. Conflicts with `filename`. This bucket must reside in the same AWS region where you are creating the Lambda function.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the S3 bucket containing the deployment package for the Lambda layer version, enabling users to specify an external storage location for the layer's code or dependencies. This argument supports workflows where the package is pre-uploaded to S3, ensuring compatibility with the AWS region of the Lambda function and avoiding conflicts with local file-based deployment (`filename`)."
+    },
+    {
+      "name": "s3_key",
+      "description": "(Optional) S3 key of an object containing the function's deployment package. Conflicts with `filename`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `s3_key` argument in the `aws_lambda_layer_version` resource allows users to specify the S3 object key for the deployment package of the Lambda layer. By setting this argument, users can define the source location of the layer's code or dependencies stored in S3, enabling streamlined management and reuse of layer packages. This argument is commonly used to configure the layer's source when deploying from S3, and it conflicts with the `filename` argument."
+    },
+    {
+      "name": "s3_object_version",
+      "description": "(Optional) Object version containing the function's deployment package. Conflicts with `filename`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `s3_object_version` argument in the `aws_lambda_layer_version` resource allows users to specify the version of an S3 object containing the deployment package for the Lambda layer. By setting this argument, users can control which specific version of the package is used, enabling precise versioning and rollback capabilities for the layer's source code."
+    },
+    {
+      "name": "skip_destroy",
+      "description": "(Optional) Whether to retain the old version of a previously deployed Lambda Layer. Default is `false`. When this is not set to `true`, changing any of `compatible_architectures`, `compatible_runtimes`, `description`, `filename`, `layer_name`, `license_info`, `s3_bucket`, `s3_key`, `s3_object_version`, or `source_code_hash` forces deletion of the existing layer version and creation of a new layer version.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `skip_destroy` argument in the `aws_lambda_layer_version` resource controls the lifecycle behavior of Lambda layer versions by allowing users to retain old versions during updates. When set to `true`, it prevents automatic deletion of the existing layer version, enabling version retention for rollback or historical reference, which is useful for managing layer versioning and minimizing disruptions during updates."
+    },
+    {
+      "name": "source_code_hash",
+      "description": "(Optional) Virtual attribute used to trigger replacement when source code changes. Must be set to a base64-encoded SHA256 hash of the package file specified with either `filename` or `s3_key`. The usual way to set this is `${filebase64sha256(\"file.zip\")}` (Terraform 0.11.12 or later) or `${base64sha256(file(\"file.zip\"))}` (Terraform 0.11.11 and earlier), where \"file.zip\" is the local filename of the lambda layer source archive.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `source_code_hash` argument in the `aws_lambda_layer_version` resource allows users to define a base64-encoded SHA256 hash of the layer's source code package, ensuring integrity and enabling Terraform to detect changes in the source archive for automatic replacement of the layer version. This is commonly used to trigger updates when the layer's code is modified, supporting lifecycle management and versioning of Lambda layers."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN of the Lambda Layer with version.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "code_sha256",
+      "description": "Base64-encoded representation of raw SHA-256 sum of the zip file.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "created_date",
+      "description": "Date this resource was created.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "layer_arn",
+      "description": "ARN of the Lambda Layer without version.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "signing_job_arn",
+      "description": "ARN of a signing job.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "signing_profile_version_arn",
+      "description": "ARN for a signing profile version.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "source_code_size",
+      "description": "Size in bytes of the function .zip file.",
+      "optional": false,
+      "type": "number"
+    },
+    {
+      "name": "version",
+      "description": "Lambda Layer version.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

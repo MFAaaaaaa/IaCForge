@@ -1,0 +1,178 @@
+{
+  "resource": {
+    "name": "aws_api_gateway_rest_api",
+    "description": "Manages an API Gateway REST API. The REST API can be configured via importing an OpenAPI specification in the body argument (with other arguments serving as overrides) or via other Terraform resources to manage the resources (aws_api_gateway_resource resource), methods (aws_api_gateway_method resource), integrations (aws_api_gateway_integration resource), etc. of the REST API. Once the REST API is configured, the aws_api_gateway_deployment resource can be used along with the aws_api_gateway_stage resource to publish the REST API. Amazon API Gateway Version 1 resources are used for creating and deploying REST APIs. To create and deploy WebSocket and HTTP APIs, use Amazon API Gateway Version 2 resources. When importing Open API Specifications with the body argument, by default the API Gateway REST API will be replaced with the Open API Specification thus removing any existing methods, resources, integrations, or endpoints. Endpoint mutations are asynchronous operations, and race conditions with DNS are possible. To overcome this limitation, use the put_rest_api_mode attribute and set it to merge.",
+    "llm_summary": "The `aws_api_gateway_rest_api` resource enables the creation and management of REST APIs using Amazon API Gateway (Version 1), supporting configurations via OpenAPI specifications or Terraform resources for granular control over resources, methods, integrations, and endpoints. Common use cases include building scalable API backends, integrating microservices, and publishing APIs to specific stages for deployment. Key configurations include importing OpenAPI specs, merging updates, managing lifecycle stages (e.g., deployments and stages), and customizing API behavior through overrides, making it ideal for developers seeking flexible and robust API management solutions."
+  },
+  "examples": [
+    {
+      "title": "OpenAPI Specification",
+      "code": "resource \"aws_api_gateway_rest_api\" \"example\" {\n  body = jsonencode({\n    openapi = \"3.0.1\"\n    info = {\n      title   = \"example\"\n      version = \"1.0\"\n    }\n    paths = {\n      \"/path1\" = {\n        get = {\n          x-amazon-apigateway-integration = {\n            httpMethod           = \"GET\"\n            payloadFormatVersion = \"1.0\"\n            type                 = \"HTTP_PROXY\"\n            uri                  = \"https://ip-ranges.amazonaws.com/ip-ranges.json\"\n          }\n        }\n      }\n    }\n  })\n\n  name = \"example\"\n\n  endpoint_configuration {\n    types = [\"REGIONAL\"]\n  }\n}\n\nresource \"aws_api_gateway_deployment\" \"example\" {\n  rest_api_id = aws_api_gateway_rest_api.example.id\n\n  triggers = {\n    redeployment = sha1(jsonencode(aws_api_gateway_rest_api.example.body))\n  }\n\n  lifecycle {\n    create_before_destroy = true\n  }\n}\n\nresource \"aws_api_gateway_stage\" \"example\" {\n  deployment_id = aws_api_gateway_deployment.example.id\n  rest_api_id   = aws_api_gateway_rest_api.example.id\n  stage_name    = \"example\"\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_api_gateway_rest_api` resource using an OpenAPI 3.0.1 specification to define API paths and integrate an HTTP proxy with `x-amazon-apigateway-integration`. It also showcases deploying the API with `aws_api_gateway_deployment` and creating a stage using `aws_api_gateway_stage`, including lifecycle management and regional endpoint configuration."
+    },
+    {
+      "title": "OpenAPI Specification with Private Endpoints",
+      "code": "data \"aws_availability_zones\" \"available\" {\n  state = \"available\"\n\n  filter {\n    name   = \"opt-in-status\"\n    values = [\"opt-in-not-required\"]\n  }\n}\n\ndata \"aws_region\" \"current\" {}\n\nresource \"aws_vpc\" \"example\" {\n  cidr_block           = \"10.0.0.0/16\"\n  enable_dns_support   = true\n  enable_dns_hostnames = true\n}\n\nresource \"aws_default_security_group\" \"example\" {\n  vpc_id = aws_vpc.example.id\n}\n\nresource \"aws_subnet\" \"example\" {\n  availability_zone = data.aws_availability_zones.available.names[0]\n  cidr_block        = cidrsubnet(aws_vpc.example.cidr_block, 8, 0)\n  vpc_id            = aws_vpc.example.id\n}\n\nresource \"aws_vpc_endpoint\" \"example\" {\n  count = 3\n\n  private_dns_enabled = false\n  security_group_ids  = [aws_default_security_group.example.id]\n  service_name        = \"com.amazonaws.${data.aws_region.current.name}.execute-api\"\n  subnet_ids          = [aws_subnet.example.id]\n  vpc_endpoint_type   = \"Interface\"\n  vpc_id              = aws_vpc.example.id\n}\n\nresource \"aws_api_gateway_rest_api\" \"example\" {\n  body = jsonencode({\n    openapi = \"3.0.1\"\n    info = {\n      title   = \"example\"\n      version = \"1.0\"\n    }\n    paths = {\n      \"/path1\" = {\n        get = {\n          x-amazon-apigateway-integration = {\n            httpMethod           = \"GET\"\n            payloadFormatVersion = \"1.0\"\n            type                 = \"HTTP_PROXY\"\n            uri                  = \"https://ip-ranges.amazonaws.com/ip-ranges.json\"\n          }\n        }\n      }\n    }\n  })\n\n  name              = \"example\"\n  put_rest_api_mode = \"merge\"\n\n  endpoint_configuration {\n    types            = [\"PRIVATE\"]\n    vpc_endpoint_ids = [aws_vpc_endpoint.example[0].id, aws_vpc_endpoint.example[1].id, aws_vpc_endpoint.example[2].id]\n  }\n}\n\nresource \"aws_api_gateway_deployment\" \"example\" {\n  rest_api_id = aws_api_gateway_rest_api.example.id\n\n  triggers = {\n    redeployment = sha1(jsonencode(aws_api_gateway_rest_api.example.body))\n  }\n\n  lifecycle {\n    create_before_destroy = true\n  }\n}\n\nresource \"aws_api_gateway_stage\" \"example\" {\n  deployment_id = aws_api_gateway_deployment.example.id\n  rest_api_id   = aws_api_gateway_rest_api.example.id\n  stage_name    = \"example\"\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_api_gateway_rest_api` resource with an OpenAPI specification and private endpoints using VPC interface endpoints. It showcases key configurations such as the `endpoint_configuration` block with `PRIVATE` type and `vpc_endpoint_ids`, integration with HTTP_PROXY, and deployment lifecycle management for a secure, private API Gateway setup."
+    },
+    {
+      "title": "Terraform Resources",
+      "code": "resource \"aws_api_gateway_rest_api\" \"example\" {\n  name = \"example\"\n}\n\nresource \"aws_api_gateway_resource\" \"example\" {\n  parent_id   = aws_api_gateway_rest_api.example.root_resource_id\n  path_part   = \"example\"\n  rest_api_id = aws_api_gateway_rest_api.example.id\n}\n\nresource \"aws_api_gateway_method\" \"example\" {\n  authorization = \"NONE\"\n  http_method   = \"GET\"\n  resource_id   = aws_api_gateway_resource.example.id\n  rest_api_id   = aws_api_gateway_rest_api.example.id\n}\n\nresource \"aws_api_gateway_integration\" \"example\" {\n  http_method = aws_api_gateway_method.example.http_method\n  resource_id = aws_api_gateway_resource.example.id\n  rest_api_id = aws_api_gateway_rest_api.example.id\n  type        = \"MOCK\"\n}\n\nresource \"aws_api_gateway_deployment\" \"example\" {\n  rest_api_id = aws_api_gateway_rest_api.example.id\n\n  triggers = {\n    # NOTE: The configuration below will satisfy ordering considerations,\n    #       but not pick up all future REST API changes. More advanced patterns\n    #       are possible, such as using the filesha1() function against the\n    #       Terraform configuration file(s) or removing the .id references to\n    #       calculate a hash against whole resources. Be aware that using whole\n    #       resources will show a difference after the initial implementation.\n    #       It will stabilize to only change when resources change afterwards.\n    redeployment = sha1(jsonencode([\n      aws_api_gateway_resource.example.id,\n      aws_api_gateway_method.example.id,\n      aws_api_gateway_integration.example.id,\n    ]))\n  }\n\n  lifecycle {\n    create_before_destroy = true\n  }\n}\n\nresource \"aws_api_gateway_stage\" \"example\" {\n  deployment_id = aws_api_gateway_deployment.example.id\n  rest_api_id   = aws_api_gateway_rest_api.example.id\n  stage_name    = \"example\"\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS API Gateway REST API with associated resources, methods, integrations, deployments, and stages using Terraform. It showcases key configurations such as linking resources via `parent_id` and `rest_api_id`, setting up a `MOCK` integration type, managing deployment triggers with `sha1(jsonencode())`, and using the `create_before_destroy` lifecycle rule for safe updates."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "api_key_source",
+      "description": "(Optional) Source of the API key for requests. Valid values are `HEADER` (default) and `AUTHORIZER`. If importing an OpenAPI specification via the `body` argument, this corresponds to the `x-amazon-apigateway-api-key-source` extension. If the argument value is provided and is different than the OpenAPI value, the argument value will override the OpenAPI value.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `api_key_source` argument in the `aws_api_gateway_rest_api` resource allows users to specify the mechanism for passing API keys in client requests, either via the `HEADER` (default) or `AUTHORIZER`. This configuration impacts how API Gateway validates and processes API key authentication, enabling users to align the API key handling with their security and integration requirements, especially when importing OpenAPI specifications."
+    },
+    {
+      "name": "binary_media_types",
+      "description": "(Optional) List of binary media types supported by the REST API. By default, the REST API supports only UTF-8-encoded text payloads. If importing an OpenAPI specification via the `body` argument, this corresponds to the `x-amazon-apigateway-binary-media-types` extension. If the argument value is provided and is different than the OpenAPI value, the argument value will override the OpenAPI value.",
+      "required": false,
+      "type": "list(string)",
+      "llm_summary": "The `binary_media_types` argument for the `aws_api_gateway_rest_api` resource allows users to define a list of binary media types that the REST API can support, extending its functionality beyond the default handling of UTF-8-encoded text payloads. By configuring this argument, users can enable the API to process and serve binary data formats (e.g., images, PDFs, or other non-text content), aligning with specific application requirements or overriding binary media type definitions in an imported OpenAPI specification."
+    },
+    {
+      "name": "body",
+      "description": "(Optional) OpenAPI specification that defines the set of routes and integrations to create as part of the REST API. This configuration, and any updates to it, will replace all REST API configuration except values overridden in this resource configuration and other resource updates applied after this resource but before any `aws_api_gateway_deployment` creation. More information about REST API OpenAPI support can be found in the API Gateway Developer Guide.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `body` argument for the `aws_api_gateway_rest_api` resource allows users to define the REST API's configuration using an OpenAPI specification. By setting this argument, users can specify routes, integrations, and overall API behavior, enabling automated creation or replacement of the API's structure while preserving overridden values and subsequent resource updates."
+    },
+    {
+      "name": "description",
+      "description": "(Optional) Description of the REST API. If importing an OpenAPI specification via the `body` argument, this corresponds to the `info.description` field. If the argument value is provided and is different than the OpenAPI value, the argument value will override the OpenAPI value.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_api_gateway_rest_api` resource allows users to define a human-readable summary or purpose for the REST API, aligning with the `info.description` field in an OpenAPI specification if one is imported. By setting this argument, users can provide meaningful context for the API, which can override the description in the OpenAPI specification, supporting documentation, organization, and clarity for API consumers and maintainers."
+    },
+    {
+      "name": "disable_execute_api_endpoint",
+      "description": "(Optional) Whether clients can invoke your API by using the default execute-api endpoint. By default, clients can invoke your API with the default https://{api_id}.execute-api.{region}.amazonaws.com endpoint. To require that clients use a custom domain name to invoke your API, disable the default endpoint. Defaults to `false`. If importing an OpenAPI specification via the `body` argument, this corresponds to the `x-amazon-apigateway-endpoint-configuration` extension `disableExecuteApiEndpoint` property. If the argument value is `true` and is different than the OpenAPI value, the argument value will override the OpenAPI value.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `disable_execute_api_endpoint` argument for the `aws_api_gateway_rest_api` resource allows users to control whether the default `execute-api` endpoint is enabled for invoking the API. Setting this to `true` ensures that clients must use a custom domain name to access the API, enhancing security and enforcing custom branding or domain-specific access requirements."
+    },
+    {
+      "name": "fail_on_warnings",
+      "description": "(Optional) Whether warnings while API Gateway is creating or updating the resource should return an error or not. Defaults to `false`",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `fail_on_warnings` argument for the `aws_api_gateway_rest_api` resource allows users to control whether API Gateway warnings during the creation or update process are treated as errors, halting the operation. Setting this to `true` ensures stricter validation, aligning with user goals of enforcing higher reliability and compliance during API deployment, while leaving it as `false` (default) prioritizes flexibility and smoother workflows."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_api_gateway_rest_api` resource represents the unique identifier of the REST API within AWS API Gateway. While optional, it is typically used to reference an existing REST API for updates or integrations, enabling users to manage or interact with pre-existing API Gateway resources rather than creating new ones."
+    },
+    {
+      "name": "minimum_compression_size",
+      "description": "(Optional) Minimum response size to compress for the REST API. String containing an integer value between `-1` and `10485760` (10MB). `-1` will disable an existing compression configuration, and all other values will enable compression with the configured size. New resources can simply omit this argument to disable compression, rather than setting the value to `-1`. If importing an OpenAPI specification via the `body` argument, this corresponds to the `x-amazon-apigateway-minimum-compression-size` extension. If the argument value is provided and is different than the OpenAPI value, the argument value will override the OpenAPI value.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `minimum_compression_size` argument for the `aws_api_gateway_rest_api` resource allows users to control the threshold for compressing API responses by specifying the minimum response size (in bytes) required for compression. Setting this argument enables or disables response compression, optimizing bandwidth usage and performance, with values ranging from `-1` (disables compression) to `10485760` (10MB). It can override compression settings defined in an imported OpenAPI specification, aligning with user-defined requirements for API behavior."
+    },
+    {
+      "name": "name",
+      "description": "(Required) Name of the REST API. If importing an OpenAPI specification via the `body` argument, this corresponds to the `info.title` field. If the argument value is different than the OpenAPI value, the argument value will override the OpenAPI value.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_api_gateway_rest_api` resource specifies the unique, user-defined identifier for the REST API, serving as its title and primary reference within AWS API Gateway. When importing an OpenAPI specification, it overrides the `info.title` field, ensuring alignment with user-defined naming conventions and enabling clear organization and management of APIs in cloud environments."
+    },
+    {
+      "name": "parameters",
+      "description": "(Optional) Map of customizations for importing the specification in the `body` argument. For example, to exclude DocumentationParts from an imported API, set `ignore` equal to `documentation`. Additional documentation, including other parameters such as `basepath`, can be found in the API Gateway Developer Guide.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `parameters` argument in the `aws_api_gateway_rest_api` resource allows users to define a map of custom settings that control how the API specification provided in the `body` argument is imported and processed. This includes behaviors like excluding specific components (e.g., `documentation`) or customizing import paths (e.g., `basepath`), enabling fine-grained control over the API Gateway configuration to align with specific deployment or organizational requirements."
+    },
+    {
+      "name": "policy",
+      "description": "(Optional) JSON formatted policy document that controls access to the API Gateway. For more information about building AWS IAM policy documents with Terraform, see the AWS IAM Policy Document Guide. Terraform will only perform drift detection of its value when present in a configuration. We recommend using the `aws_api_gateway_rest_api_policy` resource instead. If importing an OpenAPI specification via the `body` argument, this corresponds to the `x-amazon-apigateway-policy` extension. If the argument value is provided and is different than the OpenAPI value, the argument value will override the OpenAPI value.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `policy` argument for the `aws_api_gateway_rest_api` resource allows users to define a JSON-formatted IAM policy document that governs access control for the API Gateway. By setting this argument, users can specify fine-grained permissions and restrictions for API usage, aligning with security and compliance goals. If provided, it overrides any access control policy defined in an imported OpenAPI specification."
+    },
+    {
+      "name": "put_rest_api_mode",
+      "description": "(Optional) Mode of the PutRestApi operation when importing an OpenAPI specification via the `body` argument (create or update operation). Valid values are `merge` and `overwrite`. If unspecificed, defaults to `overwrite` (for backwards compatibility). This corresponds to the `x-amazon-apigateway-put-integration-method` extension. If the argument value is provided and is different than the OpenAPI value, the argument value will override the OpenAPI value.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `put_rest_api_mode` argument in the `aws_api_gateway_rest_api` resource allows users to control how an OpenAPI specification is imported into the API Gateway, specifying whether the operation should `merge` with existing configurations or `overwrite` them entirely. This argument impacts the behavior of the API update process, enabling users to define whether changes are additive or replace the current API state, aligning with common goals like managing API versioning and updates."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Key-value map of resource tags. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level. Note: If the body argument is provided, the OpenAPI specification will be used to configure the resources, methods and integrations for the Rest API. If this argument is provided, the following resources should not be managed as separate ones, as updates may cause manual resource updates to be overwritten:",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_api_gateway_rest_api` resource allows users to define a key-value map of metadata tags to organize, categorize, and manage the API Gateway resource within their cloud environment. By setting this argument, users can streamline resource identification, enable cost allocation, and integrate with tagging-based automation or governance policies, while also overriding provider-level default tags if applicable."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_api_gateway_rest_api` resource allows users to define a comprehensive set of key-value tags that are automatically merged with resource-level tags, enabling consistent metadata management across the API Gateway. This facilitates organization, cost allocation, and governance by associating the API Gateway with identifiers like environment, project, or owner."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "endpoint_configuration",
+      "description": "(Optional) Configuration block defining API endpoint configuration including endpoint type. Defined below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "types",
+          "description": "(Required) List of endpoint types. This resource currently only supports managing a single value. Valid values: `EDGE`, `REGIONAL` or `PRIVATE`. If unspecified, defaults to `EDGE`. If set to `PRIVATE` recommend to set `put_rest_api_mode` = `merge` to not cause the endpoints and associated Route53 records to be deleted. Refer to the documentation for more information on the difference between edge-optimized and regional APIs.",
+          "required": true,
+          "type": "list(string)",
+          "llm_summary": "The `types` argument in the `endpoint_configuration` block of the `aws_api_gateway_rest_api` resource allows users to specify the type of endpoint for the API Gateway, controlling whether the API is edge-optimized (`EDGE`), regional (`REGIONAL`), or private (`PRIVATE`). This configuration impacts the API's network accessibility and performance, enabling users to align the API deployment with their architectural needs, such as global distribution, regional access, or private VPC integration."
+        },
+        {
+          "name": "vpc_endpoint_ids",
+          "description": "(Optional) Set of VPC Endpoint identifiers. It is only supported for `PRIVATE` endpoint type. If importing an OpenAPI specification via the `body` argument, this corresponds to the `x-amazon-apigateway-endpoint-configuration` extension `vpcEndpointIds` property. If the argument value is provided and is different than the OpenAPI value, the argument value will override the OpenAPI value.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `vpc_endpoint_ids` argument in the `endpoint_configuration` block of the `aws_api_gateway_rest_api` resource allows users to specify a set of VPC Endpoint IDs to integrate the API Gateway with private VPC endpoints. This configuration is applicable only for APIs using the `PRIVATE` endpoint type and ensures secure, private communication between the API Gateway and resources within the specified VPC endpoints, overriding any conflicting values in an imported OpenAPI specification if provided."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `endpoint_configuration` block in the `aws_api_gateway_rest_api` resource defines the API's endpoint type and associated settings, enabling control over how the API is exposed and accessed (e.g., via edge-optimized, regional, or private endpoints). Configuring this block allows users to tailor the API's network accessibility to meet specific deployment requirements, such as optimizing for global performance or restricting access within a VPC."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "created_date",
+      "description": "Creation date of the REST API",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "execution_arn",
+      "description": "Execution ARN part to be used in `lambda_permission`'s `source_arn` when allowing API Gateway to invoke a Lambda function, e.g., `arn:aws:execute-api:eu-west-2:123456789012:z4675bid1j`, which can be concatenated with allowed stage, method and resource path.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "root_resource_id",
+      "description": "Resource ID of the REST API's root",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

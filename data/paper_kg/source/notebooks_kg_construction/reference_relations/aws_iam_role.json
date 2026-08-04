@@ -1,0 +1,22 @@
+[
+    {
+        "argument_path": "assume_role_policy",
+        "references_output": "data.aws_iam_policy_document.json",
+        "target_resource_type": "aws_iam_policy_document"
+    },
+    {
+        "argument_path": "inline_policy.policy",
+        "references_output": "data.aws_iam_policy_document.json",
+        "target_resource_type": "aws_iam_policy_document"
+    },
+    {
+        "argument_path": "managed_policy_arns",
+        "references_output": "aws_iam_policy.arn",
+        "target_resource_type": "aws_iam_policy"
+    },
+    {
+        "argument_path": "permissions_boundary",
+        "references_output": "aws_iam_policy.arn",
+        "target_resource_type": "aws_iam_policy"
+    }
+]

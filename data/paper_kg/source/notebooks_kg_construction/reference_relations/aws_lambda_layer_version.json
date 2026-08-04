@@ -1,0 +1,17 @@
+[
+    {
+        "argument_path": "s3_bucket",
+        "references_output": "aws_s3_bucket.bucket",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "s3_key",
+        "references_output": "aws_s3_object.key",
+        "target_resource_type": "aws_s3_object"
+    },
+    {
+        "argument_path": "s3_object_version",
+        "references_output": "aws_s3_object.version_id",
+        "target_resource_type": "aws_s3_object"
+    }
+]

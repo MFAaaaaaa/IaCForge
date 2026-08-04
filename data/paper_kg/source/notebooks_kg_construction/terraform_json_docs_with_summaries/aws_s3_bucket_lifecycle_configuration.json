@@ -1,0 +1,391 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_lifecycle_configuration",
+    "description": "Provides an independent configuration resource for S3 bucket lifecycle configuration. An S3 Lifecycle configuration consists of one or more Lifecycle rules. Each rule consists of the following: - Rule metadata (`id` and `status`) - Filter identifying objects to which the rule applies - One or more transition or expiration actions For more information see the Amazon S3 User Guide on Lifecycle Configuration Elements. S3 Buckets only support a single lifecycle configuration. Declaring multiple aws_s3_bucket_lifecycle_configuration resources to the same S3 Bucket will cause a perpetual difference in configuration. Lifecycle configurations may take some time to fully propagate to all AWS S3 systems. Running Terraform operations shortly after creating a lifecycle configuration may result in changes that affect configuration idempotence. See the Amazon S3 User Guide on setting lifecycle configuration on a bucket.",
+    "llm_summary": "The `aws_s3_bucket_lifecycle_configuration` resource manages the lifecycle rules for Amazon S3 buckets, enabling automated transitions, expirations, and cleanup of objects based on defined policies. Common use cases include optimizing storage costs by transitioning objects to lower-cost tiers (e.g., Glacier or Intelligent-Tiering) and automating the deletion of outdated or unused data. Users can configure granular rules with filters, transitions, and expiration actions to streamline data lifecycle management and ensure compliance with retention policies."
+  },
+  "examples": [
+    {
+      "title": "With neither a filter nor prefix specified",
+      "code": "resource \"aws_s3_bucket_lifecycle_configuration\" \"example\" {\n  bucket = aws_s3_bucket.bucket.id\n\n  rule {\n    id = \"rule-1\"\n\n    # ... other transition/expiration actions ...\n\n    status = \"Enabled\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS S3 bucket lifecycle rule using the `aws_s3_bucket_lifecycle_configuration` resource without specifying a filter or prefix, enabling lifecycle actions to apply to all objects in the bucket. It highlights the use of the `status` argument to activate the rule and provides a foundation for adding transition or expiration actions."
+    },
+    {
+      "title": "Specifying an empty filter",
+      "code": "resource \"aws_s3_bucket_lifecycle_configuration\" \"example\" {\n  bucket = aws_s3_bucket.bucket.id\n\n  rule {\n    id = \"rule-1\"\n\n    filter {}\n\n    # ... other transition/expiration actions ...\n\n    status = \"Enabled\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS S3 bucket lifecycle rule with an empty `filter` block using the `aws_s3_bucket_lifecycle_configuration` resource, enabling lifecycle actions to apply to all objects in the bucket. It illustrates the use of the `filter` block for broad rule application and the `status` argument to activate the rule."
+    },
+    {
+      "title": "Specifying a filter using key prefixes",
+      "code": "resource \"aws_s3_bucket_lifecycle_configuration\" \"example\" {\n  bucket = aws_s3_bucket.bucket.id\n\n  rule {\n    id = \"rule-1\"\n\n    filter {\n      prefix = \"logs/\"\n    }\n\n    # ... other transition/expiration actions ...\n\n    status = \"Enabled\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS S3 bucket lifecycle rule with a filter that uses a key prefix (`filter { prefix = \"logs/\" }`) to target specific objects for lifecycle actions. It illustrates the use of the `aws_s3_bucket_lifecycle_configuration` resource to enable lifecycle management for objects matching a defined prefix, providing a foundation for implementing transitions or expirations based on object key patterns."
+    },
+    {
+      "title": "Specifying a filter based on an object tag",
+      "code": "resource \"aws_s3_bucket_lifecycle_configuration\" \"example\" {\n  bucket = aws_s3_bucket.bucket.id\n\n  rule {\n    id = \"rule-1\"\n\n    filter {\n      tag {\n        key   = \"Name\"\n        value = \"Staging\"\n      }\n    }\n\n    # ... other transition/expiration actions ...\n\n    status = \"Enabled\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS S3 bucket lifecycle rule with a filter based on an object tag using the `aws_s3_bucket_lifecycle_configuration` resource. It showcases the use of the `filter` block with a `tag` sub-block to target objects with a specific key-value pair, enabling users to apply lifecycle actions selectively to tagged objects."
+    },
+    {
+      "title": "Specifying a filter based on multiple tags",
+      "code": "resource \"aws_s3_bucket_lifecycle_configuration\" \"example\" {\n  bucket = aws_s3_bucket.bucket.id\n\n  rule {\n    id = \"rule-1\"\n\n    filter {\n      and {\n        tags = {\n          Key1 = \"Value1\"\n          Key2 = \"Value2\"\n        }\n      }\n    }\n\n    # ... other transition/expiration actions ...\n\n    status = \"Enabled\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an S3 bucket lifecycle rule with a filter based on multiple tags using the `and` block in the `aws_s3_bucket_lifecycle_configuration` resource. This example shows how to specify tag-based conditions for lifecycle actions, enabling advanced filtering for object management policies.\""
+    },
+    {
+      "title": "Specifying a filter based on both prefix and one or more tags",
+      "code": "resource \"aws_s3_bucket_lifecycle_configuration\" \"example\" {\n  bucket = aws_s3_bucket.bucket.id\n\n  rule {\n    id = \"rule-1\"\n\n    filter {\n      and {\n        prefix = \"logs/\"\n        tags = {\n          Key1 = \"Value1\"\n          Key2 = \"Value2\"\n        }\n      }\n    }\n\n    # ... other transition/expiration actions ...\n\n    status = \"Enabled\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_s3_bucket_lifecycle_configuration` resource with a lifecycle rule that uses an advanced filter combining a prefix (`logs/`) and multiple tags (`Key1=Value1`, `Key2=Value2`) to target specific objects in an S3 bucket. It illustrates the use of the `and` block within the `filter` argument for precise object selection, enabling users to implement granular lifecycle management policies."
+    },
+    {
+      "title": "Specifying a filter based on object size",
+      "code": "resource \"aws_s3_bucket_lifecycle_configuration\" \"example\" {\n  bucket = aws_s3_bucket.bucket.id\n\n  rule {\n    id = \"Allow small object transitions\"\n\n    filter {\n      object_size_greater_than = 1\n    }\n\n    status = \"Enabled\"\n\n    transition {\n      days          = 365\n      storage_class = \"GLACIER_IR\"\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS S3 bucket lifecycle rule using the `aws_s3_bucket_lifecycle_configuration` resource to transition objects larger than 1 byte to the \"GLACIER_IR\" storage class after 365 days. It highlights the use of the `filter` block with the `object_size_greater_than` argument to specify size-based criteria for lifecycle transitions."
+    },
+    {
+      "title": "Specifying a filter based on object size range and prefix",
+      "code": "resource \"aws_s3_bucket_lifecycle_configuration\" \"example\" {\n  bucket = aws_s3_bucket.bucket.id\n\n  rule {\n    id = \"rule-1\"\n\n    filter {\n      and {\n        prefix                   = \"logs/\"\n        object_size_greater_than = 500\n        object_size_less_than    = 64000\n      }\n    }\n\n    # ... other transition/expiration actions ...\n\n    status = \"Enabled\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an S3 bucket lifecycle rule with a filter that combines a prefix (`logs/`) and an object size range (`object_size_greater_than` and `object_size_less_than`) to target specific objects for lifecycle actions. This example highlights advanced filtering capabilities within the `aws_s3_bucket_lifecycle_configuration` resource.\""
+    },
+    {
+      "title": "Creating a Lifecycle Configuration for a bucket with versioning",
+      "code": "resource \"aws_s3_bucket\" \"bucket\" {\n  bucket = \"my-bucket\"\n}\n\nresource \"aws_s3_bucket_acl\" \"bucket_acl\" {\n  bucket = aws_s3_bucket.bucket.id\n  acl    = \"private\"\n}\n\nresource \"aws_s3_bucket_lifecycle_configuration\" \"bucket-config\" {\n  bucket = aws_s3_bucket.bucket.id\n\n  rule {\n    id = \"log\"\n\n    expiration {\n      days = 90\n    }\n\n    filter {\n      and {\n        prefix = \"log/\"\n\n        tags = {\n          rule      = \"log\"\n          autoclean = \"true\"\n        }\n      }\n    }\n\n    status = \"Enabled\"\n\n    transition {\n      days          = 30\n      storage_class = \"STANDARD_IA\"\n    }\n\n    transition {\n      days          = 60\n      storage_class = \"GLACIER\"\n    }\n  }\n\n  rule {\n    id = \"tmp\"\n\n    filter {\n      prefix = \"tmp/\"\n    }\n\n    expiration {\n      date = \"2023-01-13T00:00:00Z\"\n    }\n\n    status = \"Enabled\"\n  }\n}\n\nresource \"aws_s3_bucket\" \"versioning_bucket\" {\n  bucket = \"my-versioning-bucket\"\n}\n\nresource \"aws_s3_bucket_acl\" \"versioning_bucket_acl\" {\n  bucket = aws_s3_bucket.versioning_bucket.id\n  acl    = \"private\"\n}\n\nresource \"aws_s3_bucket_versioning\" \"versioning\" {\n  bucket = aws_s3_bucket.versioning_bucket.id\n  versioning_configuration {\n    status = \"Enabled\"\n  }\n}\n\nresource \"aws_s3_bucket_lifecycle_configuration\" \"versioning-bucket-config\" {\n  # Must have bucket versioning enabled first\n  depends_on = [aws_s3_bucket_versioning.versioning]\n\n  bucket = aws_s3_bucket.versioning_bucket.id\n\n  rule {\n    id = \"config\"\n\n    filter {\n      prefix = \"config/\"\n    }\n\n    noncurrent_version_expiration {\n      noncurrent_days = 90\n    }\n\n    noncurrent_version_transition {\n      noncurrent_days = 30\n      storage_class   = \"STANDARD_IA\"\n    }\n\n    noncurrent_version_transition {\n      noncurrent_days = 60\n      storage_class   = \"GLACIER\"\n    }\n\n    status = \"Enabled\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure lifecycle rules for S3 buckets using the `aws_s3_bucket_lifecycle_configuration` resource, including managing object transitions to lower-cost storage classes (e.g., `STANDARD_IA`, `GLACIER`), setting expiration policies, and handling noncurrent object versions in versioned buckets. It showcases advanced configurations such as filtering by prefixes and tags, enabling bucket versioning, and defining noncurrent version transitions and expirations."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bucket",
+      "description": "(Required) Name of the source S3 bucket you want Amazon S3 to monitor.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "Specifies the name of the S3 bucket that the lifecycle configuration will apply to, enabling users to define and manage automated rules for object transitions, expirations, and storage class changes within the specified bucket. This argument is essential for associating lifecycle policies with the correct bucket to optimize storage costs and data retention strategies."
+    },
+    {
+      "name": "expected_bucket_owner",
+      "description": "(Optional) Account ID of the expected bucket owner. If the bucket is owned by a different account, the request will fail with an HTTP 403 (Access Denied) error.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `expected_bucket_owner` argument in the `aws_s3_bucket_lifecycle_configuration` resource allows users to specify the AWS account ID of the bucket's expected owner, ensuring that lifecycle configuration changes are applied only to buckets owned by the designated account. This safeguards against accidental or unauthorized modifications to buckets owned by other accounts, enhancing security and compliance in multi-account environments."
+    },
+    {
+      "name": "transition_default_minimum_object_size",
+      "description": "(Optional) The default minimum object size behavior applied to the lifecycle configuration. Valid values: `all_storage_classes_128K` (default), `varies_by_storage_class`. To customize the minimum object size for any transition you can add a `filter` that specifies a custom `object_size_greater_than` or `object_size_less_than` value. Custom filters always take precedence over the default transition behavior.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `transition_default_minimum_object_size` argument in the `aws_s3_bucket_lifecycle_configuration` resource allows users to define the default minimum object size threshold for lifecycle transitions between storage classes. By setting this argument, users can control whether the default behavior (`all_storage_classes_128K`) or a variable threshold (`varies_by_storage_class`) is applied, enabling more granular management of object transitions based on size, with custom filters taking precedence for specific configurations."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "rule",
+      "description": "(Required) List of configuration blocks describing the rules managing the replication. See below.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "id",
+          "description": "(Required) Unique identifier for the rule. The value cannot be longer than 255 characters.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `id` argument uniquely identifies a lifecycle rule within the `aws_s3_bucket_lifecycle_configuration` resource, enabling users to define and manage specific behaviors for object lifecycle management, such as transitions or expirations. By setting this required string value (up to 255 characters), users ensure precise rule targeting and differentiation, supporting organized and scalable lifecycle configurations for S3 bucket objects."
+        },
+        {
+          "name": "prefix",
+          "description": "(Optional) DEPRECATED Use `filter` instead. This has been deprecated by Amazon S3. Prefix identifying one or more objects to which the rule applies. Defaults to an empty string (`\"\"`) if `filter` is not specified.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `prefix` argument in the `rule` block of the `aws_s3_bucket_lifecycle_configuration` resource allows users to define a specific key prefix to target objects for lifecycle management, such as transitioning storage classes or expiring objects. While deprecated in favor of the `filter` argument, it enables users to apply lifecycle rules to objects with keys that start with the specified prefix, defaulting to all objects if left empty."
+        },
+        {
+          "name": "status",
+          "description": "(Required) Whether the rule is currently being applied. Valid values: `Enabled` or `Disabled`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `status` argument in the `aws_s3_bucket_lifecycle_configuration` resource's `rule` block specifies whether the lifecycle rule is actively applied to the S3 bucket. By setting this argument to `Enabled` or `Disabled`, users control whether the rule enforces lifecycle actions like transitioning objects to different storage classes or expiring them, aligning with common goals such as optimizing storage costs or managing data retention policies."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "abort_incomplete_multipart_upload",
+          "description": "(Optional) Configuration block that specifies the days since the initiation of an incomplete multipart upload that Amazon S3 will wait before permanently removing all parts of the upload. See below.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "days_after_initiation",
+              "description": "Number of days after which Amazon S3 aborts an incomplete multipart upload.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `days_after_initiation` argument in the `abort_incomplete_multipart_upload` block of the `aws_s3_bucket_lifecycle_configuration` resource allows users to define the number of days after a multipart upload is initiated before Amazon S3 automatically aborts it if incomplete. This configuration helps optimize storage usage and manage costs by ensuring unused or abandoned multipart uploads are cleaned up efficiently."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `abort_incomplete_multipart_upload` block within the `rule` of the `aws_s3_bucket_lifecycle_configuration` resource defines the number of days Amazon S3 waits before automatically deleting parts of an incomplete multipart upload. This setting helps manage storage costs and maintain bucket hygiene by ensuring unused or abandoned upload fragments are efficiently cleaned up."
+        },
+        {
+          "name": "expiration",
+          "description": "(Optional) Configuration block that specifies the expiration for the lifecycle of the object in the form of date, days and, whether the object has a delete marker. See below.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "date",
+              "description": "(Optional) Date the object is to be moved or deleted. The date value must be in RFC3339 full-date format e.g. `2023-08-22`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `date` argument in the `expiration` block of the `aws_s3_bucket_lifecycle_configuration` resource allows users to specify the exact date, in RFC3339 full-date format (e.g., `2023-08-22`), when objects in the S3 bucket should be deleted or transitioned as part of the lifecycle policy. This enables precise control over object lifecycle management, supporting use cases like compliance-driven data retention or automated cleanup of obsolete data."
+            },
+            {
+              "name": "days",
+              "description": "(Optional) Lifetime, in days, of the objects that are subject to the rule. The value must be a non-zero positive integer.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `days` argument in the `expiration` block of the `aws_s3_bucket_lifecycle_configuration` resource allows users to define the retention period for objects in the S3 bucket by specifying the number of days after object creation when they should be automatically deleted. This enables users to configure lifecycle rules for efficient storage management and cost optimization by automating the removal of outdated or unnecessary data."
+            },
+            {
+              "name": "expired_object_delete_marker",
+              "description": "(Optional, Conflicts with `date` and `days`) Indicates whether Amazon S3 will remove a delete marker with no noncurrent versions. If set to `true`, the delete marker will be expired; if set to `false` the policy takes no action.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `expired_object_delete_marker` argument in the `aws_s3_bucket_lifecycle_configuration` resource allows users to control whether Amazon S3 automatically removes delete markers that have no associated noncurrent object versions as part of the bucket's lifecycle expiration policy. Setting this to `true` enables the cleanup of orphaned delete markers, streamlining object lifecycle management and ensuring efficient storage utilization."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The \"expiration\" configuration block within the \"rule\" of the `aws_s3_bucket_lifecycle_configuration` resource defines object lifecycle expiration settings, enabling automated deletion of objects based on a specific date, a retention period in days, or the presence of a delete marker. This block helps users optimize storage management and cost by automating cleanup of outdated or unnecessary objects in S3 buckets."
+        },
+        {
+          "name": "filter",
+          "description": "(Optional) Configuration block used to identify objects that a Lifecycle Rule applies to. See below. If not specified, the `rule` will default to using `prefix`.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "object_size_greater_than",
+              "description": "(Optional) Minimum object size (in bytes) to which the rule applies.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `object_size_greater_than` argument in the `filter` block of the `aws_s3_bucket_lifecycle_configuration` resource allows users to define a minimum object size (in bytes) as a condition for applying lifecycle rules. By setting this argument, users can target specific objects based on size for actions like transitioning storage classes or expiring objects, enabling precise control over S3 bucket lifecycle management to optimize storage costs and retention policies."
+            },
+            {
+              "name": "object_size_less_than",
+              "description": "(Optional) Maximum object size (in bytes) to which the rule applies.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "\"Defines a size-based filter for lifecycle rules, allowing users to target objects smaller than the specified maximum size (in bytes) for actions like expiration or transition. This enables precise control over lifecycle management by applying rules to objects based on their size constraints.\""
+            },
+            {
+              "name": "prefix",
+              "description": "(Optional) Prefix identifying one or more objects to which the rule applies. Defaults to an empty string (`\"\"`) if not specified.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `prefix` argument in the `filter` block of the `aws_s3_bucket_lifecycle_configuration` resource allows users to specify a string that identifies the subset of S3 objects to which the lifecycle rule applies. By defining a prefix, users can target objects with keys that start with the specified value, enabling precise control over lifecycle actions such as transitioning, expiring, or archiving specific groups of objects based on their naming patterns."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "and",
+              "description": "",
+              "cardinality": [
+                0,
+                0
+              ],
+              "arguments": [
+                {
+                  "name": "object_size_greater_than",
+                  "description": "(Optional) Minimum object size to which the rule applies. Value must be at least `0` if specified. Defaults to 128000 (128 KB) for all `storage_class` values unless `transition_default_minimum_object_size` specifies otherwise.",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `object_size_greater_than` argument in the `aws_s3_bucket_lifecycle_configuration` resource allows users to define a minimum object size threshold for applying lifecycle rules, such as transitions to different storage classes or expiration policies. By specifying this value, users can optimize storage costs and lifecycle management by targeting larger objects while excluding smaller ones from the rule's scope."
+                },
+                {
+                  "name": "object_size_less_than",
+                  "description": "(Optional) Maximum object size to which the rule applies. Value must be at least `1` if specified.",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `object_size_less_than` argument in the `aws_s3_bucket_lifecycle_configuration` resource allows users to define a maximum object size threshold for applying lifecycle rules, enabling precise control over which objects are subject to actions like expiration or transition. By specifying this value, users can target smaller objects for lifecycle management, optimizing storage costs and retention policies."
+                },
+                {
+                  "name": "prefix",
+                  "description": "(Optional) Prefix identifying one or more objects to which the rule applies.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `prefix` argument in the `and` block of the `aws_s3_bucket_lifecycle_configuration` resource allows users to specify a string that identifies the object key prefix to which the lifecycle rule applies. By setting this argument, users can target specific subsets of objects within an S3 bucket for lifecycle actions, such as transitioning storage classes or expiring objects, based on their key naming patterns."
+                },
+                {
+                  "name": "tags",
+                  "description": "(Optional) Key-value map of resource tags. All of these tags must exist in the object's tag set in order for the rule to apply.",
+                  "required": false,
+                  "type": "map(string)",
+                  "llm_summary": "The `tags` argument in the `and` block of the `aws_s3_bucket_lifecycle_configuration` resource allows users to define a key-value map of tags that must exist in an object's tag set for the lifecycle rule to apply. This enables precise control over lifecycle behavior by targeting specific objects based on their metadata, supporting common goals like managing retention policies or automating object transitions for tagged resources."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The \"and\" configuration block within the \"filter\" context of the `aws_s3_bucket_lifecycle_configuration` resource enables users to define multiple conditions that must all be met for a lifecycle rule to apply. It encapsulates related settings for combining filters, such as object tags, prefixes, or other attributes, allowing for precise control over which S3 objects are subject to lifecycle actions like transitioning storage classes or expiring objects. Configuring this block helps users enforce granular lifecycle policies by specifying compound criteria for object management."
+            },
+            {
+              "name": "tag",
+              "description": "(Optional) Configuration block for specifying a tag key and value. See below.",
+              "cardinality": [
+                0,
+                0
+              ],
+              "arguments": [
+                {
+                  "name": "key",
+                  "description": "(Required) Name of the object key.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `key` argument in the `tag` block of the `aws_s3_bucket_lifecycle_configuration` resource specifies the name of the tag key used to identify and categorize objects for lifecycle management. By defining this string value, users can target specific objects based on their associated tags to apply lifecycle rules, such as transitioning storage classes or expiring objects, aligning with organizational policies or cost optimization goals."
+                },
+                {
+                  "name": "value",
+                  "description": "(Required) Value of the tag.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `value` argument specifies the value associated with a tag key in the lifecycle configuration of an S3 bucket, enabling users to define metadata that categorizes or identifies objects for lifecycle rules. By setting this argument, users can tailor lifecycle policies based on tags to automate actions like transitioning storage classes or expiring objects, aligning with organizational goals such as cost optimization or data retention management."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The \"tag\" configuration block within the \"filter\" context of the `aws_s3_bucket_lifecycle_configuration` resource allows users to define specific tag key-value pairs to filter objects in an S3 bucket for lifecycle rule application. By specifying tags, users can target subsets of objects for lifecycle actions such as transitioning storage classes or expiring objects, enabling precise control over bucket management based on metadata."
+            }
+          ],
+          "llm_summary": "The `filter` block within the `rule` of the `aws_s3_bucket_lifecycle_configuration` resource defines criteria to identify which S3 objects a lifecycle rule applies to, such as by prefix or tags. This enables precise targeting of objects for lifecycle actions like transitioning storage classes or expiring objects, providing granular control over bucket lifecycle management."
+        },
+        {
+          "name": "noncurrent_version_expiration",
+          "description": "(Optional) Configuration block that specifies when noncurrent object versions expire. See below.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "newer_noncurrent_versions",
+              "description": "(Optional) Number of noncurrent versions Amazon S3 will retain. Must be a non-zero positive integer.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `newer_noncurrent_versions` argument in the `noncurrent_version_expiration` block of the `aws_s3_bucket_lifecycle_configuration` resource allows users to define the maximum number of noncurrent object versions Amazon S3 will retain before expiring older versions. This configuration helps manage storage costs and enforce lifecycle policies by controlling version retention for objects in the bucket."
+            },
+            {
+              "name": "noncurrent_days",
+              "description": "(Required) Number of days an object is noncurrent before Amazon S3 can perform the associated action. Must be a positive integer.",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `noncurrent_days` argument in the `noncurrent_version_expiration` block of the `aws_s3_bucket_lifecycle_configuration` resource specifies the number of days an object must remain in a noncurrent (previous version) state before Amazon S3 automatically deletes it. This enables users to define lifecycle policies for managing versioned object storage, optimizing retention periods and reducing storage costs by automating cleanup of outdated object versions."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `noncurrent_version_expiration` block within the `rule` configuration of the `aws_s3_bucket_lifecycle_configuration` resource defines lifecycle rules for managing the expiration of noncurrent object versions in an S3 bucket. By specifying when older versions of objects should be automatically deleted, this block enables efficient storage management and cost optimization for versioned buckets."
+        },
+        {
+          "name": "noncurrent_version_transition",
+          "description": "(Optional) Set of configuration blocks that specify the transition rule for the lifecycle rule that describes when noncurrent objects transition to a specific storage class. See below.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "newer_noncurrent_versions",
+              "description": "(Optional) Number of noncurrent versions Amazon S3 will retain. Must be a non-zero positive integer.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `newer_noncurrent_versions` argument in the `noncurrent_version_transition` block of the `aws_s3_bucket_lifecycle_configuration` resource allows users to define the number of newer noncurrent object versions that Amazon S3 will retain before applying lifecycle transitions. By setting this value (a positive integer), users can control retention policies for noncurrent versions, ensuring compliance with data management requirements or optimizing storage costs by limiting the number of older versions kept."
+            },
+            {
+              "name": "noncurrent_days",
+              "description": "(Required) Number of days an object is noncurrent before Amazon S3 can perform the associated action.",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `noncurrent_days` argument in the `noncurrent_version_transition` block of the `aws_s3_bucket_lifecycle_configuration` resource specifies the number of days an object must remain in a noncurrent (previous version) state before Amazon S3 applies the defined transition action, such as moving the object to a different storage class. This enables users to define lifecycle policies for managing storage costs and optimizing data retention strategies for versioned S3 buckets."
+            },
+            {
+              "name": "storage_class",
+              "description": "(Required) Class of storage used to store the object. Valid Values: `GLACIER`, `STANDARD_IA`, `ONEZONE_IA`, `INTELLIGENT_TIERING`, `DEEP_ARCHIVE`, `GLACIER_IR`.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `storage_class` argument in the `noncurrent_version_transition` block of the `aws_s3_bucket_lifecycle_configuration` resource specifies the target storage tier for noncurrent object versions during lifecycle transitions. By defining this required parameter, users can optimize costs and storage efficiency by automatically moving noncurrent versions to lower-cost storage classes such as `GLACIER`, `STANDARD_IA`, or `DEEP_ARCHIVE`, aligning with data retention and archival strategies."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `noncurrent_version_transition` block within the `rule` configuration of the `aws_s3_bucket_lifecycle_configuration` resource defines transition rules for noncurrent object versions, enabling automated movement to a specified storage class after a defined time period. This block helps users optimize storage costs and manage object lifecycle policies by encapsulating settings for storage class transitions tailored to noncurrent versions of objects."
+        },
+        {
+          "name": "transition",
+          "description": "(Optional) Set of configuration blocks that specify when an Amazon S3 object transitions to a specified storage class. See below.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "date",
+              "description": "(Optional, Conflicts with `days`) Date objects are transitioned to the specified storage class. The date value must be in RFC3339 full-date format e.g. `2023-08-22`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `date` argument in the `transition` block of the `aws_s3_bucket_lifecycle_configuration` resource allows users to specify the exact calendar date (in RFC3339 format) when objects in an S3 bucket should transition to a different storage class. This enables precise control over lifecycle management by defining a fixed point in time for storage optimization, aligning with retention policies or cost-saving strategies."
+            },
+            {
+              "name": "days",
+              "description": "(Optional, Conflicts with `date`) Number of days after creation when objects are transitioned to the specified storage class. The value must be a positive integer. If both `days` and `date` are not specified, defaults to `0`. Valid values depend on `storage_class`, see Transition objects using Amazon S3 Lifecycle for more details.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `days` argument in the `transition` block of the `aws_s3_bucket_lifecycle_configuration` resource allows users to define the number of days after object creation when objects are automatically transitioned to a specified storage class. This enables users to configure lifecycle policies for cost optimization by automating storage tier transitions based on object age."
+            },
+            {
+              "name": "storage_class",
+              "description": "Class of storage used to store the object. Valid Values: `GLACIER`, `STANDARD_IA`, `ONEZONE_IA`, `INTELLIGENT_TIERING`, `DEEP_ARCHIVE`, `GLACIER_IR`.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `storage_class` argument in the `transition` block of the `aws_s3_bucket_lifecycle_configuration` resource specifies the target storage tier to which objects are transitioned as part of the bucket's lifecycle management. By defining this argument, users can optimize costs and performance by automatically moving objects to lower-cost storage classes like `GLACIER`, `STANDARD_IA`, or `DEEP_ARCHIVE` based on their access patterns and retention requirements."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The \"transition\" configuration block within the \"rule\" of the `aws_s3_bucket_lifecycle_configuration` resource defines the conditions under which Amazon S3 objects are automatically moved to a specified storage class, such as Glacier or Intelligent-Tiering, to optimize cost and performance. It encapsulates settings for storage class transitions based on object age or specific timestamps, enabling users to implement automated lifecycle management for efficient data archiving and cost savings."
+        }
+      ],
+      "llm_summary": "The \"rule\" configuration block within the `aws_s3_bucket_lifecycle_configuration` resource defines lifecycle management rules for objects in an S3 bucket, enabling automated transitions, expirations, and clean-up of stored data. It encapsulates settings for actions like transitioning objects to different storage classes, expiring objects after a specified duration, and managing versioned object deletions, providing users with granular control over data retention and cost optimization."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument in the `timeouts` block for the `aws_s3_bucket_lifecycle_configuration` resource allows users to specify the maximum duration (as a string, e.g., \"5m\" for 5 minutes) Terraform will wait for the lifecycle configuration to be successfully created. Configuring this timeout ensures predictable behavior during resource provisioning, helping users avoid prolonged or indefinite waits in cases of network delays or service issues."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument in the `timeouts` block for the `aws_s3_bucket_lifecycle_configuration` resource allows users to specify the maximum duration (as a string) Terraform will wait for updates to the bucket's lifecycle configuration to complete. Configuring this timeout ensures smoother management of lifecycle rules, preventing operations from failing prematurely due to extended update processes in AWS."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block within the `aws_s3_bucket_lifecycle_configuration` resource defines customizable time limits for operations related to managing S3 bucket lifecycle configurations, such as creating, updating, or deleting lifecycle rules. By configuring this block, users can ensure predictable execution times for lifecycle management tasks, helping to avoid delays or timeouts in automated workflows."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "id",
+      "description": "The `bucket` or `bucket` and `expected_bucket_owner` separated by a comma (`,`) if the latter is provided.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

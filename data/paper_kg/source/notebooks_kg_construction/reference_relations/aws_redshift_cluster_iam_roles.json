@@ -1,0 +1,17 @@
+[
+    {
+        "argument_path": "cluster_identifier",
+        "references_output": "aws_redshift_cluster.cluster_identifier",
+        "target_resource_type": "aws_redshift_cluster"
+    },
+    {
+        "argument_path": "iam_role_arns",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "default_iam_role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    }
+]

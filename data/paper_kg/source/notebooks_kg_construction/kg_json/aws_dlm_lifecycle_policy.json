@@ -1,0 +1,524 @@
+{
+    "resource": {
+        "name": "aws_dlm_lifecycle_policy",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "description",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "execution_role_arn",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "state",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "policy_details",
+            "description": "",
+            "cardinality": [
+                1,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "policy_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "resource_locations",
+                    "description": "",
+                    "required": false,
+                    "type": "list(string)"
+                },
+                {
+                    "name": "resource_types",
+                    "description": "",
+                    "required": false,
+                    "type": "list(string)"
+                },
+                {
+                    "name": "target_tags",
+                    "description": "",
+                    "required": false,
+                    "type": "map(string)"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "action",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "name",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "cross_region_copy",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                3
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "target",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "encryption_configuration",
+                                    "description": "",
+                                    "cardinality": [
+                                        1,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "cmk_arn",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "encrypted",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "bool"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "retain_rule",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "interval",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "interval_unit",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "event_source",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "type",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "parameters",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "description_regex",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "event_type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "snapshot_owner",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "set(string)"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "parameters",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "exclude_boot_volume",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "no_reboot",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "schedule",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        4
+                    ],
+                    "arguments": [
+                        {
+                            "name": "copy_tags",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "name",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "tags_to_add",
+                            "description": "",
+                            "required": false,
+                            "type": "map(string)"
+                        },
+                        {
+                            "name": "variable_tags",
+                            "description": "",
+                            "required": false,
+                            "type": "map(string)"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "create_rule",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "cron_expression",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "interval",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "interval_unit",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "location",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "times",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "list(string)"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "cross_region_copy_rule",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                3
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "cmk_arn",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "copy_tags",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "encrypted",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "target",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "deprecate_rule",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "interval",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "interval_unit",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "retain_rule",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "interval",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "interval_unit",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        },
+                        {
+                            "name": "deprecate_rule",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "count",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "interval",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "interval_unit",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "fast_restore_rule",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "availability_zones",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "set(string)"
+                                },
+                                {
+                                    "name": "count",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "interval",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "interval_unit",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "retain_rule",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "count",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "interval",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "interval_unit",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "share_rule",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "target_accounts",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "set(string)"
+                                },
+                                {
+                                    "name": "unshare_interval",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "unshare_interval_unit",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

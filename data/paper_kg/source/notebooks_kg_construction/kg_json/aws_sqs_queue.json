@@ -1,0 +1,174 @@
+{
+    "resource": {
+        "name": "aws_sqs_queue",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "content_based_deduplication",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "deduplication_scope",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "delay_seconds",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "fifo_queue",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "fifo_throughput_limit",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "kms_data_key_reuse_period_seconds",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "kms_master_key_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "max_message_size",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "message_retention_seconds",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "policy",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "receive_wait_time_seconds",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "redrive_allow_policy",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "redrive_policy",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "sqs_managed_sse_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "visibility_timeout_seconds",
+            "description": "",
+            "required": false,
+            "type": "number"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "url",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

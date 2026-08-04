@@ -1,0 +1,318 @@
+{
+  "resource": {
+    "name": "aws_lex_bot",
+    "description": "Provides an Amazon Lex Bot resource. For more information see Amazon Lex: How It Works",
+    "llm_summary": "The `aws_lex_bot` Terraform resource enables the creation and management of Amazon Lex conversational bots, allowing users to build natural language chatbots and voice assistants. It is commonly used for automating customer interactions, integrating AI-driven conversational interfaces into applications, and supporting multi-channel communication (e.g., web, mobile, or voice platforms). Key configurations include defining intents, slots, and utterances, setting up versioning and aliases for lifecycle management, and customizing bot behavior, language models, and response settings to suit specific use cases."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_lex_bot\" \"order_flowers_bot\" {\n  abort_statement {\n    message {\n      content      = \"Sorry, I am not able to assist at this time\"\n      content_type = \"PlainText\"\n    }\n  }\n\n  child_directed = false\n\n  clarification_prompt {\n    max_attempts = 2\n\n    message {\n      content      = \"I didn't understand you, what would you like to do?\"\n      content_type = \"PlainText\"\n    }\n  }\n\n  create_version              = false\n  description                 = \"Bot to order flowers on the behalf of a user\"\n  idle_session_ttl_in_seconds = 600\n\n  intent {\n    intent_name    = \"OrderFlowers\"\n    intent_version = \"1\"\n  }\n\n  locale           = \"en-US\"\n  name             = \"OrderFlowers\"\n  process_behavior = \"BUILD\"\n  voice_id         = \"Salli\"\n}",
+      "llm_summary": "This example demonstrates the basic configuration of an AWS Lex bot using the `aws_lex_bot` resource, including defining abort and clarification prompts, setting intents, and specifying key attributes like locale, voice ID, and session timeout. It illustrates how to create a conversational bot with essential settings for user interaction and error handling."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "child_directed",
+      "description": "(Required) By specifying true, you confirm that your use of Amazon Lex is related to a website, program, or other application that is directed or targeted, in whole or in part, to children under age 13 and subject to COPPA. For more information see the Amazon Lex FAQ and the Amazon Lex PutBot API Docs.",
+      "required": true,
+      "type": "bool",
+      "llm_summary": "The `child_directed` argument for the `aws_lex_bot` resource specifies whether the bot is designed for use in applications directed at children under 13, ensuring compliance with the Children's Online Privacy Protection Act (COPPA). Setting this required boolean value to `true` confirms the bot's intended audience and enables Amazon Lex to enforce COPPA-related policies and restrictions."
+    },
+    {
+      "name": "create_version",
+      "description": "(Optional) Determines if a new bot version is created when the initial resource is created and on each update. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `create_version` argument for the `aws_lex_bot` resource controls whether a new version of the Lex bot is automatically created during the initial resource creation and subsequent updates. Enabling this argument (`true`) helps manage bot lifecycle versions, ensuring versioning consistency for iterative updates, which is useful for deployments requiring version tracking or rollback capabilities."
+    },
+    {
+      "name": "description",
+      "description": "(Optional) A description of the bot. Must be less than or equal to 200 characters in length.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_lex_bot` resource allows users to define a brief, human-readable summary of the bot's purpose or functionality, up to 200 characters. This optional metadata helps document the bot's role within the infrastructure, aiding in organization, clarity, and collaboration during development and maintenance."
+    },
+    {
+      "name": "detect_sentiment",
+      "description": "(Optional) When set to true user utterances are sent to Amazon Comprehend for sentiment analysis. If you don't specify detectSentiment, the default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `detect_sentiment` argument for the `aws_lex_bot` resource enables sentiment analysis of user utterances by integrating Amazon Comprehend. When set to `true`, it allows the bot to assess the emotional tone of user inputs, which can be used to enhance conversational responses or drive sentiment-aware workflows; the default behavior is disabled (`false`)."
+    },
+    {
+      "name": "enable_model_improvements",
+      "description": "(Optional) Set to `true` to enable access to natural language understanding improvements. When you set the `enable_model_improvements` parameter to true you can use the `nlu_intent_confidence_threshold` parameter to configure confidence scores. For more information, see Confidence Scores. You can only set the `enable_model_improvements` parameter in certain Regions. If you set the parameter to true, your bot has access to accuracy improvements. For more information see the Amazon Lex Bot PutBot API Docs.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_model_improvements` argument for the `aws_lex_bot` resource allows users to activate advanced natural language understanding (NLU) enhancements, improving the bot's accuracy and enabling configuration of intent confidence thresholds. Setting this argument to `true` provides access to enhanced NLU capabilities in supported regions, aligning with user goals of optimizing bot performance and reliability."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_lex_bot` resource represents the unique identifier of the Lex bot, typically used to reference the bot in other resources or workflows. While optional, setting this argument can help users manage and track the bot's lifecycle or integrate it with dependent resources, ensuring consistent identification within the infrastructure."
+    },
+    {
+      "name": "idle_session_ttl_in_seconds",
+      "description": "(Optional) The maximum time in seconds that Amazon Lex retains the data gathered in a conversation. Default is `300`. Must be a number between 60 and 86400 (inclusive).",
+      "required": false,
+      "type": "number",
+      "llm_summary": "\"Configures the retention period for conversation data in Amazon Lex, allowing users to define the maximum idle time (in seconds) before session data is discarded. This argument helps manage session lifecycle and resource efficiency, supporting user goals like optimizing bot performance and controlling data persistence.\""
+    },
+    {
+      "name": "locale",
+      "description": "(Optional) Specifies the target locale for the bot. Any intent used in the bot must be compatible with the locale of the bot. For available locales, see Amazon Lex Bot PutBot API Docs. Default is `en-US`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `locale` argument for the `aws_lex_bot` resource specifies the language and regional settings for the bot, ensuring compatibility between the bot and its intents. By configuring this argument, users can define the bot's target audience and language behavior, with a default of `en-US`, aligning the bot's functionality with specific linguistic and cultural requirements."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name of the bot that you want to create, case sensitive. Must be between 2 and 50 characters in length.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies the unique, case-sensitive identifier for the Lex bot, allowing users to define its primary reference within AWS. By setting this required property, users establish the bot's identity, which is critical for deployment, interaction, and integration with conversational AI workflows."
+    },
+    {
+      "name": "nlu_intent_confidence_threshold",
+      "description": "(Optional) Determines the threshold where Amazon Lex will insert the AMAZON.FallbackIntent, AMAZON.KendraSearchIntent, or both when returning alternative intents in a PostContent or PostText response. AMAZON.FallbackIntent and AMAZON.KendraSearchIntent are only inserted if they are configured for the bot. For more information see Amazon Lex Bot PutBot API Docs This value requires `enable_model_improvements` to be set to `true` and the default is `0`. Must be a float between 0 and 1.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `nlu_intent_confidence_threshold` argument for the `aws_lex_bot` resource allows users to define the confidence threshold (a float between 0 and 1) at which Amazon Lex inserts fallback or alternative intents, such as `AMAZON.FallbackIntent` or `AMAZON.KendraSearchIntent`, in response to user input. This configuration helps control the bot's behavior in handling ambiguous or low-confidence predictions, improving user experience by ensuring appropriate fallback actions are triggered when intent recognition is uncertain."
+    },
+    {
+      "name": "process_behavior",
+      "description": "(Optional) If you set the `process_behavior` element to `BUILD`, Amazon Lex builds the bot so that it can be run. If you set the element to `SAVE` Amazon Lex saves the bot, but doesn't build it. Default is `SAVE`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `process_behavior` argument for the `aws_lex_bot` resource specifies whether Amazon Lex should build the bot (`BUILD`) to make it runnable or save the bot configuration without building it (`SAVE`). This allows users to control the bot's deployment lifecycle, enabling either immediate readiness for execution or deferred deployment for further configuration or testing."
+    },
+    {
+      "name": "voice_id",
+      "description": "(Optional) The Amazon Polly voice ID that you want Amazon Lex to use for voice interactions with the user. The locale configured for the voice must match the locale of the bot. For more information, see Available Voices in the Amazon Polly Developer Guide.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `voice_id` argument for the `aws_lex_bot` resource allows users to specify the Amazon Polly voice that the bot will use for spoken interactions, enabling text-to-speech functionality tailored to the bot's locale. By setting this argument, users can customize the bot's voice to match their application's linguistic and tonal requirements, enhancing user experience in voice-based interactions."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "abort_statement",
+      "description": "(Required) The message that Amazon Lex uses to abort a conversation. Attributes are documented under statement.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "response_card",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `response_card` argument in the `abort_statement` block of the `aws_lex_bot` resource allows users to specify a visual response card (as a string) that is displayed to the user when the bot aborts a conversation. This enables customization of the user experience by providing additional context, options, or information in a structured format during an abort scenario."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "message",
+          "description": "",
+          "cardinality": [
+            1,
+            15
+          ],
+          "arguments": [
+            {
+              "name": "content",
+              "description": "(Required) The text of the message.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `content` argument specifies the exact text of the message that the AWS Lex bot will deliver to users during interactions. By defining this required string, users control the bot's response behavior, enabling it to convey predefined information, instructions, or prompts essential for conversational workflows."
+            },
+            {
+              "name": "content_type",
+              "description": "(Required) The content type of the message string.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `content_type` argument specifies the format of the message content (e.g., plain text or SSML) for an Amazon Lex bot, ensuring the bot correctly interprets and delivers responses to users. This required setting defines how the message is processed and rendered, directly impacting the bot's communication style and user interaction experience."
+            },
+            {
+              "name": "group_number",
+              "description": "(Optional) Identifies the message group that the message belongs to. When a group is assigned to a message, Amazon Lex returns one message from each group in the response.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `group_number` argument for the `message` in the `aws_lex_bot` resource allows users to define the message group to which a specific message belongs, enabling Amazon Lex to return one message from each group in its response. This configuration is useful for organizing and controlling the structure of bot responses, particularly when managing multi-message interactions or prioritizing grouped responses for enhanced conversational flow."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `message` configuration block within the `abort_statement` of the `aws_lex_bot` resource defines the content and format of the response message presented to users when the bot terminates a conversation. It encapsulates settings for specifying the text or structured response (e.g., plain text, SSML, or custom payloads) delivered to the user, enabling clear communication of the bot's decision to abort the interaction. Configuring this block ensures a user-friendly and contextually appropriate termination message, enhancing the overall conversational experience."
+        }
+      ],
+      "llm_summary": "The `abort_statement` block in the `aws_lex_bot` resource defines the message Amazon Lex uses to terminate a conversation when an interaction cannot proceed. It encapsulates settings related to the bot's response behavior, enabling users to configure custom abort messages that enhance user experience and clarify the reason for ending the conversation."
+    },
+    {
+      "name": "clarification_prompt",
+      "description": "(Required) The message that Amazon Lex uses when it doesn't understand the user's request. Attributes are documented under prompt.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "max_attempts",
+          "description": "",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `max_attempts` argument for the `clarification_prompt` in the `aws_lex_bot` resource specifies the maximum number of times Amazon Lex will prompt the user for clarification when their input is ambiguous or unrecognized. Configuring this value allows users to control the bot's behavior in handling unclear responses, ensuring a balance between user experience and conversational flow by limiting repeated prompts."
+        },
+        {
+          "name": "response_card",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `response_card` argument for the `clarification_prompt` in the `aws_lex_bot` resource allows users to specify a custom response card in JSON format, which provides a visual representation (e.g., buttons, images, or quick replies) to enhance user interaction when the bot requests clarification. Configuring this argument enables richer, more interactive user experiences by defining how additional options or prompts are presented during clarification scenarios."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "message",
+          "description": "",
+          "cardinality": [
+            1,
+            15
+          ],
+          "arguments": [
+            {
+              "name": "content",
+              "description": "(Required) The text of the message.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `content` argument specifies the exact text of the message that the AWS Lex bot will deliver to users during interactions. By defining this required string, users control the bot's response behavior, enabling it to provide tailored, conversational outputs aligned with the bot's intent and user experience goals."
+            },
+            {
+              "name": "content_type",
+              "description": "(Required) The content type of the message string.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `content_type` argument specifies the format of the message content (e.g., plain text or SSML) for an Amazon Lex bot, ensuring the bot correctly interprets and delivers responses in the desired format. This required setting directly impacts how messages are processed and presented to users, aligning with the bot's communication style and user experience goals."
+            },
+            {
+              "name": "group_number",
+              "description": "(Optional) Identifies the message group that the message belongs to. When a group is assigned to a message, Amazon Lex returns one message from each group in the response.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `group_number` argument for the `message` in the `aws_lex_bot` resource allows users to define the message group to which a specific message belongs, enabling Amazon Lex to return one message from each group in its response. This configuration is useful for organizing and prioritizing responses, ensuring diverse and structured messaging in conversational workflows."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The \"message\" configuration block within the \"clarification_prompt\" of the \"aws_lex_bot\" resource defines the content and format of the response message presented to users when the bot requires clarification due to ambiguous or incomplete input. It encapsulates settings related to the text or speech output, enabling precise control over how the bot communicates clarification prompts, ensuring a better user experience and improved conversational flow."
+        }
+      ],
+      "llm_summary": "The `clarification_prompt` block in the `aws_lex_bot` resource defines the fallback message Amazon Lex delivers when it cannot interpret a user's input, ensuring conversational flow and user guidance. It encapsulates settings related to prompt configuration, such as message content and response behavior, enabling users to customize how the bot handles misunderstandings and improves user experience during interactions."
+    },
+    {
+      "name": "intent",
+      "description": "(Required) A set of Intent objects. Each intent represents a command that a user can express. Attributes are documented under intent. Can have up to 250 Intent objects.",
+      "cardinality": [
+        1,
+        250
+      ],
+      "arguments": [
+        {
+          "name": "intent_name",
+          "description": "(Required) The name of the intent. Must be less than or equal to 100 characters in length.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `intent_name` argument specifies the unique name of an intent within the `aws_lex_bot` resource, enabling users to define the core functionality or purpose of the bot's conversational flow. By setting this required string, users establish the intent's identity, which serves as a key reference for triggering specific actions, responses, or workflows during user interactions."
+        },
+        {
+          "name": "intent_version",
+          "description": "(Required) The version of the intent. Must be less than or equal to 64 characters in length.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `intent_version` argument specifies the version of an intent to be associated with the Lex bot, ensuring the bot uses the correct configuration and behavior for that intent. By defining this required string, users can control which iteration of the intent is deployed, enabling version management and precise functionality alignment within the bot's conversational design."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `intent` configuration block in the `aws_lex_bot` resource defines a set of up to 250 intents, which represent user commands or queries that the bot can recognize and respond to. This block encapsulates the logic for mapping user inputs to specific actions or responses, enabling detailed control over the bot's conversational capabilities and ensuring it can handle diverse user interactions effectively."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_lex_bot` resource allows users to specify the maximum duration (as a string) Terraform will wait for the creation of an Amazon Lex bot before timing out. Configuring this argument helps users manage deployment workflows by ensuring predictable behavior during resource provisioning, especially in cases where bot creation may take longer due to external factors like service latency or complex configurations."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_lex_bot` resource allows users to specify the maximum duration (as a string) Terraform will wait for the deletion of an Amazon Lex bot to complete. By configuring this timeout, users can control the lifecycle behavior during resource destruction, ensuring operations do not exceed their desired time limits or fail prematurely due to extended deletion processes."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block of the `aws_lex_bot` resource allows users to specify the maximum duration (as a string) Terraform will wait for updates to the Lex bot to complete. Configuring this timeout ensures smoother resource management by preventing operations from hanging indefinitely during bot updates, aligning with user goals of reliable and predictable infrastructure provisioning."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_lex_bot` resource allows users to define custom time limits for create, update, and delete operations, ensuring precise control over the duration of these lifecycle actions. This block is useful for managing deployment workflows, especially in environments where operations may require extended or constrained execution times."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "checksum",
+      "description": "Checksum identifying the version of the bot that was created. The checksum is not included as an argument because the resource will add it automatically when updating the bot.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "created_date",
+      "description": "The date when the bot version was created.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "failure_reason",
+      "description": "If status is FAILED, Amazon Lex provides the reason that it failed to build the bot.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "last_updated_date",
+      "description": "The date when the $LATEST version of this bot was updated.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "description": "When you send a request to create or update a bot, Amazon Lex sets the status response element to BUILDING. After Amazon Lex builds the bot, it sets status to READY. If Amazon Lex can't build the bot, it sets status to FAILED. Amazon Lex returns the reason for the failure in the failure_reason response element.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "version",
+      "description": "The version of the bot.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+    "resource": {
+        "name": "aws_glacier_vault_lock",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "complete_lock",
+            "description": "",
+            "required": true,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ignore_deletion_error",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "policy",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "vault_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": []
+}

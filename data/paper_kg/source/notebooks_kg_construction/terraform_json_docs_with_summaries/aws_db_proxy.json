@@ -1,0 +1,201 @@
+{
+  "resource": {
+    "name": "aws_db_proxy",
+    "description": "Provides an RDS DB proxy resource. For additional information, see the RDS User Guide. Not all Availability Zones (AZs) support DB proxies. Specifying vpc_subnet_ids for AZs that do not support proxies will not trigger an error as long as at least one vpc_subnet_id is valid. However, this will cause Terraform to continuously detect differences between the configuration and the actual infrastructure. Refer to the Unsupported Availability Zones section below for potential workarounds.",
+    "llm_summary": "The `aws_db_proxy` Terraform resource enables the creation and management of RDS database proxies, which improve application scalability, security, and connection pooling for relational databases. Common use cases include optimizing database connections for high-concurrency workloads, securing database credentials with AWS Secrets Manager, and simplifying failover handling in multi-AZ deployments. Users can configure VPC subnet associations, authentication methods, and connection settings to tailor proxy behavior to their application's needs, ensuring efficient and secure database access."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_db_proxy\" \"example\" {\n  name                   = \"example\"\n  debug_logging          = false\n  engine_family          = \"MYSQL\"\n  idle_client_timeout    = 1800\n  require_tls            = true\n  role_arn               = aws_iam_role.example.arn\n  vpc_security_group_ids = [aws_security_group.example.id]\n  vpc_subnet_ids         = [aws_subnet.example.id]\n\n  auth {\n    auth_scheme = \"SECRETS\"\n    description = \"example\"\n    iam_auth    = \"DISABLED\"\n    secret_arn  = aws_secretsmanager_secret.example.arn\n  }\n\n  tags = {\n    Name = \"example\"\n    Key  = \"value\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_db_proxy` resource for a MySQL database with TLS enforcement, IAM role-based access, and Secrets Manager integration for authentication. It showcases key configurations such as the `auth` block for managing credentials, VPC security group and subnet associations, and tagging for resource identification."
+    },
+    {
+      "title": "Unsupported Availability Zones",
+      "code": "data \"aws_availability_zones\" \"available\" {\n  exclude_zone_ids = [\"use1-az3\"]\n  state            = \"available\"\n\n  filter {\n    name   = \"opt-in-status\"\n    values = [\"opt-in-not-required\"]\n  }\n}\n\nresource \"aws_vpc\" \"example\" {\n  cidr_block = \"10.0.0.0/16\"\n}\n\nresource \"aws_subnet\" \"example\" {\n  count             = 5\n  cidr_block        = cidrsubnet(aws_vpc.example.cidr_block, 8, count.index)\n  availability_zone = data.aws_availability_zones.available.names[count.index]\n  vpc_id            = aws_vpc.example.id\n}\n\nresource \"aws_db_proxy\" \"example\" {\n  name           = \"example\"\n  vpc_subnet_ids = [aws_subnet.example.id]\n\n  # additional configuration...\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_db_proxy` resource with subnets in supported availability zones by dynamically filtering and excluding unsupported zones using the `aws_availability_zones` data source. It showcases the use of `exclude_zone_ids` and `filter` arguments to ensure subnets are created only in opt-in-free zones, enabling a robust and compliant VPC setup for database proxy connectivity."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "debug_logging",
+      "description": "(Optional) Whether the proxy includes detailed information about SQL statements in its logs. This information helps you to debug issues involving SQL behavior or the performance and scalability of the proxy connections. The debug information includes the text of SQL statements that you submit through the proxy. Thus, only enable this setting when needed for debugging, and only when you have security measures in place to safeguard any sensitive information that appears in the logs.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `debug_logging` argument for the `aws_db_proxy` resource allows users to enable detailed SQL statement logging for the proxy, providing visibility into SQL behavior and performance for debugging purposes. Activating this feature helps diagnose issues but should be used cautiously due to potential exposure of sensitive information in logs, aligning with user goals of troubleshooting and performance optimization."
+    },
+    {
+      "name": "engine_family",
+      "description": "(Required, Forces new resource) The kinds of databases that the proxy can connect to. This value determines which database network protocol the proxy recognizes when it interprets network traffic to and from the database. For Aurora MySQL, RDS for MariaDB, and RDS for MySQL databases, specify `MYSQL`. For Aurora PostgreSQL and RDS for PostgreSQL databases, specify `POSTGRESQL`. For RDS for Microsoft SQL Server, specify `SQLSERVER`. Valid values are `MYSQL`, `POSTGRESQL`, and `SQLSERVER`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `engine_family` argument specifies the database engine type that the `aws_db_proxy` will support, determining the network protocol used to interpret traffic between the proxy and the database. By setting this required value (`MYSQL`, `POSTGRESQL`, or `SQLSERVER`), users configure the proxy to align with the database engine of their RDS or Aurora instances, ensuring compatibility and proper functionality for secure and efficient connection management."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument represents the unique identifier of the `aws_db_proxy` resource, typically used for referencing the proxy in other Terraform configurations or external systems. While not required, it allows users to retrieve and manage the proxy's state or attributes programmatically, supporting workflows that depend on the proxy's identity."
+    },
+    {
+      "name": "idle_client_timeout",
+      "description": "(Optional) The number of seconds that a connection to the proxy can be inactive before the proxy disconnects it. You can set this value higher or lower than the connection timeout limit for the associated database.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "\"Configures the duration (in seconds) a connection to the `aws_db_proxy` can remain idle before being terminated, allowing users to optimize resource usage and manage connection lifecycles for database proxies by controlling inactive client disconnections.\""
+    },
+    {
+      "name": "name",
+      "description": "(Required) The identifier for the proxy. This name must be unique for all proxies owned by your AWS account in the specified AWS Region. An identifier must begin with a letter and must contain only ASCII letters, digits, and hyphens; it can't end with a hyphen or contain two consecutive hyphens.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies a unique identifier for the `aws_db_proxy` resource, allowing users to define a distinct and recognizable name for the database proxy within their AWS account and region. This name is essential for managing and referencing the proxy, ensuring it adheres to naming conventions and avoids conflicts with other proxies."
+    },
+    {
+      "name": "require_tls",
+      "description": "(Optional) A Boolean parameter that specifies whether Transport Layer Security (TLS) encryption is required for connections to the proxy. By enabling this setting, you can enforce encrypted TLS connections to the proxy.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `require_tls` argument for the `aws_db_proxy` resource allows users to enforce Transport Layer Security (TLS) encryption for all connections to the database proxy. By enabling this setting, users can ensure secure, encrypted communication between clients and the proxy, aligning with best practices for data protection and compliance in cloud environments."
+    },
+    {
+      "name": "role_arn",
+      "description": "(Required) The Amazon Resource Name (ARN) of the IAM role that the proxy uses to access secrets in AWS Secrets Manager.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `role_arn` argument specifies the IAM role's Amazon Resource Name (ARN that the `aws_db_proxy` uses to securely access secrets stored in AWS Secrets Manager. By defining this required parameter, users enable the proxy to retrieve authentication credentials for database connections, ensuring secure and seamless integration with managed secret storage."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A mapping of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level. auth blocks support the following:",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_db_proxy` resource allows users to assign key-value metadata to the database proxy for organizational, management, or automation purposes. By configuring tags, users can categorize and track the resource across environments, enable cost allocation, and integrate with tagging-based workflows such as access control or resource monitoring."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_db_proxy` resource allows users to define a comprehensive set of key-value tags that are applied to the database proxy and inherited from the provider-level default tags. This enables streamlined resource organization, cost allocation, and metadata management across cloud infrastructure, supporting common goals like tagging for environments, ownership, or compliance tracking."
+    },
+    {
+      "name": "vpc_security_group_ids",
+      "description": "(Optional) One or more VPC security group IDs to associate with the new proxy.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `vpc_security_group_ids` argument for the `aws_db_proxy` resource allows users to specify one or more VPC security group IDs to control network access to the database proxy. By configuring this argument, users can define security rules and restrictions, such as inbound and outbound traffic permissions, ensuring secure and controlled communication between the proxy and other resources within the VPC."
+    },
+    {
+      "name": "vpc_subnet_ids",
+      "description": "(Required) One or more VPC subnet IDs to associate with the new proxy.",
+      "required": true,
+      "type": "set(string)",
+      "llm_summary": "The `vpc_subnet_ids` argument for the `aws_db_proxy` resource specifies the VPC subnets where the database proxy will be deployed, ensuring network connectivity between the proxy and associated databases. By configuring this required parameter, users define the proxy's placement within their VPC, enabling secure and efficient communication with database instances while adhering to their network architecture."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "auth",
+      "description": "(Required) Configuration block(s) with authorization mechanisms to connect to the associated instances or clusters. Described below.",
+      "cardinality": [
+        1,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "auth_scheme",
+          "description": "(Optional) The type of authentication that the proxy uses for connections from the proxy to the underlying database. One of `SECRETS`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `auth_scheme` argument in the `auth` block of the `aws_db_proxy` resource allows users to specify the authentication method used by the proxy to connect to the underlying database. By setting this argument to `SECRETS`, users configure the proxy to leverage AWS Secrets Manager for secure credential management, aligning with common goals of enhancing security and simplifying authentication workflows."
+        },
+        {
+          "name": "client_password_auth_type",
+          "description": "(Optional) The type of authentication the proxy uses for connections from clients. Valid values are `MYSQL_CACHING_SHA2_PASSWORD`, `MYSQL_NATIVE_PASSWORD`, `POSTGRES_SCRAM_SHA_256`, `POSTGRES_MD5`, and `SQL_SERVER_AUTHENTICATION`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `client_password_auth_type` argument in the `auth` context of the `aws_db_proxy` resource allows users to specify the authentication mechanism used by the proxy to validate client connections. By setting this argument, users can configure the password-based authentication protocol (e.g., `MYSQL_CACHING_SHA2_PASSWORD`, `POSTGRES_SCRAM_SHA_256`) to align with the database engine's security requirements and client compatibility, ensuring secure and seamless access to the database through the proxy."
+        },
+        {
+          "name": "description",
+          "description": "(Optional) A user-specified description about the authentication used by a proxy to log in as a specific database user.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "\"Defines a user-provided description for the authentication configuration of the database proxy, allowing users to document or annotate the proxy's login behavior for specific database users. This argument helps improve clarity and manageability in environments with multiple authentication methods or complex proxy setups.\""
+        },
+        {
+          "name": "iam_auth",
+          "description": "(Optional) Whether to require or disallow AWS Identity and Access Management (IAM) authentication for connections to the proxy. One of `DISABLED`, `REQUIRED`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `iam_auth` argument in the `auth` context of the `aws_db_proxy` resource allows users to specify whether AWS Identity and Access Management (IAM) authentication is required (`REQUIRED`) or disallowed (`DISABLED`) for database connections through the proxy. This configuration enables users to enforce secure access control policies by integrating IAM-based authentication, aligning with common goals of enhancing security and managing access permissions for database proxies."
+        },
+        {
+          "name": "secret_arn",
+          "description": "(Optional) The Amazon Resource Name (ARN) representing the secret that the proxy uses to authenticate to the RDS DB instance or Aurora DB cluster. These secrets are stored within Amazon Secrets Manager.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `secret_arn` argument allows users to specify the Amazon Resource Name (ARN) of a secret stored in AWS Secrets Manager, which the database proxy uses to authenticate to an RDS DB instance or Aurora DB cluster. By configuring this, users enable secure, managed authentication for the proxy, aligning with best practices for credential management and enhancing the security of database connections."
+        },
+        {
+          "name": "username",
+          "description": "(Optional) The name of the database user to which the proxy connects.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `username` argument in the `auth` context of the `aws_db_proxy` resource allows users to specify the database user account that the proxy will use to authenticate and connect to the target database. Configuring this argument enables precise control over the proxy's access credentials, aligning with user goals such as managing secure database connections and enforcing role-based access policies."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"auth\" configuration block in the `aws_db_proxy` resource defines authorization mechanisms for securely connecting to associated database instances or clusters. It encapsulates settings related to authentication, such as IAM roles, secrets, or credentials, enabling users to control access and enforce security policies for database connections through the proxy."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_db_proxy` resource allows users to specify the maximum duration (as a string, e.g., \"10m\") Terraform will wait for the database proxy creation process to complete. Configuring this timeout ensures better control over resource provisioning workflows, particularly in environments where proxy creation may take longer due to network or service conditions."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block for the `aws_db_proxy` resource allows users to specify the maximum duration (as a string, e.g., \"5m\" for 5 minutes) Terraform will wait for the deletion of the database proxy to complete. Configuring this argument helps define the lifecycle behavior during resource teardown, ensuring operations do not exceed the specified timeout and fail gracefully if the deletion process takes longer than expected."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_db_proxy` resource allows users to specify the maximum duration (in string format, e.g., \"30m\") Terraform will wait for updates to the database proxy to complete. Configuring this timeout ensures predictable behavior during resource modifications, helping users manage deployment workflows and avoid prolonged or stalled operations."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_db_proxy` resource defines customizable time limits for specific operations, such as creating, updating, or deleting the database proxy. By configuring this block, users can manage operation durations to prevent long-running tasks or adapt timeout settings to align with their infrastructure requirements, ensuring smoother lifecycle management of the database proxy."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) for the proxy.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "endpoint",
+      "description": "The endpoint that you can use to connect to the proxy. You include the endpoint value in the connection string for a database client application.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

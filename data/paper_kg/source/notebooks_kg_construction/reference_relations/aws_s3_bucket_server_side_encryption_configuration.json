@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "bucket",
+        "references_output": "aws_s3_bucket.id",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "rule.apply_server_side_encryption_by_default.kms_master_key_id",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    }
+]

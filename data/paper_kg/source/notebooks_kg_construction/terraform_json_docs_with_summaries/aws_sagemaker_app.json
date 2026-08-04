@@ -1,0 +1,129 @@
+{
+  "resource": {
+    "name": "aws_sagemaker_app",
+    "description": "Provides a SageMaker AI App resource.",
+    "llm_summary": "The `aws_sagemaker_app` Terraform resource enables the creation and management of SageMaker AI applications within user profiles, supporting machine learning workflows in AWS. It is commonly used to configure and deploy custom apps for data processing, model training, and inference in SageMaker Studio environments. Key configurations include lifecycle management, resource permissions, and integration with SageMaker domains and user profiles, allowing seamless orchestration of AI development and collaboration."
+  },
+  "examples": [
+    {
+      "title": "Basic usage",
+      "code": "resource \"aws_sagemaker_app\" \"example\" {\n  domain_id         = aws_sagemaker_domain.example.id\n  user_profile_name = aws_sagemaker_user_profile.example.user_profile_name\n  app_name          = \"example\"\n  app_type          = \"JupyterServer\"\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS SageMaker App resource (`aws_sagemaker_app`) to create a JupyterServer application within a SageMaker domain. It highlights key arguments such as `domain_id`, `user_profile_name`, `app_name`, and `app_type`, showcasing the setup of a user-specific app tied to a SageMaker domain and user profile."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "app_name",
+      "description": "(Required) The name of the app.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `app_name` argument specifies the unique name of the SageMaker app within the associated domain and user profile, serving as an identifier for the application. Setting this argument is essential for creating and managing the app, enabling users to define and reference specific SageMaker applications for tasks like notebook instances, model training, or deployment workflows."
+    },
+    {
+      "name": "app_type",
+      "description": "(Required) The type of app. Valid values are `JupyterServer`, `KernelGateway`, `RStudioServerPro`, `RSessionGateway`, `TensorBoard`, `CodeEditor`, `JupyterLab`, `DetailedProfiler`, and `Canvas`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `app_type` argument specifies the type of application to be deployed within the SageMaker environment, enabling users to define the functionality and interface of the app, such as Jupyter notebooks, RStudio, TensorBoard, or other tools for data science and machine learning workflows. By setting this required parameter, users configure the app's behavior and purpose to align with their development, analysis, or visualization goals."
+    },
+    {
+      "name": "domain_id",
+      "description": "(Required) The domain ID.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `domain_id` argument specifies the unique identifier of the SageMaker Domain to which the SageMaker App belongs, enabling users to associate the app with a specific managed environment for machine learning workloads. By setting this required value, users define the app's scope within the domain, ensuring proper integration and access control within the SageMaker ecosystem."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_sagemaker_app` resource specifies the unique identifier of the SageMaker app, allowing users to reference or manage the app programmatically. While optional, setting this argument can help track and organize SageMaker app instances within infrastructure workflows or integrations."
+    },
+    {
+      "name": "space_name",
+      "description": "(Optional) The name of the space. At least one of `user_profile_name` or `space_name` required.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `space_name` argument in the `aws_sagemaker_app` resource allows users to specify the name of a SageMaker space, which is a collaborative environment for sharing resources and workflows within SageMaker Studio. Configuring this argument helps define the scope of the application by associating it with a specific space, enabling team-based access and resource organization."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_sagemaker_app` resource allows users to assign key-value metadata to the SageMaker app, enabling resource categorization, organization, and cost tracking. By defining tags, users can streamline management tasks such as identifying environments (e.g., \"dev\" or \"prod\"), applying governance policies, or integrating with billing and reporting workflows."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument in the `aws_sagemaker_app` resource allows users to define a comprehensive set of key-value tags that are applied to the SageMaker app and any associated resources. By configuring this argument, users can streamline resource organization, enable cost tracking, and enforce tagging policies for governance and operational management across their AWS environment."
+    },
+    {
+      "name": "user_profile_name",
+      "description": "(Optional) The user profile name. At least one of `user_profile_name` or `space_name` required.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `user_profile_name` argument allows users to specify the name of the SageMaker user profile associated with the application, enabling the configuration of user-specific settings and access within the SageMaker environment. Defining this argument helps tailor the app to a specific user profile, supporting personalized workflows and resource isolation for individual users."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "resource_spec",
+      "description": "(Optional) The instance type and the Amazon Resource Name (ARN) of the SageMaker AI image created on the instance.See Resource Spec below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "instance_type",
+          "description": "(Optional) The instance type that the image version runs on. For valid values see SageMaker AI Instance Types.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `instance_type` argument in the `resource_spec` block of the `aws_sagemaker_app` resource allows users to specify the compute instance type on which the associated image version will run. Configuring this argument enables users to tailor the application's performance and resource allocation to match their workload requirements, such as optimizing for cost or computational power, by selecting from valid SageMaker AI instance types."
+        },
+        {
+          "name": "lifecycle_config_arn",
+          "description": "(Optional) The Amazon Resource Name (ARN) of the Lifecycle Configuration attached to the Resource.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `lifecycle_config_arn` argument allows users to specify the Amazon Resource Name (ARN) of a SageMaker Lifecycle Configuration to attach to the `resource_spec` for the `aws_sagemaker_app` resource. This enables the definition of custom scripts or actions that automatically execute during the app's lifecycle events, such as startup or termination, helping users streamline environment setup, automate workflows, or enforce configuration consistency."
+        },
+        {
+          "name": "sagemaker_image_arn",
+          "description": "(Optional) The ARN of the SageMaker AI image that the image version belongs to.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `sagemaker_image_arn` argument allows users to specify the Amazon Resource Name (ARN) of a SageMaker AI image associated with the image version used by the SageMaker app. By setting this value, users can define the underlying container image for the app's runtime environment, enabling customization of the software stack and dependencies for machine learning workflows or applications."
+        },
+        {
+          "name": "sagemaker_image_version_alias",
+          "description": "(Optional) The SageMaker AI Image Version Alias.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `sagemaker_image_version_alias` argument allows users to specify an alias for a specific version of a SageMaker AI image within the `resource_spec` configuration of the `aws_sagemaker_app` resource. By setting this alias, users can reference and manage image versions more intuitively, enabling streamlined updates, versioning, and consistency across SageMaker applications."
+        },
+        {
+          "name": "sagemaker_image_version_arn",
+          "description": "(Optional) The ARN of the image version created on the instance.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `sagemaker_image_version_arn` argument allows users to specify the Amazon Resource Name (ARN) of a specific SageMaker image version to be used within the `resource_spec` configuration of the `aws_sagemaker_app`. By setting this argument, users can control the runtime environment for their SageMaker application, ensuring it utilizes a predefined image version with the desired dependencies, tools, or frameworks for machine learning workflows."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `resource_spec` block in the `aws_sagemaker_app` resource defines the compute instance type and the Amazon Resource Name (ARN) of the SageMaker AI image to be used, enabling precise control over the application's runtime environment. This configuration encapsulates settings for specifying the infrastructure and image resources required to execute machine learning workloads, ensuring compatibility and performance optimization for SageMaker applications."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) of the app.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "resource": {
+    "name": "aws_dax_subnet_group",
+    "description": "Provides a DAX Subnet Group resource.",
+    "llm_summary": "The `aws_dax_subnet_group` Terraform resource enables the creation and management of subnet groups for Amazon DynamoDB Accelerator (DAX), facilitating high-performance in-memory caching for DynamoDB. It is commonly used to define the network boundaries for DAX clusters by specifying a set of subnets within a VPC, ensuring secure and optimized connectivity. Users can configure subnet associations to control cluster placement, enhance fault tolerance, and support multi-AZ deployments for improved availability and scalability."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_dax_subnet_group\" \"example\" {\n  name       = \"example\"\n  subnet_ids = [aws_subnet.example1.id, aws_subnet.example2.id]\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS DAX subnet group using the `aws_dax_subnet_group` resource, specifying a custom name and associating it with multiple subnet IDs. It illustrates the basic setup required to define a subnet group for DAX clusters, enabling users to control the network placement of their DAX instances."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "description",
+      "description": "(Optional) A description of the subnet group.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_dax_subnet_group` resource allows users to define a human-readable summary or label for the subnet group, providing context or metadata about its purpose or usage. Setting this argument helps document the subnet group's role within the DAX cluster infrastructure, aiding in resource organization and clarity for environments with multiple subnet groups."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_dax_subnet_group` resource specifies a unique identifier for the DAX subnet group, allowing users to define or reference the resource explicitly within their Terraform configuration. While optional, setting this argument can help ensure consistent identification of the subnet group across dependent resources or workflows, supporting better resource management and integration."
+    },
+    {
+      "name": "name",
+      "description": "\u2013 (Required) The name of the subnet group.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_dax_subnet_group` resource specifies a unique identifier for the subnet group, allowing users to define and reference the group within their DAX (DynamoDB Accelerator) cluster configuration. Setting this argument ensures the subnet group is properly named for organizational purposes and facilitates its association with specific subnets to control network access and placement of DAX nodes."
+    },
+    {
+      "name": "subnet_ids",
+      "description": "\u2013 (Required) A list of VPC subnet IDs for the subnet group.",
+      "required": true,
+      "type": "set(string)",
+      "llm_summary": "The `subnet_ids` argument for the `aws_dax_subnet_group` resource specifies the set of VPC subnet IDs where the DAX (DynamoDB Accelerator) cluster will operate, enabling users to define the network placement and connectivity of the cluster within their AWS environment. By configuring this argument, users ensure the DAX cluster is deployed in specific subnets, typically to control access, security, and integration with other resources in the same VPC."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "vpc_id",
+      "description": "",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "resource": {
+    "name": "aws_iam_group",
+    "description": "Provides an IAM group. Using aws_iam_group_membership or aws_iam_user_group_membership resources in addition to manually managing user/group membership using the console may lead to configuration drift or conflicts. For this reason, it's recommended to either manage membership entirely with Terraform or entirely within the AWS console.",
+    "llm_summary": "The `aws_iam_group` resource enables the creation and management of IAM groups in AWS, allowing users to organize and control access for multiple IAM users under shared policies. Common use cases include streamlining permission management, implementing role-based access control, and grouping users for consistent policy application. Users can configure group membership entirely within Terraform to avoid configuration drift, ensuring reliable lifecycle management and alignment with infrastructure-as-code practices."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_iam_group\" \"developers\" {\n  name = \"developers\"\n  path = \"/users/\"\n}",
+      "llm_summary": "This example demonstrates the basic configuration of the `aws_iam_group` resource by creating an IAM group named \"developers\" with a specified path (`/users/`). It illustrates how to define a simple IAM group for organizing and managing user permissions in AWS."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_iam_group` resource allows users to specify the unique identifier of the IAM group, typically used to reference the group in other resources or outputs. While optional, setting this argument can help ensure consistent identification of the group across Terraform configurations and integrations, supporting workflows that rely on explicit group IDs for access control or automation."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The group's name. The name must consist of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: `=,.@-_.`. Group names are not distinguished by case. For example, you cannot create groups named both \"ADMINS\" and \"admins\".",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_iam_group` resource specifies the unique identifier for the IAM group, allowing users to define a human-readable name that organizes and manages permissions for a set of IAM users. Setting this argument ensures the group is uniquely identifiable within the AWS account, enabling role-based access control and policy assignment to streamline user management and enforce security practices."
+    },
+    {
+      "name": "path",
+      "description": "(Optional, default \"/\") Path in which to create the group.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `path` argument in the `aws_iam_group` resource allows users to define the hierarchical namespace under which the IAM group is created, enabling organization and categorization of IAM resources. By setting this argument, users can structure groups within a specific path (defaulting to `/`), which is particularly useful for managing permissions and policies in environments with multiple teams or organizational units."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN assigned by AWS for this group.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "unique_id",
+      "description": "The unique ID assigned by AWS.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+    "resource": {
+        "name": "aws_redshift_snapshot_schedule",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "definitions",
+            "description": "",
+            "required": true,
+            "type": "set(string)"
+        },
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "force_destroy",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "identifier_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

@@ -1,0 +1,66 @@
+{
+  "resource": {
+    "name": "aws_dynamodb_contributor_insights",
+    "description": "Provides a DynamoDB contributor insights resource",
+    "llm_summary": "\"Manages the configuration of DynamoDB Contributor Insights, enabling detailed analysis of table and index access patterns to optimize performance and scalability. Common use cases include monitoring high-traffic tables, identifying bottlenecks, and improving query efficiency in real-time. Supports configurations for enabling insights, managing lifecycle settings, and integrating metrics with monitoring tools for enhanced observability.\""
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_dynamodb_contributor_insights\" \"test\" {\n  table_name = \"ExampleTableName\"\n}",
+      "llm_summary": "\"Demonstrates the basic configuration of the `aws_dynamodb_contributor_insights` resource to enable Contributor Insights for a specified DynamoDB table using the `table_name` argument. This example helps users understand how to activate performance analysis and monitoring for a DynamoDB table with minimal setup.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_dynamodb_contributor_insights` resource allows users to specify a unique identifier for the Contributor Insights configuration associated with a DynamoDB table or global secondary index. While optional, setting this argument can help manage and reference the resource explicitly, aiding in resource tracking and organization within Terraform configurations."
+    },
+    {
+      "name": "index_name",
+      "description": "(Optional) The global secondary index name",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `index_name` argument in the `aws_dynamodb_contributor_insights` resource allows users to specify the name of a global secondary index (GSI) for which Contributor Insights should be enabled. By setting this argument, users can monitor and analyze access patterns and performance metrics specific to the selected GSI, supporting optimization and troubleshooting goals for DynamoDB workloads."
+    },
+    {
+      "name": "table_name",
+      "description": "(Required) The name of the table to enable contributor insights",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `table_name` argument specifies the DynamoDB table for which Contributor Insights will be enabled, allowing users to analyze and monitor key access patterns and usage metrics for that table. By defining this required parameter, users can target specific tables to gain actionable insights into traffic distribution and operational behavior, supporting optimization and troubleshooting goals."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_dynamodb_contributor_insights` resource allows users to specify the maximum duration (as a string) Terraform should wait for the creation of Contributor Insights to complete. By configuring this timeout, users can control the resource provisioning behavior, ensuring operations do not hang indefinitely and align with their deployment expectations."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_dynamodb_contributor_insights` resource allows users to specify the maximum duration Terraform will wait for the deletion of Contributor Insights to complete. Configuring this ensures control over timeout behavior during resource teardown, helping to prevent prolonged operations or failures in automation workflows."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_dynamodb_contributor_insights` resource manages the duration settings for operations related to enabling, disabling, or updating Contributor Insights on a DynamoDB table or global secondary index. Configuring this block allows users to define custom time limits for these operations, ensuring better control over execution time and handling potential delays in resource provisioning or updates."
+    }
+  ],
+  "attributes": []
+}

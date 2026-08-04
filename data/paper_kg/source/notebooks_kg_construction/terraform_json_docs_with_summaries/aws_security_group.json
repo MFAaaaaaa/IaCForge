@@ -1,0 +1,143 @@
+{
+  "resource": {
+    "name": "aws_security_group",
+    "description": "Provides a security group resource. Avoid using the ingress and egress arguments of the aws_security_group resource to configure in-line rules, as they struggle with managing multiple CIDR blocks, and, due to the historical lack of unique IDs, tags and descriptions. To avoid these problems, use the current best practice of the aws_vpc_security_group_egress_rule and aws_vpc_security_group_ingress_rule resources with one CIDR block per rule. You should not use the aws_security_group resource with in-line rules (using the ingress and egress arguments of aws_security_group) in conjunction with the aws_vpc_security_group_egress_rule and aws_vpc_security_group_ingress_rule resources or the aws_security_group_rule resource. Doing so may cause rule conflicts, perpetual differences, and result in rules being overwritten. Referencing Security Groups across VPC peering has certain restrictions. More information is available in the VPC Peering User Guide. Due to AWS Lambda improved VPC networking changes that began deploying in September 2019, security groups associated with Lambda Functions can take up to 45 minutes to successfully delete. Terraform AWS Provider version 2.31.0 and later automatically handles this increased timeout, however prior versions require setting the customizable deletion timeout to 45 minutes (delete = \"45m\"). AWS and HashiCorp are working together to reduce the amount of time required for resource deletion and updates can be tracked in this GitHub issue. The cidr_blocks and ipv6_cidr_blocks parameters are optional in the ingress and egress blocks. If nothing is specified, traffic will be blocked as described in NOTE on Egress rules later.",
+    "llm_summary": "The `aws_security_group` resource enables the creation and management of AWS security groups, which control inbound and outbound traffic for resources within a VPC. It is commonly used to define network access rules for EC2 instances, Lambda functions, and other AWS services, supporting configurations for ingress and egress traffic based on CIDR blocks, protocols, and ports. Best practices recommend using dedicated resources like `aws_vpc_security_group_ingress_rule` and `aws_vpc_security_group_egress_rule` for granular rule management to avoid conflicts and ensure scalability, especially when handling multiple CIDR blocks or complex rule sets."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_security_group\" \"allow_tls\" {\n  name        = \"allow_tls\"\n  description = \"Allow TLS inbound traffic and all outbound traffic\"\n  vpc_id      = aws_vpc.main.id\n\n  tags = {\n    Name = \"allow_tls\"\n  }\n}\n\nresource \"aws_vpc_security_group_ingress_rule\" \"allow_tls_ipv4\" {\n  security_group_id = aws_security_group.allow_tls.id\n  cidr_ipv4         = aws_vpc.main.cidr_block\n  from_port         = 443\n  ip_protocol       = \"tcp\"\n  to_port           = 443\n}\n\nresource \"aws_vpc_security_group_ingress_rule\" \"allow_tls_ipv6\" {\n  security_group_id = aws_security_group.allow_tls.id\n  cidr_ipv6         = aws_vpc.main.ipv6_cidr_block\n  from_port         = 443\n  ip_protocol       = \"tcp\"\n  to_port           = 443\n}\n\nresource \"aws_vpc_security_group_egress_rule\" \"allow_all_traffic_ipv4\" {\n  security_group_id = aws_security_group.allow_tls.id\n  cidr_ipv4         = \"0.0.0.0/0\"\n  ip_protocol       = \"-1\" # semantically equivalent to all ports\n}\n\nresource \"aws_vpc_security_group_egress_rule\" \"allow_all_traffic_ipv6\" {\n  security_group_id = aws_security_group.allow_tls.id\n  cidr_ipv6         = \"::/0\"\n  ip_protocol       = \"-1\" # semantically equivalent to all ports\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_security_group` to allow inbound TLS traffic (port 443) for both IPv4 and IPv6, and permit all outbound traffic. It showcases the use of `aws_vpc_security_group_ingress_rule` and `aws_vpc_security_group_egress_rule` resources for granular control over security group rules, including specifying CIDR blocks and protocols."
+    },
+    {
+      "title": "Usage With Prefix List IDs",
+      "code": "resource \"aws_security_group\" \"example\" {\n  # ... other configuration ...\n\n  egress {\n    from_port       = 0\n    to_port         = 0\n    protocol        = \"-1\"\n    prefix_list_ids = [aws_vpc_endpoint.my_endpoint.prefix_list_id]\n  }\n}\n\nresource \"aws_vpc_endpoint\" \"my_endpoint\" {\n  # ... other configuration ...\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_security_group` egress rule using the `prefix_list_ids` argument to allow traffic to a VPC endpoint, showcasing integration between `aws_security_group` and `aws_vpc_endpoint` resources for controlled network access.\""
+    },
+    {
+      "title": "Removing All Ingress and Egress Rules",
+      "code": "resource \"aws_security_group\" \"example\" {\n  name   = \"sg\"\n  vpc_id = aws_vpc.example.id\n\n  ingress = []\n  egress  = []\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_security_group` resource with no ingress or egress rules by explicitly setting the `ingress` and `egress` blocks to empty lists. It illustrates how to create a security group with a completely restrictive configuration, useful for scenarios requiring strict network isolation."
+    },
+    {
+      "title": "Recreating a Security Group",
+      "code": "resource \"aws_security_group\" \"example\" {\n  name = \"changeable-name\"\n  # ... other configuration ...\n\n  lifecycle {\n    create_before_destroy = true\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_security_group` resource with the `lifecycle` block to enable the `create_before_destroy` setting, ensuring seamless replacement of the security group during updates. Users can learn how to manage resource lifecycle behavior to avoid downtime or dependency issues when modifying security group configurations."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "description",
+      "description": "(Optional, Forces new resource) Security group description. Defaults to `Managed by Terraform`. Cannot be `\"\"`. NOTE: This field maps to the AWS `GroupDescription` attribute, for which there is no Update API. If you'd like to classify your security groups in a way that can be updated, use `tags`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_security_group` resource allows users to define a human-readable description for the security group, providing context or classification for its purpose (e.g., \"Web server access control\"). While optional, setting this argument helps document the security group's intent, as it cannot be updated after creation due to AWS limitations."
+    },
+    {
+      "name": "egress",
+      "description": "(Optional, VPC only) Configuration block for egress rules. Can be specified multiple times for each egress rule. Each egress block supports fields documented below. This argument is processed in attribute-as-blocks mode.",
+      "required": false,
+      "type": "set(object({cidr_blocks=list(string),description=string,from_port=number,ipv6_cidr_blocks=list(string),prefix_list_ids=list(string),protocol=string,security_groups=set(string),self=bool,to_port=number}))",
+      "llm_summary": "The `egress` argument in the `aws_security_group` resource allows users to define outbound traffic rules for a VPC, specifying which destinations can be reached and under what conditions (e.g., protocols, ports, IP ranges, or security groups). By configuring this argument, users can control the flow of outbound network traffic from resources associated with the security group, ensuring compliance with security policies and enabling communication with external systems or services."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_security_group` resource represents the unique identifier of the security group, typically assigned by AWS upon creation. While not required for configuration, it is often used to reference an existing security group for dependency management, cross-resource linking, or when retrieving details about the security group in other Terraform resources or modules."
+    },
+    {
+      "name": "ingress",
+      "description": "(Optional) Configuration block for ingress rules. Can be specified multiple times for each ingress rule. Each ingress block supports fields documented below. This argument is processed in attribute-as-blocks mode.",
+      "required": false,
+      "type": "set(object({cidr_blocks=list(string),description=string,from_port=number,ipv6_cidr_blocks=list(string),prefix_list_ids=list(string),protocol=string,security_groups=set(string),self=bool,to_port=number}))",
+      "llm_summary": "The `ingress` argument in the `aws_security_group` resource allows users to define inbound traffic rules for the security group, specifying which protocols, ports, and source IP ranges or entities (e.g., CIDR blocks, IPv6 ranges, security groups) are permitted to access resources. By configuring this argument, users can control access to their cloud infrastructure, ensuring secure and granular management of incoming network traffic based on application or environment requirements."
+    },
+    {
+      "name": "name",
+      "description": "(Optional, Forces new resource) Name of the security group. If omitted, Terraform will assign a random, unique name.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument in the `aws_security_group` resource allows users to define a custom, human-readable identifier for the security group, facilitating easier management and organization within AWS. If omitted, Terraform generates a unique name automatically, but specifying this argument is useful for aligning security group naming conventions with project, environment, or application-specific goals."
+    },
+    {
+      "name": "name_prefix",
+      "description": "(Optional, Forces new resource) Creates a unique name beginning with the specified prefix. Conflicts with `name`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name_prefix` argument in the `aws_security_group` resource allows users to define a unique, auto-generated name for the security group that begins with the specified prefix. This is useful for dynamically creating security groups with predictable naming patterns, often employed in environments requiring consistent naming conventions or automated resource provisioning. It conflicts with the `name` argument and forces the creation of a new resource when modified."
+    },
+    {
+      "name": "revoke_rules_on_delete",
+      "description": "(Optional) Instruct Terraform to revoke all of the Security Groups attached ingress and egress rules before deleting the rule itself. This is normally not needed, however certain AWS services such as Elastic Map Reduce may automatically add required rules to security groups used with the service, and those rules may contain a cyclic dependency that prevent the security groups from being destroyed without removing the dependency first. Default `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `revoke_rules_on_delete` argument in the `aws_security_group` resource controls whether Terraform revokes all attached ingress and egress rules before deleting the security group. This behavior is useful for resolving cyclic dependencies in scenarios where AWS services, such as Elastic Map Reduce, automatically add required rules that could block security group deletion. Setting this argument to `true` ensures smoother resource cleanup during destruction, aligning with lifecycle management goals."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_security_group` resource allows users to assign key-value metadata to the security group, enabling better organization, identification, and management of resources (e.g., by environment, project, or cost center). When used alongside a provider's `default_tags` configuration, it ensures resource-specific tags can override default tags, providing flexibility in tagging strategies."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument in the `aws_security_group` resource allows users to define a comprehensive set of key-value tags that are automatically merged with any tags specified at the provider level. This facilitates consistent resource tagging across environments, enabling better organization, cost allocation, and governance for security group resources."
+    },
+    {
+      "name": "vpc_id",
+      "description": "(Optional, Forces new resource) VPC ID. Defaults to the region's default VPC.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `vpc_id` argument in the `aws_security_group` resource allows users to specify the ID of the VPC where the security group will be created, enabling precise control over network isolation and resource placement within a specific VPC. If omitted, the security group defaults to the region's default VPC, making this argument useful for configuring security groups in custom or non-default VPC environments."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_security_group` resource allows users to specify the maximum duration (as a string) Terraform should wait for the security group creation process to complete. By configuring this timeout, users can control the behavior of long-running operations, ensuring predictable execution and avoiding unnecessary failures due to default timeout limits."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_security_group` resource allows users to specify the maximum duration (in string format, e.g., \"5m\" for 5 minutes) Terraform should wait for the security group deletion process to complete. Configuring this argument helps manage resource lifecycle operations by ensuring Terraform does not timeout prematurely during deletion, which is particularly useful in environments with complex dependencies or slower API responses."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_security_group` resource allows users to define custom timeout durations for specific operations, such as creating, updating, or deleting a security group. This block provides granular control over operation time limits, ensuring smoother management of security group lifecycle processes in cases where default timeout settings may be insufficient for complex or delayed operations."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN of the security group.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "owner_id",
+      "description": "Owner ID.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

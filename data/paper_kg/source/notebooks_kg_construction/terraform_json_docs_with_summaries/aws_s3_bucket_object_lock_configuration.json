@@ -1,0 +1,99 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_object_lock_configuration",
+    "description": "Provides an S3 bucket Object Lock configuration resource. For more information about Object Locking, go to Using S3 Object Lock in the Amazon S3 User Guide. This resource can be used enable Object Lock for new and existing buckets. This resource cannot be used with S3 directory buckets.",
+    "llm_summary": "The `aws_s3_bucket_object_lock_configuration` resource manages the configuration of Object Lock settings for Amazon S3 buckets, enabling advanced data protection and compliance capabilities. It is commonly used to enforce write-once-read-many (WORM) policies, prevent accidental or malicious deletion of objects, and meet regulatory requirements for data retention. Users can configure retention modes (e.g., Governance or Compliance) and retention periods to ensure immutability for new or existing buckets, making it ideal for scenarios like archiving, legal holds, and secure data storage."
+  },
+  "examples": [
+    {
+      "title": "Object Lock configuration for new or existing buckets",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"mybucket\"\n}\n\nresource \"aws_s3_bucket_versioning\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n\n  versioning_configuration {\n    status = \"Enabled\"\n  }\n}\n\nresource \"aws_s3_bucket_object_lock_configuration\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n\n  rule {\n    default_retention {\n      mode = \"COMPLIANCE\"\n      days = 5\n    }\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure Object Lock on an S3 bucket with versioning enabled, using the `aws_s3_bucket_object_lock_configuration` resource to enforce a default retention policy in COMPLIANCE mode for 5 days. Highlights the integration of versioning and object lock settings to ensure data immutability and regulatory compliance.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bucket",
+      "description": "(Required, Forces new resource) Name of the bucket.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket` argument specifies the name of the S3 bucket to which the object lock configuration will be applied, serving as the target for enabling governance or compliance retention policies. By defining this required parameter, users ensure the resource is associated with the correct bucket, allowing them to configure object-level immutability and data protection features critical for regulatory compliance or data integrity."
+    },
+    {
+      "name": "expected_bucket_owner",
+      "description": "(Optional, Forces new resource) Account ID of the expected bucket owner.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `expected_bucket_owner` argument allows users to specify the AWS account ID of the expected owner of the S3 bucket associated with the object lock configuration. This ensures that operations on the resource are restricted to the specified account, enhancing security and preventing accidental misconfiguration or unauthorized access in multi-account environments."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_s3_bucket_object_lock_configuration` resource represents the unique identifier of the object lock configuration, primarily used for referencing the resource within Terraform's state. While not required, it helps track and manage the configuration, ensuring consistency and enabling updates or dependencies in infrastructure workflows."
+    },
+    {
+      "name": "object_lock_enabled",
+      "description": "(Optional, Forces new resource) Indicates whether this bucket has an Object Lock configuration enabled. Defaults to `Enabled`. Valid values: `Enabled`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `object_lock_enabled` argument in the `aws_s3_bucket_object_lock_configuration` resource allows users to specify whether Object Lock functionality is enabled for an S3 bucket, ensuring data immutability and protection against accidental deletion or modification. Setting this argument to `Enabled` activates Object Lock, supporting compliance and retention policies by locking objects for a specified duration or indefinitely."
+    },
+    {
+      "name": "token",
+      "description": "(Optional,Deprecated) This argument is deprecated and no longer needed to enable Object Lock. To enable Object Lock for an existing bucket, you must first enable versioning on the bucket and then enable Object Lock. For more details on versioning, see the `aws_s3_bucket_versioning` resource.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `token` argument in the `aws_s3_bucket_object_lock_configuration` resource was previously used to enable Object Lock functionality for an S3 bucket but is now deprecated and unnecessary. Users should instead enable versioning on the bucket and configure Object Lock directly, aligning with common practices for managing data immutability and compliance in S3."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "rule",
+      "description": "(Optional) Configuration block for specifying the Object Lock rule for the specified object. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "default_retention",
+          "description": "(Required) Configuration block for specifying the default Object Lock retention settings for new objects placed in the specified bucket. See below.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "days",
+              "description": "(Optional, Required if `years` is not specified) Number of days that you want to specify for the default retention period.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `days` argument in the `default_retention` block of the `aws_s3_bucket_object_lock_configuration` resource allows users to define the default retention period for S3 objects in terms of days, ensuring compliance with data retention policies or regulatory requirements. By specifying this value (if `years` is not set), users can control how long objects are protected from deletion or modification, supporting use cases like data governance and archival strategies."
+            },
+            {
+              "name": "mode",
+              "description": "(Required) Default Object Lock retention mode you want to apply to new objects placed in the specified bucket. Valid values: `COMPLIANCE`, `GOVERNANCE`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `mode` argument in the `default_retention` block of the `aws_s3_bucket_object_lock_configuration` resource specifies the default Object Lock retention mode (`COMPLIANCE` or `GOVERNANCE`) to apply to new objects in the bucket. This controls the enforcement level of retention policies, enabling users to define whether objects are immutable under strict compliance requirements or governance-based access restrictions, supporting regulatory or organizational data protection goals."
+            },
+            {
+              "name": "years",
+              "description": "(Optional, Required if `days` is not specified) Number of years that you want to specify for the default retention period.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `years` argument in the `default_retention` block of the `aws_s3_bucket_object_lock_configuration` resource allows users to define the default retention period for S3 objects in terms of years, ensuring compliance with data retention policies or regulatory requirements. By specifying this value (if `days` is not set), users can configure long-term retention behavior for objects, preventing deletion or modification during the specified timeframe."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `default_retention` configuration block within the `rule` of the `aws_s3_bucket_object_lock_configuration` resource defines the default retention policy for new objects in an S3 bucket, specifying how long objects are protected from deletion or overwriting. This block enables users to enforce compliance and data governance by automatically applying retention settings to all new objects, ensuring regulatory or organizational requirements for data immutability are met."
+        }
+      ],
+      "llm_summary": "The \"rule\" configuration block within the `aws_s3_bucket_object_lock_configuration` resource defines the Object Lock rule for an S3 bucket, enabling fine-grained control over data retention policies. It encapsulates settings related to retention periods and compliance modes, helping users enforce write-once-read-many (WORM) protection to meet regulatory or data governance requirements."
+    }
+  ],
+  "attributes": []
+}

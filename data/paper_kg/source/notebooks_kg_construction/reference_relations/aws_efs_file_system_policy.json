@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "file_system_id",
+        "references_output": "aws_efs_file_system.id",
+        "target_resource_type": "aws_efs_file_system"
+    },
+    {
+        "argument_path": "policy",
+        "references_output": "aws_iam_policy_document.json",
+        "target_resource_type": "aws_iam_policy_document"
+    }
+]

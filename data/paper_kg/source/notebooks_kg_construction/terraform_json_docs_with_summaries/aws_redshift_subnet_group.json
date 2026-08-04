@@ -1,0 +1,67 @@
+{
+  "resource": {
+    "name": "aws_redshift_subnet_group",
+    "description": "Creates a new Amazon Redshift subnet group. You must provide a list of one or more subnets in your existing Amazon Virtual Private Cloud (Amazon VPC) when creating Amazon Redshift subnet group.",
+    "llm_summary": "The `aws_redshift_subnet_group` resource enables the creation and management of subnet groups for Amazon Redshift within an existing Amazon VPC. It is commonly used to define the network boundaries for Redshift clusters, ensuring secure and optimized connectivity to specific subnets. This resource is essential for configuring Redshift deployments in private or isolated network environments, supporting scenarios like data warehousing, analytics, and integration with other VPC resources."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_vpc\" \"foo\" {\n  cidr_block = \"10.1.0.0/16\"\n}\n\nresource \"aws_subnet\" \"foo\" {\n  cidr_block        = \"10.1.1.0/24\"\n  availability_zone = \"us-west-2a\"\n  vpc_id            = aws_vpc.foo.id\n\n  tags = {\n    Name = \"tf-dbsubnet-test-1\"\n  }\n}\n\nresource \"aws_subnet\" \"bar\" {\n  cidr_block        = \"10.1.2.0/24\"\n  availability_zone = \"us-west-2b\"\n  vpc_id            = aws_vpc.foo.id\n\n  tags = {\n    Name = \"tf-dbsubnet-test-2\"\n  }\n}\n\nresource \"aws_redshift_subnet_group\" \"foo\" {\n  name       = \"foo\"\n  subnet_ids = [aws_subnet.foo.id, aws_subnet.bar.id]\n\n  tags = {\n    environment = \"Production\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_redshift_subnet_group` by creating a VPC and two subnets across different availability zones, associating them with the subnet group using the `subnet_ids` argument. It illustrates tagging resources for organization and setting up a basic Redshift subnet group for a production environment."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "description",
+      "description": "(Optional) The description of the Redshift Subnet group. Defaults to \"Managed by Terraform\".",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_redshift_subnet_group` resource allows users to define a human-readable description for the subnet group, providing context or metadata about its purpose or usage. While optional, setting this argument can help document the resource's role within the infrastructure, aiding in clarity and maintainability, especially in environments with multiple subnet groups."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_redshift_subnet_group` resource allows users to specify a unique identifier for the subnet group, which can be used to reference the resource in other parts of the Terraform configuration or external systems. While optional, setting this argument can help ensure consistent identification and tracking of the subnet group across deployments and integrations."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name of the Redshift Subnet group.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies the unique identifier for the Redshift Subnet Group, allowing users to define a meaningful and recognizable name for organizing and referencing the group within their AWS environment. Setting this argument is essential for creating the resource, as it establishes the primary label used to manage and associate the subnet group with Redshift clusters, supporting common user goals like resource organization and infrastructure clarity."
+    },
+    {
+      "name": "subnet_ids",
+      "description": "(Required) An array of VPC subnet IDs.",
+      "required": true,
+      "type": "set(string)",
+      "llm_summary": "The `subnet_ids` argument in the `aws_redshift_subnet_group` resource specifies the set of VPC subnet IDs where the Redshift cluster can operate, enabling users to define the network boundaries and control the cluster's connectivity within their VPC. By configuring this argument, users ensure the cluster is deployed in specific subnets, typically to meet security, availability, or compliance requirements for their cloud infrastructure."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_redshift_subnet_group` resource allows users to assign metadata in the form of key-value pairs to the subnet group, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or compliance tracking. When configured, it can override provider-level default tags, ensuring granular control over tag definitions specific to this resource."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_redshift_subnet_group` resource allows users to define a comprehensive set of key-value tags that are automatically merged with resource-specific tags, enabling consistent metadata management across AWS resources. By configuring this argument, users can streamline tagging for purposes like cost allocation, resource organization, or environment identification, ensuring uniform application of tags across their infrastructure."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) of the Redshift Subnet group name",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

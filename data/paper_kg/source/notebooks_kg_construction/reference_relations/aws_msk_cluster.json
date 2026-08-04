@@ -1,0 +1,37 @@
+[
+    {
+        "argument_path": "broker_node_group_info.client_subnets",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "broker_node_group_info.security_groups",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "encryption_info.encryption_at_rest_kms_key_arn",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "logging_info.broker_logs.cloudwatch_logs.log_group",
+        "references_output": "aws_cloudwatch_log_group.name",
+        "target_resource_type": "aws_cloudwatch_log_group"
+    },
+    {
+        "argument_path": "logging_info.broker_logs.firehose.delivery_stream",
+        "references_output": "aws_kinesis_firehose_delivery_stream.name",
+        "target_resource_type": "aws_kinesis_firehose_delivery_stream"
+    },
+    {
+        "argument_path": "logging_info.broker_logs.s3.bucket",
+        "references_output": "aws_s3_bucket.id",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "configuration_info.arn",
+        "references_output": "aws_msk_configuration.arn",
+        "target_resource_type": "aws_msk_configuration"
+    }
+]

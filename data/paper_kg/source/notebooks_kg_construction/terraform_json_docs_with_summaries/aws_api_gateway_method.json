@@ -1,0 +1,102 @@
+{
+  "resource": {
+    "name": "aws_api_gateway_method",
+    "description": "Provides a HTTP Method for an API Gateway Resource.",
+    "llm_summary": "The `aws_api_gateway_method` Terraform resource enables the creation and management of HTTP methods (e.g., GET, POST, DELETE) for API Gateway resources, facilitating the definition of client-server interactions in RESTful APIs. It is commonly used to configure API endpoints, integrate them with backend services (e.g., Lambda, DynamoDB), and define authorization mechanisms such as IAM roles or API keys. Users can customize settings like request validation, throttling, caching, and method-specific responses to optimize API performance and security."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_api_gateway_rest_api\" \"MyDemoAPI\" {\n  name        = \"MyDemoAPI\"\n  description = \"This is my API for demonstration purposes\"\n}\n\nresource \"aws_api_gateway_resource\" \"MyDemoResource\" {\n  rest_api_id = aws_api_gateway_rest_api.MyDemoAPI.id\n  parent_id   = aws_api_gateway_rest_api.MyDemoAPI.root_resource_id\n  path_part   = \"mydemoresource\"\n}\n\nresource \"aws_api_gateway_method\" \"MyDemoMethod\" {\n  rest_api_id   = aws_api_gateway_rest_api.MyDemoAPI.id\n  resource_id   = aws_api_gateway_resource.MyDemoResource.id\n  http_method   = \"GET\"\n  authorization = \"NONE\"\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_api_gateway_method` resource to define an HTTP GET method with no authorization for a specific API Gateway resource. It showcases the integration of `aws_api_gateway_rest_api`, `aws_api_gateway_resource`, and `aws_api_gateway_method` to create a basic API structure, including key arguments like `http_method` and `authorization`."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "api_key_required",
+      "description": "(Optional) Specify if the method requires an API key",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `api_key_required` argument for the `aws_api_gateway_method` resource allows users to specify whether an API key is mandatory for accessing the method. Enabling this option ensures that requests to the method are authenticated using an API key, supporting enhanced security and access control for API endpoints."
+    },
+    {
+      "name": "authorization",
+      "description": "(Required) Type of authorization used for the method (`NONE`, `CUSTOM`, `AWS_IAM`, `COGNITO_USER_POOLS`)",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `authorization` argument in the `aws_api_gateway_method` resource specifies the type of authorization mechanism (`NONE`, `CUSTOM`, `AWS_IAM`, or `COGNITO_USER_POOLS`) required to access the API method. By configuring this argument, users can control access to the method, enabling authentication and authorization workflows that align with security requirements, such as integrating IAM roles, custom authorizers, or user pool-based authentication."
+    },
+    {
+      "name": "authorization_scopes",
+      "description": "(Optional) Authorization scopes used when the authorization is `COGNITO_USER_POOLS`",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `authorization_scopes` argument in the `aws_api_gateway_method` resource allows users to define a set of OAuth 2.0 scopes that control access to the method when using `COGNITO_USER_POOLS` as the authorization type. By specifying these scopes, users can enforce fine-grained access control, ensuring that only requests with the appropriate permissions are authorized to interact with the API method."
+    },
+    {
+      "name": "authorizer_id",
+      "description": "(Optional) Authorizer id to be used when the authorization is `CUSTOM` or `COGNITO_USER_POOLS`",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `authorizer_id` argument in the `aws_api_gateway_method` resource allows users to specify the ID of a custom or Cognito user pool authorizer for the method, enabling fine-grained access control and authentication. By setting this argument, users can integrate custom authorization logic or leverage Cognito user pools to secure API Gateway endpoints, aligning with common goals of managing API security and user authentication."
+    },
+    {
+      "name": "http_method",
+      "description": "(Required) HTTP Method (`GET`, `POST`, `PUT`, `DELETE`, `HEAD`, `OPTIONS`, `ANY`)",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `http_method` argument specifies the HTTP method (e.g., `GET`, `POST`, `PUT`, `DELETE`, `HEAD`, `OPTIONS`, `ANY`) that the API Gateway method will handle, allowing users to define the type of request the method is designed to process. Setting this argument enables the configuration of RESTful API behavior by mapping specific HTTP operations to backend integrations, supporting common user goals like building API endpoints for web applications or microservices."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_api_gateway_method` resource specifies the unique identifier of the API Gateway method, allowing users to reference or manage the method programmatically within Terraform configurations. While optional, setting this argument can help track and interact with the method explicitly, supporting workflows that require precise identification or integration with other resources."
+    },
+    {
+      "name": "operation_name",
+      "description": "(Optional) Function name that will be given to the method when generating an SDK through API Gateway. If omitted, API Gateway will generate a function name based on the resource path and HTTP verb.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `operation_name` argument for the `aws_api_gateway_method` resource allows users to define a custom function name for the method when generating an SDK through API Gateway. By specifying this argument, users can control the naming convention for SDK functions, improving clarity and alignment with application-specific naming standards; if omitted, a default name based on the resource path and HTTP verb is automatically generated."
+    },
+    {
+      "name": "request_models",
+      "description": "(Optional) Map of the API models used for the request's content type where key is the content type (e.g., `application/json`) and value is either `Error`, `Empty` (built-in models) or `aws_api_gateway_model`'s `name`.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `request_models` argument in the `aws_api_gateway_method` resource allows users to define a mapping of content types (e.g., `application/json`) to specific API models, either built-in (`Error`, `Empty`) or custom models created via `aws_api_gateway_model`. By configuring this argument, users can specify how incoming request payloads are validated and processed based on their content type, enabling structured data handling and ensuring compatibility with the API's expected schema."
+    },
+    {
+      "name": "request_parameters",
+      "description": "(Optional) Map of request parameters (from the path, query string and headers) that should be passed to the integration. The boolean value indicates whether the parameter is required (`true`) or optional (`false`). For example: `request_parameters = {\"method.request.header.X-Some-Header\" = true \"method.request.querystring.some-query-param\" = true}` would define that the header `X-Some-Header` and the query string `some-query-param` must be provided in the request.",
+      "required": false,
+      "type": "map(bool)",
+      "llm_summary": "The `request_parameters` argument in the `aws_api_gateway_method` resource allows users to define a map of request parameters (e.g., headers, query strings, or path variables) that must be passed to the API Gateway integration. By specifying whether each parameter is required (`true`) or optional (`false`), this argument enables precise control over the validation and handling of incoming requests, ensuring that the API enforces expected input formats and values for seamless integration with backend services."
+    },
+    {
+      "name": "request_validator_id",
+      "description": "(Optional) ID of a `aws_api_gateway_request_validator`",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `request_validator_id` argument allows users to specify the ID of an associated `aws_api_gateway_request_validator` to control the validation of incoming API requests for the `aws_api_gateway_method`. By setting this argument, users can enforce checks on request parameters and payloads, ensuring compliance with defined schemas or requirements, which enhances API reliability and security."
+    },
+    {
+      "name": "resource_id",
+      "description": "(Required) API resource ID",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `resource_id` argument specifies the unique identifier of the API Gateway resource to which the method will be attached, enabling users to define the HTTP method behavior (e.g., GET, POST) for a specific resource within their API. By setting this argument, users establish the association between the method and the targeted resource, a critical step in configuring API endpoints and their functionality."
+    },
+    {
+      "name": "rest_api_id",
+      "description": "(Required) ID of the associated REST API",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `rest_api_id` argument specifies the unique identifier of the associated REST API, linking the `aws_api_gateway_method` resource to a specific API Gateway instance. By setting this required value, users define which REST API the method belongs to, enabling the configuration of HTTP methods and their behaviors within the targeted API infrastructure."
+    }
+  ],
+  "blocks": [],
+  "attributes": []
+}

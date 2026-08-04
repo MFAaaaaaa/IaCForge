@@ -1,0 +1,72 @@
+[
+    {
+        "argument_path": "cloudwatch_logging_options.log_stream_arn",
+        "references_output": "aws_cloudwatch_log_stream.arn",
+        "target_resource_type": "aws_cloudwatch_log_stream"
+    },
+    {
+        "argument_path": "cloudwatch_logging_options.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "inputs.kinesis_stream.resource_arn",
+        "references_output": "aws_kinesis_stream.arn",
+        "target_resource_type": "aws_kinesis_stream"
+    },
+    {
+        "argument_path": "inputs.kinesis_stream.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "inputs.kinesis_firehose.resource_arn",
+        "references_output": "aws_kinesis_firehose_delivery_stream.arn",
+        "target_resource_type": "aws_kinesis_firehose_delivery_stream"
+    },
+    {
+        "argument_path": "inputs.kinesis_firehose.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "outputs.kinesis_stream.resource_arn",
+        "references_output": "aws_kinesis_stream.arn",
+        "target_resource_type": "aws_kinesis_stream"
+    },
+    {
+        "argument_path": "outputs.kinesis_stream.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "outputs.kinesis_firehose.resource_arn",
+        "references_output": "aws_kinesis_firehose_delivery_stream.arn",
+        "target_resource_type": "aws_kinesis_firehose_delivery_stream"
+    },
+    {
+        "argument_path": "outputs.kinesis_firehose.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "outputs.lambda.resource_arn",
+        "references_output": "aws_lambda_function.arn",
+        "target_resource_type": "aws_lambda_function"
+    },
+    {
+        "argument_path": "outputs.lambda.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "reference_data_sources.s3.bucket_arn",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "reference_data_sources.s3.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    }
+]

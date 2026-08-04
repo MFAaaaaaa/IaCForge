@@ -1,0 +1,161 @@
+{
+    "resource": {
+        "name": "aws_efs_file_system",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "availability_zone_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "creation_token",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "encrypted",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "kms_key_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "performance_mode",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "provisioned_throughput_in_mibps",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "throughput_mode",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "lifecycle_policy",
+            "description": "",
+            "cardinality": [
+                0,
+                3
+            ],
+            "arguments": [
+                {
+                    "name": "transition_to_archive",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "transition_to_ia",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "transition_to_primary_storage_class",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "protection",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "replication_overwrite",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "availability_zone_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "dns_name",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "number_of_mount_targets",
+            "description": "",
+            "optional": false,
+            "type": "number"
+        },
+        {
+            "name": "owner_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "size_in_bytes",
+            "description": "",
+            "optional": false,
+            "type": "list(object({value=number,value_in_ia=number,value_in_standard=number}))"
+        }
+    ]
+}

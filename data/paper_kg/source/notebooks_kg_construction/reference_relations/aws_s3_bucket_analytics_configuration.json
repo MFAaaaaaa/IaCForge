@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "bucket",
+        "references_output": "aws_s3_bucket.id",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "storage_class_analysis.data_export.destination.s3_bucket_destination.bucket_arn",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    }
+]

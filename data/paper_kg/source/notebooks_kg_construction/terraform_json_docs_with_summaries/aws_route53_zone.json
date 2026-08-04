@@ -1,0 +1,129 @@
+{
+  "resource": {
+    "name": "aws_route53_zone",
+    "description": "Manages a Route53 Hosted Zone. For managing Domain Name System Security Extensions (DNSSEC), see the aws_route53_key_signing_key and aws_route53_hosted_zone_dnssec resources.",
+    "llm_summary": "\"Manages the creation and configuration of Amazon Route 53 hosted zones, enabling users to define and control DNS settings for their domains. Common use cases include setting up custom domain names, managing DNS records for web applications, and integrating with AWS services like CloudFront or Elastic Load Balancer. Supports advanced configurations such as DNSSEC management, lifecycle policies, and delegation setups for scalable and secure domain management.\""
+  },
+  "examples": [
+    {
+      "title": "Public Zone",
+      "code": "resource \"aws_route53_zone\" \"primary\" {\n  name = \"example.com\"\n}",
+      "llm_summary": "This example demonstrates how to configure a public Route 53 DNS zone using the `aws_route53_zone` resource, specifying the `name` argument to define the domain name (`example.com`). It illustrates the basic setup required to create a managed DNS zone for hosting public records in AWS."
+    },
+    {
+      "title": "Public Subdomain Zone",
+      "code": "resource \"aws_route53_zone\" \"main\" {\n  name = \"example.com\"\n}\n\nresource \"aws_route53_zone\" \"dev\" {\n  name = \"dev.example.com\"\n\n  tags = {\n    Environment = \"dev\"\n  }\n}\n\nresource \"aws_route53_record\" \"dev-ns\" {\n  zone_id = aws_route53_zone.main.zone_id\n  name    = \"dev.example.com\"\n  type    = \"NS\"\n  ttl     = \"30\"\n  records = aws_route53_zone.dev.name_servers\n}",
+      "llm_summary": "\"Demonstrates how to configure a public Route 53 hosted zone for a primary domain and a subdomain, including setting up NS records to delegate subdomain DNS management. Highlights the use of `tags` for environment-specific metadata and the `name_servers` attribute for subdomain delegation.\""
+    },
+    {
+      "title": "Private Zone",
+      "code": "resource \"aws_route53_zone\" \"private\" {\n  name = \"example.com\"\n\n  vpc {\n    vpc_id = aws_vpc.example.id\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure a private Route 53 DNS zone using the `aws_route53_zone` resource, with the `vpc` block linking the zone to a specific VPC (`vpc_id`). This example is ideal for users setting up internal DNS resolution within a VPC for enhanced network isolation.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "comment",
+      "description": "(Optional) A comment for the hosted zone. Defaults to 'Managed by Terraform'.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `comment` argument for the `aws_route53_zone` resource allows users to define an optional descriptive note for the hosted zone, providing context or metadata about its purpose or management. This is useful for documentation or organizational clarity, with a default value of \"Managed by Terraform\" if not explicitly set."
+    },
+    {
+      "name": "delegation_set_id",
+      "description": "(Optional) The ID of the reusable delegation set whose NS records you want to assign to the hosted zone. Conflicts with `vpc` as delegation sets can only be used for public zones.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `delegation_set_id` argument in the `aws_route53_zone` resource allows users to specify the ID of a reusable delegation set to assign its name server (NS) records to the hosted zone. This enables centralized management and reuse of DNS configurations across multiple public Route 53 zones, simplifying administration and ensuring consistency. Note that it is incompatible with private zones configured via the `vpc` argument."
+    },
+    {
+      "name": "force_destroy",
+      "description": "(Optional) Whether to destroy all records (possibly managed outside of Terraform) in the zone when destroying the zone.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `force_destroy` argument in the `aws_route53_zone` resource controls whether all DNS records within the Route 53 hosted zone, including those not managed by Terraform, are automatically deleted when the zone is destroyed. Enabling this option simplifies cleanup during zone deletion but may result in the loss of unmanaged records, making it useful for automating lifecycle management in environments where full zone teardown is required."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_route53_zone` resource represents the unique identifier of the Route 53 hosted zone. While not explicitly configurable, it is typically used as a read-only attribute to reference the hosted zone in other resources or outputs, enabling users to integrate and manage dependencies within their infrastructure."
+    },
+    {
+      "name": "name",
+      "description": "(Required) This is the name of the hosted zone.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument in the `aws_route53_zone` resource specifies the fully qualified domain name (FQDN) of the hosted zone being created or managed in Amazon Route 53. By defining this required string, users establish the primary DNS namespace for their zone, enabling the configuration and management of DNS records for the specified domain."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the zone. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_route53_zone` resource allows users to assign key-value metadata to the hosted zone, enabling better organization, categorization, and cost management of resources. When specified, these tags can override provider-level default tags, supporting use cases like environment labeling, ownership tracking, or compliance tagging."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_route53_zone` resource allows users to define a comprehensive set of key-value tags that are automatically propagated across the resource and its associated components. This enables streamlined resource organization, cost allocation, and metadata management, supporting common user goals like tagging for environments, ownership, or compliance tracking."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "vpc",
+      "description": "(Optional) Configuration block(s) specifying VPC(s) to associate with a private hosted zone. Conflicts with the `delegation_set_id` argument in this resource and any `aws_route53_zone_association` resource specifying the same zone ID. Detailed below.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "vpc_id",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `vpc_id` argument specifies the ID of the Virtual Private Cloud (VPC) associated with a private Route 53 hosted zone, enabling the user to link the DNS zone to a specific VPC for internal DNS resolution. By setting this argument, users ensure that the hosted zone is restricted to the selected VPC, supporting private DNS functionality for resources within that VPC."
+        },
+        {
+          "name": "vpc_region",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `vpc_region` argument for the `aws_route53_zone` resource allows users to specify the AWS region of the VPC associated with a private Route 53 hosted zone. By setting this argument, users can ensure the hosted zone is correctly linked to a VPC in the desired region, enabling region-specific DNS resolution for private resources within that VPC."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `vpc` configuration block in the `aws_route53_zone` resource specifies one or more VPCs to associate with a private hosted zone, enabling DNS resolution within those VPCs. This block is essential for linking private Route 53 zones to specific VPCs, ensuring controlled and secure DNS management within isolated network environments, and cannot be used alongside `delegation_set_id` or `aws_route53_zone_association` for the same zone."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) of the Hosted Zone.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "name_servers",
+      "description": "A list of name servers in associated (or default) delegation set. Find more about delegation sets in AWS docs.",
+      "optional": false,
+      "type": "list(string)"
+    },
+    {
+      "name": "primary_name_server",
+      "description": "The Route 53 name server that created the SOA record.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "zone_id",
+      "description": "The Hosted Zone ID. This can be referenced by zone records.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

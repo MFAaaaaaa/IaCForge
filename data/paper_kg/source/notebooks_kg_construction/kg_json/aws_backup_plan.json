@@ -1,0 +1,208 @@
+{
+    "resource": {
+        "name": "aws_backup_plan",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "advanced_backup_setting",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "backup_options",
+                    "description": "",
+                    "required": true,
+                    "type": "map(string)"
+                },
+                {
+                    "name": "resource_type",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "rule",
+            "description": "",
+            "cardinality": [
+                1,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "completion_window",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "enable_continuous_backup",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "recovery_point_tags",
+                    "description": "",
+                    "required": false,
+                    "type": "map(string)"
+                },
+                {
+                    "name": "rule_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "schedule",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "schedule_expression_timezone",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "start_window",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "target_vault_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "copy_action",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        0
+                    ],
+                    "arguments": [
+                        {
+                            "name": "destination_vault_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "lifecycle",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "cold_storage_after",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "delete_after",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "opt_in_to_archive_for_supported_resources",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "lifecycle",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "cold_storage_after",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "delete_after",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "opt_in_to_archive_for_supported_resources",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "version",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

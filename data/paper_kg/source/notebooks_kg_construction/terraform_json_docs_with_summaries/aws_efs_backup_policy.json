@@ -1,0 +1,52 @@
+{
+  "resource": {
+    "name": "aws_efs_backup_policy",
+    "description": "Provides an Elastic File System (EFS) Backup Policy resource. Backup policies turn automatic backups on or off for an existing file system.",
+    "llm_summary": "The `aws_efs_backup_policy` resource manages the configuration of automatic backup policies for existing Amazon Elastic File Systems (EFS), enabling seamless integration with AWS Backup to ensure data protection and recovery. It is commonly used to automate backup scheduling, enforce compliance requirements, and safeguard critical file system data without manual intervention. Users can configure this resource to toggle automatic backups on or off, aligning backup strategies with organizational policies and disaster recovery plans."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_efs_file_system\" \"fs\" {\n  creation_token = \"my-product\"\n}\n\nresource \"aws_efs_backup_policy\" \"policy\" {\n  file_system_id = aws_efs_file_system.fs.id\n\n  backup_policy {\n    status = \"ENABLED\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS EFS backup policy using the `aws_efs_backup_policy` resource, enabling automatic backups for an EFS file system by setting the `status` argument to `\"ENABLED\"` within the `backup_policy` block. It also shows how to associate the backup policy with an EFS file system created using the `aws_efs_file_system` resource."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "file_system_id",
+      "description": "(Required) The ID of the EFS file system.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `file_system_id` argument specifies the unique identifier of the Amazon EFS file system to which the backup policy will be applied. By setting this required parameter, users define the target file system for automated backup management, enabling the configuration of backup behaviors to protect data and ensure recovery in compliance with organizational policies."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_efs_backup_policy` resource represents the unique identifier of the associated Amazon EFS file system for which the backup policy is being configured. By specifying this argument, users can link the backup policy to a specific EFS file system, enabling automated backups and ensuring data protection for that resource."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "backup_policy",
+      "description": "(Required) A backup_policy object (documented below).",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "status",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `status` argument in the `aws_efs_backup_policy` resource specifies whether the backup policy for an Amazon EFS file system is enabled or disabled. By setting this required string value (e.g., `\"ENABLED\"` or `\"DISABLED\"`), users control the activation state of automated backups, ensuring compliance with data protection requirements or disabling backups when not needed."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `backup_policy` configuration block within the `aws_efs_backup_policy` resource defines the backup settings for an Amazon EFS file system, enabling automated backups to ensure data durability and recovery. It encapsulates related settings that specify whether backups are enabled, allowing users to enforce data protection policies and streamline disaster recovery processes."
+    }
+  ],
+  "attributes": []
+}

@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "vpc_config.subnet_ids",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "vpc_config.security_group_ids",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    }
+]

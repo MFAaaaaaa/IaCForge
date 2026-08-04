@@ -1,0 +1,296 @@
+{
+  "resource": {
+    "name": "aws_cloudwatch_metric_alarm",
+    "description": "Provides a CloudWatch Metric Alarm resource.",
+    "llm_summary": "The `aws_cloudwatch_metric_alarm` Terraform resource enables the creation and management of CloudWatch alarms based on metric thresholds, empowering users to monitor and respond to changes in AWS resource performance or application health. Common use cases include setting up automated alerts for CPU utilization, network traffic, or custom metrics, and triggering actions like scaling, notifications, or remediation workflows. Users can configure thresholds, comparison operators, evaluation periods, and alarm actions, making it ideal for proactive infrastructure monitoring and automated incident response."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_cloudwatch_metric_alarm\" \"foobar\" {\n  alarm_name                = \"terraform-test-foobar5\"\n  comparison_operator       = \"GreaterThanOrEqualToThreshold\"\n  evaluation_periods        = 2\n  metric_name               = \"CPUUtilization\"\n  namespace                 = \"AWS/EC2\"\n  period                    = 120\n  statistic                 = \"Average\"\n  threshold                 = 80\n  alarm_description         = \"This metric monitors ec2 cpu utilization\"\n  insufficient_data_actions = []\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS CloudWatch metric alarm to monitor EC2 CPU utilization using the `aws_cloudwatch_metric_alarm` resource. It showcases key arguments such as `alarm_name`, `metric_name`, `comparison_operator`, `threshold`, and `evaluation_periods`, providing a basic setup for triggering alarms based on average CPU usage exceeding a specified threshold."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "actions_enabled",
+      "description": "(Optional) Indicates whether or not actions should be executed during any changes to the alarm's state. Defaults to `true`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `actions_enabled` argument for the `aws_cloudwatch_metric_alarm` resource controls whether alarm actions (e.g., notifications or automated responses) are triggered when the alarm's state changes. By setting this boolean value, users can enable or disable the execution of these actions, allowing for fine-grained control over automated workflows tied to alarm state transitions."
+    },
+    {
+      "name": "alarm_actions",
+      "description": "(Optional) The list of actions to execute when this alarm transitions into an ALARM state from any other state. Each action is specified as an Amazon Resource Name (ARN).",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `alarm_actions` argument in the `aws_cloudwatch_metric_alarm` resource allows users to specify a set of Amazon Resource Names (ARNs) for actions to be executed when the alarm transitions into the ALARM state. This enables automated responses, such as triggering notifications, scaling operations, or invoking Lambda functions, to address critical metric thresholds or system events."
+    },
+    {
+      "name": "alarm_description",
+      "description": "(Optional) The description for the alarm.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `alarm_description` argument for the `aws_cloudwatch_metric_alarm` resource allows users to define a human-readable description for the alarm, providing context or additional details about its purpose or functionality. Setting this argument helps improve clarity and documentation within the CloudWatch dashboard, aiding in the identification and management of alarms in complex monitoring setups."
+    },
+    {
+      "name": "alarm_name",
+      "description": "(Required) The descriptive name for the alarm. This name must be unique within the user's AWS account",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `alarm_name` argument specifies a unique, descriptive identifier for the CloudWatch metric alarm within the user's AWS account. By defining this name, users can distinguish and reference the alarm for monitoring, notifications, and management purposes, ensuring clarity and organization in their CloudWatch infrastructure."
+    },
+    {
+      "name": "comparison_operator",
+      "description": "(Required) The arithmetic operation to use when comparing the specified Statistic and Threshold. The specified Statistic value is used as the first operand. Either of the following is supported: `GreaterThanOrEqualToThreshold`, `GreaterThanThreshold`, `LessThanThreshold`, `LessThanOrEqualToThreshold`. Additionally, the values `LessThanLowerOrGreaterThanUpperThreshold`, `LessThanLowerThreshold`, and `GreaterThanUpperThreshold` are used only for alarms based on anomaly detection models.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `comparison_operator` argument in the `aws_cloudwatch_metric_alarm` resource specifies the condition used to evaluate the relationship between a metric's statistic and a defined threshold, enabling users to control the logic that triggers the alarm. By setting this argument, users can define whether the alarm activates based on comparisons like greater than, less than, or anomaly detection thresholds, aligning alarm behavior with monitoring goals such as detecting performance issues or unusual activity."
+    },
+    {
+      "name": "datapoints_to_alarm",
+      "description": "(Optional) The number of datapoints that must be breaching to trigger the alarm.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `datapoints_to_alarm` argument in the `aws_cloudwatch_metric_alarm` resource specifies the minimum number of data points within the evaluation period that must breach the defined threshold to trigger the alarm. This allows users to fine-tune the sensitivity of the alarm, balancing responsiveness with tolerance for transient metric fluctuations."
+    },
+    {
+      "name": "dimensions",
+      "description": "(Optional) The dimensions for the alarm's associated metric. For the list of available dimensions see the AWS documentation here.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `dimensions` argument in the `aws_cloudwatch_metric_alarm` resource allows users to specify key-value pairs that define the dimensions associated with the alarm's metric, such as resource-specific identifiers (e.g., instance ID or service name). Configuring this argument enables precise targeting of metrics for monitoring, ensuring the alarm is scoped to specific resources or contexts within AWS services."
+    },
+    {
+      "name": "evaluate_low_sample_count_percentiles",
+      "description": "(Optional) Used only for alarms based on percentiles. If you specify `ignore`, the alarm state will not change during periods with too few data points to be statistically significant. If you specify `evaluate` or omit this parameter, the alarm will always be evaluated and possibly change state no matter how many data points are available. The following values are supported: `ignore`, and `evaluate`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `evaluate_low_sample_count_percentiles` argument in the `aws_cloudwatch_metric_alarm` resource allows users to control how alarms based on percentiles handle periods with insufficient data points. By specifying `ignore`, the alarm avoids state changes during low-data periods, while `evaluate` ensures the alarm is always assessed regardless of data availability, enabling users to fine-tune alarm sensitivity and behavior in sparse data scenarios."
+    },
+    {
+      "name": "evaluation_periods",
+      "description": "(Required) The number of periods over which data is compared to the specified threshold.",
+      "required": true,
+      "type": "number",
+      "llm_summary": "The `evaluation_periods` argument in the `aws_cloudwatch_metric_alarm` resource specifies the number of consecutive time periods over which the alarm evaluates metric data against the defined threshold. By configuring this, users control the duration and consistency required for a metric to trigger the alarm, enabling fine-tuned monitoring and alerting based on sustained conditions rather than transient spikes."
+    },
+    {
+      "name": "extended_statistic",
+      "description": "(Optional) The percentile statistic for the metric associated with the alarm. Specify a value between p0.0 and p100.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `extended_statistic` argument in the `aws_cloudwatch_metric_alarm` resource allows users to specify a percentile-based statistic (e.g., p90.0) for the metric associated with the alarm, enabling precise monitoring of metric distribution patterns. By configuring this argument, users can create alarms that trigger based on specific percentile thresholds, supporting advanced use cases like anomaly detection or performance optimization."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_cloudwatch_metric_alarm` resource represents the unique identifier for the alarm, typically auto-generated by Terraform and AWS. While not required to be explicitly set by the user, it can be used to reference or track the alarm within Terraform configurations or external systems, aiding in resource management and integration workflows."
+    },
+    {
+      "name": "insufficient_data_actions",
+      "description": "(Optional) The list of actions to execute when this alarm transitions into an INSUFFICIENT_DATA state from any other state. Each action is specified as an Amazon Resource Name (ARN).",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `insufficient_data_actions` argument in the `aws_cloudwatch_metric_alarm` resource allows users to define a set of actions, specified as Amazon Resource Names (ARNs), that are triggered when the alarm enters the `INSUFFICIENT_DATA` state. This enables users to configure automated responses, such as notifications or remediation workflows, for scenarios where the alarm cannot determine its state due to missing or incomplete metric data, supporting robust monitoring and operational workflows."
+    },
+    {
+      "name": "metric_name",
+      "description": "(Optional) The name for the alarm's associated metric. See docs for supported metrics.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `metric_name` argument in the `aws_cloudwatch_metric_alarm` resource allows users to specify the name of the CloudWatch metric that the alarm will monitor. By defining this argument, users can target a specific metric to track and evaluate against configured thresholds, enabling precise monitoring and alerting for key performance indicators or system health metrics."
+    },
+    {
+      "name": "namespace",
+      "description": "(Optional) The namespace for the alarm's associated metric. See docs for the list of namespaces. See docs for supported metrics.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `namespace` argument in the `aws_cloudwatch_metric_alarm` resource specifies the namespace of the metric associated with the alarm, allowing users to define the logical grouping of metrics (e.g., AWS service-specific metrics like `AWS/EC2` or custom namespaces). Setting this argument ensures the alarm monitors metrics from the correct source, aligning with the user's monitoring and alerting goals."
+    },
+    {
+      "name": "ok_actions",
+      "description": "(Optional) The list of actions to execute when this alarm transitions into an OK state from any other state. Each action is specified as an Amazon Resource Name (ARN).",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `ok_actions` argument in the `aws_cloudwatch_metric_alarm` resource allows users to define a set of actions, specified as Amazon Resource Names (ARNs), that are triggered when the alarm transitions into an \"OK\" state from any other state. This enables users to automate recovery workflows, notifications, or other operational tasks upon resolution of the monitored condition, supporting common goals like incident management and system health monitoring."
+    },
+    {
+      "name": "period",
+      "description": "(Optional) The period in seconds over which the specified `statistic` is applied. Valid values are `10`, `30`, or any multiple of `60`.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `period` argument in the `aws_cloudwatch_metric_alarm` resource specifies the time interval, in seconds, over which the chosen `statistic` is calculated for the monitored metric. By configuring this argument, users can control the granularity of metric evaluation, enabling precise alarm triggering based on short-term or aggregated trends, which is essential for tailoring monitoring to specific application performance or operational goals."
+    },
+    {
+      "name": "statistic",
+      "description": "(Optional) The statistic to apply to the alarm's associated metric. Either of the following is supported: `SampleCount`, `Average`, `Sum`, `Minimum`, `Maximum`",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `statistic` argument in the `aws_cloudwatch_metric_alarm` resource allows users to specify the statistical aggregation method (e.g., `SampleCount`, `Average`, `Sum`, `Minimum`, `Maximum`) applied to the associated metric for evaluating alarm conditions. By configuring this, users can tailor the alarm's behavior to monitor specific aspects of metric data, such as average performance or peak values, aligning with their monitoring and alerting goals."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level. If you specify at least one metric_query, you may not specify a metric_name, namespace, period or statistic. If you do not specify a metric_query, you must specify each of these (although you may use extended_statistic instead of statistic).",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_cloudwatch_metric_alarm` resource allows users to assign key-value metadata to the alarm for organizational, management, or automation purposes, such as categorizing resources by environment, cost center, or ownership. Configuring this argument helps streamline resource tracking, enables tag-based access control, and integrates with tagging strategies for governance and billing insights."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument in the `aws_cloudwatch_metric_alarm` resource allows users to define a comprehensive set of key-value tags that are applied to the CloudWatch alarm, including inherited tags from the provider's default configuration. This enables efficient resource organization, categorization, and cost allocation by associating metadata such as environment, project, or ownership details with the alarm."
+    },
+    {
+      "name": "threshold",
+      "description": "(Optional) The value against which the specified statistic is compared. This parameter is required for alarms based on static thresholds, but should not be used for alarms based on anomaly detection models.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `threshold` argument in the `aws_cloudwatch_metric_alarm` resource allows users to define the static value against which the specified metric statistic is evaluated to trigger the alarm. This argument is essential for configuring alarms based on static thresholds, enabling users to monitor and respond to specific metric conditions, but is not applicable for anomaly detection-based alarms."
+    },
+    {
+      "name": "threshold_metric_id",
+      "description": "(Optional) If this is an alarm based on an anomaly detection model, make this value match the ID of the ANOMALY_DETECTION_BAND function.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `threshold_metric_id` argument in the `aws_cloudwatch_metric_alarm` resource allows users to specify the ID of the anomaly detection model (ANOMALY_DETECTION_BAND function) that the alarm should evaluate against. By setting this argument, users can configure the alarm to monitor and respond to deviations from expected patterns in metric data, enabling advanced anomaly detection for proactive alerting and system monitoring."
+    },
+    {
+      "name": "treat_missing_data",
+      "description": "(Optional) Sets how this alarm is to handle missing data points. The following values are supported: `missing`, `ignore`, `breaching` and `notBreaching`. Defaults to `missing`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `treat_missing_data` argument in the `aws_cloudwatch_metric_alarm` resource allows users to define how the alarm should behave when data points are missing from the monitored metric. By specifying values like `missing`, `ignore`, `breaching`, or `notBreaching`, users can control whether the alarm treats missing data as a trigger condition, ignores it, or assumes a specific state, enabling precise handling of incomplete metric data to align with monitoring and alerting strategies."
+    },
+    {
+      "name": "unit",
+      "description": "(Optional) The unit for the alarm's associated metric.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `unit` argument in the `aws_cloudwatch_metric_alarm` resource allows users to specify the unit of measurement for the associated metric, such as Seconds, Bytes, or Percent. This ensures the alarm evaluates metric data using the correct unit, aligning with the intended context and improving the accuracy of threshold comparisons."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "metric_query",
+      "description": "(Optional) Enables you to create an alarm based on a metric math expression. You may specify at most 20.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "account_id",
+          "description": "(Optional) The ID of the account where the metrics are located, if this is a cross-account alarm.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `account_id` argument in the `metric_query` block of the `aws_cloudwatch_metric_alarm` resource allows users to specify the AWS account ID where the target metrics are located, enabling cross-account metric queries for alarms. By setting this argument, users can monitor metrics from external accounts, supporting multi-account architectures and centralized CloudWatch alarm management."
+        },
+        {
+          "name": "expression",
+          "description": "(Optional) The math expression to be performed on the returned data, if this object is performing a math expression. This expression can use the id of the other metrics to refer to those metrics, and can also use the id of other expressions to use the result of those expressions. For more information about metric math expressions, see Metric Math Syntax and Functions in the Amazon CloudWatch User Guide.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `expression` argument in the `metric_query` block of the `aws_cloudwatch_metric_alarm` resource allows users to define a mathematical computation using CloudWatch Metric Math syntax. By specifying this expression, users can perform advanced calculations on metric data, referencing other metrics or expressions by their IDs, enabling dynamic and customized alarm conditions based on derived metrics."
+        },
+        {
+          "name": "id",
+          "description": "(Required) A short name used to tie this object to the results in the response. If you are performing math expressions on this set of data, this name represents that data and can serve as a variable in the mathematical expression. The valid characters are letters, numbers, and underscore. The first character must be a lowercase letter.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `id` argument in the `metric_query` block of the `aws_cloudwatch_metric_alarm` resource defines a unique identifier for the query, serving as a variable name for referencing the associated metric data in mathematical expressions or aggregations. By specifying this required string, users enable precise control over how metric data is labeled and manipulated within complex alarm conditions, supporting use cases like multi-metric comparisons or custom calculations."
+        },
+        {
+          "name": "label",
+          "description": "(Optional) A human-readable label for this metric or expression. This is especially useful if this is an expression, so that you know what the value represents.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `label` argument in the `metric_query` block of the `aws_cloudwatch_metric_alarm` resource allows users to define a human-readable identifier for a metric or expression within the alarm configuration. Setting this argument helps users clearly distinguish and interpret the purpose or value of the metric, especially for complex expressions, enhancing clarity in monitoring dashboards and alarm notifications."
+        },
+        {
+          "name": "period",
+          "description": "(Optional) Granularity in seconds of returned data points. For metrics with regular resolution, valid values are any multiple of `60`. For high-resolution metrics, valid values are `1`, `5`, `10`, `30`, or any multiple of `60`.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `period` argument in the `metric_query` block of the `aws_cloudwatch_metric_alarm` resource specifies the granularity, in seconds, of the data points returned for the queried metric. By configuring this, users can control the resolution of metric data, enabling precise monitoring and alarm triggering based on either regular (multiples of 60 seconds) or high-resolution metrics (e.g., 1, 5, or 30 seconds), aligning with their performance and monitoring goals."
+        },
+        {
+          "name": "return_data",
+          "description": "(Optional) Specify exactly one `metric_query` to be `true` to use that `metric_query` result as the alarm. You must specify either metric or expression. Not both.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `return_data` argument in the `metric_query` block of the `aws_cloudwatch_metric_alarm` resource allows users to specify whether the result of a particular metric query should be used as the primary data source for the alarm evaluation. Setting this to `true` designates the selected query's output as the alarm's target metric or expression, enabling users to define which query drives the alarm behavior when multiple queries are present."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "metric",
+          "description": "(Optional) The metric to be returned, along with statistics, period, and units. Use this parameter only if this object is retrieving a metric and not performing a math expression on returned data.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "dimensions",
+              "description": "(Optional) The dimensions for this metric. For the list of available dimensions see the AWS documentation here.",
+              "required": false,
+              "type": "map(string)",
+              "llm_summary": "The `dimensions` argument for the `aws_cloudwatch_metric_alarm` resource allows users to define key-value pairs that specify contextual attributes (e.g., instance ID, service name) for the associated CloudWatch metric. By configuring dimensions, users can narrow the scope of the metric being monitored, enabling targeted alarms for specific resources or environments within their AWS infrastructure."
+            },
+            {
+              "name": "metric_name",
+              "description": "(Required) The name for this metric. See docs for supported metrics.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `metric_name` argument specifies the name of the CloudWatch metric to monitor, allowing users to define the specific metric that triggers the alarm. By setting this required value, users can align the alarm with a particular performance or operational metric, enabling targeted monitoring and alerting for critical resources or applications."
+            },
+            {
+              "name": "namespace",
+              "description": "(Required) The namespace for this metric. See docs for the list of namespaces. See docs for supported metrics.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `namespace` argument in the `aws_cloudwatch_metric_alarm` resource allows users to specify the logical grouping or category of the metric being monitored, such as AWS service-specific namespaces (e.g., `AWS/EC2`, `AWS/S3`). Setting this argument ensures the alarm targets metrics within the correct service context, enabling precise monitoring and alerting for resources tied to that namespace."
+            },
+            {
+              "name": "period",
+              "description": "(Required) Granularity in seconds of returned data points. For metrics with regular resolution, valid values are any multiple of `60`. For high-resolution metrics, valid values are `1`, `5`, `10`, `30`, or any multiple of `60`.",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `period` argument specifies the granularity, in seconds, of the data points used to evaluate the CloudWatch metric for the alarm. By defining this value, users control the resolution of metric data, enabling precise monitoring and alerting based on either regular or high-resolution metrics, which is critical for tailoring alarms to meet specific performance or operational goals."
+            },
+            {
+              "name": "stat",
+              "description": "(Required) The statistic to apply to this metric. See docs for supported statistics.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `stat` argument in the `aws_cloudwatch_metric_alarm` resource specifies the statistical method (e.g., average, sum, minimum, maximum) applied to the associated metric data, enabling users to define how the metric's values are aggregated for alarm evaluation. By configuring this argument, users control the behavior of the alarm's threshold comparison, ensuring it aligns with their monitoring goals, such as detecting anomalies or performance trends."
+            },
+            {
+              "name": "unit",
+              "description": "(Optional) The unit for this metric.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `unit` argument in the `aws_cloudwatch_metric_alarm` resource allows users to specify the measurement unit (e.g., Seconds, Bytes, Percent) for the associated metric, ensuring consistency in how the metric's data is interpreted and displayed. Setting this argument helps align the alarm's evaluation criteria with the expected data format, supporting accurate monitoring and alerting based on the metric's values."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `metric` configuration block within the `metric_query` context of the `aws_cloudwatch_metric_alarm` resource defines the specific CloudWatch metric to retrieve, including its associated statistics, period, and unit settings. This block enables precise monitoring by specifying the raw metric data to be analyzed, helping users configure alarms based on direct metric values rather than derived math expressions."
+        }
+      ],
+      "llm_summary": "The `metric_query` block in the `aws_cloudwatch_metric_alarm` resource enables the creation of alarms based on metric math expressions, allowing users to define complex calculations or aggregations across multiple CloudWatch metrics. This block encapsulates settings for specifying individual metrics, mathematical expressions, and their relationships, providing advanced control for monitoring and alerting on derived metrics or custom performance indicators."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the CloudWatch Metric Alarm.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

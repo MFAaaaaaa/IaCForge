@@ -1,0 +1,853 @@
+{
+  "resource": {
+    "name": "aws_opensearch_domain",
+    "description": "Manages an Amazon OpenSearch Domain.",
+    "llm_summary": "\"Manages the creation and configuration of Amazon OpenSearch Service domains, enabling users to deploy scalable, secure, and highly available search and analytics solutions. Common use cases include setting up full-text search, log analytics, and real-time data exploration for applications or systems. Supports key configurations such as cluster settings, access policies, encryption, VPC integration, automated backups, and monitoring/logging to optimize performance and security.\""
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_opensearch_domain\" \"example\" {\n  domain_name    = \"example\"\n  engine_version = \"Elasticsearch_7.10\"\n\n  cluster_config {\n    instance_type = \"r4.large.search\"\n  }\n\n  tags = {\n    Domain = \"TestDomain\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure a basic Amazon OpenSearch Service domain using the `aws_opensearch_domain` resource, specifying a custom domain name, engine version (`Elasticsearch_7.10`), and cluster configuration with an `r4.large.search` instance type. It also showcases the use of tags for resource identification, providing a foundational setup for OpenSearch domains."
+    },
+    {
+      "title": "Access Policy",
+      "code": "variable \"domain\" {\n  default = \"tf-test\"\n}\n\ndata \"aws_region\" \"current\" {}\n\ndata \"aws_caller_identity\" \"current\" {}\n\ndata \"aws_iam_policy_document\" \"example\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"*\"\n      identifiers = [\"*\"]\n    }\n\n    actions   = [\"es:*\"]\n    resources = [\"arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/${var.domain}/*\"]\n\n    condition {\n      test     = \"IpAddress\"\n      variable = \"aws:SourceIp\"\n      values   = [\"66.193.100.22/32\"]\n    }\n  }\n}\n\nresource \"aws_opensearch_domain\" \"example\" {\n  domain_name = var.domain\n\n  # ... other configuration ...\n\n  access_policies = data.aws_iam_policy_document.example.json\n}",
+      "llm_summary": "This example demonstrates how to configure an access policy for an AWS OpenSearch domain (`aws_opensearch_domain`) using an IAM policy document (`aws_iam_policy_document`). It illustrates how to define granular access controls with conditions, such as restricting access based on IP address (`aws:SourceIp`), and applies the policy to the `access_policies` argument of the OpenSearch domain resource."
+    },
+    {
+      "title": "Log publishing to CloudWatch Logs",
+      "code": "resource \"aws_cloudwatch_log_group\" \"example\" {\n  name = \"example\"\n}\n\ndata \"aws_iam_policy_document\" \"example\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"es.amazonaws.com\"]\n    }\n\n    actions = [\n      \"logs:PutLogEvents\",\n      \"logs:PutLogEventsBatch\",\n      \"logs:CreateLogStream\",\n    ]\n\n    resources = [\"arn:aws:logs:*\"]\n  }\n}\nresource \"aws_cloudwatch_log_resource_policy\" \"example\" {\n  policy_name     = \"example\"\n  policy_document = data.aws_iam_policy_document.example.json\n}\n\nresource \"aws_opensearch_domain\" \"example\" {\n  # .. other configuration ...\n\n  log_publishing_options {\n    cloudwatch_log_group_arn = aws_cloudwatch_log_group.example.arn\n    log_type                 = \"INDEX_SLOW_LOGS\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure log publishing for an Amazon OpenSearch Service domain by integrating CloudWatch Logs. It showcases the use of the `log_publishing_options` block in the `aws_opensearch_domain` resource to enable slow index logging, along with the creation of a CloudWatch Log Group and an IAM policy to grant necessary permissions for log streaming."
+    },
+    {
+      "title": "VPC based OpenSearch",
+      "code": "variable \"vpc\" {}\n\nvariable \"domain\" {\n  default = \"tf-test\"\n}\n\ndata \"aws_vpc\" \"example\" {\n  tags = {\n    Name = var.vpc\n  }\n}\n\ndata \"aws_subnets\" \"example\" {\n  filter {\n    name   = \"vpc-id\"\n    values = [data.aws_vpc.example.id]\n  }\n\n  tags = {\n    Tier = \"private\"\n  }\n}\n\ndata \"aws_region\" \"current\" {}\n\ndata \"aws_caller_identity\" \"current\" {}\n\nresource \"aws_security_group\" \"example\" {\n  name        = \"${var.vpc}-opensearch-${var.domain}\"\n  description = \"Managed by Terraform\"\n  vpc_id      = data.aws_vpc.example.id\n\n  ingress {\n    from_port = 443\n    to_port   = 443\n    protocol  = \"tcp\"\n\n    cidr_blocks = [\n      data.aws_vpc.example.cidr_block,\n    ]\n  }\n}\n\nresource \"aws_iam_service_linked_role\" \"example\" {\n  aws_service_name = \"opensearchservice.amazonaws.com\"\n}\n\ndata \"aws_iam_policy_document\" \"example\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"*\"\n      identifiers = [\"*\"]\n    }\n\n    actions   = [\"es:*\"]\n    resources = [\"arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/${var.domain}/*\"]\n  }\n}\n\nresource \"aws_opensearch_domain\" \"example\" {\n  domain_name    = var.domain\n  engine_version = \"OpenSearch_1.0\"\n\n  cluster_config {\n    instance_type          = \"m4.large.search\"\n    zone_awareness_enabled = true\n  }\n\n  vpc_options {\n    subnet_ids = [\n      data.aws_subnets.example.ids[0],\n      data.aws_subnets.example.ids[1],\n    ]\n\n    security_group_ids = [aws_security_group.example.id]\n  }\n\n  advanced_options = {\n    \"rest.action.multi.allow_explicit_index\" = \"true\"\n  }\n\n  access_policies = data.aws_iam_policy_document.example.json\n\n  tags = {\n    Domain = \"TestDomain\"\n  }\n\n  depends_on = [aws_iam_service_linked_role.example]\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS OpenSearch domain within a VPC, including VPC-specific options such as private subnets and security groups for enhanced network isolation. It showcases key configurations like `vpc_options`, `access_policies` for fine-grained access control, and `cluster_config` for enabling zone awareness and specifying instance types."
+    },
+    {
+      "title": "Enabling fine-grained access control on an existing domain",
+      "code": "resource \"aws_opensearch_domain\" \"example\" {\n  domain_name    = \"ggkitty\"\n  engine_version = \"Elasticsearch_7.1\"\n\n  cluster_config {\n    instance_type = \"r5.large.search\"\n  }\n\n  advanced_security_options {\n    enabled                        = false\n    anonymous_auth_enabled         = true\n    internal_user_database_enabled = true\n    master_user_options {\n      master_user_name     = \"example\"\n      master_user_password = \"Barbarbarbar1!\"\n    }\n  }\n\n  encrypt_at_rest {\n    enabled = true\n  }\n\n  domain_endpoint_options {\n    enforce_https       = true\n    tls_security_policy = \"Policy-Min-TLS-1-2-2019-07\"\n  }\n\n  node_to_node_encryption {\n    enabled = true\n  }\n\n  ebs_options {\n    ebs_enabled = true\n    volume_size = 10\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS OpenSearch domain with fine-grained access control, including enabling internal user authentication, enforcing HTTPS with TLS 1.2, and securing data with encryption at rest and node-to-node encryption. It highlights key configurations such as `advanced_security_options`, `domain_endpoint_options`, and `encrypt_at_rest` to ensure robust security and compliance for the OpenSearch domain."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "access_policies",
+      "description": "(Optional) IAM policy document specifying the access policies for the domain.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `access_policies` argument for the `aws_opensearch_domain` resource allows users to define an IAM policy document that specifies access control rules for the OpenSearch domain. By configuring this argument, users can manage permissions and restrict or grant access to the domain's resources, aligning with security and compliance requirements for their environment."
+    },
+    {
+      "name": "advanced_options",
+      "description": "(Optional) Key-value string pairs to specify advanced configuration options. Note that the values for these configuration options must be strings (wrapped in quotes) or they may be wrong and cause a perpetual diff, causing Terraform to want to recreate your OpenSearch domain on every apply.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `advanced_options` argument for the `aws_opensearch_domain` resource allows users to configure key-value pairs that define advanced settings for the OpenSearch domain, such as enabling specific features or fine-tuning operational behaviors (e.g., disabling the automated snapshot scheduler or customizing cluster settings). By setting these options, users can tailor the domain's functionality to meet specific requirements, ensuring optimal performance and alignment with their use case."
+    },
+    {
+      "name": "domain_name",
+      "description": "(Required) Name of the domain. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `domain_name` argument specifies the unique name of the OpenSearch domain, serving as its identifier within AWS. Setting this required string allows users to define and manage the domain's lifecycle, enabling the creation, configuration, and operation of a dedicated OpenSearch cluster for search and analytics workloads."
+    },
+    {
+      "name": "engine_version",
+      "description": "(Optional) Either `Elasticsearch_X.Y` or `OpenSearch_X.Y` to specify the engine version for the Amazon OpenSearch Service domain. For example, `OpenSearch_1.0` or `Elasticsearch_7.9`. See Creating and managing Amazon OpenSearch Service domains. Defaults to the lastest version of OpenSearch.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `engine_version` argument for the `aws_opensearch_domain` resource allows users to specify the version of the search engine (either OpenSearch or Elasticsearch) to be used for the Amazon OpenSearch Service domain, such as `OpenSearch_1.0` or `Elasticsearch_7.9`. Configuring this argument ensures compatibility with specific application requirements or features tied to a particular engine version, while omitting it defaults the domain to the latest OpenSearch version."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_opensearch_domain` resource represents the unique identifier of the OpenSearch domain. While not required, it is typically used to reference the domain in other Terraform resources or outputs, enabling users to integrate the domain into broader infrastructure configurations or workflows."
+    },
+    {
+      "name": "ip_address_type",
+      "description": "(Optional) The IP address type for the endpoint. Valid values are `ipv4` and `dualstack`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ip_address_type` argument for the `aws_opensearch_domain` resource allows users to specify the type of IP addressing for the domain's endpoint, enabling either IPv4-only (`ipv4`) or dual-stack (`dualstack`) support for both IPv4 and IPv6. Configuring this argument impacts network accessibility and compatibility, helping users align the OpenSearch domain's endpoint with their infrastructure's IP requirements or broader connectivity goals."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_opensearch_domain` resource allows users to assign key-value metadata to the OpenSearch domain, enabling resource categorization, organization, and cost allocation. By defining tags, users can streamline management tasks such as tracking environments (e.g., \"dev\" or \"prod\"), applying governance policies, or integrating with billing and reporting tools."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_opensearch_domain` resource allows users to define a comprehensive set of key-value tags that are applied to the OpenSearch domain and all associated resources. This facilitates resource organization, cost allocation, and management by enabling tagging for purposes such as identifying environments, tracking ownership, or categorizing resources for billing and governance."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "advanced_security_options",
+      "description": "(Optional) Configuration block for fine-grained access control. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "anonymous_auth_enabled",
+          "description": "(Optional) Whether Anonymous auth is enabled. Enables fine-grained access control on an existing domain. Ignored unless `advanced_security_options` are enabled. Can only be enabled on an existing domain.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `anonymous_auth_enabled` argument in the `advanced_security_options` block of the `aws_opensearch_domain` resource allows users to control whether anonymous access is permitted for fine-grained access control on an existing OpenSearch domain. Enabling this option facilitates unauthenticated access to the domain, which can be useful for specific use cases but requires `advanced_security_options` to be enabled and is only applicable to pre-existing domains."
+        },
+        {
+          "name": "enabled",
+          "description": "(Required, Forces new resource when changing from `true` to `false`) Whether advanced security is enabled.",
+          "required": true,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument in the `advanced_security_options` block of the `aws_opensearch_domain` resource specifies whether advanced security features, such as fine-grained access control and encryption, are activated for the OpenSearch domain. Setting this to `true` enables enhanced security capabilities, allowing users to define granular permissions and secure sensitive data, while changing it from `true` to `false` forces the creation of a new resource."
+        },
+        {
+          "name": "internal_user_database_enabled",
+          "description": "(Optional) Whether the internal user database is enabled. Default is `false`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `internal_user_database_enabled` argument in the `advanced_security_options` block of the `aws_opensearch_domain` resource allows users to control whether OpenSearch's internal user database is activated for managing user authentication and access control. Enabling this feature provides a built-in mechanism for defining and storing user credentials directly within the OpenSearch domain, which is useful for environments that do not rely on external identity providers or IAM roles for access management."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "master_user_options",
+          "description": "(Optional) Configuration block for the main user. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "master_user_arn",
+              "description": "(Optional) ARN for the main user. Only specify if `internal_user_database_enabled` is not set or set to `false`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `master_user_arn` argument in the `master_user_options` block of the `aws_opensearch_domain` resource allows users to specify the Amazon Resource Name (ARN) of the primary IAM user who will have administrative access to the OpenSearch domain. This argument is typically used to define external authentication for the master user when the internal user database is disabled, ensuring secure and centralized access control for managing the domain."
+            },
+            {
+              "name": "master_user_name",
+              "description": "(Optional) Main user's username, which is stored in the Amazon OpenSearch Service domain's internal database. Only specify if `internal_user_database_enabled` is set to `true`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "Defines the username for the primary administrative user of the OpenSearch domain when the internal user database is enabled. This argument allows users to configure access control by specifying the master user responsible for managing domain-level permissions and settings."
+            },
+            {
+              "name": "master_user_password",
+              "description": "(Optional) Main user's password, which is stored in the Amazon OpenSearch Service domain's internal database. Only specify if `internal_user_database_enabled` is set to `true`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "Defines the password for the master user in the internal user database of an Amazon OpenSearch Service domain, enabling authentication and access control when `internal_user_database_enabled` is set to `true`. This argument allows users to configure secure access credentials for managing the domain, supporting common goals like enforcing security and user management within the OpenSearch environment."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `master_user_options` block within the `advanced_security_options` of the `aws_opensearch_domain` resource configures authentication details for the primary user responsible for managing the OpenSearch domain's security settings. It encapsulates settings such as the master user's username and password or IAM role, enabling secure access control and administrative privileges for advanced security features. Configuring this block ensures granular control over domain access, supporting compliance and secure management of sensitive data."
+        }
+      ],
+      "llm_summary": "The `advanced_security_options` block in the `aws_opensearch_domain` resource enables fine-grained access control for OpenSearch domains, allowing users to configure advanced security features such as role-based access and user authentication. This block encapsulates settings related to access policies and security mechanisms, helping users enforce granular permissions and secure their OpenSearch clusters effectively."
+    },
+    {
+      "name": "auto_tune_options",
+      "description": "(Optional) Configuration block for the Auto-Tune options of the domain. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "desired_state",
+          "description": "(Required) Auto-Tune desired state for the domain. Valid values: `ENABLED` or `DISABLED`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `desired_state` argument in the `auto_tune_options` block of the `aws_opensearch_domain` resource specifies whether Auto-Tune, a feature that optimizes OpenSearch domain performance and resource utilization, is enabled or disabled. By setting this required argument to `ENABLED` or `DISABLED`, users control the activation state of automated performance tuning, aligning the domain's behavior with operational goals such as efficiency or manual resource management."
+        },
+        {
+          "name": "rollback_on_disable",
+          "description": "(Optional) Whether to roll back to default Auto-Tune settings when disabling Auto-Tune. Valid values: `DEFAULT_ROLLBACK` or `NO_ROLLBACK`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `rollback_on_disable` argument in the `auto_tune_options` block of the `aws_opensearch_domain` resource allows users to specify whether the domain should revert to default Auto-Tune settings when Auto-Tune is disabled. By setting this argument to `DEFAULT_ROLLBACK` or `NO_ROLLBACK`, users can control the behavior of Auto-Tune configuration rollback, ensuring either a return to default optimization settings or retention of the current configuration, aligning with operational or performance goals."
+        },
+        {
+          "name": "use_off_peak_window",
+          "description": "(Optional) Whether to schedule Auto-Tune optimizations that require blue/green deployments during the domain's configured daily off-peak window. Defaults to `false`. desired_state - (Required) Auto-Tune desired state for the domain. Valid values: ENABLED or DISABLED. maintenance_schedule - (Required if rollback_on_disable is set to DEFAULT_ROLLBACK) Configuration block for Auto-Tune maintenance windows. Can be specified multiple times for each maintenance window. Detailed below. NOTE: Maintenance windows are deprecated and have been replaced with off-peak windows. Consequently, maintenance_schedule configuration blocks cannot be specified when use_off_peak_window is set to true. rollback_on_disable - (Optional) Whether to roll back to default Auto-Tune settings when disabling Auto-Tune. Valid values: DEFAULT_ROLLBACK or NO_ROLLBACK. use_off_peak_window - (Optional) Whether to schedule Auto-Tune optimizations that require blue/green deployments during the domain's configured daily off-peak window. Defaults to false.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `use_off_peak_window` argument in the `auto_tune_options` block of the `aws_opensearch_domain` resource allows users to control whether Auto-Tune optimizations requiring blue/green deployments are scheduled during the domain's configured daily off-peak window. Enabling this option (setting it to `true`) helps minimize operational impact by aligning resource-intensive optimizations with periods of lower activity, supporting common user goals like optimizing performance and reducing disruption during peak usage."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "maintenance_schedule",
+          "description": "(Required if `rollback_on_disable` is set to `DEFAULT_ROLLBACK`) Configuration block for Auto-Tune maintenance windows. Can be specified multiple times for each maintenance window. Detailed below. NOTE: Maintenance windows are deprecated and have been replaced with off-peak windows. Consequently, `maintenance_schedule` configuration blocks cannot be specified when `use_off_peak_window` is set to `true`.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "cron_expression_for_recurrence",
+              "description": "(Required) A cron expression specifying the recurrence pattern for an Auto-Tune maintenance schedule.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "\"Defines the recurrence pattern for Auto-Tune maintenance schedules in an OpenSearch domain using a cron expression, enabling users to automate and control the timing of maintenance tasks to optimize domain performance and minimize disruptions.\""
+            },
+            {
+              "name": "start_at",
+              "description": "(Required) Date and time at which to start the Auto-Tune maintenance schedule in RFC3339 format.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `start_at` argument for the `maintenance_schedule` in the `aws_opensearch_domain` resource specifies the exact date and time, in RFC3339 format, when the Auto-Tune maintenance process should begin. This allows users to control the timing of performance optimization updates, ensuring they align with operational windows and minimize disruption to critical workloads."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "duration",
+              "description": "(Required) Configuration block for the duration of the Auto-Tune maintenance window. Detailed below.",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "unit",
+                  "description": "(Required) Unit of time specifying the duration of an Auto-Tune maintenance window. Valid values: `HOURS`.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `unit` argument for the `aws_opensearch_domain` resource specifies the time unit (`HOURS`) used to define the duration of an Auto-Tune maintenance window. By setting this argument, users control the granularity of the maintenance window's length, ensuring precise scheduling for performance optimization and system updates."
+                },
+                {
+                  "name": "value",
+                  "description": "(Required) An integer specifying the value of the duration of an Auto-Tune maintenance window.",
+                  "required": true,
+                  "type": "number",
+                  "llm_summary": "The `value` argument specifies the duration, in integer format, for an Auto-Tune maintenance window in an Amazon OpenSearch Service domain. By defining this value, users control the length of time allocated for performance optimization and system tuning activities, ensuring efficient resource management and uninterrupted service operation during maintenance periods."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `duration` configuration block within the `maintenance_schedule` of the `aws_opensearch_domain` resource defines the time span for the Auto-Tune maintenance window, enabling precise control over how long optimization and tuning operations can occur. By configuring this block, users can ensure maintenance activities are performed within a specified timeframe, minimizing disruption and aligning with operational requirements."
+            }
+          ],
+          "llm_summary": "The `maintenance_schedule` configuration block within `auto_tune_options` for the `aws_opensearch_domain` resource defines Auto-Tune maintenance windows, enabling users to schedule specific time periods for system optimizations and updates. It encapsulates settings for managing maintenance timing but is deprecated in favor of off-peak windows, making it useful only when `use_off_peak_window` is disabled and `rollback_on_disable` is set to `DEFAULT_ROLLBACK`."
+        }
+      ],
+      "llm_summary": "The `auto_tune_options` configuration block in the `aws_opensearch_domain` resource enables automated performance optimization for an OpenSearch domain by managing settings related to Auto-Tune functionality. It encapsulates parameters for fine-tuning resource utilization and system performance, allowing users to achieve enhanced efficiency and scalability without manual intervention."
+    },
+    {
+      "name": "cluster_config",
+      "description": "(Optional) Configuration block for the cluster of the domain. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "dedicated_master_count",
+          "description": "(Optional) Number of dedicated main nodes in the cluster.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "\"Defines the number of dedicated master nodes in the OpenSearch cluster, which are responsible for cluster management tasks such as maintaining stability and coordinating node operations. Configuring this argument enhances fault tolerance and ensures efficient cluster performance, particularly for larger or more complex deployments.\""
+        },
+        {
+          "name": "dedicated_master_enabled",
+          "description": "(Optional) Whether dedicated main nodes are enabled for the cluster.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "\"Controls whether dedicated master nodes are enabled in the OpenSearch cluster configuration, allowing users to offload cluster management tasks like node coordination and stability to specialized nodes. Enabling this feature enhances cluster performance and reliability, particularly for larger or more complex deployments.\""
+        },
+        {
+          "name": "dedicated_master_type",
+          "description": "(Optional) Instance type of the dedicated main nodes in the cluster.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `dedicated_master_type` argument in the `cluster_config` block of the `aws_opensearch_domain` resource allows users to specify the instance type for dedicated master nodes, which are responsible for cluster management tasks such as maintaining stability and coordinating node operations. Configuring this argument helps optimize cluster performance and reliability by tailoring the master node's compute capacity to the workload and operational requirements."
+        },
+        {
+          "name": "instance_count",
+          "description": "(Optional) Number of instances in the cluster.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `instance_count` argument in the `cluster_config` block of the `aws_opensearch_domain` resource specifies the number of instances provisioned for the OpenSearch cluster, allowing users to scale the cluster's capacity to handle workloads and data processing needs. Configuring this parameter directly impacts the cluster's performance, availability, and cost, making it essential for optimizing resource allocation based on application requirements."
+        },
+        {
+          "name": "instance_type",
+          "description": "(Optional) Instance type of data nodes in the cluster.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `instance_type` argument in the `cluster_config` block of the `aws_opensearch_domain` resource allows users to specify the compute capacity and performance characteristics of the data nodes in the OpenSearch cluster. By defining this argument, users can tailor the cluster's scalability and resource allocation to meet workload demands, such as optimizing query performance or handling large data volumes."
+        },
+        {
+          "name": "multi_az_with_standby_enabled",
+          "description": "(Optional) Whether a multi-AZ domain is turned on with a standby AZ. For more information, see Configuring a multi-AZ domain in Amazon OpenSearch Service.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `multi_az_with_standby_enabled` argument in the `cluster_config` block of the `aws_opensearch_domain` resource allows users to enable a multi-AZ deployment with a standby Availability Zone for enhanced fault tolerance and high availability. Setting this to `true` ensures the OpenSearch domain is configured to automatically failover to a standby AZ in case of disruptions, aligning with common goals of improving resilience and minimizing downtime in distributed systems."
+        },
+        {
+          "name": "warm_count",
+          "description": "(Optional) Number of warm nodes in the cluster. Valid values are between `2` and `150`. `warm_count` can be only and must be set when `warm_enabled` is set to `true`.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `warm_count` argument in the `cluster_config` block of the `aws_opensearch_domain` resource specifies the number of warm nodes in the OpenSearch cluster, enabling the user to configure a tier optimized for cost-effective storage of infrequently accessed data. This argument is only applicable when `warm_enabled` is set to `true` and supports values between 2 and 150, allowing users to scale warm storage capacity to meet data retention and archival needs."
+        },
+        {
+          "name": "warm_enabled",
+          "description": "(Optional) Whether to enable warm storage.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `warm_enabled` argument in the `cluster_config` block of the `aws_opensearch_domain` resource allows users to control whether warm storage is enabled for the OpenSearch cluster. Enabling warm storage optimizes cost efficiency by offloading less frequently accessed data to a separate storage tier, supporting use cases like long-term data retention or archival while maintaining query accessibility."
+        },
+        {
+          "name": "warm_type",
+          "description": "(Optional) Instance type for the OpenSearch cluster's warm nodes. Valid values are `ultrawarm1.medium.search`, `ultrawarm1.large.search` and `ultrawarm1.xlarge.search`. `warm_type` can be only and must be set when `warm_enabled` is set to `true`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `warm_type` argument in the `cluster_config` block of the `aws_opensearch_domain` resource allows users to specify the instance type for warm storage nodes in an OpenSearch cluster, which are optimized for cost-effective storage of infrequently accessed data. This argument is essential for enabling warm storage functionality (`warm_enabled` must be `true`) and helps users balance performance and cost by selecting from predefined instance types (`ultrawarm1.medium.search`, `ultrawarm1.large.search`, or `ultrawarm1.xlarge.search`) based on their data retention and query needs."
+        },
+        {
+          "name": "zone_awareness_enabled",
+          "description": "(Optional) Whether zone awareness is enabled, set to `true` for multi-az deployment. To enable awareness with three Availability Zones, the `availability_zone_count` within the `zone_awareness_config` must be set to `3`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `zone_awareness_enabled` argument in the `cluster_config` of the `aws_opensearch_domain` resource allows users to configure multi-AZ (Availability Zone) deployment for enhanced fault tolerance and high availability. When set to `true`, it ensures the OpenSearch cluster is distributed across multiple Availability Zones, reducing the risk of downtime due to zone-specific failures, and can be paired with `zone_awareness_config` to specify the number of zones used."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "cold_storage_options",
+          "description": "(Optional) Configuration block containing cold storage configuration. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "enabled",
+              "description": "(Optional) Boolean to enable cold storage for an OpenSearch domain. Defaults to `false`. Master and ultrawarm nodes must be enabled for cold storage.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `enabled` argument in the `cold_storage_options` block of the `aws_opensearch_domain` resource allows users to control whether cold storage is activated for the OpenSearch domain. Enabling this feature facilitates cost-efficient storage of infrequently accessed data, but requires both master and UltraWarm nodes to be configured in the domain."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `cold_storage_options` configuration block within the `cluster_config` of the `aws_opensearch_domain` resource enables the management of cold storage for infrequently accessed data, optimizing cost-efficiency by offloading data to lower-cost storage tiers. It encapsulates settings related to enabling and configuring cold storage, allowing users to extend their OpenSearch cluster's storage capacity while reducing operational costs for archival or low-priority data."
+        },
+        {
+          "name": "node_options",
+          "description": "(Optional) List of node options for the domain.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "node_type",
+              "description": "(Optional) Type of node this configuration describes. Valid values: `coordinator`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `node_type` argument in the `node_options` block of the `aws_opensearch_domain` resource allows users to specify the role of a node within the OpenSearch cluster, such as defining it as a `coordinator` node. Configuring this argument impacts cluster behavior by designating specialized nodes for query coordination, which can optimize performance and resource allocation for distributed search and indexing operations."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "node_config",
+              "description": "(Optional) Container to specify sizing of a node type.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "count",
+                  "description": "(Optional) Number of nodes of a particular node type in the cluster.",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "\"Defines the number of nodes for a specific node type within the OpenSearch cluster, allowing users to scale the cluster's capacity and performance to meet workload demands. Configuring this argument helps optimize resource allocation for tasks like indexing, querying, or data replication.\""
+                },
+                {
+                  "name": "enabled",
+                  "description": "(Optional) Whether a particular node type is enabled.",
+                  "required": false,
+                  "type": "bool",
+                  "llm_summary": "The `enabled` argument in the `node_config` block of the `aws_opensearch_domain` resource allows users to specify whether a particular node type (e.g., data, master, or UltraWarm nodes) is active within the OpenSearch domain. Setting this argument to `true` enables the associated node type, impacting the domain's scalability, performance, and resource allocation based on the user's architecture and workload requirements."
+                },
+                {
+                  "name": "type",
+                  "description": "(Optional) The instance type of a particular node type in the cluster.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `type` argument in the `node_config` block of the `aws_opensearch_domain` resource allows users to specify the instance type for a particular node role within the OpenSearch cluster, such as data, master, or UltraWarm nodes. Configuring this argument impacts the performance, scalability, and cost of the cluster by defining the computational capacity allocated to the specified node type, aligning with workload requirements and resource optimization goals."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `node_config` block within the `node_options` of the `aws_opensearch_domain` resource defines the sizing and capacity specifications for OpenSearch nodes, including parameters like instance type and count. Configuring this block enables users to optimize performance and scalability by tailoring node resources to workload requirements, ensuring efficient operation of the OpenSearch cluster."
+            }
+          ],
+          "llm_summary": "\"Defines optional configurations for OpenSearch domain nodes within the `cluster_config` block, enabling fine-grained control over node-specific settings such as performance tuning, operational parameters, or specialized behaviors. Configuring `node_options` helps users optimize cluster performance and tailor node functionality to meet specific workload requirements.\""
+        },
+        {
+          "name": "zone_awareness_config",
+          "description": "(Optional) Configuration block containing zone awareness settings. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "availability_zone_count",
+              "description": "(Optional) Number of Availability Zones for the domain to use with `zone_awareness_enabled`. Defaults to `2`. Valid values: `2` or `3`.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `availability_zone_count` argument in the `zone_awareness_config` of the `aws_opensearch_domain` resource specifies the number of Availability Zones (either 2 or 3) to distribute the domain's nodes across when `zone_awareness_enabled` is activated. Configuring this ensures high availability and fault tolerance by spreading resources across multiple zones, aligning with user goals of improving resilience and minimizing downtime in distributed environments."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `zone_awareness_config` block within the `cluster_config` of the `aws_opensearch_domain` resource enables high availability and fault tolerance by configuring zone awareness settings for the OpenSearch cluster. It encapsulates related settings that define how data nodes are distributed across multiple Availability Zones, ensuring resilience and minimizing downtime in case of zone failures. Configuring this block helps users achieve enhanced cluster reliability and disaster recovery by leveraging multi-AZ deployments."
+        }
+      ],
+      "llm_summary": "The `cluster_config` block within the `aws_opensearch_domain` resource defines the compute and scaling configuration for the OpenSearch cluster, including instance types, instance counts, and dedicated master nodes. Configuring this block allows users to optimize cluster performance, scalability, and fault tolerance by tailoring resource allocation to workload requirements."
+    },
+    {
+      "name": "cognito_options",
+      "description": "(Optional) Configuration block for authenticating dashboard with Cognito. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enabled",
+          "description": "(Optional) Whether Amazon Cognito authentication with Dashboard is enabled or not. Default is `false`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument in the `cognito_options` block of the `aws_opensearch_domain` resource allows users to control whether Amazon Cognito authentication is activated for the OpenSearch Dashboard. Setting this to `true` enables seamless user authentication and access management via Cognito, aligning with common goals of securing and managing dashboard access in a scalable and integrated manner."
+        },
+        {
+          "name": "identity_pool_id",
+          "description": "(Required) ID of the Cognito Identity Pool to use.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "Defines the Cognito Identity Pool ID used to enable user authentication and authorization for the OpenSearch domain, allowing integration with Amazon Cognito for secure access control. Setting this argument ensures the domain can leverage Cognito-managed identities for user access, aligning with common goals of configuring secure and scalable authentication mechanisms."
+        },
+        {
+          "name": "role_arn",
+          "description": "(Required) ARN of the IAM role that has the AmazonOpenSearchServiceCognitoAccess policy attached.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `role_arn` argument specifies the Amazon Resource Name (ARN) of an IAM role required to enable Amazon Cognito authentication for an OpenSearch domain. By providing a role with the `AmazonOpenSearchServiceCognitoAccess` policy attached, users can integrate OpenSearch with Cognito for secure user authentication and access control, aligning with common goals of managing identity and permissions in cloud environments."
+        },
+        {
+          "name": "user_pool_id",
+          "description": "(Required) ID of the Cognito User Pool to use.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `user_pool_id` argument specifies the ID of the Amazon Cognito User Pool to integrate with the OpenSearch domain's authentication system, enabling user access control and secure sign-in functionality. By configuring this required parameter, users can define the identity provider for managing access to the OpenSearch domain, aligning with common goals like securing resources and implementing user authentication workflows."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `cognito_options` configuration block in the `aws_opensearch_domain` resource enables authentication for the OpenSearch dashboard using Amazon Cognito, providing seamless integration with user pools and identity pools. It encapsulates settings related to user authentication and access control, allowing users to securely manage dashboard access without custom authentication mechanisms."
+    },
+    {
+      "name": "domain_endpoint_options",
+      "description": "(Optional) Configuration block for domain endpoint HTTP(S) related options. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "custom_endpoint",
+          "description": "(Optional) Fully qualified domain for your custom endpoint.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `custom_endpoint` argument in the `domain_endpoint_options` block of the `aws_opensearch_domain` resource allows users to specify a fully qualified domain name for a custom endpoint, enabling them to define a user-friendly, branded, or application-specific URL for accessing their OpenSearch domain. This configuration is typically used to enhance accessibility, branding, or integration with external systems by providing a tailored endpoint instead of the default AWS-generated domain name."
+        },
+        {
+          "name": "custom_endpoint_certificate_arn",
+          "description": "(Optional) ACM certificate ARN for your custom endpoint.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `custom_endpoint_certificate_arn` argument allows users to specify the ARN of an ACM certificate to secure a custom endpoint for their OpenSearch domain. By configuring this, users can enable HTTPS for a custom domain endpoint, ensuring encrypted communication and aligning with security and compliance requirements for custom domain access."
+        },
+        {
+          "name": "custom_endpoint_enabled",
+          "description": "(Optional) Whether to enable custom endpoint for the OpenSearch domain.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `custom_endpoint_enabled` argument allows users to control whether a custom endpoint is enabled for the OpenSearch domain, providing the ability to define a user-specific domain endpoint instead of the default AWS-generated endpoint. Enabling this feature is typically used to create a more user-friendly or branded endpoint URL, aligning with custom domain and access requirements."
+        },
+        {
+          "name": "enforce_https",
+          "description": "(Optional) Whether or not to require HTTPS. Defaults to `true`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enforce_https` argument in the `domain_endpoint_options` block of the `aws_opensearch_domain` resource allows users to specify whether HTTPS is required for all traffic to the OpenSearch domain endpoint. Enabling this (default: `true`) ensures secure communication by enforcing encrypted connections, aligning with best practices for data protection and compliance in cloud environments."
+        },
+        {
+          "name": "tls_security_policy",
+          "description": "(Optional) Name of the TLS security policy that needs to be applied to the HTTPS endpoint. For valid values, refer to the AWS documentation. Terraform will only perform drift detection if a configuration value is provided.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `tls_security_policy` argument in the `domain_endpoint_options` block of the `aws_opensearch_domain` resource allows users to specify the TLS security policy applied to the HTTPS endpoint of the OpenSearch domain. By configuring this, users can enforce specific encryption standards and protocols for secure communication, aligning with compliance requirements or organizational security policies."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `domain_endpoint_options` configuration block in the `aws_opensearch_domain` resource manages HTTP(S)-related settings for the domain's endpoint, including enabling or enforcing secure connections and customizing TLS protocols. Configuring this block allows users to enhance endpoint security and compliance by controlling how clients interact with the OpenSearch domain over HTTPS."
+    },
+    {
+      "name": "ebs_options",
+      "description": "(Optional) Configuration block for EBS related options, may be required based on chosen instance size. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "ebs_enabled",
+          "description": "(Required) Whether EBS volumes are attached to data nodes in the domain.",
+          "required": true,
+          "type": "bool",
+          "llm_summary": "The `ebs_enabled` argument in the `ebs_options` block of the `aws_opensearch_domain` resource specifies whether Elastic Block Store (EBS) volumes are attached to the data nodes in the OpenSearch domain. Enabling this option allows users to configure persistent storage for their domain, supporting larger data sets and improving durability for indexing and search operations."
+        },
+        {
+          "name": "iops",
+          "description": "(Optional) Baseline input/output (I/O) performance of EBS volumes attached to data nodes. Applicable only for the GP3 and Provisioned IOPS EBS volume types.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `iops` argument in the `ebs_options` block of the `aws_opensearch_domain` resource allows users to define the baseline input/output operations per second (IOPS) for EBS volumes attached to data nodes, specifically for GP3 and Provisioned IOPS volume types. Configuring this parameter enables users to optimize storage performance for their OpenSearch domain, aligning with workload requirements such as high-throughput or low-latency data processing."
+        },
+        {
+          "name": "throughput",
+          "description": "(Required if `volume_type` is set to `gp3`) Specifies the throughput (in MiB/s) of the EBS volumes attached to data nodes. Applicable only for the gp3 volume type.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `throughput` argument in the `ebs_options` block of the `aws_opensearch_domain` resource allows users to configure the data transfer rate (in MiB/s) for EBS volumes attached to OpenSearch data nodes when using the `gp3` volume type. By specifying this value, users can optimize storage performance to meet workload demands, ensuring efficient data processing and retrieval in their OpenSearch domain."
+        },
+        {
+          "name": "volume_size",
+          "description": "(Required if `ebs_enabled` is set to `true`.) Size of EBS volumes attached to data nodes (in GiB).",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `volume_size` argument in the `ebs_options` block of the `aws_opensearch_domain` resource specifies the storage capacity (in GiB) of EBS volumes attached to data nodes. By configuring this parameter, users can control the amount of disk space allocated for OpenSearch data storage, enabling scalability and performance optimization based on workload requirements."
+        },
+        {
+          "name": "volume_type",
+          "description": "(Optional) Type of EBS volumes attached to data nodes.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `volume_type` argument in the `ebs_options` block of the `aws_opensearch_domain` resource allows users to specify the type of EBS volumes attached to the data nodes, such as `gp2` (general-purpose SSD) or `io1` (provisioned IOPS SSD). Configuring this argument impacts storage performance and cost, enabling users to optimize the OpenSearch domain's data node storage for their workload requirements, such as balancing throughput, latency, and budget."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `ebs_options` configuration block in the `aws_opensearch_domain` resource enables management of Elastic Block Store (EBS) settings for the OpenSearch domain, allowing users to define storage options such as volume size, type, and whether EBS is enabled. This block is essential for optimizing storage performance and capacity, particularly for instance types that require EBS, ensuring scalable and efficient data handling for OpenSearch workloads."
+    },
+    {
+      "name": "encrypt_at_rest",
+      "description": "(Optional) Configuration block for encrypt at rest options. Only available for certain instance types. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enabled",
+          "description": "(Required) Whether to enable encryption at rest. If the `encrypt_at_rest` block is not provided then this defaults to `false`. Enabling encryption on new domains requires an `engine_version` of `OpenSearch_X.Y` or `Elasticsearch_5.1` or greater.",
+          "required": true,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument in the `encrypt_at_rest` block for the `aws_opensearch_domain` resource specifies whether encryption at rest is activated for the OpenSearch or Elasticsearch domain. Setting this argument to `true` ensures that data stored on disk is encrypted, enhancing security and compliance, particularly for sensitive workloads."
+        },
+        {
+          "name": "kms_key_id",
+          "description": "(Optional) KMS key ARN to encrypt the Elasticsearch domain with. If not specified then it defaults to using the `aws/es` service KMS key. Note that KMS will accept a KMS key ID but will return the key ARN. To prevent Terraform detecting unwanted changes, use the key ARN instead.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `kms_key_id` argument allows users to specify a custom AWS KMS key ARN for encrypting data at rest in the OpenSearch domain, overriding the default `aws/es` service KMS key. By defining this argument, users can enforce stricter control over encryption keys to meet compliance, security, or organizational requirements."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `encrypt_at_rest` configuration block in the `aws_opensearch_domain` resource enables encryption of data stored on disk within an OpenSearch domain, enhancing data security and compliance. It encapsulates settings related to encryption keys and mechanisms, allowing users to configure encryption using AWS Key Management Service (KMS) for protecting sensitive information at rest."
+    },
+    {
+      "name": "log_publishing_options",
+      "description": "(Optional) Configuration block for publishing slow and application logs to CloudWatch Logs. This block can be declared multiple times, for each log_type, within the same resource. Detailed below.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "cloudwatch_log_group_arn",
+          "description": "(Required) ARN of the Cloudwatch log group to which log needs to be published.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `cloudwatch_log_group_arn` argument specifies the Amazon Resource Name (ARN) of the CloudWatch log group where OpenSearch domain logs, such as search or application logs, will be published. By configuring this required argument, users enable centralized log monitoring and analysis, supporting common goals like troubleshooting, performance optimization, and compliance tracking for their OpenSearch domain."
+        },
+        {
+          "name": "enabled",
+          "description": "(Optional, Default: true) Whether given log publishing option is enabled or not.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument in the `log_publishing_options` block of the `aws_opensearch_domain` resource allows users to control whether log publishing for a specific log type (e.g., application, search, or index logs) is active. Setting this argument to `true` enables the publishing of logs to the configured destination, supporting common goals like monitoring, debugging, and compliance, while disabling it (`false`) stops log publishing for the specified type."
+        },
+        {
+          "name": "log_type",
+          "description": "(Required) Type of OpenSearch log. Valid values: `INDEX_SLOW_LOGS`, `SEARCH_SLOW_LOGS`, `ES_APPLICATION_LOGS`, `AUDIT_LOGS`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `log_type` argument in the `log_publishing_options` block of the `aws_opensearch_domain` resource specifies the category of OpenSearch logs to be published, such as `INDEX_SLOW_LOGS`, `SEARCH_SLOW_LOGS`, `ES_APPLICATION_LOGS`, or `AUDIT_LOGS`. By defining this argument, users can control which operational or diagnostic logs are enabled for monitoring and analysis, supporting goals like performance optimization, security auditing, and application troubleshooting."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `log_publishing_options` block in the `aws_opensearch_domain` resource configures the publishing of slow and application logs to CloudWatch Logs, enabling centralized log management and monitoring for OpenSearch domains. By defining settings for specific log types, this block helps users enhance observability and troubleshoot performance issues or application behavior effectively."
+    },
+    {
+      "name": "node_to_node_encryption",
+      "description": "(Optional) Configuration block for node-to-node encryption options. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enabled",
+          "description": "(Required) Whether to enable node-to-node encryption. If the `node_to_node_encryption` block is not provided then this defaults to `false`. Enabling node-to-node encryption of a new domain requires an `engine_version` of `OpenSearch_X.Y` or `Elasticsearch_6.0` or greater.",
+          "required": true,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument for the `node_to_node_encryption` block in the `aws_opensearch_domain` resource allows users to specify whether node-to-node encryption is activated, ensuring secure communication between nodes within the OpenSearch or Elasticsearch domain. Enabling this feature enhances data security, typically aligning with compliance and privacy goals, and requires an engine version of `OpenSearch_X.Y` or `Elasticsearch_6.0` or higher."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `node_to_node_encryption` block in the `aws_opensearch_domain` resource enables and manages encryption for data transmitted between nodes within an OpenSearch domain, enhancing security for inter-node communication. This block encapsulates settings to enforce encrypted traffic, helping users protect sensitive data and meet compliance requirements for secure cluster operations."
+    },
+    {
+      "name": "off_peak_window_options",
+      "description": "(Optional) Configuration to add Off Peak update options. (documentation). Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enabled",
+          "description": "(Optional) Enabled disabled toggle for off-peak update window.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument in the `off_peak_window_options` block of the `aws_opensearch_domain` resource allows users to toggle whether the off-peak update window feature is activated. Enabling this option optimizes domain updates by scheduling them during off-peak hours, reducing potential disruptions to performance and availability during high-traffic periods."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "off_peak_window",
+          "description": "(Optional)`window_start_time` - (Optional) 10h window for updates`hours` - (Required) Starting hour of the 10-hour window for updates `minutes` - (Required) Starting minute of the 10-hour window for updates",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "window_start_time",
+              "description": "(Optional) 10h window for updates`hours` - (Required) Starting hour of the 10-hour window for updates `minutes` - (Required) Starting minute of the 10-hour window for updates",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "hours",
+                  "description": "(Required) Starting hour of the 10-hour window for updates",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `hours` argument for the `window_start_time` in the `aws_opensearch_domain` resource allows users to specify the starting hour (in 24-hour format) of a 10-hour maintenance window during which updates to the OpenSearch domain can occur. Configuring this argument helps users control the timing of updates to align with off-peak hours or operational preferences, ensuring minimal disruption to workloads."
+                },
+                {
+                  "name": "minutes",
+                  "description": "(Required) Starting minute of the 10-hour window for updates",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `minutes` argument for the `aws_opensearch_domain` resource allows users to specify the starting minute within the `window_start_time` for a 10-hour maintenance or update window. By configuring this value, users can precisely define the minute at which the update window begins, enabling better alignment with operational schedules and minimizing disruption to workloads."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `window_start_time` block within the `off_peak_window` configuration for the `aws_opensearch_domain` resource defines the precise starting hour (`hours`) and minute (`minutes`) of a 10-hour maintenance window during off-peak periods. This block enables users to schedule updates and maintenance tasks at specific times to minimize disruption to production workloads, providing granular control over the timing of operational activities."
+            }
+          ],
+          "llm_summary": "The `off_peak_window` configuration block within `off_peak_window_options` for the `aws_opensearch_domain` resource defines the start time for a 10-hour maintenance window, enabling updates to occur during off-peak hours to minimize service disruption. It encapsulates settings for specifying the exact starting hour (`hours`) and minute (`minutes`) of the window, allowing users to optimize operational efficiency and reduce the impact of maintenance on end-user experience."
+        }
+      ],
+      "llm_summary": "The `off_peak_window_options` block in the `aws_opensearch_domain` resource configures settings for scheduling updates during off-peak hours, optimizing cluster performance and minimizing disruption. It encapsulates options related to maintenance windows, allowing users to define time periods for updates to ensure operational efficiency and reduce impact on workloads."
+    },
+    {
+      "name": "snapshot_options",
+      "description": "(Optional) Configuration block for snapshot related options. Detailed below. DEPRECATED. For domains running OpenSearch 5.3 and later, Amazon OpenSearch takes hourly automated snapshots, making this setting irrelevant. For domains running earlier versions, OpenSearch takes daily automated snapshots.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "automated_snapshot_start_hour",
+          "description": "(Required) Hour during which the service takes an automated daily snapshot of the indices in the domain.",
+          "required": true,
+          "type": "number",
+          "llm_summary": "\"Defines the specific hour (0-23) at which OpenSearch takes automated daily snapshots of the domain's indices, enabling users to schedule backups for data durability and recovery in alignment with operational or compliance requirements.\""
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `snapshot_options` block in the `aws_opensearch_domain` resource configures settings for automated snapshots of OpenSearch domains, primarily relevant for versions earlier than OpenSearch 5.3. It allows users to manage snapshot frequency and timing, enabling control over data backup schedules for older domain versions, though it is deprecated for newer versions where hourly snapshots are automatically handled by Amazon OpenSearch."
+    },
+    {
+      "name": "software_update_options",
+      "description": "(Optional) Software update options for the domain. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "auto_software_update_enabled",
+          "description": "(Optional) Whether automatic service software updates are enabled for the domain. Defaults to `false`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `auto_software_update_enabled` argument in the `software_update_options` block of the `aws_opensearch_domain` resource allows users to control whether automatic service software updates are applied to the OpenSearch domain. Enabling this feature ensures the domain stays up-to-date with the latest service software versions without manual intervention, supporting maintenance-free operations and improved security, while disabling it provides users with greater control over update timing."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `software_update_options` block within the `aws_opensearch_domain` resource configures settings for managing software updates on an OpenSearch domain. It encapsulates options related to update scheduling and behavior, enabling users to control how and when updates are applied to ensure minimal disruption and alignment with operational requirements."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_opensearch_domain` resource allows users to specify the maximum duration (as a string) Terraform should wait for the creation of an OpenSearch domain to complete. By configuring this timeout, users can control the provisioning behavior to accommodate longer setup times for complex domains, ensuring smoother resource deployment without premature errors."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block for the `aws_opensearch_domain` resource allows users to specify the maximum duration (as a string) Terraform should wait for the deletion of an OpenSearch domain to complete. By configuring this timeout, users can control the lifecycle behavior during resource destruction, ensuring Terraform does not prematurely fail or time out while waiting for the domain's deletion process to finish."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_opensearch_domain` resource allows users to specify the maximum duration (as a string) Terraform will wait for updates to the OpenSearch domain to complete. Configuring this timeout ensures smoother management of domain updates, preventing operations from failing prematurely due to extended update processes, which is particularly useful for large-scale or complex domain changes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_opensearch_domain` resource allows users to define custom timeout durations for specific operations, such as creating, updating, or deleting an OpenSearch domain. By configuring this block, users can ensure smoother management of long-running tasks, prevent operation failures due to default timeout limits, and achieve greater control over resource lifecycle processes."
+    },
+    {
+      "name": "vpc_options",
+      "description": "(Optional) Configuration block for VPC related options. Adding or removing this configuration forces a new resource (documentation). Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "availability_zones",
+          "description": "",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `availability_zones` argument within the `vpc_options` block of the `aws_opensearch_domain` resource allows users to specify the set of Availability Zones in which the OpenSearch domain's VPC subnets will be deployed. Configuring this argument helps optimize fault tolerance and high availability by distributing resources across multiple zones, aligning with common user goals of ensuring resilient and geographically distributed infrastructure."
+        },
+        {
+          "name": "security_group_ids",
+          "description": "(Optional) List of VPC Security Group IDs to be applied to the OpenSearch domain endpoints. If omitted, the default Security Group for the VPC will be used.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `security_group_ids` argument in the `vpc_options` block of the `aws_opensearch_domain` resource allows users to specify a set of VPC Security Group IDs to control network-level access to the OpenSearch domain endpoints. By defining this argument, users can enforce custom security rules, such as restricting inbound and outbound traffic, instead of relying on the default Security Group for the VPC, enabling enhanced network isolation and compliance with organizational security policies."
+        },
+        {
+          "name": "subnet_ids",
+          "description": "(Required) List of VPC Subnet IDs for the OpenSearch domain endpoints to be created in.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `subnet_ids` argument in the `vpc_options` block of the `aws_opensearch_domain` resource allows users to specify the VPC subnets where OpenSearch domain endpoints will be deployed. By defining this, users can control the network placement of the domain within their VPC, ensuring private access and enhanced security for the OpenSearch service."
+        },
+        {
+          "name": "vpc_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `vpc_id` argument within the `vpc_options` block of the `aws_opensearch_domain` resource allows users to specify the ID of the VPC where the OpenSearch domain will be deployed. By setting this argument, users can ensure the domain is hosted within a specific VPC, enabling private network access, enhanced security, and tighter control over connectivity to the OpenSearch service."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `vpc_options` configuration block in the `aws_opensearch_domain` resource enables the integration of an OpenSearch domain with a Virtual Private Cloud (VPC), providing network isolation and enhanced security. It encapsulates settings for specifying VPC-related parameters, such as subnet IDs and security group IDs, and configuring this block ensures the domain is accessible only within the defined private network, supporting secure and controlled access."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN of the domain.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "dashboard_endpoint",
+      "description": "Domain-specific endpoint for Dashboard without https scheme.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "dashboard_endpoint_v2",
+      "description": "V2 domain endpoint for Dashboard that works with both IPv4 and IPv6 addresses, without https scheme.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "domain_endpoint_v2_hosted_zone_id",
+      "description": "Dual stack hosted zone ID for the domain.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "domain_id",
+      "description": "Unique identifier for the domain.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "endpoint",
+      "description": "Domain-specific endpoint used to submit index, search, and data upload requests.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "endpoint_v2",
+      "description": "V2 domain endpoint that works with both IPv4 and IPv6 addresses, used to submit index, search, and data upload requests.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "kibana_endpoint",
+      "description": "(Deprecated) Domain-specific endpoint for kibana without https scheme. Use the `dashboard_endpoint` attribute instead.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

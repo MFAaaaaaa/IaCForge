@@ -1,0 +1,22 @@
+[
+    {
+        "argument_path": "bucket",
+        "references_output": "aws_s3_bucket.id",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "bucket",
+        "references_output": "aws_s3_access_point.arn",
+        "target_resource_type": "aws_s3_access_point"
+    },
+    {
+        "argument_path": "kms_key_id",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "kms_key_id",
+        "references_output": "aws_kms_alias.target_key_arn",
+        "target_resource_type": "aws_kms_alias"
+    }
+]

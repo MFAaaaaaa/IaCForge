@@ -1,0 +1,241 @@
+{
+  "resource": {
+    "name": "aws_backup_plan",
+    "description": "Provides an AWS Backup plan resource.",
+    "llm_summary": "The `aws_backup_plan` Terraform resource enables the creation and management of automated backup plans in AWS, streamlining data protection across multiple services. It is commonly used to define backup schedules, retention policies, and lifecycle management for resources like EC2 instances, RDS databases, and EFS file systems. Users can configure advanced settings such as backup vault integration, cross-region replication, and recovery point tagging to ensure compliance, disaster recovery, and efficient data management."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_backup_plan\" \"example\" {\n  name = \"tf_example_backup_plan\"\n\n  rule {\n    rule_name         = \"tf_example_backup_rule\"\n    target_vault_name = aws_backup_vault.test.name\n    schedule          = \"cron(0 12 * * ? *)\"\n\n    lifecycle {\n      delete_after = 14\n    }\n  }\n\n  advanced_backup_setting {\n    backup_options = {\n      WindowsVSS = \"enabled\"\n    }\n    resource_type = \"EC2\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_backup_plan` resource with a scheduled backup rule targeting a specific vault, a lifecycle policy for retention, and advanced backup settings enabling Windows VSS for EC2 instances. It illustrates key configurations such as the `rule` block for scheduling and retention, and the `advanced_backup_setting` block for resource-specific backup options."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_backup_plan` resource represents the unique identifier for the backup plan, allowing users to reference or manage the plan programmatically. While optional, setting this argument can help ensure consistent identification of the backup plan across Terraform configurations and integrations, supporting workflows like tracking, updates, or automation."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The display name of a backup plan.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_backup_plan` resource specifies the user-defined display name of the backup plan, serving as a unique identifier to organize and distinguish backup plans within AWS Backup. Setting this argument allows users to clearly label and manage backup configurations, aligning them with specific environments, applications, or compliance requirements."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Metadata that you can assign to help organize the plans you create. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument in the `aws_backup_plan` resource allows users to assign metadata in the form of key-value pairs to help organize and categorize backup plans for easier management and identification. Configuring this argument enables tagging functionality, which is commonly used for tracking resources by environment, cost center, or compliance requirements, and can override provider-level default tags if matching keys are defined."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_backup_plan` resource allows users to define a comprehensive set of key-value tags that are automatically applied to the backup plan and all associated resources. This enables streamlined resource organization, cost allocation, and metadata management, supporting common user goals like tagging for environment identification, compliance tracking, or billing analysis."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "advanced_backup_setting",
+      "description": "(Optional) An object that specifies backup options for each resource type.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "backup_options",
+          "description": "",
+          "required": true,
+          "type": "map(string)",
+          "llm_summary": "The `backup_options` argument in the `advanced_backup_setting` block of the `aws_backup_plan` resource allows users to define key-value pairs that configure advanced backup behaviors for specific resource types, such as enabling encryption or specifying backup preferences. By setting this required argument, users can tailor backup operations to meet compliance, security, or performance requirements for their cloud infrastructure."
+        },
+        {
+          "name": "resource_type",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `resource_type` argument in the `advanced_backup_setting` block of the `aws_backup_plan` resource specifies the type of AWS resource (e.g., EBS volumes, RDS databases, DynamoDB tables) to which advanced backup settings will apply. By defining this argument, users can tailor backup configurations, such as encryption or backup window preferences, for specific resource types, ensuring precise control over backup behavior and compliance with organizational policies."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `advanced_backup_setting` block within the `aws_backup_plan` resource allows users to define granular backup options tailored to specific resource types, enabling advanced control over backup behavior. This configuration encapsulates settings that optimize backup processes, such as specifying custom backup preferences or features for individual resource types, helping users achieve precise and efficient data protection strategies."
+    },
+    {
+      "name": "rule",
+      "description": "(Required) A rule object that specifies a scheduled task that is used to back up a selection of resources.",
+      "cardinality": [
+        1,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "completion_window",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `completion_window` argument in the `rule` block of the `aws_backup_plan` resource specifies the maximum time, in hours, allowed for a backup job to complete after its scheduled start time. Configuring this parameter helps users define the operational window for backup completion, ensuring alignment with recovery point objectives (RPO) and minimizing potential disruptions in backup workflows."
+        },
+        {
+          "name": "enable_continuous_backup",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enable_continuous_backup` argument in the `rule` block of the `aws_backup_plan` resource allows users to specify whether continuous backups should be enabled for the resources targeted by the backup rule. When set to `true`, it ensures ongoing, point-in-time recovery capability for supported resources, aligning with user goals of minimizing data loss and enabling robust disaster recovery strategies."
+        },
+        {
+          "name": "recovery_point_tags",
+          "description": "",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `recovery_point_tags` argument allows users to define key-value tags that are automatically applied to recovery points created by the backup rule within the `aws_backup_plan`. This enables users to organize, categorize, and manage recovery points for purposes such as cost allocation, environment identification, or compliance tracking."
+        },
+        {
+          "name": "rule_name",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `rule_name` argument specifies a unique, user-defined name for a backup rule within the `aws_backup_plan`, allowing users to clearly identify and organize backup rules. Setting this argument is essential for managing multiple rules within a plan, enabling better tracking and differentiation of backup configurations, such as schedules, lifecycle policies, or target resources."
+        },
+        {
+          "name": "schedule",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `schedule` argument in the `rule` block of the `aws_backup_plan` resource allows users to define the cron expression or schedule for automated backup execution. By configuring this argument, users can specify the frequency and timing of backup operations, aligning with their data protection and recovery objectives, such as daily or weekly backups."
+        },
+        {
+          "name": "schedule_expression_timezone",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `schedule_expression_timezone` argument in the `rule` block of the `aws_backup_plan` resource allows users to specify the timezone for interpreting the schedule expression that defines backup execution times. By setting this argument, users can ensure that backup schedules align with their desired timezone, enabling precise control over when backups are triggered relative to local or regional time standards."
+        },
+        {
+          "name": "start_window",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `start_window` argument in the `rule` block of the `aws_backup_plan` resource specifies the time window (in minutes) within which the backup job can start after its scheduled time. Configuring this argument allows users to define a flexible start period for backup operations, ensuring alignment with system load or maintenance windows to optimize resource usage and minimize disruptions."
+        },
+        {
+          "name": "target_vault_name",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `target_vault_name` argument in the `rule` block of the `aws_backup_plan` resource specifies the name of the backup vault where recovery points created by the rule will be stored. By defining this argument, users ensure that backups are directed to a specific vault, enabling centralized management, retention policies, and access control for their backup data."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "copy_action",
+          "description": "",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "destination_vault_arn",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `destination_vault_arn` argument in the `copy_action` block of the `aws_backup_plan` resource specifies the Amazon Resource Name (ARN) of the backup vault where copied backups will be stored. By setting this required string, users define the target storage location for backup copies, enabling cross-vault or cross-region backup workflows to meet compliance, disaster recovery, or data retention goals."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "lifecycle",
+              "description": "",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "cold_storage_after",
+                  "description": "",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `cold_storage_after` argument in the `lifecycle` block of the `aws_backup_plan` resource specifies the number of days after creation when a backup transitions to cold storage. This allows users to define the lifecycle behavior for cost optimization by moving backups to lower-cost storage tiers, aligning with retention and storage management goals."
+                },
+                {
+                  "name": "delete_after",
+                  "description": "",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `delete_after` argument in the `lifecycle` block of the `aws_backup_plan` resource specifies the number of days after creation that a backup should be retained before being automatically deleted. This allows users to define retention policies for backups, ensuring compliance with data lifecycle management requirements and optimizing storage costs by removing outdated backups."
+                },
+                {
+                  "name": "opt_in_to_archive_for_supported_resources",
+                  "description": "",
+                  "required": false,
+                  "type": "bool",
+                  "llm_summary": "The `opt_in_to_archive_for_supported_resources` argument in the `lifecycle` block of the `aws_backup_plan` resource allows users to specify whether supported resources should automatically opt into long-term archival storage as part of their backup lifecycle. Enabling this option ensures that backups for eligible resources are retained in archival storage, potentially reducing costs for infrequently accessed data while extending retention periods."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `lifecycle` block within the `copy_action` configuration of the `aws_backup_plan` resource defines lifecycle rules for managing the retention and transition of backup copies. It allows users to specify the duration for which backups are retained and when they are transitioned to cold storage, enabling cost optimization and compliance with data retention policies."
+            }
+          ],
+          "llm_summary": "The `copy_action` block within the `rule` configuration of the `aws_backup_plan` resource defines settings for copying backups to additional destinations, enabling cross-region or cross-account backup replication. It encapsulates parameters such as destination vault ARN and optional lifecycle rules, allowing users to enhance data durability, compliance, and disaster recovery strategies by automating backup replication workflows."
+        },
+        {
+          "name": "lifecycle",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "cold_storage_after",
+              "description": "",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `cold_storage_after` argument in the `lifecycle` block of the `aws_backup_plan` resource allows users to define the number of days after creation when backup data transitions to cold storage. Configuring this argument helps optimize storage costs by automatically moving older backups to a lower-cost storage tier, aligning with retention and cost management goals."
+            },
+            {
+              "name": "delete_after",
+              "description": "",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `delete_after` argument in the `lifecycle` block of the `aws_backup_plan` resource specifies the number of days after creation that a backup should be retained before being automatically deleted. This allows users to define retention policies for backups, ensuring compliance with data lifecycle management requirements and optimizing storage costs by removing outdated backups."
+            },
+            {
+              "name": "opt_in_to_archive_for_supported_resources",
+              "description": "",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `opt_in_to_archive_for_supported_resources` argument in the `lifecycle` block of the `aws_backup_plan` resource allows users to enable archiving for supported resources within the backup plan. Setting this to `true` configures the backup lifecycle to include archiving, which can help optimize storage costs by moving backups to long-term, lower-cost storage tiers after the defined retention period."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `lifecycle` configuration block within the `rule` of the `aws_backup_plan` resource defines lifecycle management settings for backups, including retention periods and transition to cold storage. This block enables users to automate the aging process of backups, ensuring compliance with data retention policies and optimizing storage costs by controlling when backups are deleted or moved to lower-cost storage tiers."
+        }
+      ],
+      "llm_summary": "The \"rule\" configuration block within the `aws_backup_plan` resource defines the scheduling and execution parameters for automated backup tasks, enabling users to specify when and how selected resources are backed up. It encapsulates settings related to backup frequency, lifecycle management, and retention policies, allowing users to create detailed and reliable backup schedules that align with compliance and recovery objectives."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the backup plan.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "version",
+      "description": "Unique, randomly generated, Unicode, UTF-8 encoded string that serves as the version ID of the backup plan.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

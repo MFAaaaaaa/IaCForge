@@ -1,0 +1,144 @@
+{
+    "resource": {
+        "name": "aws_api_gateway_rest_api",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "api_key_source",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "binary_media_types",
+            "description": "",
+            "required": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "body",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "disable_execute_api_endpoint",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "fail_on_warnings",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "minimum_compression_size",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "parameters",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "policy",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "put_rest_api_mode",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "endpoint_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "types",
+                    "description": "",
+                    "required": true,
+                    "type": "list(string)"
+                },
+                {
+                    "name": "vpc_endpoint_ids",
+                    "description": "",
+                    "required": false,
+                    "type": "set(string)"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "created_date",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "execution_arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "root_resource_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

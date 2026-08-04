@@ -1,0 +1,610 @@
+{
+  "resource": {
+    "name": "aws_dlm_lifecycle_policy",
+    "description": "Provides a Data Lifecycle Manager (DLM) lifecycle policy for managing snapshots.",
+    "llm_summary": "The `aws_dlm_lifecycle_policy` resource enables automated lifecycle management of Amazon EBS snapshots by defining policies for creation, retention, and deletion. Common use cases include implementing backup strategies, optimizing storage costs, and ensuring compliance with data retention requirements. Users can configure schedules, retention rules, and target resource tags to streamline snapshot management and maintain consistent data protection workflows."
+  },
+  "examples": [
+    {
+      "title": "Basic",
+      "code": "data \"aws_iam_policy_document\" \"assume_role\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"dlm.amazonaws.com\"]\n    }\n\n    actions = [\"sts:AssumeRole\"]\n  }\n}\n\nresource \"aws_iam_role\" \"dlm_lifecycle_role\" {\n  name               = \"dlm-lifecycle-role\"\n  assume_role_policy = data.aws_iam_policy_document.assume_role.json\n}\n\ndata \"aws_iam_policy_document\" \"dlm_lifecycle\" {\n  statement {\n    effect = \"Allow\"\n\n    actions = [\n      \"ec2:CreateSnapshot\",\n      \"ec2:CreateSnapshots\",\n      \"ec2:DeleteSnapshot\",\n      \"ec2:DescribeInstances\",\n      \"ec2:DescribeVolumes\",\n      \"ec2:DescribeSnapshots\",\n    ]\n\n    resources = [\"*\"]\n  }\n\n  statement {\n    effect    = \"Allow\"\n    actions   = [\"ec2:CreateTags\"]\n    resources = [\"arn:aws:ec2:*::snapshot/*\"]\n  }\n}\n\nresource \"aws_iam_role_policy\" \"dlm_lifecycle\" {\n  name   = \"dlm-lifecycle-policy\"\n  role   = aws_iam_role.dlm_lifecycle_role.id\n  policy = data.aws_iam_policy_document.dlm_lifecycle.json\n}\n\nresource \"aws_dlm_lifecycle_policy\" \"example\" {\n  description        = \"example DLM lifecycle policy\"\n  execution_role_arn = aws_iam_role.dlm_lifecycle_role.arn\n  state              = \"ENABLED\"\n\n  policy_details {\n    resource_types = [\"VOLUME\"]\n\n    schedule {\n      name = \"2 weeks of daily snapshots\"\n\n      create_rule {\n        interval      = 24\n        interval_unit = \"HOURS\"\n        times         = [\"23:45\"]\n      }\n\n      retain_rule {\n        count = 14\n      }\n\n      tags_to_add = {\n        SnapshotCreator = \"DLM\"\n      }\n\n      copy_tags = false\n    }\n\n    target_tags = {\n      Snapshot = \"true\"\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS DLM lifecycle policy (`aws_dlm_lifecycle_policy`) to automate daily snapshots for EBS volumes, retaining them for 14 days. It includes IAM role and policy setup for permissions, detailed scheduling with `create_rule` and `retain_rule` blocks, and tag-based targeting to manage snapshots effectively."
+    },
+    {
+      "title": "Example Cross-Region Snapshot Copy Usage",
+      "code": "# ...other configuration...\ndata \"aws_caller_identity\" \"current\" {}\n\ndata \"aws_iam_policy_document\" \"key\" {\n  statement {\n    sid    = \"Enable IAM User Permissions\"\n    effect = \"Allow\"\n\n    principals {\n      type        = \"AWS\"\n      identifiers = [\"arn:aws:iam::${data.aws_caller_identity.current.account_id}:root\"]\n    }\n\n    actions   = [\"kms:*\"]\n    resources = [\"*\"]\n  }\n}\n\nresource \"aws_kms_key\" \"dlm_cross_region_copy_cmk\" {\n  provider    = aws.alternate\n  description = \"Example Alternate Region KMS Key\"\n  policy      = data.aws_iam_policy_document.key.json\n}\n\nresource \"aws_dlm_lifecycle_policy\" \"example\" {\n  description        = \"example DLM lifecycle policy\"\n  execution_role_arn = aws_iam_role.dlm_lifecycle_role.arn\n  state              = \"ENABLED\"\n\n  policy_details {\n    resource_types = [\"VOLUME\"]\n\n    schedule {\n      name = \"2 weeks of daily snapshots\"\n\n      create_rule {\n        interval      = 24\n        interval_unit = \"HOURS\"\n        times         = [\"23:45\"]\n      }\n\n      retain_rule {\n        count = 14\n      }\n\n      tags_to_add = {\n        SnapshotCreator = \"DLM\"\n      }\n\n      copy_tags = false\n\n      cross_region_copy_rule {\n        target    = \"us-west-2\"\n        encrypted = true\n        cmk_arn   = aws_kms_key.dlm_cross_region_copy_cmk.arn\n        copy_tags = true\n        retain_rule {\n          interval      = 30\n          interval_unit = \"DAYS\"\n        }\n      }\n    }\n\n    target_tags = {\n      Snapshot = \"true\"\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_dlm_lifecycle_policy` to automate cross-region snapshot copies with encryption using a KMS key in an alternate region. It highlights key configurations such as `cross_region_copy_rule` for specifying the target region, encryption with a custom `aws_kms_key`, snapshot retention rules, and tagging strategies for efficient lifecycle management of EBS volume snapshots."
+    },
+    {
+      "title": "Example Event Based Policy Usage",
+      "code": "data \"aws_caller_identity\" \"current\" {}\n\nresource \"aws_dlm_lifecycle_policy\" \"example\" {\n  description        = \"tf-acc-basic\"\n  execution_role_arn = aws_iam_role.example.arn\n\n  policy_details {\n    policy_type = \"EVENT_BASED_POLICY\"\n\n    action {\n      name = \"tf-acc-basic\"\n      cross_region_copy {\n        encryption_configuration {}\n        retain_rule {\n          interval      = 15\n          interval_unit = \"MONTHS\"\n        }\n\n        target = \"us-east-1\"\n      }\n    }\n\n    event_source {\n      type = \"MANAGED_CWE\"\n      parameters {\n        description_regex = \"^.*Created for policy: policy-1234567890abcdef0.*$\"\n        event_type        = \"shareSnapshot\"\n        snapshot_owner    = [data.aws_caller_identity.current.account_id]\n      }\n    }\n  }\n}\n\ndata \"aws_iam_policy\" \"example\" {\n  name = \"AWSDataLifecycleManagerServiceRole\"\n}\n\nresource \"aws_iam_role_policy_attachment\" \"example\" {\n  role       = aws_iam_role.example.id\n  policy_arn = data.aws_iam_policy.example.arn\n}",
+      "llm_summary": "This example demonstrates how to configure an event-based AWS DLM lifecycle policy (`aws_dlm_lifecycle_policy`) to manage cross-region snapshot sharing triggered by CloudWatch Events. It showcases key configurations such as the `event_source` block for filtering events, the `action` block for cross-region copy with retention rules, and the integration of an IAM role with the required permissions."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "description",
+      "description": "(Required) A description for the DLM lifecycle policy.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "Defines a human-readable description for the DLM lifecycle policy, enabling users to document the policy's purpose, scope, or intended behavior, such as managing snapshot lifecycles or retention schedules. This required argument helps ensure clarity and traceability in resource management, aligning with common goals like organizing and identifying cloud infrastructure policies."
+    },
+    {
+      "name": "execution_role_arn",
+      "description": "(Required) The ARN of an IAM role that is able to be assumed by the DLM service.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `execution_role_arn` argument specifies the Amazon Resource Name (ARN) of an IAM role that the Data Lifecycle Manager (DLM) service can assume to execute lifecycle policies. By defining this role, users enable DLM to perform automated actions such as snapshot creation, retention, and deletion, ensuring secure and controlled management of resource lifecycles in compliance with IAM permissions."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_dlm_lifecycle_policy` resource represents the unique identifier of the lifecycle policy, allowing users to reference or manage the specific policy within their Terraform configuration. While optional, it is typically used for tracking or interacting with the policy after creation, supporting workflows that require precise identification of resources for updates, dependencies, or integrations."
+    },
+    {
+      "name": "state",
+      "description": "(Optional) Whether the lifecycle policy should be enabled or disabled. `ENABLED` or `DISABLED` are valid values. Defaults to `ENABLED`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `state` argument in the `aws_dlm_lifecycle_policy` resource allows users to control whether the lifecycle policy is active (`ENABLED`) or inactive (`DISABLED`). By configuring this argument, users can define the operational status of the policy, enabling automated management of resource lifecycles or pausing its execution as needed, aligning with goals like resource optimization and compliance."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Key-value map of resource tags. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_dlm_lifecycle_policy` resource allows users to define a key-value map of resource tags, enabling the categorization and identification of the lifecycle policy for organizational, billing, or management purposes. When set, it can override provider-level default tags, ensuring precise control over metadata associated with the policy."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument in the `aws_dlm_lifecycle_policy` resource allows users to define a comprehensive set of key-value tags that are applied to the lifecycle policy and inherited by associated resources. This enables streamlined resource organization, categorization, and management, supporting common goals like cost allocation, environment identification, and compliance tracking."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "policy_details",
+      "description": "(Required) See the `policy_details` configuration block. Max of 1.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "policy_type",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `policy_type` argument in the `policy_details` block of the `aws_dlm_lifecycle_policy` resource specifies the type of lifecycle policy to be applied, such as \"EBS Snapshot Management\" or \"Image Management.\" By defining this argument, users control the overarching behavior of the policy, enabling automated management of resources like snapshots or AMIs to align with retention, backup, or cleanup goals."
+        },
+        {
+          "name": "resource_locations",
+          "description": "",
+          "required": false,
+          "type": "list(string)",
+          "llm_summary": "The `resource_locations` argument in the `policy_details` block of the `aws_dlm_lifecycle_policy` resource allows users to specify the AWS regions or locations where the targeted resources for the lifecycle policy are stored. By defining this list, users can control the scope of the policy to manage snapshots or backups across specific regions, enabling region-specific lifecycle management for compliance, cost optimization, or disaster recovery purposes."
+        },
+        {
+          "name": "resource_types",
+          "description": "",
+          "required": false,
+          "type": "list(string)",
+          "llm_summary": "The `resource_types` argument in the `policy_details` block of the `aws_dlm_lifecycle_policy` resource allows users to specify the types of AWS resources (e.g., volumes or snapshots) that the lifecycle policy will manage. By defining this list, users can control which resource categories are subject to automated actions like creation, retention, or deletion, aligning with common goals such as optimizing storage costs or enforcing compliance policies."
+        },
+        {
+          "name": "target_tags",
+          "description": "",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `target_tags` argument in the `policy_details` block of the `aws_dlm_lifecycle_policy` resource allows users to specify a map of key-value pairs that define tags used to identify the target resources for the lifecycle policy. By setting this argument, users can control which Amazon EBS volumes or snapshots are managed by the policy, enabling automated lifecycle actions such as creation, retention, or deletion based on the specified tags."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "action",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "name",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `name` argument for the `action` block in the `aws_dlm_lifecycle_policy` resource specifies a unique identifier for the action within the lifecycle policy, allowing users to define and distinguish the specific operation (e.g., snapshot creation or deletion) being performed. Setting this argument ensures clarity and organization within the policy, enabling precise management of automated data lifecycle tasks."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "cross_region_copy",
+              "description": "",
+              "cardinality": [
+                1,
+                3
+              ],
+              "arguments": [
+                {
+                  "name": "target",
+                  "description": "",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `target` argument in the `cross_region_copy` block of the `aws_dlm_lifecycle_policy` resource specifies the destination Amazon Resource Name (ARN) of the target AWS region or storage location where snapshots or AMIs will be copied. This required argument enables users to define the cross-region replication destination, ensuring data redundancy, disaster recovery, or compliance with geographic storage requirements."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "encryption_configuration",
+                  "description": "",
+                  "cardinality": [
+                    1,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "cmk_arn",
+                      "description": "",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `cmk_arn` argument in the `encryption_configuration` block of the `aws_dlm_lifecycle_policy` resource allows users to specify the Amazon Resource Name (ARN) of a customer-managed AWS KMS key (CMK) for encrypting snapshots created by the lifecycle policy. By setting this argument, users can enforce custom encryption standards, enhance data security, and comply with organizational or regulatory requirements for snapshot encryption."
+                    },
+                    {
+                      "name": "encrypted",
+                      "description": "",
+                      "required": false,
+                      "type": "bool",
+                      "llm_summary": "The `encrypted` argument within the `encryption_configuration` block of the `aws_dlm_lifecycle_policy` resource specifies whether snapshots created by the lifecycle policy should be encrypted. Setting this boolean enables encryption for snapshots, ensuring data security and compliance with encryption requirements, which is a common goal for users managing sensitive data in AWS."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `encryption_configuration` block within the `cross_region_copy` context of the `aws_dlm_lifecycle_policy` resource defines encryption settings for snapshots copied across regions, ensuring data security during transfer. It encapsulates options for specifying encryption behavior, such as enabling or configuring the use of a KMS key, allowing users to enforce compliance and secure sensitive data in cross-region backup workflows."
+                },
+                {
+                  "name": "retain_rule",
+                  "description": "",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "interval",
+                      "description": "",
+                      "required": true,
+                      "type": "number",
+                      "llm_summary": "The `interval` argument in the `retain_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the time interval, in days, between each snapshot or backup retention event. This required parameter allows users to define the frequency of retained backups, enabling precise control over the lifecycle and retention schedule of snapshots to meet compliance, cost management, or disaster recovery objectives."
+                    },
+                    {
+                      "name": "interval_unit",
+                      "description": "",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `interval_unit` argument in the `retain_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the time unit (e.g., days, weeks, months, or years) used to define the retention period for snapshots or AMIs managed by the lifecycle policy. By setting this argument, users control the granularity of the retention schedule, enabling precise configuration of how long backups are retained to meet compliance, cost optimization, or disaster recovery goals."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `retain_rule` block within the `cross_region_copy` configuration of the `aws_dlm_lifecycle_policy` resource defines retention settings for snapshots copied across regions, specifying how long these snapshots should be preserved. This block enables users to manage lifecycle policies for cross-region backups by setting retention periods, ensuring compliance with data retention requirements and optimizing storage costs."
+                }
+              ],
+              "llm_summary": "The `cross_region_copy` block within the `action` configuration of the `aws_dlm_lifecycle_policy` resource defines settings for copying snapshots or AMIs to a different AWS region as part of a lifecycle policy. It encapsulates parameters such as the destination region, encryption settings, and retention rules, enabling users to enhance disaster recovery, compliance, and data redundancy by automating cross-region replication."
+            }
+          ],
+          "llm_summary": "The \"action\" configuration block within the \"policy_details\" of the `aws_dlm_lifecycle_policy` resource defines the specific operations to be performed on Amazon EBS volumes or snapshots as part of the lifecycle policy. It encapsulates settings for actions such as creating snapshots, copying snapshots, or deleting outdated snapshots, enabling users to automate and manage the retention, replication, and cleanup of EBS resources to optimize storage and ensure compliance with data management policies."
+        },
+        {
+          "name": "event_source",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "type",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `type` argument in the `event_source` block of the `aws_dlm_lifecycle_policy` resource specifies the source type of events that trigger the lifecycle policy, such as snapshots or other resource types. This required argument defines the behavior of the policy by determining which event source will initiate automated actions, aligning with user goals like managing resource lifecycles and optimizing data retention."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "parameters",
+              "description": "",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "description_regex",
+                  "description": "",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `description_regex` argument in the `parameters` block of the `aws_dlm_lifecycle_policy` resource allows users to define a regular expression pattern to match the description of EBS volumes or snapshots targeted by the lifecycle policy. By specifying this argument, users can filter and apply lifecycle rules to resources based on their description, enabling precise control over retention, deletion, or backup policies for specific resources that meet the defined criteria."
+                },
+                {
+                  "name": "event_type",
+                  "description": "",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `event_type` argument in the `parameters` block of the `aws_dlm_lifecycle_policy` resource specifies the type of event that triggers the lifecycle policy, such as snapshot creation or resource deletion. By defining this argument, users can control the conditions under which the policy is applied, enabling automated management of resource lifecycles based on specific events."
+                },
+                {
+                  "name": "snapshot_owner",
+                  "description": "",
+                  "required": true,
+                  "type": "set(string)",
+                  "llm_summary": "The `snapshot_owner` argument in the `aws_dlm_lifecycle_policy` resource specifies the AWS account IDs that own the snapshots targeted by the lifecycle policy. By defining this set of account IDs, users can control which snapshots are managed by the policy, enabling precise governance over snapshot retention, deletion, or other lifecycle actions for specific accounts."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `parameters` block within the `event_source` configuration of the `aws_dlm_lifecycle_policy` resource defines specific settings that customize the behavior of the event source triggering the lifecycle policy. It encapsulates details such as event attributes or filters, enabling users to fine-tune how and when the lifecycle policy is initiated based on specific event criteria, providing greater control over automated data lifecycle management."
+            }
+          ],
+          "llm_summary": "The `event_source` configuration block within the `policy_details` of the `aws_dlm_lifecycle_policy` resource defines the source of events that trigger lifecycle actions, such as snapshot creation or retention management. It encapsulates settings related to event-driven automation, enabling users to specify event types and sources (e.g., AWS services or custom events) to streamline policy execution based on real-time triggers."
+        },
+        {
+          "name": "parameters",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "exclude_boot_volume",
+              "description": "",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `exclude_boot_volume` argument in the `parameters` block of the `aws_dlm_lifecycle_policy` resource allows users to specify whether the lifecycle policy should exclude the boot volume of an instance from snapshot management. Setting this argument to `true` ensures that only non-boot volumes are included in the policy, which is useful for optimizing backup strategies or avoiding unnecessary snapshots of system volumes."
+            },
+            {
+              "name": "no_reboot",
+              "description": "",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `no_reboot` argument in the `parameters` block of the `aws_dlm_lifecycle_policy` resource allows users to specify whether instances should avoid rebooting during the creation of snapshots as part of the lifecycle policy. Setting this argument to `true` ensures snapshots are created without interrupting instance operations, which is useful for maintaining uptime and minimizing disruptions in production environments."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `parameters` configuration block within the `policy_details` of the `aws_dlm_lifecycle_policy` resource defines key settings for managing the behavior of data lifecycle policies, such as snapshot creation and retention. It encapsulates related parameters like resource types, schedules, and actions, enabling users to customize how and when automated lifecycle operations are performed, ensuring efficient data management and compliance with retention policies."
+        },
+        {
+          "name": "schedule",
+          "description": "",
+          "cardinality": [
+            0,
+            4
+          ],
+          "arguments": [
+            {
+              "name": "copy_tags",
+              "description": "",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `copy_tags` argument in the `schedule` block of the `aws_dlm_lifecycle_policy` resource controls whether tags from the source resource are copied to snapshots created by the lifecycle policy. Setting this argument to `true` ensures that snapshots inherit the tags of the original resource, enabling consistent tagging for resource organization, cost tracking, or compliance purposes."
+            },
+            {
+              "name": "name",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `name` argument in the `schedule` block of the `aws_dlm_lifecycle_policy` resource allows users to define a unique, descriptive identifier for the lifecycle schedule. This name is used to distinguish and organize specific schedules within the policy, enabling users to manage automated actions like snapshot creation or retention with clarity and precision."
+            },
+            {
+              "name": "tags_to_add",
+              "description": "",
+              "required": false,
+              "type": "map(string)",
+              "llm_summary": "The `tags_to_add` argument in the `schedule` block of the `aws_dlm_lifecycle_policy` resource allows users to define a set of key-value tags that will be automatically applied to snapshots or AMIs created by the lifecycle policy. This enables users to organize, categorize, or track resources for purposes such as cost allocation, environment identification, or compliance tagging, aligning with common goals like resource management and governance."
+            },
+            {
+              "name": "variable_tags",
+              "description": "",
+              "required": false,
+              "type": "map(string)",
+              "llm_summary": "The `variable_tags` argument in the `schedule` block of the `aws_dlm_lifecycle_policy` resource allows users to define dynamic, tag-based conditions for applying lifecycle rules to resources. By specifying a map of key-value pairs, users can configure flexible policies that target resources based on their tags, enabling automated management of snapshots or other lifecycle actions tailored to specific environments, workloads, or organizational tagging strategies."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "create_rule",
+              "description": "",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "cron_expression",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `cron_expression` argument in the `create_rule` block of the `aws_dlm_lifecycle_policy` resource allows users to define the schedule for creating snapshots using a cron-like syntax. By specifying this argument, users can precisely control the timing and frequency of automated snapshot creation, enabling efficient lifecycle management of EBS volumes based on their backup and retention requirements."
+                },
+                {
+                  "name": "interval",
+                  "description": "",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `interval` argument in the `create_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the frequency, in hours, at which snapshots or backups are created as part of the lifecycle policy. By configuring this value, users can define the regularity of automated resource protection, aligning with retention and disaster recovery goals."
+                },
+                {
+                  "name": "interval_unit",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `interval_unit` argument in the `create_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the time unit (e.g., hours, days, weeks) used to define the frequency at which snapshots or lifecycle actions are created. Configuring this argument allows users to control the granularity of the schedule for automated resource management, aligning with retention or backup policies."
+                },
+                {
+                  "name": "location",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `location` argument in the `create_rule` block of the `aws_dlm_lifecycle_policy` resource allows users to specify the target storage location for snapshots or backups created by the Data Lifecycle Manager (DLM). By configuring this argument, users can define where the lifecycle-managed data will be stored, such as a specific AWS region or storage tier, enabling control over data placement for compliance, cost optimization, or disaster recovery purposes."
+                },
+                {
+                  "name": "times",
+                  "description": "",
+                  "required": false,
+                  "type": "list(string)",
+                  "llm_summary": "The `times` argument in the `create_rule` block of the `aws_dlm_lifecycle_policy` resource allows users to specify a list of daily timestamps (in UTC) at which lifecycle actions, such as snapshot creation, are triggered. By configuring this argument, users can define precise scheduling for automated data lifecycle management tasks, aligning with backup or retention policies to ensure consistent and predictable execution."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `create_rule` block within the `schedule` configuration of the `aws_dlm_lifecycle_policy` resource defines the criteria for creating snapshots or AMIs as part of a Data Lifecycle Manager (DLM) policy. It encapsulates settings such as creation frequency and time intervals, enabling users to automate and control the generation of backups to ensure consistent data protection and recovery strategies."
+            },
+            {
+              "name": "cross_region_copy_rule",
+              "description": "",
+              "cardinality": [
+                0,
+                3
+              ],
+              "arguments": [
+                {
+                  "name": "cmk_arn",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `cmk_arn` argument in the `cross_region_copy_rule` of the `aws_dlm_lifecycle_policy` resource allows users to specify the Amazon Resource Name (ARN) of a customer-managed KMS key (CMK) for encrypting snapshots copied across regions. By setting this argument, users can enforce encryption for cross-region snapshot copies using a specific CMK, aligning with security and compliance requirements for data protection."
+                },
+                {
+                  "name": "copy_tags",
+                  "description": "",
+                  "required": false,
+                  "type": "bool",
+                  "llm_summary": "The `copy_tags` argument in the `cross_region_copy_rule` of the `aws_dlm_lifecycle_policy` resource controls whether tags associated with the source snapshot are copied to the cross-region snapshot. Setting this argument to `true` ensures tag propagation, enabling consistent metadata management across regions, which is useful for tracking, organization, and automation purposes in multi-region environments."
+                },
+                {
+                  "name": "encrypted",
+                  "description": "",
+                  "required": true,
+                  "type": "bool",
+                  "llm_summary": "The `encrypted` argument in the `cross_region_copy_rule` of the `aws_dlm_lifecycle_policy` resource specifies whether snapshots copied to a target region should be encrypted. Setting this argument ensures data security during cross-region replication, aligning with compliance and encryption requirements for disaster recovery or backup strategies."
+                },
+                {
+                  "name": "target",
+                  "description": "",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `target` argument in the `cross_region_copy_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the destination AWS region or ARN where snapshots or AMIs will be copied as part of the cross-region backup process. Setting this argument enables users to define the target location for replicated resources, ensuring compliance, disaster recovery, or multi-region availability goals."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "deprecate_rule",
+                  "description": "",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "interval",
+                      "description": "",
+                      "required": true,
+                      "type": "number",
+                      "llm_summary": "The `interval` argument in the `deprecate_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the frequency, in days, at which snapshots are marked for deprecation. By defining this value, users control the lifecycle timing for transitioning snapshots to a deprecated state, enabling automated management of snapshot retention and cleanup policies aligned with organizational data lifecycle goals."
+                    },
+                    {
+                      "name": "interval_unit",
+                      "description": "",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `interval_unit` argument in the `deprecate_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the time unit (e.g., days, weeks, months) used to define the interval for deprecating snapshots. By setting this argument, users control the granularity of the deprecation schedule, enabling precise configuration of lifecycle policies to align with retention or compliance requirements."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `deprecate_rule` configuration block within the `cross_region_copy_rule` of the `aws_dlm_lifecycle_policy` resource defines settings to automatically mark cross-region copied snapshots as deprecated after a specified period. It encapsulates lifecycle management parameters, such as the deprecation interval, enabling users to streamline snapshot governance and ensure outdated copies are flagged for eventual removal or archival. Configuring this block helps enforce snapshot lifecycle policies, reducing storage costs and maintaining compliance with retention strategies."
+                },
+                {
+                  "name": "retain_rule",
+                  "description": "",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "interval",
+                      "description": "",
+                      "required": true,
+                      "type": "number",
+                      "llm_summary": "The `interval` argument in the `retain_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the frequency, in number of days, at which snapshots or backups are retained as part of the lifecycle policy. By defining this value, users control the retention schedule for managed resources, ensuring compliance with backup policies or optimizing storage costs by maintaining snapshots at regular intervals."
+                    },
+                    {
+                      "name": "interval_unit",
+                      "description": "",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `interval_unit` argument in the `retain_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the time unit (e.g., days, weeks, months, or years) used to define the retention period for snapshots or AMIs managed by the lifecycle policy. By setting this argument, users control the granularity of the retention schedule, enabling precise configuration of how long resources are retained before being deleted."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `retain_rule` block within the `cross_region_copy_rule` of the `aws_dlm_lifecycle_policy` resource defines retention settings for snapshots copied across regions, specifying how long these snapshots should be preserved. By configuring this block, users can enforce detailed lifecycle management policies for cross-region backups, ensuring compliance, cost optimization, and data availability requirements."
+                }
+              ],
+              "llm_summary": "The `cross_region_copy_rule` block within the `schedule` configuration of the `aws_dlm_lifecycle_policy` resource defines rules for copying snapshots or AMIs to a different AWS region as part of a data lifecycle management policy. It encapsulates settings such as the destination region, encryption configuration, and retention rules, enabling users to enhance disaster recovery, compliance, and data redundancy by automating cross-region replication of backups."
+            },
+            {
+              "name": "deprecate_rule",
+              "description": "",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "count",
+                  "description": "",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `count` argument in the `deprecate_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the number of deprecation rules to apply for managing the lifecycle of snapshots or AMIs. By setting this argument, users can define multiple rules to automate the deprecation process, such as marking resources as obsolete after a certain period, aligning with retention policies or compliance requirements."
+                },
+                {
+                  "name": "interval",
+                  "description": "",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `interval` argument in the `deprecate_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the frequency, in days, at which snapshots are marked for deprecation. By configuring this value, users can define the periodic schedule for transitioning snapshots to a deprecated state, aligning with their data lifecycle management goals such as optimizing storage or enforcing retention policies."
+                },
+                {
+                  "name": "interval_unit",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `interval_unit` argument in the `deprecate_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the time unit (e.g., days, weeks, months) used to define the interval for deprecating snapshots. By configuring this argument, users can control the granularity of the deprecation schedule, aligning snapshot lifecycle management with retention policies or compliance requirements."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `deprecate_rule` block within the `schedule` configuration of the `aws_dlm_lifecycle_policy` resource defines rules for automatically deprecating older versions of Amazon EBS snapshots based on specified criteria. It encapsulates settings related to the timing and conditions for marking snapshots as deprecated, enabling users to streamline snapshot lifecycle management and ensure compliance with retention policies or cost optimization goals."
+            },
+            {
+              "name": "fast_restore_rule",
+              "description": "",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "availability_zones",
+                  "description": "",
+                  "required": true,
+                  "type": "set(string)",
+                  "llm_summary": "The `availability_zones` argument in the `fast_restore_rule` of the `aws_dlm_lifecycle_policy` resource specifies the set of Availability Zones where fast snapshot restore functionality will be enabled for Amazon EBS snapshots managed by the lifecycle policy. By defining this argument, users ensure optimized snapshot recovery performance in specific zones, aligning with goals like minimizing latency and improving disaster recovery readiness in targeted regions."
+                },
+                {
+                  "name": "count",
+                  "description": "",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `count` argument in the `fast_restore_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the number of fast restore rules to configure for enabling fast snapshot restores in specific AWS regions. By setting this argument, users can control the replication of fast restore rules across multiple regions, optimizing snapshot recovery performance for their workloads."
+                },
+                {
+                  "name": "interval",
+                  "description": "",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `interval` argument in the `fast_restore_rule` of the `aws_dlm_lifecycle_policy` resource specifies the frequency, in hours, at which snapshots are evaluated for enabling fast snapshot restore. By configuring this value, users can control how often the policy checks and applies fast restore settings, optimizing snapshot availability for performance-critical workloads."
+                },
+                {
+                  "name": "interval_unit",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `interval_unit` argument in the `fast_restore_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the time unit (e.g., hours or days) used to define the frequency at which fast snapshot restores are enabled for matching snapshots. By configuring this argument, users can control the granularity of the restore schedule, aligning it with their operational or recovery time objectives."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `fast_restore_rule` block within the `schedule` configuration of the `aws_dlm_lifecycle_policy` resource enables and manages fast snapshot restores for Amazon EBS snapshots created by the lifecycle policy. It encapsulates settings related to the regions and availability zones where fast snapshot restore should be activated, allowing users to optimize recovery times and ensure rapid access to snapshots in specific locations. Configuring this block helps achieve faster EBS volume creation from snapshots, improving operational efficiency in disaster recovery and high-availability scenarios."
+            },
+            {
+              "name": "retain_rule",
+              "description": "",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "count",
+                  "description": "",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `count` argument in the `retain_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the number of snapshots or recovery points to retain as part of the lifecycle management policy. By configuring this argument, users can define retention limits to control the duration and quantity of backups, aligning with compliance, cost optimization, or disaster recovery goals."
+                },
+                {
+                  "name": "interval",
+                  "description": "",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `interval` argument in the `retain_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the frequency, in number of days, between snapshots or backups retained by the lifecycle policy. By configuring this value, users can define the retention cadence for their backups, ensuring compliance with data protection policies or optimizing storage costs."
+                },
+                {
+                  "name": "interval_unit",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `interval_unit` argument in the `retain_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the time unit (e.g., days, weeks, months) used to define the retention period for snapshots or AMIs managed by the lifecycle policy. By configuring this argument, users can control the granularity of retention intervals, aligning resource cleanup schedules with organizational policies or compliance requirements."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `retain_rule` block within the `schedule` configuration of the `aws_dlm_lifecycle_policy` resource defines retention settings for snapshots or AMIs managed by the lifecycle policy. It specifies the number of backups to retain, enabling users to control storage costs and ensure compliance with backup retention requirements. Configuring this block allows for precise management of resource lifecycle policies by automating retention limits."
+            },
+            {
+              "name": "share_rule",
+              "description": "",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "target_accounts",
+                  "description": "",
+                  "required": true,
+                  "type": "set(string)",
+                  "llm_summary": "The `target_accounts` argument in the `share_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the AWS account IDs that will receive shared access to snapshots managed by the lifecycle policy. By defining this set of account IDs, users can control which external or internal accounts are authorized to access the snapshots, enabling cross-account sharing for backup, disaster recovery, or compliance purposes."
+                },
+                {
+                  "name": "unshare_interval",
+                  "description": "",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `unshare_interval` argument in the `share_rule` block of the `aws_dlm_lifecycle_policy` resource specifies the duration (in hours) after which shared snapshots are automatically unshared. This allows users to define a lifecycle behavior for managing access to shared snapshots, ensuring temporary sharing and automated revocation to enhance security and compliance."
+                },
+                {
+                  "name": "unshare_interval_unit",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `unshare_interval_unit` argument in the `share_rule` of the `aws_dlm_lifecycle_policy` resource allows users to specify the time unit (e.g., hours, days, or weeks) for the interval after which shared snapshots are unshared. This configuration helps define the lifecycle behavior for managing shared snapshot access, aligning with retention or compliance policies for resource sharing."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `share_rule` configuration block within the `schedule` of the `aws_dlm_lifecycle_policy` resource defines rules for sharing snapshots created by the lifecycle policy with specific AWS accounts. It encapsulates settings related to account IDs and permissions, enabling users to automate snapshot sharing for backup, disaster recovery, or cross-account collaboration. Configuring this block helps achieve streamlined and secure snapshot distribution across designated accounts."
+            }
+          ],
+          "llm_summary": "The `schedule` configuration block within the `policy_details` of the `aws_dlm_lifecycle_policy` resource defines the timing and frequency for executing lifecycle management actions, such as snapshot creation or retention. It encapsulates settings like name, tags, copy rules, and execution intervals, enabling users to automate and customize data protection workflows for AWS resources based on specific schedules."
+        }
+      ],
+      "llm_summary": "The `policy_details` configuration block within the `aws_dlm_lifecycle_policy` resource defines the core settings for managing Data Lifecycle Manager (DLM) policies, enabling users to automate the creation, retention, and deletion of Amazon EBS snapshots or AMIs. This block encapsulates lifecycle rules, schedules, and target resource types, providing granular control over backup and retention strategies to optimize storage management and ensure compliance with data protection policies."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) of the DLM Lifecycle Policy.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

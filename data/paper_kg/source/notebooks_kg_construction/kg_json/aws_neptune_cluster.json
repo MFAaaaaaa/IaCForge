@@ -1,0 +1,287 @@
+{
+    "resource": {
+        "name": "aws_neptune_cluster",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "allow_major_version_upgrade",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "apply_immediately",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "availability_zones",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "backup_retention_period",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "cluster_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_identifier_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "copy_tags_to_snapshot",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "deletion_protection",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "enable_cloudwatch_logs_exports",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "engine",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "engine_version",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "final_snapshot_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "global_cluster_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "iam_database_authentication_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "iam_roles",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "kms_key_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "neptune_cluster_parameter_group_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "neptune_instance_parameter_group_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "neptune_subnet_group_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "port",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "preferred_backup_window",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "preferred_maintenance_window",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "replication_source_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "skip_final_snapshot",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "snapshot_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "storage_encrypted",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "storage_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "vpc_security_group_ids",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "serverless_v2_scaling_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "max_capacity",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "min_capacity",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_members",
+            "description": "",
+            "optional": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "cluster_resource_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "endpoint",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "hosted_zone_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "reader_endpoint",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

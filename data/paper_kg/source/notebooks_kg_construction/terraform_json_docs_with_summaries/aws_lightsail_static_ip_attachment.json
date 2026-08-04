@@ -1,0 +1,46 @@
+{
+  "resource": {
+    "name": "aws_lightsail_static_ip_attachment",
+    "description": "Provides a static IP address attachment - relationship between a Lightsail static IP & Lightsail instance. Lightsail is currently only supported in a limited number of AWS Regions, please see \"Regions and Availability Zones in Amazon Lightsail\" for more details",
+    "llm_summary": "The `aws_lightsail_static_ip_attachment` resource enables the association of a Lightsail static IP address with a Lightsail instance, ensuring consistent and reliable access to the instance via a fixed IP. Common use cases include configuring stable endpoints for web applications, APIs, or other services hosted on Lightsail instances. This resource simplifies IP lifecycle management by automating the attachment process, supporting scenarios like failover setups, DNS configuration, and maintaining persistent connectivity in supported AWS regions."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_lightsail_static_ip_attachment\" \"test\" {\n  static_ip_name = aws_lightsail_static_ip.test.id\n  instance_name  = aws_lightsail_instance.test.id\n}\n\nresource \"aws_lightsail_static_ip\" \"test\" {\n  name = \"example\"\n}\n\nresource \"aws_lightsail_instance\" \"test\" {\n  name              = \"example\"\n  availability_zone = \"us-east-1b\"\n  blueprint_id      = \"string\"\n  bundle_id         = \"string\"\n  key_pair_name     = \"some_key_name\"\n}",
+      "llm_summary": "This example demonstrates how to attach an AWS Lightsail static IP to a Lightsail instance using the `aws_lightsail_static_ip_attachment` resource. It showcases the configuration of a static IP (`aws_lightsail_static_ip`) and an instance (`aws_lightsail_instance`), highlighting key arguments such as `static_ip_name` and `instance_name` for establishing the attachment."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_lightsail_static_ip_attachment` resource represents the unique identifier of the static IP attachment. While optional, it is typically used for referencing or managing the attachment in Terraform's state, enabling users to track and interact with the resource programmatically within their infrastructure."
+    },
+    {
+      "name": "instance_name",
+      "description": "(Required) The name of the Lightsail instance to attach the IP to",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `instance_name` argument specifies the name of the Lightsail instance to which the static IP will be attached, enabling users to associate a fixed, public IP address with a specific instance for consistent access and connectivity. This is essential for scenarios requiring stable endpoints, such as hosting applications or services with predictable network configurations."
+    },
+    {
+      "name": "static_ip_name",
+      "description": "(Required) The name of the allocated static IP",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `static_ip_name` argument specifies the name of the allocated static IP to be attached to a Lightsail instance, enabling users to define which static IP resource will be associated with the instance. By setting this required argument, users ensure consistent and reliable access to the instance via the designated static IP, supporting common goals like maintaining stable endpoints for applications or services."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "ip_address",
+      "description": "The allocated static IP address",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

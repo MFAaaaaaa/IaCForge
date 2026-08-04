@@ -1,0 +1,162 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_acl",
+    "description": "Provides an S3 bucket ACL resource. terraform destroy does not delete the S3 Bucket ACL but does remove the resource from Terraform state. This resource cannot be used with S3 directory buckets.",
+    "llm_summary": "The `aws_s3_bucket_acl` Terraform resource manages the configuration of access control lists (ACLs) for Amazon S3 buckets, enabling users to define granular permissions for bucket access. Common use cases include setting up predefined access levels (e.g., private, public-read, or authenticated-read) to control who can read, write, or manage bucket contents. This resource is ideal for scenarios requiring fine-tuned access management but does not delete the ACL upon resource destruction, making it suitable for persistent access control setups."
+  },
+  "examples": [
+    {
+      "title": "With private ACL",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"my-tf-example-bucket\"\n}\n\nresource \"aws_s3_bucket_ownership_controls\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n  rule {\n    object_ownership = \"BucketOwnerPreferred\"\n  }\n}\n\nresource \"aws_s3_bucket_acl\" \"example\" {\n  depends_on = [aws_s3_bucket_ownership_controls.example]\n\n  bucket = aws_s3_bucket.example.id\n  acl    = \"private\"\n}",
+      "llm_summary": "\"Demonstrates how to configure an S3 bucket with a private ACL using the `aws_s3_bucket_acl` resource, ensuring restricted access to the bucket. Includes `depends_on` to enforce ownership controls with the `aws_s3_bucket_ownership_controls` resource, setting `object_ownership` to `BucketOwnerPreferred` for enhanced security and ownership management.\""
+    },
+    {
+      "title": "With public-read ACL",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"my-tf-example-bucket\"\n}\n\nresource \"aws_s3_bucket_ownership_controls\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n  rule {\n    object_ownership = \"BucketOwnerPreferred\"\n  }\n}\n\nresource \"aws_s3_bucket_public_access_block\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n\n  block_public_acls       = false\n  block_public_policy     = false\n  ignore_public_acls      = false\n  restrict_public_buckets = false\n}\n\nresource \"aws_s3_bucket_acl\" \"example\" {\n  depends_on = [\n    aws_s3_bucket_ownership_controls.example,\n    aws_s3_bucket_public_access_block.example,\n  ]\n\n  bucket = aws_s3_bucket.example.id\n  acl    = \"public-read\"\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS S3 bucket with a `public-read` ACL using the `aws_s3_bucket_acl` resource, while ensuring compatibility with ownership controls and public access block settings. It illustrates how to manage bucket-level permissions by explicitly disabling public access restrictions and setting `object_ownership` to `BucketOwnerPreferred`."
+    },
+    {
+      "title": "With Grants",
+      "code": "data \"aws_canonical_user_id\" \"current\" {}\n\nresource \"aws_s3_bucket\" \"example\" {\n  bucket = \"my-tf-example-bucket\"\n}\n\nresource \"aws_s3_bucket_ownership_controls\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n  rule {\n    object_ownership = \"BucketOwnerPreferred\"\n  }\n}\n\nresource \"aws_s3_bucket_acl\" \"example\" {\n  depends_on = [aws_s3_bucket_ownership_controls.example]\n\n  bucket = aws_s3_bucket.example.id\n  access_control_policy {\n    grant {\n      grantee {\n        id   = data.aws_canonical_user_id.current.id\n        type = \"CanonicalUser\"\n      }\n      permission = \"READ\"\n    }\n\n    grant {\n      grantee {\n        type = \"Group\"\n        uri  = \"http://acs.amazonaws.com/groups/s3/LogDelivery\"\n      }\n      permission = \"READ_ACP\"\n    }\n\n    owner {\n      id = data.aws_canonical_user_id.current.id\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure granular access control for an S3 bucket using the `aws_s3_bucket_acl` resource with custom grants. It showcases the use of the `access_control_policy` block to define specific permissions for a canonical user and an S3 log delivery group, along with ownership settings enforced via the `aws_s3_bucket_ownership_controls` resource."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "acl",
+      "description": "(Optional, either `access_control_policy` or `acl` is required) Specifies the Canned ACL to apply to the bucket. Valid values: `private`, `public-read`, `public-read-write`, `aws-exec-read`, `authenticated-read`, `bucket-owner-read`, `bucket-owner-full-control`, `log-delivery-write`. Full details are available on the AWS documentation.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `acl` argument in the `aws_s3_bucket_acl` resource allows users to specify a predefined (\"canned\") access control list (ACL) for an S3 bucket, defining the default permissions for who can read, write, or manage the bucket. By setting this argument, users can quickly configure bucket-level access policies to align with common use cases, such as private storage, public access, or permissions for specific AWS services or authenticated users."
+    },
+    {
+      "name": "bucket",
+      "description": "(Required, Forces new resource) Bucket to which to apply the ACL.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket` argument specifies the name of the S3 bucket to which the access control list (ACL) will be applied, serving as the target resource for configuring permissions. By setting this required argument, users define the specific bucket whose access policies are managed, enabling control over read, write, and other access behaviors to align with security and compliance goals."
+    },
+    {
+      "name": "expected_bucket_owner",
+      "description": "(Optional, Forces new resource) Account ID of the expected bucket owner.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `expected_bucket_owner` argument in the `aws_s3_bucket_acl` resource allows users to specify the AWS account ID of the bucket's expected owner, ensuring that ACL changes are applied only if the bucket is owned by the designated account. This provides an additional layer of validation and security, helping users prevent accidental modifications to buckets owned by unintended accounts."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_s3_bucket_acl` resource represents the unique identifier of the S3 bucket ACL configuration. While optional, it can be used to reference or track the specific ACL settings applied to a bucket, aiding in resource management and integration with other Terraform configurations or external systems."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "access_control_policy",
+      "description": "(Optional, either `access_control_policy` or `acl` is required) Configuration block that sets the ACL permissions for an object per grantee. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "grant",
+          "description": "(Required) Set of `grant` configuration blocks. See below.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "permission",
+              "description": "(Required) Logging permissions assigned to the grantee for the bucket. Valid values: `FULL_CONTROL`, `WRITE`, `WRITE_ACP`, `READ`, `READ_ACP`. See What permissions can I grant? for more details about what each permission means in the context of buckets.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `permission` argument in the `grant` block of the `aws_s3_bucket_acl` resource specifies the level of access granted to a designated entity (grantee) for the S3 bucket. By defining this argument, users can control specific permissions such as `FULL_CONTROL`, `WRITE`, `WRITE_ACP`, `READ`, or `READ_ACP`, enabling fine-grained access management to meet security and operational requirements for bucket interactions."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "grantee",
+              "description": "(Required) Configuration block for the person being granted permissions. See below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "display_name",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `display_name` argument in the `aws_s3_bucket_acl` resource allows users to specify a human-readable identifier for the grantee, providing a descriptive label that can help distinguish or clarify the entity receiving access permissions. While optional, setting this argument enhances the clarity of access control configurations, especially in environments with multiple grantees."
+                },
+                {
+                  "name": "email_address",
+                  "description": "(Optional) Email address of the grantee. See Regions and Endpoints for supported AWS regions where this argument can be specified.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `email_address` argument in the `aws_s3_bucket_acl` resource allows users to specify the email address of a grantee, enabling access control by identifying the recipient of permissions for the S3 bucket. This argument is typically used to grant access to an AWS account associated with the provided email, aligning with user goals of managing bucket-level permissions and sharing resources securely."
+                },
+                {
+                  "name": "id",
+                  "description": "(Optional) Canonical user ID of the grantee.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `id` argument in the `aws_s3_bucket_acl` resource allows users to specify the canonical user ID of the grantee, enabling precise control over which AWS account or user is granted access to the S3 bucket. By setting this argument, users can define access permissions for a specific entity, aligning with common goals like configuring fine-grained access control for bucket-level operations."
+                },
+                {
+                  "name": "type",
+                  "description": "(Required) Type of grantee. Valid values: `CanonicalUser`, `AmazonCustomerByEmail`, `Group`.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `type` argument in the `grantee` block of the `aws_s3_bucket_acl` resource specifies the category of entity (e.g., `CanonicalUser`, `AmazonCustomerByEmail`, or `Group`) that will be granted access to the S3 bucket. By defining this argument, users control the access model and ensure permissions are assigned to the appropriate type of grantee, aligning with their security and sharing requirements."
+                },
+                {
+                  "name": "uri",
+                  "description": "(Optional) URI of the grantee group.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `uri` argument in the `aws_s3_bucket_acl` resource allows users to specify the predefined URI of an AWS grantee group, such as \"AllUsers\" or \"AuthenticatedUsers,\" to define access permissions for the S3 bucket. By setting this argument, users can grant standardized access to specific groups, enabling broader or restricted access control aligned with common use cases like public access or authenticated user access."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The \"grantee\" configuration block within the \"grant\" section of the `aws_s3_bucket_acl` resource defines the entity (user, group, or AWS account) being granted specific permissions to access the S3 bucket. It encapsulates settings such as the grantee's type, identifier, and display name, enabling precise control over who can access the bucket and under what conditions, thereby supporting fine-grained access management for S3 resources."
+            }
+          ],
+          "llm_summary": "The `grant` configuration block within the `access_control_policy` of the `aws_s3_bucket_acl` resource defines granular permissions for specific AWS principals, enabling fine-tuned access control to the S3 bucket. It encapsulates settings for specifying grantees (e.g., AWS accounts, users, or groups) and their associated permissions (e.g., `READ`, `WRITE`, `FULL_CONTROL`), allowing users to customize bucket-level access policies to meet security and compliance requirements."
+        },
+        {
+          "name": "owner",
+          "description": "(Required) Configuration block for the bucket owner's display name and ID. See below.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "display_name",
+              "description": "(Optional) Display name of the owner.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `display_name` argument for the `aws_s3_bucket_acl` resource allows users to specify a human-readable identifier for the bucket owner, enhancing clarity when managing or auditing ownership details. While optional, setting this argument can improve visibility and organization in environments with multiple S3 bucket owners."
+            },
+            {
+              "name": "id",
+              "description": "(Required) ID of the owner.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `id` argument specifies the unique identifier of the S3 bucket owner, enabling users to define ownership for access control purposes in the bucket's ACL configuration. By setting this required string, users ensure that permissions and access rights are correctly attributed to the designated owner, aligning with security and compliance goals."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The \"owner\" configuration block within the \"access_control_policy\" of the \"aws_s3_bucket_acl\" resource specifies the bucket owner's display name and unique ID, enabling precise identification and assignment of ownership for access control purposes. This block ensures proper attribution and management of permissions, helping users establish clear ownership and accountability for S3 bucket access policies."
+        }
+      ],
+      "llm_summary": "The `access_control_policy` configuration block within the `aws_s3_bucket_acl` resource enables granular control over access permissions for an S3 bucket by defining ACL rules for specific grantees. It encapsulates settings related to permission assignments, allowing users to customize access levels for individual users or groups, ensuring precise and secure management of bucket access policies."
+    }
+  ],
+  "attributes": []
+}

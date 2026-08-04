@@ -1,0 +1,57 @@
+[
+    {
+        "argument_path": "production_variants.model_name",
+        "references_output": "aws_sagemaker_model.name",
+        "target_resource_type": "aws_sagemaker_model"
+    },
+    {
+        "argument_path": "kms_key_arn",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "production_variants.core_dump_config.destination_s3_uri",
+        "references_output": "aws_s3_bucket.bucket",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "production_variants.core_dump_config.kms_key_id",
+        "references_output": "aws_kms_key.id",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "data_capture_config.destination_s3_uri",
+        "references_output": "aws_s3_bucket.bucket",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "data_capture_config.kms_key_id",
+        "references_output": "aws_kms_key.id",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "async_inference_config.output_config.s3_output_path",
+        "references_output": "aws_s3_bucket.bucket",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "async_inference_config.output_config.s3_failure_path",
+        "references_output": "aws_s3_bucket.bucket",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "async_inference_config.output_config.kms_key_id",
+        "references_output": "aws_kms_key.id",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "async_inference_config.output_config.notification_config.error_topic",
+        "references_output": "aws_sns_topic.arn",
+        "target_resource_type": "aws_sns_topic"
+    },
+    {
+        "argument_path": "async_inference_config.output_config.notification_config.success_topic",
+        "references_output": "aws_sns_topic.arn",
+        "target_resource_type": "aws_sns_topic"
+    }
+]

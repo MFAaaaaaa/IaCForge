@@ -1,0 +1,986 @@
+{
+    "resource": {
+        "name": "aws_kinesisanalyticsv2_application",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "application_mode",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "force_stop",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "runtime_environment",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "service_execution_role",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "start_application",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "application_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "application_code_configuration",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "code_content_type",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "code_content",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "text_content",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "s3_content_location",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "bucket_arn",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "file_key",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "object_version",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "application_snapshot_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "snapshots_enabled",
+                            "description": "",
+                            "required": true,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "environment_properties",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "property_group",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                50
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "property_group_id",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "property_map",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "map(string)"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "flink_application_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "checkpoint_configuration",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "checkpoint_interval",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "checkpointing_enabled",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "configuration_type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "min_pause_between_checkpoints",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "monitoring_configuration",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "configuration_type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "log_level",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "metrics_level",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "parallelism_configuration",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "auto_scaling_enabled",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "configuration_type",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "parallelism",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "parallelism_per_kpu",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "run_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "application_restore_configuration",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "application_restore_type",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "snapshot_name",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "flink_run_configuration",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "allow_non_restored_state",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "sql_application_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "input",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "in_app_stream_names",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "list(string)"
+                                },
+                                {
+                                    "name": "input_id",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "name_prefix",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "input_parallelism",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "count",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "input_processing_configuration",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [],
+                                    "blocks": [
+                                        {
+                                            "name": "input_lambda_processor",
+                                            "description": "",
+                                            "cardinality": [
+                                                1,
+                                                1
+                                            ],
+                                            "arguments": [
+                                                {
+                                                    "name": "resource_arn",
+                                                    "description": "",
+                                                    "required": true,
+                                                    "type": "string"
+                                                }
+                                            ],
+                                            "blocks": []
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "input_schema",
+                                    "description": "",
+                                    "cardinality": [
+                                        1,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "record_encoding",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": [
+                                        {
+                                            "name": "record_column",
+                                            "description": "",
+                                            "cardinality": [
+                                                1,
+                                                1000
+                                            ],
+                                            "arguments": [
+                                                {
+                                                    "name": "mapping",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "name": "name",
+                                                    "description": "",
+                                                    "required": true,
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "name": "sql_type",
+                                                    "description": "",
+                                                    "required": true,
+                                                    "type": "string"
+                                                }
+                                            ],
+                                            "blocks": []
+                                        },
+                                        {
+                                            "name": "record_format",
+                                            "description": "",
+                                            "cardinality": [
+                                                1,
+                                                1
+                                            ],
+                                            "arguments": [
+                                                {
+                                                    "name": "record_format_type",
+                                                    "description": "",
+                                                    "required": true,
+                                                    "type": "string"
+                                                }
+                                            ],
+                                            "blocks": [
+                                                {
+                                                    "name": "mapping_parameters",
+                                                    "description": "",
+                                                    "cardinality": [
+                                                        1,
+                                                        1
+                                                    ],
+                                                    "arguments": [],
+                                                    "blocks": [
+                                                        {
+                                                            "name": "csv_mapping_parameters",
+                                                            "description": "",
+                                                            "cardinality": [
+                                                                0,
+                                                                1
+                                                            ],
+                                                            "arguments": [
+                                                                {
+                                                                    "name": "record_column_delimiter",
+                                                                    "description": "",
+                                                                    "required": true,
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "name": "record_row_delimiter",
+                                                                    "description": "",
+                                                                    "required": true,
+                                                                    "type": "string"
+                                                                }
+                                                            ],
+                                                            "blocks": []
+                                                        },
+                                                        {
+                                                            "name": "json_mapping_parameters",
+                                                            "description": "",
+                                                            "cardinality": [
+                                                                0,
+                                                                1
+                                                            ],
+                                                            "arguments": [
+                                                                {
+                                                                    "name": "record_row_path",
+                                                                    "description": "",
+                                                                    "required": true,
+                                                                    "type": "string"
+                                                                }
+                                                            ],
+                                                            "blocks": []
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "input_starting_position_configuration",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        0
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "input_starting_position",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "kinesis_firehose_input",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "resource_arn",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "kinesis_streams_input",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "resource_arn",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        },
+                        {
+                            "name": "output",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                3
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "name",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "output_id",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "destination_schema",
+                                    "description": "",
+                                    "cardinality": [
+                                        1,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "record_format_type",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "kinesis_firehose_output",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "resource_arn",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "kinesis_streams_output",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "resource_arn",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "lambda_output",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "resource_arn",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        },
+                        {
+                            "name": "reference_data_source",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "reference_id",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "table_name",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "reference_schema",
+                                    "description": "",
+                                    "cardinality": [
+                                        1,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "record_encoding",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": [
+                                        {
+                                            "name": "record_column",
+                                            "description": "",
+                                            "cardinality": [
+                                                1,
+                                                1000
+                                            ],
+                                            "arguments": [
+                                                {
+                                                    "name": "mapping",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "name": "name",
+                                                    "description": "",
+                                                    "required": true,
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "name": "sql_type",
+                                                    "description": "",
+                                                    "required": true,
+                                                    "type": "string"
+                                                }
+                                            ],
+                                            "blocks": []
+                                        },
+                                        {
+                                            "name": "record_format",
+                                            "description": "",
+                                            "cardinality": [
+                                                1,
+                                                1
+                                            ],
+                                            "arguments": [
+                                                {
+                                                    "name": "record_format_type",
+                                                    "description": "",
+                                                    "required": true,
+                                                    "type": "string"
+                                                }
+                                            ],
+                                            "blocks": [
+                                                {
+                                                    "name": "mapping_parameters",
+                                                    "description": "",
+                                                    "cardinality": [
+                                                        1,
+                                                        1
+                                                    ],
+                                                    "arguments": [],
+                                                    "blocks": [
+                                                        {
+                                                            "name": "csv_mapping_parameters",
+                                                            "description": "",
+                                                            "cardinality": [
+                                                                0,
+                                                                1
+                                                            ],
+                                                            "arguments": [
+                                                                {
+                                                                    "name": "record_column_delimiter",
+                                                                    "description": "",
+                                                                    "required": true,
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "name": "record_row_delimiter",
+                                                                    "description": "",
+                                                                    "required": true,
+                                                                    "type": "string"
+                                                                }
+                                                            ],
+                                                            "blocks": []
+                                                        },
+                                                        {
+                                                            "name": "json_mapping_parameters",
+                                                            "description": "",
+                                                            "cardinality": [
+                                                                0,
+                                                                1
+                                                            ],
+                                                            "arguments": [
+                                                                {
+                                                                    "name": "record_row_path",
+                                                                    "description": "",
+                                                                    "required": true,
+                                                                    "type": "string"
+                                                                }
+                                                            ],
+                                                            "blocks": []
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "name": "s3_reference_data_source",
+                                    "description": "",
+                                    "cardinality": [
+                                        1,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "bucket_arn",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "file_key",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "vpc_configuration",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "security_group_ids",
+                            "description": "",
+                            "required": true,
+                            "type": "set(string)"
+                        },
+                        {
+                            "name": "subnet_ids",
+                            "description": "",
+                            "required": true,
+                            "type": "set(string)"
+                        },
+                        {
+                            "name": "vpc_configuration_id",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "vpc_id",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "cloudwatch_logging_options",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "cloudwatch_logging_option_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "log_stream_arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "create_timestamp",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "last_update_timestamp",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "status",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "version_id",
+            "description": "",
+            "optional": false,
+            "type": "number"
+        }
+    ]
+}

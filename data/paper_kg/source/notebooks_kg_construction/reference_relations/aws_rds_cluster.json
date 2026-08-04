@@ -1,0 +1,77 @@
+[
+    {
+        "argument_path": "db_subnet_group_name",
+        "references_output": "aws_db_subnet_group.name",
+        "target_resource_type": "aws_db_subnet_group"
+    },
+    {
+        "argument_path": "domain",
+        "references_output": "aws_directory_service_directory.id",
+        "target_resource_type": "aws_directory_service_directory"
+    },
+    {
+        "argument_path": "domain_iam_role_name",
+        "references_output": "aws_iam_role.name",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "global_cluster_identifier",
+        "references_output": "aws_rds_global_cluster.global_cluster_identifier",
+        "target_resource_type": "aws_rds_global_cluster"
+    },
+    {
+        "argument_path": "iam_roles",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "kms_key_id",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "master_user_secret_kms_key_id",
+        "references_output": "aws_kms_key.key_id",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "monitoring_role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "replication_source_identifier",
+        "references_output": "aws_rds_cluster.arn",
+        "target_resource_type": "aws_rds_cluster"
+    },
+    {
+        "argument_path": "restore_to_point_in_time.source_cluster_identifier",
+        "references_output": "aws_rds_cluster.cluster_identifier",
+        "target_resource_type": "aws_rds_cluster"
+    },
+    {
+        "argument_path": "restore_to_point_in_time.source_cluster_identifier",
+        "references_output": "aws_rds_cluster.arn",
+        "target_resource_type": "aws_rds_cluster"
+    },
+    {
+        "argument_path": "restore_to_point_in_time.source_cluster_resource_id",
+        "references_output": "aws_rds_cluster.cluster_resource_id",
+        "target_resource_type": "aws_rds_cluster"
+    },
+    {
+        "argument_path": "s3_import.ingestion_role",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "snapshot_identifier",
+        "references_output": "aws_db_cluster_snapshot.id",
+        "target_resource_type": "aws_db_cluster_snapshot"
+    },
+    {
+        "argument_path": "vpc_security_group_ids",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    }
+]

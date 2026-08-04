@@ -1,0 +1,22 @@
+[
+    {
+        "argument_path": "launch_template_config.launch_template_specification.launch_template_id",
+        "references_output": "aws_launch_template.id",
+        "target_resource_type": "aws_launch_template"
+    },
+    {
+        "argument_path": "launch_template_config.launch_template_specification.launch_template_name",
+        "references_output": "aws_launch_template.name",
+        "target_resource_type": "aws_launch_template"
+    },
+    {
+        "argument_path": "launch_template_config.launch_template_specification.version",
+        "references_output": "aws_launch_template.latest_version",
+        "target_resource_type": "aws_launch_template"
+    },
+    {
+        "argument_path": "launch_template_config.override.subnet_id",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    }
+]

@@ -1,0 +1,617 @@
+{
+  "resource": {
+    "name": "aws_lex_intent",
+    "description": "Provides an Amazon Lex Intent resource. For more information see Amazon Lex: How It Works",
+    "llm_summary": "The `aws_lex_intent` Terraform resource enables the creation and management of Amazon Lex intents, which define user goals and conversational flows for chatbot applications. It is commonly used to configure natural language understanding capabilities for virtual assistants, customer support bots, and voice interfaces. Key configurations include specifying sample utterances, intent fulfillment logic, slot types for capturing user input, and error handling, allowing users to design tailored and dynamic conversational experiences."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_lex_intent\" \"order_flowers_intent\" {\n  confirmation_prompt {\n    max_attempts = 2\n\n    message {\n      content      = \"Okay, your {FlowerType} will be ready for pickup by {PickupTime} on {PickupDate}.  Does this sound okay?\"\n      content_type = \"PlainText\"\n    }\n  }\n\n  create_version = false\n  name           = \"OrderFlowers\"\n  description    = \"Intent to order a bouquet of flowers for pick up\"\n\n  fulfillment_activity {\n    type = \"ReturnIntent\"\n  }\n\n  rejection_statement {\n    message {\n      content      = \"Okay, I will not place your order.\"\n      content_type = \"PlainText\"\n    }\n  }\n\n  sample_utterances = [\n    \"I would like to order some flowers\",\n    \"I would like to pick up flowers\",\n  ]\n\n  slot {\n    description = \"The type of flowers to pick up\"\n    name        = \"FlowerType\"\n    priority    = 1\n\n    sample_utterances = [\n      \"I would like to order {FlowerType}\",\n    ]\n\n    slot_constraint   = \"Required\"\n    slot_type         = \"FlowerTypes\"\n    slot_type_version = \"$$LATEST\"\n\n    value_elicitation_prompt {\n      max_attempts = 2\n\n      message {\n        content      = \"What type of flowers would you like to order?\"\n        content_type = \"PlainText\"\n      }\n    }\n  }\n\n  slot {\n    description = \"The date to pick up the flowers\"\n    name        = \"PickupDate\"\n    priority    = 2\n\n    sample_utterances = [\n      \"I would like to order {FlowerType}\",\n    ]\n\n    slot_constraint   = \"Required\"\n    slot_type         = \"AMAZON.DATE\"\n    slot_type_version = \"$$LATEST\"\n\n    value_elicitation_prompt {\n      max_attempts = 2\n\n      message {\n        content      = \"What day do you want the {FlowerType} to be picked up?\"\n        content_type = \"PlainText\"\n      }\n    }\n  }\n\n  slot {\n    description = \"The time to pick up the flowers\"\n    name        = \"PickupTime\"\n    priority    = 3\n\n    sample_utterances = [\n      \"I would like to order {FlowerType}\",\n    ]\n\n    slot_constraint   = \"Required\"\n    slot_type         = \"AMAZON.TIME\"\n    slot_type_version = \"$$LATEST\"\n\n    value_elicitation_prompt {\n      max_attempts = 2\n\n      message {\n        content      = \"Pick up the {FlowerType} at what time on {PickupDate}?\"\n        content_type = \"PlainText\"\n      }\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Lex intent for ordering flowers, showcasing key features such as `confirmation_prompt`, `rejection_statement`, `fulfillment_activity`, and multiple `slot` definitions with `value_elicitation_prompt` for required user inputs like flower type, pickup date, and time. It illustrates how to define sample utterances, slot constraints, and prompts to create a conversational flow for a chatbot."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "create_version",
+      "description": "(Optional) Determines if a new slot type version is created when the initial resource is created and on each update. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `create_version` argument in the `aws_lex_intent` resource allows users to control whether a new version of the intent is automatically created during the initial resource creation and subsequent updates. Enabling this functionality (`true`) ensures versioning for the intent, which is useful for managing lifecycle changes and maintaining backward compatibility, while disabling it (`false`, default) avoids automatic versioning."
+    },
+    {
+      "name": "description",
+      "description": "(Optional) A description of the intent. Must be less than or equal to 200 characters in length.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_lex_intent` resource allows users to define a brief, human-readable summary of the intent's purpose or functionality, up to 200 characters. This helps document the intent's role within the Lex bot, improving clarity and maintainability for developers managing conversational AI workflows."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_lex_intent` resource allows users to specify a unique identifier for the Lex intent, which can be used to reference or manage the intent programmatically. While optional, setting this argument can help ensure consistent identification of the intent across Terraform configurations and integrations, supporting workflows that require explicit intent tracking or updates."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name of the intent, not case sensitive. Must be less than or equal to 100 characters in length.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies the unique identifier for the Lex intent, allowing users to define a human-readable label that represents the intent's purpose or functionality within the chatbot. Setting this argument ensures the intent is distinguishable within the Lex model and facilitates organization, retrieval, and interaction with the intent during bot development and runtime."
+    },
+    {
+      "name": "parent_intent_signature",
+      "description": "(Optional) A unique identifier for the built-in intent to base this intent on. To find the signature for an intent, see Standard Built-in Intents in the Alexa Skills Kit.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `parent_intent_signature` argument in the `aws_lex_intent` resource allows users to specify a unique identifier for a built-in intent that serves as the foundation for creating a custom intent. By setting this argument, users can inherit predefined functionality and behaviors from standard built-in intents, streamlining the development of conversational interfaces while aligning with common patterns in the Alexa Skills Kit."
+    },
+    {
+      "name": "sample_utterances",
+      "description": "(Optional) An array of utterances (strings) that a user might say to signal the intent. For example, \"I want {PizzaSize} pizza\", \"Order {Quantity} {PizzaSize} pizzas\". In each utterance, a slot name is enclosed in curly braces. Must have between 1 and 10 items in the list, and each item must be less than or equal to 200 characters in length.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `sample_utterances` argument for the `aws_lex_intent` resource allows users to define a set of example phrases that a user might say to invoke the intent, incorporating dynamic slot values enclosed in curly braces (e.g., `{{SlotName}}`). Configuring this argument helps train the Lex bot to recognize and interpret user input patterns, improving its ability to match spoken or typed phrases to the intent and enhancing conversational accuracy."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "conclusion_statement",
+      "description": "(Optional) The statement that you want Amazon Lex to convey to the user after the intent is successfully fulfilled by the Lambda function. This element is relevant only if you provide a Lambda function in the `fulfillment_activity`. If you return the intent to the client application, you can't specify this element. The `follow_up_prompt` and `conclusion_statement` are mutually exclusive. You can specify only one. Attributes are documented under statement.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "response_card",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `response_card` argument in the `conclusion_statement` of the `aws_lex_intent` resource allows users to specify a visual response card (as a string) that is displayed to the user when the intent concludes. This enables customization of the user experience by providing additional context, options, or information in a structured format, such as buttons or images, enhancing interactivity and engagement in chatbot conversations."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "message",
+          "description": "",
+          "cardinality": [
+            1,
+            15
+          ],
+          "arguments": [
+            {
+              "name": "content",
+              "description": "(Required) The text of the message. Must be less than or equal to 1000 characters in length.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `content` argument specifies the text of the message that the AWS Lex intent will deliver to users during interactions, enabling the configuration of conversational responses. By defining this required string, users control the exact message content presented by the bot, ensuring tailored and meaningful communication within the constraints of 1000 characters."
+            },
+            {
+              "name": "content_type",
+              "description": "(Required) The content type of the message string.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `content_type` argument for the `aws_lex_intent` resource specifies the format of the message string, allowing users to define how the message content is interpreted and processed by Amazon Lex (e.g., plain text or SSML). Setting this argument ensures the correct rendering and delivery of the message to end users, aligning with the desired communication style and interaction experience."
+            },
+            {
+              "name": "group_number",
+              "description": "(Optional) Identifies the message group that the message belongs to. When a group is assigned to a message, Amazon Lex returns one message from each group in the response. Must be a number between 1 and 5 (inclusive).",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `group_number` argument for the `message` in the `aws_lex_intent` resource allows users to define the message group to which a specific message belongs, enabling Amazon Lex to return one message from each group in its response. This configuration is useful for managing and organizing dynamic responses, ensuring diverse and structured message delivery within conversational flows."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The \"message\" configuration block within the \"conclusion_statement\" of the `aws_lex_intent` resource defines the text or response delivered to the user when the intent concludes successfully. It encapsulates settings for crafting user-facing messages, enabling customization of conversational outcomes and enhancing the chatbot's user experience by providing clear and contextually relevant responses."
+        }
+      ],
+      "llm_summary": "The `conclusion_statement` block in the `aws_lex_intent` resource defines the final message Amazon Lex delivers to the user after an intent is successfully fulfilled by a Lambda function, enabling seamless communication at the end of a conversational flow. It encapsulates settings for crafting user-facing statements, ensuring clarity and closure in interactions, and is mutually exclusive with `follow_up_prompt`, allowing users to tailor the fulfillment experience based on their application's requirements."
+    },
+    {
+      "name": "confirmation_prompt",
+      "description": "(Optional) Prompts the user to confirm the intent. This question should have a yes or no answer. You you must provide both the `rejection_statement` and `confirmation_prompt`, or neither. Attributes are documented under prompt.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "max_attempts",
+          "description": "",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `max_attempts` argument for the `confirmation_prompt` in the `aws_lex_intent` resource specifies the maximum number of times Amazon Lex will prompt the user for confirmation before failing the intent. By configuring this value, users can control the retry behavior for confirmation prompts, ensuring a balance between user experience and intent resolution in conversational workflows."
+        },
+        {
+          "name": "response_card",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `response_card` argument in the `confirmation_prompt` context of the `aws_lex_intent` resource allows users to specify a visual representation, such as a card or template, that is displayed to the user during the confirmation prompt. By setting this argument, users can enhance the conversational experience by providing structured, interactive content (e.g., buttons or images) to guide user responses and improve engagement."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "message",
+          "description": "",
+          "cardinality": [
+            1,
+            15
+          ],
+          "arguments": [
+            {
+              "name": "content",
+              "description": "(Required) The text of the message. Must be less than or equal to 1000 characters in length.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `content` argument specifies the text of the message that the AWS Lex intent will deliver to users during interactions, enabling the configuration of conversational responses. By defining this required string, users control the exact message content presented by the bot, ensuring tailored and meaningful communication within the intent's flow."
+            },
+            {
+              "name": "content_type",
+              "description": "(Required) The content type of the message string.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `content_type` argument specifies the format of the message content for an Amazon Lex intent, such as plain text or SSML (Speech Synthesis Markup Language). Setting this required parameter ensures the message is correctly interpreted and rendered by Lex, enabling users to define how responses are delivered to end-users in their desired format."
+            },
+            {
+              "name": "group_number",
+              "description": "(Optional) Identifies the message group that the message belongs to. When a group is assigned to a message, Amazon Lex returns one message from each group in the response. Must be a number between 1 and 5 (inclusive).",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `group_number` argument allows users to assign a message to a specific group (1-5) within an Amazon Lex intent, enabling the bot to return one message per group in its response. This configuration helps control and organize message delivery, supporting dynamic and varied conversational experiences."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The \"message\" configuration block within the \"confirmation_prompt\" of the \"aws_lex_intent\" resource defines the content and format of the user-facing messages presented when confirming an intent. It encapsulates settings for customizing the text or speech output, enabling precise control over how the chatbot communicates confirmation prompts to users, ensuring clarity and alignment with the desired conversational experience."
+        }
+      ],
+      "llm_summary": "The `confirmation_prompt` block in the `aws_lex_intent` resource configures a user-facing prompt to confirm an intent with a yes/no response, ensuring clarity before proceeding with the intent's execution. It encapsulates settings related to user interaction, requiring both `rejection_statement` and `confirmation_prompt` for proper validation, and helps achieve robust conversational flow by managing intent confirmation logic."
+    },
+    {
+      "name": "dialog_code_hook",
+      "description": "(Optional) Specifies a Lambda function to invoke for each user input. You can invoke this Lambda function to personalize user interaction. Attributes are documented under code_hook.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "message_version",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `message_version` argument specifies the version of the message format used by the `dialog_code_hook` in the `aws_lex_intent` resource, ensuring compatibility between the Lex bot and the Lambda function invoked for dialog management. Setting this required string value allows users to define the expected communication protocol, enabling seamless integration and proper execution of custom business logic during conversations."
+        },
+        {
+          "name": "uri",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `uri` argument specifies the endpoint of the Lambda function to be invoked by the `dialog_code_hook` in the `aws_lex_intent` resource. By defining this URI, users enable custom logic execution during a conversation, such as validating user input or dynamically generating responses, ensuring tailored and interactive chatbot behavior."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `dialog_code_hook` block in the `aws_lex_intent` resource configures a Lambda function to process and personalize user input during interactions with the Lex bot. This block enables dynamic and customized conversational flows by invoking the specified Lambda function for each user input, allowing users to implement advanced logic and tailor responses based on real-time context."
+    },
+    {
+      "name": "follow_up_prompt",
+      "description": "(Optional) Amazon Lex uses this prompt to solicit additional activity after fulfilling an intent. For example, after the OrderPizza intent is fulfilled, you might prompt the user to order a drink. The `follow_up_prompt` field and the `conclusion_statement` field are mutually exclusive. You can specify only one. Attributes are documented under follow_up_prompt.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "prompt",
+          "description": "(Required) Prompts for information from the user. Attributes are documented under prompt.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "max_attempts",
+              "description": "(Required) The number of times to prompt the user for information. Must be a number between 1 and 5 (inclusive).",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `max_attempts` argument for the `prompt` in the `aws_lex_intent` resource specifies the maximum number of times Amazon Lex will prompt a user to provide required information during a conversation. By setting this value (between 1 and 5), users can control the retry behavior for gathering input, ensuring a balance between user experience and chatbot responsiveness."
+            },
+            {
+              "name": "response_card",
+              "description": "(Optional) The response card. Amazon Lex will substitute session attributes and slot values into the response card. For more information, see Example: Using a Response Card. Must be less than or equal to 50000 characters in length.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `response_card` argument allows users to define a customizable visual element that Amazon Lex substitutes with session attributes and slot values during a prompt interaction. By configuring this optional string, users can enhance the conversational experience by presenting dynamic, user-specific information or options in a structured format, such as buttons or images, within the chatbot's response."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "message",
+              "description": "(Required) A set of messages, each of which provides a message string and its type. You can specify the message string in plain text or in Speech Synthesis Markup Language (SSML). Attributes are documented under message. Must contain between 1 and 15 messages.",
+              "cardinality": [
+                1,
+                15
+              ],
+              "arguments": [
+                {
+                  "name": "content",
+                  "description": "(Required) The text of the message. Must be less than or equal to 1000 characters in length.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `content` argument specifies the text of the message that the AWS Lex intent will deliver to users during interactions, enabling the configuration of conversational responses. By defining this required string, users control the exact content of the bot's reply, ensuring it aligns with the intended user experience and stays within the 1000-character limit."
+                },
+                {
+                  "name": "content_type",
+                  "description": "(Required) The content type of the message string.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `content_type` argument for the `aws_lex_intent` resource specifies the format of the message string, allowing users to define how the message content is interpreted and processed by Amazon Lex (e.g., plain text or SSML). Setting this argument ensures compatibility with the desired message rendering behavior, enabling precise control over the user interaction experience in chatbot responses."
+                },
+                {
+                  "name": "group_number",
+                  "description": "(Optional) Identifies the message group that the message belongs to. When a group is assigned to a message, Amazon Lex returns one message from each group in the response. Must be a number between 1 and 5 (inclusive).",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `group_number` argument for the `message` in the `aws_lex_intent` resource allows users to define the message group to which a specific message belongs, enabling Amazon Lex to return one message from each group in its response. By setting this argument (a number between 1 and 5), users can control the organization and prioritization of messages within conversational responses, supporting structured and dynamic dialogue flows."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The \"message\" configuration block within the \"prompt\" context of the `aws_lex_intent` resource defines a set of up to 15 messages that specify the bot's responses in either plain text or SSML format. This block enables precise control over how the bot communicates with users, allowing customization of response content and type to enhance conversational flow and user experience."
+            }
+          ],
+          "llm_summary": "The `prompt` configuration block within the `follow_up_prompt` context of the `aws_lex_intent` resource defines the user-facing prompts used to gather additional information during a follow-up interaction with an Amazon Lex bot. It encapsulates settings related to the structure and content of the prompt, enabling precise control over how the bot communicates and collects input, ensuring a seamless conversational flow and improved user experience."
+        },
+        {
+          "name": "rejection_statement",
+          "description": "(Optional) If the user answers \"no\" to the question defined in the prompt field, Amazon Lex responds with this statement to acknowledge that the intent was canceled. Attributes are documented below under statement.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "response_card",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `response_card` argument in the `rejection_statement` context of the `aws_lex_intent` resource allows users to specify a visual response card (as a string) that is displayed to the user when their input is rejected by the bot. Configuring this argument enhances the user experience by providing additional context or guidance in a structured, interactive format, such as buttons or images, to help users navigate the conversation effectively."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "message",
+              "description": "",
+              "cardinality": [
+                1,
+                15
+              ],
+              "arguments": [
+                {
+                  "name": "content",
+                  "description": "(Required) The text of the message. Must be less than or equal to 1000 characters in length.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `content` argument specifies the text of the message that the AWS Lex intent will deliver to users during interactions, enabling the configuration of conversational responses. By defining this required string, users control the exact message content presented by the bot, ensuring tailored and meaningful communication within the constraints of 1000 characters."
+                },
+                {
+                  "name": "content_type",
+                  "description": "(Required) The content type of the message string.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `content_type` argument specifies the format of the message string for an AWS Lex intent, ensuring compatibility with the expected input type (e.g., plain text or SSML). By defining this required property, users control how the bot processes and delivers responses, enabling tailored communication formats to meet application requirements."
+                },
+                {
+                  "name": "group_number",
+                  "description": "(Optional) Identifies the message group that the message belongs to. When a group is assigned to a message, Amazon Lex returns one message from each group in the response. Must be a number between 1 and 5 (inclusive).",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `group_number` argument for the `message` in the `aws_lex_intent` resource allows users to define the message group to which a specific message belongs, enabling Amazon Lex to return one message from each group in its response. This configuration helps control the grouping and prioritization of messages, supporting dynamic and organized conversational flows within a chatbot."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `message` configuration block within the `rejection_statement` of the `aws_lex_intent` resource defines the content and format of the response message presented to users when their input is rejected by the intent. It encapsulates settings for customizing the text and speech output, enabling precise control over how rejection feedback is communicated to improve user experience and clarity in conversational interfaces."
+            }
+          ],
+          "llm_summary": "The `rejection_statement` block within the `follow_up_prompt` configuration of the `aws_lex_intent` resource defines the response Amazon Lex provides when a user declines the follow-up prompt, effectively canceling the intent. This block encapsulates settings for crafting a custom acknowledgment message, enabling users to manage conversational flow and improve user experience by clearly handling intent rejection scenarios."
+        }
+      ],
+      "llm_summary": "The `follow_up_prompt` block in the `aws_lex_intent` resource configures a prompt that Amazon Lex uses to engage users with additional actions after fulfilling an intent, enabling conversational continuity. It encapsulates settings for defining follow-up interactions, such as prompting users for related activities, and is mutually exclusive with the `conclusion_statement` block, allowing users to tailor post-fulfillment behavior for enhanced chatbot workflows."
+    },
+    {
+      "name": "fulfillment_activity",
+      "description": "(Required) Describes how the intent is fulfilled. For example, after a user provides all of the information for a pizza order, `fulfillment_activity` defines how the bot places an order with a local pizza store. Attributes are documented under fulfillment_activity.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "type",
+          "description": "(Required) How the intent should be fulfilled, either by running a Lambda function or by returning the slot data to the client application. Type can be either `ReturnIntent` or `CodeHook`, as documented here.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument in the `fulfillment_activity` block of the `aws_lex_intent` resource specifies how the intent's fulfillment is handled, allowing users to define whether the intent should execute a Lambda function (`CodeHook`) or return slot data directly to the client application (`ReturnIntent`). This configuration determines the behavior of the intent's response, enabling users to tailor fulfillment logic to either server-side processing or client-side handling based on their application's requirements."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "code_hook",
+          "description": "(Optional) A description of the Lambda function that is run to fulfill the intent. Required if type is CodeHook. Attributes are documented under code_hook.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "message_version",
+              "description": "(Required) The version of the request-response that you want Amazon Lex to use to invoke your Lambda function. For more information, see Using Lambda Functions. Must be less than or equal to 5 characters in length.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `message_version` argument specifies the version of the request-response format that Amazon Lex uses to invoke the associated Lambda function via the `code_hook`. By defining this value (up to 5 characters), users ensure compatibility between Lex and the Lambda function, enabling seamless execution of custom logic during intent fulfillment or validation."
+            },
+            {
+              "name": "uri",
+              "description": "(Required) The Amazon Resource Name (ARN) of the Lambda function.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `uri` argument specifies the Amazon Resource Name (ARN) of the Lambda function to be invoked as a code hook for the `aws_lex_intent` resource. By defining this, users enable custom logic execution during the intent's lifecycle, such as validating user input or fulfilling the intent, aligning with common goals like dynamic response generation and backend integration."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `code_hook` configuration block within the `fulfillment_activity` of the `aws_lex_intent` resource defines the integration of an AWS Lambda function to handle intent fulfillment. It encapsulates settings required to specify and execute the Lambda function, enabling dynamic and custom logic for processing user intents. Configuring this block allows users to implement advanced fulfillment workflows by leveraging serverless compute for tailored responses and actions."
+        }
+      ],
+      "llm_summary": "The `fulfillment_activity` block in the `aws_lex_intent` resource defines how the bot completes an intent after gathering all required user inputs, such as executing a specific action or invoking a Lambda function. It encapsulates settings related to the fulfillment mechanism, enabling users to configure how the bot interacts with external systems or services to achieve the desired outcome, such as placing orders or triggering workflows."
+    },
+    {
+      "name": "rejection_statement",
+      "description": "(Optional) When the user answers \"no\" to the question defined in `confirmation_prompt`, Amazon Lex responds with this statement to acknowledge that the intent was canceled. You must provide both the `rejection_statement` and the `confirmation_prompt`, or neither. Attributes are documented under statement.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "response_card",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `response_card` argument in the `rejection_statement` context of the `aws_lex_intent` resource allows users to specify a visual response card (as a string) that is displayed to the user when their input is rejected by the bot. Configuring this argument enhances the user experience by providing additional context or options in a structured, interactive format, such as buttons or images, during rejection scenarios."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "message",
+          "description": "",
+          "cardinality": [
+            1,
+            15
+          ],
+          "arguments": [
+            {
+              "name": "content",
+              "description": "(Required) The text of the message. Must be less than or equal to 1000 characters in length.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `content` argument specifies the text of the message that the AWS Lex intent will deliver to users during interactions, enabling the configuration of conversational responses. By defining this required string, users control the exact message content presented by the bot, ensuring tailored and meaningful communication within the constraints of 1000 characters."
+            },
+            {
+              "name": "content_type",
+              "description": "(Required) The content type of the message string.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `content_type` argument specifies the format of the message string for an AWS Lex intent, ensuring compatibility with the expected input type (e.g., plain text or SSML). By defining this required property, users control how the bot processes and delivers responses, enabling tailored communication formats to meet application requirements."
+            },
+            {
+              "name": "group_number",
+              "description": "(Optional) Identifies the message group that the message belongs to. When a group is assigned to a message, Amazon Lex returns one message from each group in the response. Must be a number between 1 and 5 (inclusive).",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `group_number` argument for the `message` in the `aws_lex_intent` resource allows users to define the message group to which a specific message belongs, enabling Amazon Lex to return one message from each group in its response. By setting this number (1-5), users can control the organization and variability of bot responses, supporting dynamic and structured conversational flows."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `message` configuration block within the `rejection_statement` of the `aws_lex_intent` resource defines the content and format of the response message presented to users when their input is rejected by the intent. It encapsulates settings for customizing the text or speech output, enabling precise control over how the chatbot communicates rejection, ensuring a user-friendly and contextually appropriate experience."
+        }
+      ],
+      "llm_summary": "The `rejection_statement` block in the `aws_lex_intent` resource defines the response Amazon Lex provides when a user declines the intent during the `confirmation_prompt` interaction, effectively acknowledging the cancellation of the intent. This block encapsulates settings for crafting user-facing messages, enabling clear communication and enhancing conversational flow in chatbot interactions. Configuring this block ensures a seamless user experience by handling negative responses gracefully."
+    },
+    {
+      "name": "slot",
+      "description": "(Optional) An list of intent slots. At runtime, Amazon Lex elicits required slot values from the user using prompts defined in the slots. Attributes are documented under slot.",
+      "cardinality": [
+        0,
+        100
+      ],
+      "arguments": [
+        {
+          "name": "description",
+          "description": "(Optional) A description of the bot. Must be less than or equal to 200 characters in length.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `description` argument for the `slot` in the `aws_lex_intent` resource allows users to define a brief, human-readable summary of the slot's purpose or functionality within the intent. Setting this argument helps document the slot's role in conversational design, improving clarity and maintainability, especially in complex bot configurations."
+        },
+        {
+          "name": "name",
+          "description": "(Required) The name of the intent slot that you want to create. The name is case sensitive. Must be less than or equal to 100 characters in length.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `name` argument specifies the unique, case-sensitive identifier for a slot within an AWS Lex intent, allowing users to define and reference the slot during conversational design. By setting this argument, users establish the slot's identity, enabling it to capture specific user input and map it to predefined parameters, which is essential for building dynamic and context-aware chatbot interactions."
+        },
+        {
+          "name": "priority",
+          "description": "(Optional) Directs Lex the order in which to elicit this slot value from the user. For example, if the intent has two slots with priorities 1 and 2, AWS Lex first elicits a value for the slot with priority 1. If multiple slots share the same priority, the order in which Lex elicits values is arbitrary. Must be between 1 and 100.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `priority` argument for the `slot` in the `aws_lex_intent` resource allows users to define the order in which AWS Lex prompts the user to provide values for multiple slots within an intent. By assigning a priority value (1-100), users can control the elicitation sequence, ensuring critical slots are addressed first, while slots with the same priority are handled arbitrarily. This configuration helps optimize conversational flow and user experience in chatbot interactions."
+        },
+        {
+          "name": "response_card",
+          "description": "(Optional) The response card. Amazon Lex will substitute session attributes and slot values into the response card. For more information, see Example: Using a Response Card. Must be less than or equal to 50000 characters in length.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `response_card` argument for the `slot` in the `aws_lex_intent` resource allows users to define a customizable visual response card that Amazon Lex can dynamically populate with session attributes and slot values during interactions. This enhances user experience by enabling rich, context-aware responses, such as presenting options or information in a structured format, and supports common goals like improving conversational flow and user engagement."
+        },
+        {
+          "name": "sample_utterances",
+          "description": "(Optional) If you know a specific pattern with which users might respond to an Amazon Lex request for a slot value, you can provide those utterances to improve accuracy. This is optional. In most cases, Amazon Lex is capable of understanding user utterances. Must have between 1 and 10 items in the list, and each item must be less than or equal to 200 characters in length.",
+          "required": false,
+          "type": "list(string)",
+          "llm_summary": "The `sample_utterances` argument for the `slot` in the `aws_lex_intent` resource allows users to define specific example phrases or patterns that Amazon Lex can use to better interpret user responses when filling the slot. By providing up to 10 concise utterances (each \u2264 200 characters), users can improve the accuracy of slot value recognition, especially for scenarios where user input follows predictable patterns, enhancing conversational AI performance."
+        },
+        {
+          "name": "slot_constraint",
+          "description": "(Required) Specifies whether the slot is required or optional.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `slot_constraint` argument for the `aws_lex_intent` resource defines whether a slot is mandatory or optional during user interaction with the Lex bot. By specifying this constraint, users control the bot's behavior in requiring input for the slot before proceeding, enabling precise conversational flow and ensuring critical data collection for intent fulfillment."
+        },
+        {
+          "name": "slot_type",
+          "description": "(Optional) The type of the slot, either a custom slot type that you defined or one of the built-in slot types. Must be less than or equal to 100 characters in length.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `slot_type` argument specifies the data type or category of information that a slot in an AWS Lex intent is designed to capture, allowing users to define either a custom slot type or use predefined built-in types. By setting this argument, users control how Lex interprets and validates user input for the slot, enabling tailored conversational experiences and ensuring accurate data collection for downstream processing."
+        },
+        {
+          "name": "slot_type_version",
+          "description": "(Optional) The version of the slot type. Must be less than or equal to 64 characters in length.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `slot_type_version` argument allows users to specify the version of the slot type associated with a slot in the `aws_lex_intent` resource, enabling precise control over which iteration of the slot type is used. This ensures compatibility and consistency in the intent's behavior, particularly when managing updates or variations of slot types in conversational AI workflows."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "value_elicitation_prompt",
+          "description": "(Optional) The prompt that Amazon Lex uses to elicit the slot value from the user. Attributes are documented under prompt.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "max_attempts",
+              "description": "",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `max_attempts` argument for the `value_elicitation_prompt` in the `aws_lex_intent` resource specifies the maximum number of times Amazon Lex will prompt the user to provide a valid response for a required slot before failing. Configuring this value allows users to control the retry behavior of the bot, ensuring a balance between user experience and operational efficiency in handling incomplete or invalid inputs."
+            },
+            {
+              "name": "response_card",
+              "description": "(Optional) The response card. Amazon Lex will substitute session attributes and slot values into the response card. For more information, see Example: Using a Response Card. Must be less than or equal to 50000 characters in length.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `response_card` argument for the `value_elicitation_prompt` in the `aws_lex_intent` resource allows users to define a customizable visual aid or interactive element that Amazon Lex substitutes with session attributes and slot values during user interactions. By configuring this argument, users can enhance conversational experiences by presenting dynamic, context-aware response cards, improving user engagement and decision-making within the chatbot interface."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "message",
+              "description": "",
+              "cardinality": [
+                1,
+                15
+              ],
+              "arguments": [
+                {
+                  "name": "content",
+                  "description": "(Required) The text of the message. Must be less than or equal to 1000 characters in length.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `content` argument specifies the text of the message that the AWS Lex intent will deliver to users during interactions, enabling the configuration of conversational responses. By defining this required string, users control the exact message content presented by the bot, ensuring tailored and meaningful communication within the constraints of 1000 characters."
+                },
+                {
+                  "name": "content_type",
+                  "description": "(Required) The content type of the message string.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `content_type` argument specifies the format of the message string for an AWS Lex intent, ensuring compatibility with the expected input type (e.g., plain text or SSML). By defining this required property, users control how the bot processes and delivers responses, enabling tailored communication formats to meet application requirements."
+                },
+                {
+                  "name": "group_number",
+                  "description": "(Optional) Identifies the message group that the message belongs to. When a group is assigned to a message, Amazon Lex returns one message from each group in the response. Must be a number between 1 and 5 (inclusive).",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `group_number` argument for the `message` in the `aws_lex_intent` resource allows users to define the grouping of messages within a response, enabling Amazon Lex to return one message from each specified group during interactions. By setting this argument (a number between 1 and 5), users can control the organization and variability of bot responses, supporting dynamic and structured conversational flows."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `message` configuration block within the `value_elicitation_prompt` of the `aws_lex_intent` resource defines the content and format of the prompt messages presented to users when eliciting input for a specific intent. It encapsulates settings related to the text or speech output, enabling customization of user-facing prompts to improve conversational flow and ensure clarity in gathering required information. Configuring this block allows users to tailor the interaction experience, ensuring the chatbot effectively communicates and collects necessary data."
+            }
+          ],
+          "llm_summary": "The `value_elicitation_prompt` block within the `slot` configuration of the `aws_lex_intent` resource defines the prompt Amazon Lex uses to request a specific slot value from the user during a conversation. It encapsulates settings related to user interaction design, enabling detailed control over how Lex elicits required information, ensuring accurate and user-friendly dialogue flow for fulfilling intent requirements."
+        }
+      ],
+      "llm_summary": "The \"slot\" configuration block within the `aws_lex_intent` resource defines a list of intent slots that Amazon Lex uses to collect specific user inputs required to fulfill an intent. It encapsulates settings for slot prompts, elicitation behavior, and value constraints, enabling detailed control over how Lex interacts with users to gather necessary information for intent execution. Configuring this block ensures precise and dynamic user input handling, enhancing conversational flow and intent accuracy."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_lex_intent` resource allows users to specify the maximum duration (as a string) Terraform should wait for the creation of an Amazon Lex intent. By configuring this timeout, users can control the resource provisioning behavior to avoid prolonged or indefinite waits during deployment, ensuring predictable and efficient infrastructure workflows."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block for the `aws_lex_intent` resource allows users to specify the maximum duration (as a string) Terraform should wait for the deletion of a Lex intent to complete. Configuring this timeout ensures predictable behavior during resource destruction, helping users manage infrastructure lifecycle operations and avoid prolonged or stalled deletions in cases of dependency or service delays."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_lex_intent` resource allows users to specify the maximum duration (as a string) Terraform will wait for updates to the Lex intent to complete. Configuring this timeout ensures smoother resource management by preventing operations from hanging indefinitely during intent updates, aligning with user goals of reliable and predictable infrastructure provisioning."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_lex_intent` resource allows users to define custom timeout durations for create, update, and delete operations, ensuring precise control over the lifecycle management of Lex intents. By configuring this block, users can optimize resource provisioning and avoid potential delays or failures during long-running operations."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the Lex intent.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "checksum",
+      "description": "Checksum identifying the version of the intent that was created. The checksum is not included as an argument because the resource will add it automatically when updating the intent.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "created_date",
+      "description": "The date when the intent version was created.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "last_updated_date",
+      "description": "The date when the $LATEST version of this intent was updated.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "version",
+      "description": "The version of the bot.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

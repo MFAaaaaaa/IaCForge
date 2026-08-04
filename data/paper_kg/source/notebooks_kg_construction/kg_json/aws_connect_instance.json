@@ -1,0 +1,138 @@
+{
+    "resource": {
+        "name": "aws_connect_instance",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "auto_resolve_best_voices_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "contact_flow_logs_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "contact_lens_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "directory_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "early_media_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "identity_management_type",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "inbound_calls_enabled",
+            "description": "",
+            "required": true,
+            "type": "bool"
+        },
+        {
+            "name": "instance_alias",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "multi_party_conference_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "outbound_calls_enabled",
+            "description": "",
+            "required": true,
+            "type": "bool"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "created_time",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "service_role",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "status",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "policy.KmsARN",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "policy.SourceVPCEs",
+        "references_output": "aws_vpc_endpoint.id",
+        "target_resource_type": "aws_vpc_endpoint"
+    }
+]

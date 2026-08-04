@@ -1,0 +1,202 @@
+{
+  "resource": {
+    "name": "aws_subnet",
+    "description": "Provides an VPC subnet resource. Due to AWS Lambda improved VPC networking changes that began deploying in September 2019, subnets associated with Lambda Functions can take up to 45 minutes to successfully delete. Terraform AWS Provider version 2.31.0 and later automatically handles this increased timeout, however prior versions require setting the customizable deletion timeout to 45 minutes (delete = \"45m\"). AWS and HashiCorp are working together to reduce the amount of time required for resource deletion and updates can be tracked in this GitHub issue.",
+    "llm_summary": "The `aws_subnet` Terraform resource enables the creation and management of subnets within an AWS VPC, allowing users to define isolated network segments for organizing and securing cloud resources. Common use cases include setting up private or public subnets for applications, configuring network boundaries for services like EC2, RDS, or Lambda, and optimizing traffic flow within a VPC. This resource supports key configurations such as CIDR block assignment, availability zone placement, and lifecycle management, including handling extended deletion timeouts for Lambda-associated subnets."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_subnet\" \"main\" {\n  vpc_id     = aws_vpc.main.id\n  cidr_block = \"10.0.1.0/24\"\n\n  tags = {\n    Name = \"Main\"\n  }\n}",
+      "llm_summary": "\"Demonstrates the basic configuration of an `aws_subnet` resource, including associating it with a VPC using the `vpc_id` argument and defining a `cidr_block` for the subnet. Highlights how to add tags for resource identification, providing a foundational example for creating subnets in AWS.\""
+    },
+    {
+      "title": "Subnets In Secondary VPC CIDR Blocks",
+      "code": "resource \"aws_vpc_ipv4_cidr_block_association\" \"secondary_cidr\" {\n  vpc_id     = aws_vpc.main.id\n  cidr_block = \"172.20.0.0/16\"\n}\n\nresource \"aws_subnet\" \"in_secondary_cidr\" {\n  vpc_id     = aws_vpc_ipv4_cidr_block_association.secondary_cidr.vpc_id\n  cidr_block = \"172.20.0.0/24\"\n}",
+      "llm_summary": "This example demonstrates how to create an AWS subnet within a secondary CIDR block associated with a VPC using the `aws_subnet` resource. It showcases the configuration of `vpc_id` and `cidr_block` arguments, illustrating how to extend a VPC's IP range with `aws_vpc_ipv4_cidr_block_association` and provision subnets in the newly added CIDR block."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "assign_ipv6_address_on_creation",
+      "description": "(Optional) Specify true to indicate that network interfaces created in the specified subnet should be assigned an IPv6 address. Default is `false`",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `assign_ipv6_address_on_creation` argument for the `aws_subnet` resource allows users to control whether IPv6 addresses are automatically assigned to network interfaces created within the specified subnet. Enabling this functionality (`true`) ensures seamless IPv6 support for resources in the subnet, aligning with environments that require dual-stack networking or IPv6-only configurations."
+    },
+    {
+      "name": "availability_zone",
+      "description": "(Optional) AZ for the subnet.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `availability_zone` argument for the `aws_subnet` resource allows users to specify the specific Availability Zone within a region where the subnet will be created. By setting this argument, users can control the geographic placement of the subnet to optimize network latency, ensure high availability, or align with other resources deployed in the same zone."
+    },
+    {
+      "name": "availability_zone_id",
+      "description": "(Optional) AZ ID of the subnet. This argument is not supported in all regions or partitions. If necessary, use `availability_zone` instead.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `availability_zone_id` argument for the `aws_subnet` resource allows users to specify the unique identifier of the Availability Zone (AZ) where the subnet will be created. This provides precise control over the subnet's placement within a specific AZ, which can be useful for optimizing resource distribution or meeting regional requirements. Note that this argument is optional and may not be supported in all AWS regions or partitions; users can alternatively use `availability_zone` for broader compatibility."
+    },
+    {
+      "name": "cidr_block",
+      "description": "(Optional) The IPv4 CIDR block for the subnet.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cidr_block` argument for the `aws_subnet` resource allows users to define the IPv4 address range for the subnet in CIDR notation, specifying the network's size and address allocation within a VPC. Configuring this argument enables precise control over IP address management, supporting tasks like segmenting networks for different environments or workloads."
+    },
+    {
+      "name": "customer_owned_ipv4_pool",
+      "description": "(Optional) The customer owned IPv4 address pool. Typically used with the `map_customer_owned_ip_on_launch` argument. The `outpost_arn` argument must be specified when configured.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `customer_owned_ipv4_pool` argument in the `aws_subnet` resource allows users to specify a custom IPv4 address pool for subnets associated with an AWS Outpost. This enables the configuration of customer-managed IP addresses for instances launched within the subnet, typically in conjunction with `map_customer_owned_ip_on_launch`, providing greater control over IP allocation in hybrid or on-premises environments."
+    },
+    {
+      "name": "enable_dns64",
+      "description": "(Optional) Indicates whether DNS queries made to the Amazon-provided DNS Resolver in this subnet should return synthetic IPv6 addresses for IPv4-only destinations. Default: `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_dns64` argument in the `aws_subnet` resource allows users to control whether the Amazon-provided DNS Resolver in the subnet synthesizes IPv6 addresses for IPv4-only destinations during DNS queries. Enabling this feature facilitates IPv6 compatibility in environments where clients or applications require IPv6 connectivity but the target resources are IPv4-only, supporting hybrid networking goals."
+    },
+    {
+      "name": "enable_lni_at_device_index",
+      "description": "(Optional) Indicates the device position for local network interfaces in this subnet. For example, 1 indicates local network interfaces in this subnet are the secondary network interface (eth1). A local network interface cannot be the primary network interface (eth0).",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `enable_lni_at_device_index` argument for the `aws_subnet` resource allows users to specify the device index position (e.g., `1` for `eth1`) where local network interfaces (LNIs) are enabled within the subnet. This configuration impacts how secondary network interfaces are assigned to instances in the subnet, supporting advanced networking setups such as multi-interface architectures or specialized routing requirements."
+    },
+    {
+      "name": "enable_resource_name_dns_a_record_on_launch",
+      "description": "(Optional) Indicates whether to respond to DNS queries for instance hostnames with DNS A records. Default: `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "Controls whether the subnet automatically registers DNS A records for instance hostnames upon launch, enabling DNS resolution for instances within the subnet. This argument is useful for configuring hostname-based connectivity, particularly in environments requiring seamless DNS integration for EC2 instances."
+    },
+    {
+      "name": "enable_resource_name_dns_aaaa_record_on_launch",
+      "description": "(Optional) Indicates whether to respond to DNS queries for instance hostnames with DNS AAAA records. Default: `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "Controls whether the subnet responds to DNS queries for instance hostnames with DNS AAAA records, enabling IPv6 address resolution for instances launched within the subnet. Setting this argument to `true` is useful for environments requiring IPv6 support and DNS-based hostname resolution."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_subnet` resource represents the unique identifier of the subnet, typically used to reference an existing subnet within AWS. While optional, setting this argument allows users to explicitly define or retrieve the subnet by its ID, enabling integration with other resources or workflows that depend on a specific subnet's configuration or existence."
+    },
+    {
+      "name": "ipv6_cidr_block",
+      "description": "(Optional) The IPv6 network range for the subnet, in CIDR notation. The subnet size must use a /64 prefix length.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "\"Defines the IPv6 network range for the subnet in CIDR notation, allowing users to allocate a /64 prefix for IPv6 addressing within the subnet. This argument enables IPv6 connectivity and routing, supporting environments that require dual-stack networking or IPv6-specific configurations.\""
+    },
+    {
+      "name": "ipv6_native",
+      "description": "(Optional) Indicates whether to create an IPv6-only subnet. Default: `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `ipv6_native` argument for the `aws_subnet` resource allows users to specify whether the subnet should be IPv6-only, enabling the configuration of a network environment that exclusively supports IPv6 traffic. Setting this argument to `true` is typically used to align with modern networking requirements or compliance goals for IPv6 adoption, while the default `false` creates a dual-stack or IPv4-only subnet."
+    },
+    {
+      "name": "map_customer_owned_ip_on_launch",
+      "description": "(Optional) Specify `true` to indicate that network interfaces created in the subnet should be assigned a customer owned IP address. The `customer_owned_ipv4_pool` and `outpost_arn` arguments must be specified when set to `true`. Default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `map_customer_owned_ip_on_launch` argument in the `aws_subnet` resource controls whether network interfaces created in the subnet are automatically assigned customer-owned IP addresses upon launch. Enabling this functionality (`true`) is typically used for Outposts deployments and requires specifying both the `customer_owned_ipv4_pool` and `outpost_arn`, allowing users to integrate their own IP address pools for enhanced control over network configurations."
+    },
+    {
+      "name": "map_public_ip_on_launch",
+      "description": "(Optional) Specify true to indicate that instances launched into the subnet should be assigned a public IP address. Default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `map_public_ip_on_launch` argument in the `aws_subnet` resource controls whether instances launched into the subnet are automatically assigned a public IP address. Setting this to `true` enables public internet access for instances, which is commonly used for environments requiring external connectivity, such as web servers or public-facing applications."
+    },
+    {
+      "name": "outpost_arn",
+      "description": "(Optional) The Amazon Resource Name (ARN) of the Outpost.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `outpost_arn` argument in the `aws_subnet` resource allows users to associate the subnet with a specific AWS Outpost by specifying its Amazon Resource Name (ARN). This enables the creation of subnets within the Outpost's local infrastructure, supporting edge computing use cases and extending AWS services to on-premises environments."
+    },
+    {
+      "name": "private_dns_hostname_type_on_launch",
+      "description": "(Optional) The type of hostnames to assign to instances in the subnet at launch. For IPv6-only subnets, an instance DNS name must be based on the instance ID. For dual-stack and IPv4-only subnets, you can specify whether DNS names use the instance IPv4 address or the instance ID. Valid values: `ip-name`, `resource-name`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `private_dns_hostname_type_on_launch` argument allows users to define the type of private DNS hostnames assigned to instances launched in the subnet, controlling whether the DNS name is based on the instance's IPv4 address (`ip-name`) or its instance ID (`resource-name`). This configuration impacts how instances are identified within the subnet, particularly in environments with IPv6-only, dual-stack, or IPv4-only networking setups, aligning DNS behavior with specific networking or application requirements."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_subnet` resource allows users to assign key-value metadata to the subnet, enabling organization, categorization, and identification of resources for purposes such as cost allocation, environment labeling, or automation workflows. When set, it overrides provider-level default tags with matching keys, ensuring granular control over resource-specific tagging."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_subnet` resource allows users to define a comprehensive set of key-value tags that are automatically applied to the subnet and any related resources managed by AWS. This facilitates consistent resource organization, cost allocation, and metadata management across environments, aligning with common goals like tagging for governance, billing, or operational clarity."
+    },
+    {
+      "name": "vpc_id",
+      "description": "(Required) The VPC ID.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `vpc_id` argument specifies the ID of the VPC in which the subnet will be created, allowing users to define the network boundary and associate the subnet with a specific Virtual Private Cloud. Setting this argument ensures the subnet is properly integrated into the desired VPC, enabling control over network segmentation, routing, and resource isolation within the cloud environment."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_subnet` resource allows users to specify the maximum duration (as a string, e.g., \"5m\" for 5 minutes) Terraform should wait for the subnet creation process to complete. By configuring this timeout, users can control the behavior of Terraform during resource provisioning, ensuring it aligns with their infrastructure deployment expectations and avoids unnecessary delays or premature failures."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_subnet` resource allows users to specify the maximum duration (as a string) Terraform should wait for the deletion of a subnet to complete. By configuring this timeout, users can control the lifecycle behavior during resource destruction, ensuring operations do not hang indefinitely or fail prematurely in cases where subnet deletion takes longer due to dependencies or network delays."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_subnet` resource allows users to define custom timeout durations for specific operations, such as creating, updating, or deleting a subnet. By configuring this block, users gain precise control over operation time limits, ensuring smoother management of subnet lifecycle processes in cases of network latency or extended provisioning times."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the subnet.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "ipv6_cidr_block_association_id",
+      "description": "The association ID for the IPv6 CIDR block.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "owner_id",
+      "description": "The ID of the AWS account that owns the subnet.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

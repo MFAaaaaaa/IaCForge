@@ -1,0 +1,52 @@
+[
+    {
+        "argument_path": "access_policies",
+        "references_output": "data.aws_region.current.name",
+        "target_resource_type": "data.aws_region"
+    },
+    {
+        "argument_path": "access_policies",
+        "references_output": "data.aws_caller_identity.current.account_id",
+        "target_resource_type": "data.aws_caller_identity"
+    },
+    {
+        "argument_path": "log_publishing_options.cloudwatch_log_group_arn",
+        "references_output": "aws_cloudwatch_log_group.example.arn",
+        "target_resource_type": "aws_cloudwatch_log_group"
+    },
+    {
+        "argument_path": "vpc_options.subnet_ids",
+        "references_output": "data.aws_subnets.selected.ids",
+        "target_resource_type": "data.aws_subnets"
+    },
+    {
+        "argument_path": "vpc_options.security_group_ids",
+        "references_output": "aws_security_group.es.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "encrypt_at_rest.kms_key_id",
+        "references_output": "aws_kms_key.example.arn",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "cognito_options.identity_pool_id",
+        "references_output": "aws_cognito_identity_pool.example.id",
+        "target_resource_type": "aws_cognito_identity_pool"
+    },
+    {
+        "argument_path": "cognito_options.role_arn",
+        "references_output": "aws_iam_role.example.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "cognito_options.user_pool_id",
+        "references_output": "aws_cognito_user_pool.example.id",
+        "target_resource_type": "aws_cognito_user_pool"
+    },
+    {
+        "argument_path": "domain_endpoint_options.custom_endpoint_certificate_arn",
+        "references_output": "aws_acm_certificate.example.arn",
+        "target_resource_type": "aws_acm_certificate"
+    }
+]

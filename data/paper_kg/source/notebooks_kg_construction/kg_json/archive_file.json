@@ -1,0 +1,138 @@
+{
+    "resource": {
+        "name": "archive_file",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "exclude_symlink_directories",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "excludes",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "output_file_mode",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "output_path",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "source_content",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "source_content_filename",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "source_dir",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "source_file",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "type",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "source",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "content",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "filename",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "output_base64sha256",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "output_base64sha512",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "output_md5",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "output_sha",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "output_sha256",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "output_sha512",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "output_size",
+            "description": "",
+            "optional": false,
+            "type": "number"
+        }
+    ]
+}

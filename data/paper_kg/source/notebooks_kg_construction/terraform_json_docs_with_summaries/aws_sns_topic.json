@@ -1,0 +1,240 @@
+{
+  "resource": {
+    "name": "aws_sns_topic",
+    "description": "Provides an SNS topic resource",
+    "llm_summary": "The `aws_sns_topic` Terraform resource enables the creation and management of Amazon SNS topics for reliable message broadcasting and pub/sub communication. Common use cases include setting up event-driven architectures, integrating notifications across distributed systems, and enabling cross-service communication in AWS. Users can configure topic attributes such as delivery policies, encryption with AWS KMS, access control via IAM policies, and support for message filtering and dead-letter queues to optimize message handling and security."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_sns_topic\" \"user_updates\" {\n  name = \"user-updates-topic\"\n}",
+      "llm_summary": "\"Demonstrates the basic setup of an AWS SNS topic using the `aws_sns_topic` resource, showcasing how to define a topic with a custom name using the `name` argument. This example is ideal for users looking to create a simple SNS topic for message publishing and subscription.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "application_failure_feedback_role_arn",
+      "description": "(Optional) IAM role for failure feedback",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `application_failure_feedback_role_arn` argument for the `aws_sns_topic` resource allows users to specify the ARN of an IAM role that handles failure feedback for message delivery to application endpoints. Configuring this role enables enhanced monitoring and troubleshooting by granting permissions to capture and process delivery failure events, supporting reliable message delivery and operational insights."
+    },
+    {
+      "name": "application_success_feedback_role_arn",
+      "description": "(Optional) The IAM role permitted to receive success feedback for this topic",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the IAM role authorized to receive success feedback notifications for the SNS topic, enabling users to track and audit successful message deliveries to applications integrated with the topic. This argument supports configuring feedback mechanisms for monitoring and operational insights."
+    },
+    {
+      "name": "application_success_feedback_sample_rate",
+      "description": "(Optional) Percentage of success to sample",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `application_success_feedback_sample_rate` argument for the `aws_sns_topic` resource allows users to define the percentage of successful message deliveries to sample for generating success feedback reports when using an application as the delivery protocol. This helps users monitor and analyze delivery performance by controlling the granularity of success feedback data, supporting use cases like debugging or optimizing message delivery."
+    },
+    {
+      "name": "archive_policy",
+      "description": "(Optional) The message archive policy for FIFO topics. More details in the AWS documentation.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `archive_policy` argument for the `aws_sns_topic` resource allows users to define the message archive policy for FIFO (First-In-First-Out) topics, specifying how messages are retained or managed for compliance or auditing purposes. Configuring this argument enables users to control the behavior of message archiving, aligning with organizational policies or regulatory requirements."
+    },
+    {
+      "name": "content_based_deduplication",
+      "description": "(Optional) Enables content-based deduplication for FIFO topics. For more information, see the related documentation",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `content_based_deduplication` argument for the `aws_sns_topic` resource enables deduplication of messages in FIFO (First-In-First-Out) topics by using the content of the message body to generate a unique deduplication ID. This helps ensure that duplicate messages with identical content are not delivered, supporting reliable and ordered message processing for use cases like event-driven workflows or distributed systems."
+    },
+    {
+      "name": "delivery_policy",
+      "description": "(Optional) The SNS delivery policy. More details in the AWS documentation.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `delivery_policy` argument for the `aws_sns_topic` resource allows users to define the JSON-based delivery policy that controls how Amazon SNS retries message delivery to subscribed endpoints in case of failures. Configuring this argument enables users to specify retry behavior, backoff strategies, and message delivery parameters, ensuring reliable and customized message delivery for their use case."
+    },
+    {
+      "name": "display_name",
+      "description": "(Optional) The display name for the topic",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `display_name` argument for the `aws_sns_topic` resource allows users to specify a human-readable name for the topic, which is displayed to subscribers when they receive notifications. This enhances the user experience by providing a recognizable identifier for the topic, making it easier to distinguish and manage in communication workflows."
+    },
+    {
+      "name": "fifo_topic",
+      "description": "(Optional) Boolean indicating whether or not to create a FIFO (first-in-first-out) topic. FIFO topics can't deliver messages to customer managed endpoints, such as email addresses, mobile apps, SMS, or HTTP(S) endpoints. These endpoint types aren't guaranteed to preserve strict message ordering. Default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `fifo_topic` argument for the `aws_sns_topic` resource allows users to specify whether the SNS topic should operate as a FIFO (first-in-first-out) topic, ensuring strict message ordering and deduplication. Enabling this feature is ideal for use cases requiring sequential message processing but restricts delivery to certain endpoint types, such as email, SMS, or HTTP(S), which do not guarantee message order."
+    },
+    {
+      "name": "firehose_failure_feedback_role_arn",
+      "description": "(Optional) IAM role for failure feedback",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the IAM role ARN used to provide failure feedback for Amazon SNS delivery to a Firehose stream, enabling users to monitor and handle delivery errors. This argument is optional and typically supports configuring error tracking and diagnostics for Firehose integrations."
+    },
+    {
+      "name": "firehose_success_feedback_role_arn",
+      "description": "(Optional) The IAM role permitted to receive success feedback for this topic",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the IAM role that is authorized to receive success feedback from Amazon SNS when messages are successfully delivered to a Firehose subscription. Configuring this argument enables detailed delivery status tracking for Firehose targets, supporting monitoring and troubleshooting of message delivery workflows."
+    },
+    {
+      "name": "firehose_success_feedback_sample_rate",
+      "description": "(Optional) Percentage of success to sample",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `firehose_success_feedback_sample_rate` argument for the `aws_sns_topic` resource allows users to define the percentage of successful message deliveries to Amazon Kinesis Data Firehose for which feedback is sampled. Configuring this parameter helps monitor and analyze delivery success rates, supporting use cases like debugging or performance optimization of message delivery pipelines."
+    },
+    {
+      "name": "http_failure_feedback_role_arn",
+      "description": "(Optional) IAM role for failure feedback",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the IAM role ARN used to provide failure feedback for HTTP/S delivery attempts in the SNS topic, enabling detailed error reporting and diagnostics for message delivery issues. This argument is typically used to specify permissions for capturing and analyzing failed delivery events, supporting enhanced monitoring and troubleshooting."
+    },
+    {
+      "name": "http_success_feedback_role_arn",
+      "description": "(Optional) The IAM role permitted to receive success feedback for this topic",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the IAM role that grants permissions to receive success feedback for HTTP/S notifications sent by the SNS topic. Configuring this argument enables detailed delivery status tracking for successful message deliveries, supporting monitoring and auditing goals."
+    },
+    {
+      "name": "http_success_feedback_sample_rate",
+      "description": "(Optional) Percentage of success to sample",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `http_success_feedback_sample_rate` argument for the `aws_sns_topic` resource allows users to define the percentage of successful HTTP message deliveries to sample for feedback purposes. Configuring this parameter helps optimize monitoring and debugging by controlling the granularity of success metrics collected for HTTP-based subscriptions."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_sns_topic` resource allows users to specify a unique identifier for the SNS topic, typically used to reference the topic within Terraform configurations or other AWS resources. While optional, setting this argument can help ensure consistent identification and tracking of the topic across deployments, supporting workflows like resource management and integration with dependent services."
+    },
+    {
+      "name": "kms_master_key_id",
+      "description": "(Optional) The ID of an AWS-managed customer master key (CMK) for Amazon SNS or a custom CMK. For more information, see Key Terms",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `kms_master_key_id` argument for the `aws_sns_topic` resource allows users to specify the ID of an AWS-managed or custom customer master key (CMK) to enable server-side encryption for messages published to the SNS topic. By configuring this argument, users can enhance data security and compliance by ensuring that all messages are encrypted using the specified CMK."
+    },
+    {
+      "name": "lambda_failure_feedback_role_arn",
+      "description": "(Optional) IAM role for failure feedback",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the IAM role ARN used to provide failure feedback for Lambda function invocations triggered by the SNS topic, enabling detailed error reporting and monitoring. This argument helps users specify permissions for capturing and handling invocation failures, supporting enhanced troubleshooting and operational visibility."
+    },
+    {
+      "name": "lambda_success_feedback_role_arn",
+      "description": "(Optional) The IAM role permitted to receive success feedback for this topic",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the IAM role ARN that grants permissions to receive success feedback for Lambda function invocations triggered by the SNS topic. Configuring this argument enables tracking and auditing of successful message deliveries to Lambda, supporting enhanced monitoring and operational visibility."
+    },
+    {
+      "name": "lambda_success_feedback_sample_rate",
+      "description": "(Optional) Percentage of success to sample",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `lambda_success_feedback_sample_rate` argument for the `aws_sns_topic` resource allows users to define the percentage of successful Lambda function invocations that should be sampled for feedback purposes. Configuring this parameter helps monitor and analyze the performance of Lambda functions triggered by the SNS topic, supporting observability and debugging goals."
+    },
+    {
+      "name": "name",
+      "description": "(Optional) The name of the topic. Topic names must be made up of only uppercase and lowercase ASCII letters, numbers, underscores, and hyphens, and must be between 1 and 256 characters long. For a FIFO (first-in-first-out) topic, the name must end with the `.fifo` suffix. If omitted, Terraform will assign a random, unique name. Conflicts with `name_prefix`",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_sns_topic` resource allows users to define a custom, human-readable identifier for the SNS topic, ensuring it adheres to specific naming conventions (ASCII letters, numbers, underscores, hyphens, and `.fifo` for FIFO topics). By setting this argument, users can control the topic's name for organizational clarity, integration consistency, or compliance with naming standards, while omitting it lets Terraform generate a unique name automatically."
+    },
+    {
+      "name": "name_prefix",
+      "description": "(Optional) Creates a unique name beginning with the specified prefix. Conflicts with `name`",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name_prefix` argument for the `aws_sns_topic` resource allows users to define a custom prefix for the topic's name, enabling the creation of a unique, system-generated name that begins with the specified prefix. This is particularly useful for dynamically managing topic names in environments where uniqueness is required, such as multi-environment deployments, and it cannot be used in conjunction with the `name` argument."
+    },
+    {
+      "name": "policy",
+      "description": "(Optional) The fully-formed AWS policy as JSON. For more information about building AWS IAM policy documents with Terraform, see the AWS IAM Policy Document Guide.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `policy` argument for the `aws_sns_topic` resource allows users to define a custom IAM policy in JSON format, specifying access control rules and permissions for the SNS topic. By setting this argument, users can manage who can publish, subscribe, or perform other actions on the topic, enabling fine-grained security and compliance configurations tailored to their application's needs."
+    },
+    {
+      "name": "signature_version",
+      "description": "(Optional) If `SignatureVersion` should be 1 (SHA1) or 2 (SHA256). The signature version corresponds to the hashing algorithm used while creating the signature of the notifications, subscription confirmations, or unsubscribe confirmation messages sent by Amazon SNS.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `signature_version` argument for the `aws_sns_topic` resource allows users to specify the hashing algorithm (SHA1 or SHA256) used to generate message signatures for notifications, subscription confirmations, and unsubscribe confirmations sent by Amazon SNS. Configuring this argument impacts the security and compatibility of message validation, enabling users to align with specific cryptographic standards or legacy system requirements."
+    },
+    {
+      "name": "sqs_failure_feedback_role_arn",
+      "description": "(Optional) IAM role for failure feedback",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `sqs_failure_feedback_role_arn` argument for the `aws_sns_topic` resource allows users to specify the ARN of an IAM role that grants permissions for Amazon SNS to provide failure feedback when delivering messages to an Amazon SQS queue. Configuring this role enhances monitoring and troubleshooting by enabling detailed delivery status reporting for failed message deliveries to SQS endpoints."
+    },
+    {
+      "name": "sqs_success_feedback_role_arn",
+      "description": "(Optional) The IAM role permitted to receive success feedback for this topic",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the IAM role ARN that grants permissions to receive success feedback for Amazon SNS messages delivered to an SQS queue, enabling users to monitor and track successful message deliveries for the topic. This argument is optional and supports configuring feedback mechanisms for operational insights or auditing purposes."
+    },
+    {
+      "name": "sqs_success_feedback_sample_rate",
+      "description": "(Optional) Percentage of success to sample",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `sqs_success_feedback_sample_rate` argument for the `aws_sns_topic` resource allows users to define the percentage of successful message deliveries to an Amazon SQS queue that should be sampled for feedback purposes. Configuring this parameter helps monitor and analyze delivery success rates, supporting use cases like debugging, performance optimization, or compliance tracking for message delivery workflows."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Key-value map of resource tags. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_sns_topic` resource allows users to define a key-value map of metadata to categorize and manage the topic, such as assigning environment identifiers, ownership details, or cost allocation tags. Configuring this argument helps streamline resource organization, governance, and billing by enabling tagging at the resource level, with the ability to override provider-level default tags if applicable."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_sns_topic` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to the SNS topic and any associated resources. This enables efficient resource organization, cost allocation, and metadata management, supporting common user goals like tagging for environment identification, compliance tracking, or billing analysis."
+    },
+    {
+      "name": "tracing_config",
+      "description": "(Optional) Tracing mode of an Amazon SNS topic. Valid values: `\"PassThrough\"`, `\"Active\"`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `tracing_config` argument for the `aws_sns_topic` resource allows users to specify the tracing mode for the Amazon SNS topic, enabling integration with AWS X-Ray for distributed tracing. By setting this argument to either `\"PassThrough\"` or `\"Active\"`, users can control how message tracing data is captured, which is useful for monitoring and debugging the flow of messages across microservices and distributed systems."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the SNS topic, as a more obvious property (clone of id)",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "beginning_archive_time",
+      "description": "The oldest timestamp at which a FIFO topic subscriber can start a replay.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "owner",
+      "description": "The AWS Account ID of the SNS topic owner",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

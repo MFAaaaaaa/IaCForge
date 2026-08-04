@@ -1,0 +1,83 @@
+{
+    "resource": {
+        "name": "aws_api_gateway_method",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "api_key_required",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "authorization",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "authorization_scopes",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "authorizer_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "http_method",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "operation_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "request_models",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "request_parameters",
+            "description": "",
+            "required": false,
+            "type": "map(bool)"
+        },
+        {
+            "name": "request_validator_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "resource_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "rest_api_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": []
+}

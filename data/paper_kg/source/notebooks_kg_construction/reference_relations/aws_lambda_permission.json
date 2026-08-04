@@ -1,0 +1,37 @@
+[
+    {
+        "argument_path": "function_name",
+        "references_output": "aws_lambda_function.function_name",
+        "target_resource_type": "aws_lambda_function"
+    },
+    {
+        "argument_path": "qualifier",
+        "references_output": "aws_lambda_alias.name",
+        "target_resource_type": "aws_lambda_alias"
+    },
+    {
+        "argument_path": "source_arn",
+        "references_output": "aws_sns_topic.arn",
+        "target_resource_type": "aws_sns_topic"
+    },
+    {
+        "argument_path": "source_arn",
+        "references_output": "aws_api_gateway_rest_api.execution_arn",
+        "target_resource_type": "aws_api_gateway_rest_api"
+    },
+    {
+        "argument_path": "source_arn",
+        "references_output": "aws_cloudwatch_log_group.arn",
+        "target_resource_type": "aws_cloudwatch_log_group"
+    },
+    {
+        "argument_path": "source_arn",
+        "references_output": "aws_eventbridge_rule.arn",
+        "target_resource_type": "aws_eventbridge_rule"
+    },
+    {
+        "argument_path": "source_arn",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    }
+]

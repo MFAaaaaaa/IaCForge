@@ -1,0 +1,77 @@
+{
+    "resource": {
+        "name": "aws_s3_bucket_cors_configuration",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "bucket",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "expected_bucket_owner",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "cors_rule",
+            "description": "",
+            "cardinality": [
+                1,
+                100
+            ],
+            "arguments": [
+                {
+                    "name": "allowed_headers",
+                    "description": "",
+                    "required": false,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "allowed_methods",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "allowed_origins",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "expose_headers",
+                    "description": "",
+                    "required": false,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "max_age_seconds",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": []
+}

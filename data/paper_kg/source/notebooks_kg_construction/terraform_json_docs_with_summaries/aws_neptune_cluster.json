@@ -1,0 +1,332 @@
+{
+  "resource": {
+    "name": "aws_neptune_cluster",
+    "description": "Provides an Neptune Cluster Resource. A Cluster Resource defines attributes that are applied to the entire cluster of Neptune Cluster Instances. Changes to a Neptune Cluster can occur when you manually change a parameter, such as backup_retention_period, and are reflected in the next maintenance window. Because of this, Terraform may report a difference in its planning phase because a modification has not yet taken place. You can use the apply_immediately flag to instruct the service to apply the change immediately (see documentation below).",
+    "llm_summary": "The `aws_neptune_cluster` Terraform resource enables the creation and management of Amazon Neptune database clusters, centralizing configuration for all instances within the cluster. It is commonly used for setting up graph or document databases optimized for complex relationship queries, with features like automated backups, retention policies, and maintenance scheduling. Users can configure key attributes such as backup retention periods, engine versions, and immediate or deferred application of changes, making it ideal for lifecycle management and fine-tuning database performance and availability."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_neptune_cluster\" \"default\" {\n  cluster_identifier                  = \"neptune-cluster-demo\"\n  engine                              = \"neptune\"\n  backup_retention_period             = 5\n  preferred_backup_window             = \"07:00-09:00\"\n  skip_final_snapshot                 = true\n  iam_database_authentication_enabled = true\n  apply_immediately                   = true\n}",
+      "llm_summary": "This example demonstrates the basic configuration of an AWS Neptune cluster using the `aws_neptune_cluster` resource, showcasing key settings such as enabling IAM database authentication, defining a backup retention period, specifying a preferred backup window, and skipping the final snapshot during deletion. It is ideal for users looking to quickly set up a Neptune cluster with essential parameters and immediate application of changes."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "allow_major_version_upgrade",
+      "description": "(Optional) Specifies whether upgrades between different major versions are allowed. You must set it to `true` when providing an `engine_version` parameter that uses a different major version than the DB cluster's current version. Default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `allow_major_version_upgrade` argument for the `aws_neptune_cluster` resource controls whether the cluster permits upgrades across major engine versions, enabling users to specify compatibility for significant version changes when defining the `engine_version`. Setting this to `true` is required for scenarios where the desired engine version differs in major version from the current cluster, ensuring flexibility for version management and upgrades."
+    },
+    {
+      "name": "apply_immediately",
+      "description": "(Optional) Specifies whether any cluster modifications are applied immediately, or during the next maintenance window. Default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `apply_immediately` argument for the `aws_neptune_cluster` resource allows users to control whether configuration changes to the cluster are applied immediately or deferred until the next maintenance window. Setting this to `true` enables immediate application of modifications, which is useful for urgent updates, while leaving it as `false` ensures changes are applied during scheduled maintenance to minimize potential disruptions."
+    },
+    {
+      "name": "availability_zones",
+      "description": "(Optional) A list of EC2 Availability Zones that instances in the Neptune cluster can be created in.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `availability_zones` argument for the `aws_neptune_cluster` resource allows users to specify a set of EC2 Availability Zones where Neptune cluster instances can be deployed, enabling control over the cluster's geographic redundancy and fault tolerance. Configuring this argument helps optimize high availability and resilience by distributing instances across multiple zones within the same region."
+    },
+    {
+      "name": "backup_retention_period",
+      "description": "(Optional) The days to retain backups for. Default `1`",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `backup_retention_period` argument for the `aws_neptune_cluster` resource allows users to define the number of days automated backups are retained for the Neptune database cluster. Configuring this parameter helps ensure data durability and recovery options by specifying the backup retention policy, with a default of 1 day if not explicitly set."
+    },
+    {
+      "name": "cluster_identifier",
+      "description": "(Optional, Forces new resources) The cluster identifier. If omitted, Terraform will assign a random, unique identifier.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cluster_identifier` argument for the `aws_neptune_cluster` resource allows users to define a unique name for the Neptune cluster, enabling clear identification and management of the cluster within their infrastructure. If omitted, Terraform generates a random identifier, but explicitly setting this argument is useful for aligning the cluster with naming conventions, organizational standards, or specific deployment environments."
+    },
+    {
+      "name": "cluster_identifier_prefix",
+      "description": "(Optional, Forces new resource) Creates a unique cluster identifier beginning with the specified prefix. Conflicts with `cluster_identifier`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cluster_identifier_prefix` argument for the `aws_neptune_cluster` resource allows users to define a custom prefix for automatically generating a unique cluster identifier, enabling easier organization and identification of Neptune clusters within a project or environment. Setting this argument is useful for scenarios where consistent naming conventions are required, and it forces the creation of a new resource while conflicting with the `cluster_identifier` argument."
+    },
+    {
+      "name": "copy_tags_to_snapshot",
+      "description": "(Optional) If set to true, tags are copied to any snapshot of the DB cluster that is created.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `copy_tags_to_snapshot` argument in the `aws_neptune_cluster` resource allows users to control whether the tags applied to the Neptune DB cluster are automatically propagated to any snapshots created from the cluster. Enabling this feature (`true`) ensures consistent tagging for resource organization, cost tracking, and management across both the cluster and its snapshots."
+    },
+    {
+      "name": "deletion_protection",
+      "description": "(Optional) A value that indicates whether the DB cluster has deletion protection enabled.The database can't be deleted when deletion protection is enabled. By default, deletion protection is disabled.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `deletion_protection` argument for the `aws_neptune_cluster` resource allows users to define whether the cluster is safeguarded against accidental deletion by enabling deletion protection. When set to `true`, this feature ensures the database cannot be deleted, supporting lifecycle management and enhancing operational security for critical environments."
+    },
+    {
+      "name": "enable_cloudwatch_logs_exports",
+      "description": "(Optional) A list of the log types this DB cluster is configured to export to Cloudwatch Logs. Currently only supports `audit` and `slowquery`.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `enable_cloudwatch_logs_exports` argument for the `aws_neptune_cluster` resource allows users to specify which log types (`audit` or `slowquery`) should be exported to Amazon CloudWatch Logs, enabling enhanced monitoring and troubleshooting capabilities for the database cluster. By configuring this argument, users can gain deeper insights into database activity and performance, supporting common goals like auditing and optimizing query execution."
+    },
+    {
+      "name": "engine",
+      "description": "(Optional) The name of the database engine to be used for this Neptune cluster. Defaults to `neptune`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `engine` argument for the `aws_neptune_cluster` resource allows users to specify the database engine type for the Neptune cluster, with the default value set to `neptune`. This argument ensures the cluster is configured to use the appropriate engine, aligning with the user's intended database functionality and compatibility requirements."
+    },
+    {
+      "name": "engine_version",
+      "description": "(Optional) The database engine version.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `engine_version` argument for the `aws_neptune_cluster` resource allows users to specify the version of the Neptune database engine to be used for the cluster. Configuring this ensures compatibility with desired features, performance optimizations, or specific application requirements, enabling precise control over the database environment."
+    },
+    {
+      "name": "final_snapshot_identifier",
+      "description": "(Optional) The name of your final Neptune snapshot when this Neptune cluster is deleted. If omitted, no final snapshot will be made.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `final_snapshot_identifier` argument for the `aws_neptune_cluster` resource allows users to specify the name of the final snapshot to be created when the Neptune cluster is deleted. This enables users to preserve the cluster's data for future recovery or analysis, aligning with lifecycle management and disaster recovery goals. If omitted, no final snapshot will be created, potentially resulting in permanent data loss."
+    },
+    {
+      "name": "global_cluster_identifier",
+      "description": "(Optional) The global cluster identifier specified on `aws_neptune_global_cluster`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `global_cluster_identifier` argument allows users to associate the Neptune cluster with a global database cluster by specifying the identifier of an existing `aws_neptune_global_cluster`. This enables cross-region replication and global database functionality, supporting use cases like disaster recovery and low-latency reads across multiple regions."
+    },
+    {
+      "name": "iam_database_authentication_enabled",
+      "description": "(Optional) Specifies whether or not mappings of AWS Identity and Access Management (IAM) accounts to database accounts is enabled.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `iam_database_authentication_enabled` argument for the `aws_neptune_cluster` resource allows users to control whether AWS Identity and Access Management (IAM) authentication is enabled for database account mappings. Enabling this feature facilitates secure access to the Neptune cluster by leveraging IAM credentials, aligning with common user goals of enhancing security and simplifying access management."
+    },
+    {
+      "name": "iam_roles",
+      "description": "(Optional) A List of ARNs for the IAM roles to associate to the Neptune Cluster.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `iam_roles` argument for the `aws_neptune_cluster` resource allows users to specify a set of IAM role ARNs to associate with the Neptune cluster, enabling the cluster to access AWS services or resources securely on behalf of the user. Configuring this argument is typically used to grant the cluster permissions for tasks like accessing S3 for data import/export or interacting with other AWS services, aligning with common goals of managing service-level access and security."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_neptune_cluster` resource specifies the unique identifier for the Neptune cluster, allowing users to reference or manage the cluster within Terraform configurations and workflows. While optional, setting this argument can help users explicitly define or track the cluster's identity for integration with other resources or operational tasks."
+    },
+    {
+      "name": "kms_key_arn",
+      "description": "(Optional) The ARN for the KMS encryption key. When specifying `kms_key_arn`, `storage_encrypted` needs to be set to true.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `kms_key_arn` argument for the `aws_neptune_cluster` resource allows users to specify the Amazon Resource Name (ARN) of a KMS encryption key to enable server-side encryption for the cluster's storage. By setting this argument, users can enforce data-at-rest encryption for enhanced security, provided that `storage_encrypted` is also set to `true`."
+    },
+    {
+      "name": "neptune_cluster_parameter_group_name",
+      "description": "(Optional) A cluster parameter group to associate with the cluster.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the name of the cluster parameter group to associate with the Neptune cluster, enabling users to customize database engine settings and behaviors such as query optimization, memory allocation, or logging configurations. This argument allows fine-tuning of the cluster's operational parameters to align with specific application requirements or performance goals."
+    },
+    {
+      "name": "neptune_instance_parameter_group_name",
+      "description": "(Optional) The name of the DB parameter group to apply to all instances of the DB cluster.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the name of the DB parameter group to apply to all instances within the Neptune cluster, enabling users to customize database engine settings and behaviors such as performance tuning, query optimization, or feature configurations. This argument allows for centralized control over instance-level parameters, aligning the cluster's operation with specific application or environment requirements."
+    },
+    {
+      "name": "neptune_subnet_group_name",
+      "description": "(Optional) A Neptune subnet group to associate with this Neptune instance.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `neptune_subnet_group_name` argument allows users to specify the subnet group associated with the Neptune cluster, defining the network configuration for where the cluster's instances will reside. By setting this argument, users can control the cluster's placement within specific subnets, typically to ensure connectivity, security, or compliance with VPC design requirements."
+    },
+    {
+      "name": "port",
+      "description": "(Optional) The port on which the Neptune accepts connections. Default is `8182`.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `port` argument for the `aws_neptune_cluster` resource allows users to specify the TCP port on which the Neptune database cluster accepts client connections, enabling customization of network access configurations. By setting this argument, users can align the cluster's connectivity with specific application requirements or network policies, with the default port being `8182`."
+    },
+    {
+      "name": "preferred_backup_window",
+      "description": "(Optional) The daily time range during which automated backups are created if automated backups are enabled using the BackupRetentionPeriod parameter. Time in UTC. Default: A 30-minute window selected at random from an 8-hour block of time per regionE.g., 04:00-09:00",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `preferred_backup_window` argument for the `aws_neptune_cluster` resource allows users to define a specific daily time range in UTC during which automated backups are created, provided backups are enabled via the `backup_retention_period` parameter. This configuration helps users align backup operations with their maintenance schedules or off-peak hours, ensuring minimal impact on database performance."
+    },
+    {
+      "name": "preferred_maintenance_window",
+      "description": "(Optional) The weekly time range during which system maintenance can occur, in (UTC) e.g., wed:04:00-wed:04:30",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `preferred_maintenance_window` argument for the `aws_neptune_cluster` resource allows users to define a specific weekly time range in UTC during which system maintenance operations, such as updates or patches, can occur. By configuring this window, users can align maintenance activities with periods of low database usage, minimizing potential disruptions to application performance and ensuring predictable maintenance scheduling."
+    },
+    {
+      "name": "replication_source_identifier",
+      "description": "(Optional) ARN of a source Neptune cluster or Neptune instance if this Neptune cluster is to be created as a Read Replica.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `replication_source_identifier` argument allows users to specify the ARN of an existing Neptune cluster or instance to configure the new `aws_neptune_cluster` as a read replica. This enables replication functionality, supporting use cases like scaling read operations or creating disaster recovery setups by linking the new cluster to a source database."
+    },
+    {
+      "name": "skip_final_snapshot",
+      "description": "(Optional) Determines whether a final Neptune snapshot is created before the Neptune cluster is deleted. If true is specified, no Neptune snapshot is created. If false is specified, a Neptune snapshot is created before the Neptune cluster is deleted, using the value from `final_snapshot_identifier`. Default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `skip_final_snapshot` argument for the `aws_neptune_cluster` resource allows users to control whether a final snapshot of the Neptune cluster is created before its deletion. Setting this to `true` skips snapshot creation, enabling faster teardown of the cluster without retaining data, while setting it to `false` ensures data preservation by creating a snapshot using the `final_snapshot_identifier`, supporting lifecycle management and disaster recovery goals."
+    },
+    {
+      "name": "snapshot_identifier",
+      "description": "(Optional) Specifies whether or not to create this cluster from a snapshot. You can use either the name or ARN when specifying a Neptune cluster snapshot, or the ARN when specifying a Neptune snapshot. Automated snapshots should not be used for this attribute, unless from a different cluster. Automated snapshots are deleted as part of cluster destruction when the resource is replaced.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `snapshot_identifier` argument for the `aws_neptune_cluster` resource allows users to specify a snapshot (by name or ARN) from which to restore and create the Neptune cluster, enabling recovery or replication of cluster data from a specific point in time. This is commonly used for disaster recovery, cloning environments, or initializing a cluster with pre-existing data, but automated snapshots from the same cluster should be avoided due to lifecycle constraints during resource replacement."
+    },
+    {
+      "name": "storage_encrypted",
+      "description": "(Optional) Specifies whether the Neptune cluster is encrypted. The default is `false` if not specified.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `storage_encrypted` argument for the `aws_neptune_cluster` resource allows users to specify whether the cluster's underlying storage is encrypted at rest, enhancing data security and compliance. Setting this to `true` enables encryption, which is particularly useful for protecting sensitive data and meeting regulatory requirements, while leaving it unset or `false` defaults to unencrypted storage."
+    },
+    {
+      "name": "storage_type",
+      "description": "(Optional) Storage type associated with the cluster `standard/iopt1`. Default: `standard`",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `storage_type` argument for the `aws_neptune_cluster` resource allows users to specify the type of storage used for the cluster, either `standard` (default) or `iopt1` for provisioned IOPS. Configuring this argument impacts performance and cost, enabling users to optimize storage for workloads requiring higher throughput or lower latency."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the Neptune cluster. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument allows users to assign key-value metadata to the Neptune cluster, enabling resource organization, cost allocation, and environment identification. When set, it customizes the cluster's tags, potentially overriding provider-level default tags for matching keys."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_neptune_cluster` resource allows users to define a comprehensive set of key-value tags that are automatically merged from both provider-level and resource-specific tags. This enables centralized tagging for resource organization, cost allocation, and governance, ensuring consistent metadata across the Neptune cluster for tracking and management purposes."
+    },
+    {
+      "name": "vpc_security_group_ids",
+      "description": "(Optional) List of VPC security groups to associate with the Cluster",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `vpc_security_group_ids` argument for the `aws_neptune_cluster` resource allows users to specify a set of VPC security group IDs to control network access to the Neptune cluster. By defining this argument, users can enforce inbound and outbound traffic rules, ensuring secure communication and restricting access based on their cloud environment's security requirements."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "serverless_v2_scaling_configuration",
+      "description": "(Optional) If set, create the Neptune cluster as a serverless one. See Serverless for example block attributes.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "max_capacity",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `max_capacity` argument in the `serverless_v2_scaling_configuration` of the `aws_neptune_cluster` resource allows users to define the maximum number of Neptune capacity units (NCUs) that the cluster can scale up to in a serverless configuration. By setting this value, users can control the upper limit of compute and memory resources allocated for handling peak workloads, ensuring cost efficiency while maintaining performance during high-demand periods."
+        },
+        {
+          "name": "min_capacity",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `min_capacity` argument in the `serverless_v2_scaling_configuration` block of the `aws_neptune_cluster` resource specifies the minimum number of Neptune capacity units (NCUs) to allocate for the serverless cluster. This allows users to define the baseline compute resources for their database, ensuring consistent performance while optimizing costs by scaling down to this threshold during periods of low demand."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `serverless_v2_scaling_configuration` block in the `aws_neptune_cluster` resource enables the creation of a serverless Neptune cluster, allowing dynamic scaling of compute capacity based on workload demands. It encapsulates settings related to serverless scaling thresholds, providing users with fine-grained control over resource allocation to optimize cost and performance for graph database workloads."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_neptune_cluster` resource allows users to specify the maximum duration (as a string, e.g., \"30m\" for 30 minutes) Terraform should wait for the Neptune cluster creation process to complete. This configuration helps users manage deployment time expectations and avoid unnecessary timeouts during resource provisioning."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_neptune_cluster` resource allows users to specify the maximum duration (as a string) Terraform should wait for the deletion of the Neptune cluster to complete. By configuring this timeout, users can control the lifecycle behavior during resource destruction, ensuring operations do not exceed their desired time limits or fail prematurely due to default timeout constraints."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block of the `aws_neptune_cluster` resource allows users to define the maximum duration (as a string) Terraform will wait for updates to the Neptune cluster to complete. By configuring this timeout, users can control the behavior of long-running update operations, ensuring Terraform does not prematurely fail during cluster modifications or upgrades."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_neptune_cluster` resource defines customizable time limits for specific operations, such as creating, updating, or deleting a Neptune cluster. This block enables users to manage operation durations, ensuring better control over resource provisioning and lifecycle management in scenarios where default timeout settings may not suffice."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Neptune Cluster Amazon Resource Name (ARN)",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "cluster_members",
+      "description": "",
+      "optional": false,
+      "type": "set(string)"
+    },
+    {
+      "name": "cluster_resource_id",
+      "description": "The Neptune Cluster Resource ID",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "endpoint",
+      "description": "The DNS address of the Neptune instance",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "hosted_zone_id",
+      "description": "The Route53 Hosted Zone ID of the endpoint",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "reader_endpoint",
+      "description": "A read-only endpoint for the Neptune cluster, automatically load-balanced across replicas",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

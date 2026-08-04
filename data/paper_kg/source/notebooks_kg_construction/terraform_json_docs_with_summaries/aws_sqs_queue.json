@@ -1,0 +1,205 @@
+{
+  "resource": {
+    "name": "aws_sqs_queue",
+    "description": "Amazon SQS (Simple Queue Service) is a fully managed message queuing service that enables decoupling and scaling of microservices, distributed systems, and serverless applications. This resource allows you to create, configure, and manage an SQS queue, which acts as a reliable message buffer between producers and consumers. With support for standard and FIFO queues, SQS ensures secure, scalable, and asynchronous message processing. Use this resource to define queue attributes, configure access policies, and integrate seamlessly with AWS services like Lambda, SNS, and EC2. AWS will hang indefinitely, leading to a timeout while waiting error, when creating or updating an aws_sqs_queue with an associated aws_sqs_queue_policy if Version = \"2012-10-17\" is not explicitly set in the policy. AWS will hang indefinitely and trigger a timeout while waiting error when creating or updating an aws_sqs_queue if kms_data_key_reuse_period_seconds is set to a non-default value, sqs_managed_sse_enabled is false (explicitly or by default), and kms_master_key_id is not set.",
+    "llm_summary": "The `aws_sqs_queue` Terraform resource enables the creation and management of Amazon SQS queues for reliable, asynchronous message processing in distributed systems, microservices, and serverless architectures. It supports both standard and FIFO queues, allowing users to configure attributes like message retention, encryption (SSE/KMS), access policies, and integration with AWS services such as Lambda, SNS, and EC2. Common use cases include decoupling application components, scaling workloads, and ensuring secure message delivery, with options for fine-tuning queue behavior and compliance settings."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_sqs_queue\" \"terraform_queue\" {\n  name                      = \"terraform-example-queue\"\n  delay_seconds             = 90\n  max_message_size          = 2048\n  message_retention_seconds = 86400\n  receive_wait_time_seconds = 10\n  redrive_policy = jsonencode({\n    deadLetterTargetArn = aws_sqs_queue.terraform_queue_deadletter.arn\n    maxReceiveCount     = 4\n  })\n\n  tags = {\n    Environment = \"production\"\n  }\n}",
+      "llm_summary": "This example demonstrates the basic configuration of an AWS SQS queue with custom settings, including delay seconds, message retention, and a redrive policy for dead-letter queues. It showcases how to define key attributes like `max_message_size`, `receive_wait_time_seconds`, and `tags`, while integrating a dead-letter queue using the `redrive_policy` block."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "content_based_deduplication",
+      "description": "(Optional) Enables content-based deduplication for FIFO queues. For more information, see the related documentation.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `content_based_deduplication` argument for the `aws_sqs_queue` resource enables the configuration of deduplication behavior for FIFO queues by automatically generating a deduplication ID based on the content of the message. This ensures that duplicate messages with identical content are filtered out, supporting use cases where message uniqueness is critical without requiring manual deduplication ID assignment."
+    },
+    {
+      "name": "deduplication_scope",
+      "description": "(Optional) Specifies whether message deduplication occurs at the message group or queue level. Valid values are `messageGroup` and `queue` (default).",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `deduplication_scope` argument in the `aws_sqs_queue` resource allows users to define the level at which message deduplication is enforced, either at the `messageGroup` level for FIFO queues with message groups or at the `queue` level for the entire queue (default). Configuring this argument impacts how duplicate messages are identified and managed, enabling users to tailor deduplication behavior to align with their application's messaging structure and requirements."
+    },
+    {
+      "name": "delay_seconds",
+      "description": "(Optional) Time in seconds that the delivery of all messages in the queue will be delayed. An integer from 0 to 900 (15 minutes). The default for this attribute is 0 seconds.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `delay_seconds` argument in the `aws_sqs_queue` resource allows users to configure the delay period (0 to 900 seconds) for message delivery in the queue, effectively postponing the visibility of all incoming messages to consumers. This feature is commonly used to control message processing timing, enabling workflows that require deferred execution or throttling of message consumption."
+    },
+    {
+      "name": "fifo_queue",
+      "description": "(Optional) Boolean designating a FIFO queue. If not set, it defaults to `false` making it standard.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `fifo_queue` argument for the `aws_sqs_queue` resource allows users to specify whether the queue should operate as a First-In-First-Out (FIFO) queue, ensuring strict message ordering and exactly-once delivery. Setting this to `true` enables FIFO functionality, which is ideal for use cases requiring precise sequencing or deduplication, while leaving it unset defaults to a standard queue with no ordering guarantees."
+    },
+    {
+      "name": "fifo_throughput_limit",
+      "description": "(Optional) Specifies whether the FIFO queue throughput quota applies to the entire queue or per message group. Valid values are `perQueue` (default) and `perMessageGroupId`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `fifo_throughput_limit` argument for the `aws_sqs_queue` resource allows users to specify whether the FIFO queue's throughput quota is applied globally to the entire queue (`perQueue`) or scoped to individual message groups (`perMessageGroupId`). This configuration impacts how throughput limits are enforced, enabling users to optimize message processing based on their application's workload distribution and concurrency needs."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_sqs_queue` resource represents the unique identifier of the SQS queue, typically auto-generated by AWS upon creation. While not required to be explicitly set by the user, it can be used to reference or retrieve the queue in other Terraform configurations or workflows, enabling integration with dependent resources or external systems."
+    },
+    {
+      "name": "kms_data_key_reuse_period_seconds",
+      "description": "(Optional) Length of time, in seconds, for which Amazon SQS can reuse a data key to encrypt or decrypt messages before calling AWS KMS again. An integer representing seconds, between 60 seconds (1 minute) and 86,400 seconds (24 hours). The default is 300 (5 minutes).",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `kms_data_key_reuse_period_seconds` argument for the `aws_sqs_queue` resource allows users to configure the duration, in seconds, that Amazon SQS can reuse a data encryption key provided by AWS KMS to encrypt or decrypt messages before requesting a new key. This setting impacts encryption efficiency and cost, enabling users to balance security requirements with performance and AWS KMS usage costs by defining the reuse period within the allowed range of 60 seconds to 86,400 seconds."
+    },
+    {
+      "name": "kms_master_key_id",
+      "description": "(Optional) ID of an AWS-managed customer master key (CMK) for Amazon SQS or a custom CMK. For more information, see Key Terms.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `kms_master_key_id` argument for the `aws_sqs_queue` resource allows users to specify the ID of an AWS-managed or custom customer master key (CMK) to enable server-side encryption for the SQS queue. By setting this argument, users can control the encryption of messages at rest, ensuring enhanced security and compliance with data protection requirements."
+    },
+    {
+      "name": "max_message_size",
+      "description": "(Optional) Limit of how many bytes a message can contain before Amazon SQS rejects it. An integer from 1024 bytes (1 KiB) up to 262144 bytes (256 KiB). The default for this attribute is 262144 (256 KiB).",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `max_message_size` argument for the `aws_sqs_queue` resource allows users to define the maximum size, in bytes, of a single message that can be sent to the SQS queue, ensuring control over message payload limits. By configuring this value (from 1 KiB to 256 KiB), users can optimize queue behavior to align with application requirements, prevent oversized messages, and maintain efficient message processing workflows."
+    },
+    {
+      "name": "message_retention_seconds",
+      "description": "(Optional) Number of seconds Amazon SQS retains a message. Integer representing seconds, from 60 (1 minute) to 1209600 (14 days). The default for this attribute is 345600 (4 days).",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `message_retention_seconds` argument for the `aws_sqs_queue` resource allows users to configure the duration (in seconds) that Amazon SQS retains messages in the queue before they are automatically deleted. By specifying this value, users can define the lifecycle of queued messages to align with application requirements, such as ensuring sufficient time for processing or compliance with retention policies, with a range from 1 minute (60 seconds) to 14 days (1209600 seconds)."
+    },
+    {
+      "name": "name",
+      "description": "(Optional) Name of the queue. Queue names must be made up of only uppercase and lowercase ASCII letters, numbers, underscores, and hyphens, and must be between 1 and 80 characters long. For a FIFO (first-in-first-out) queue, the name must end with the `.fifo` suffix. If omitted, Terraform will assign a random, unique name. Conflicts with `name_prefix`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_sqs_queue` resource allows users to define a custom, unique identifier for the SQS queue, ensuring it adheres to specific naming conventions (ASCII letters, numbers, underscores, hyphens, and `.fifo` for FIFO queues). By setting this argument, users can control the queue's name for organizational clarity, integration with other systems, or alignment with naming standards, while omitting it lets Terraform generate a random name automatically."
+    },
+    {
+      "name": "name_prefix",
+      "description": "(Optional) Creates a unique name beginning with the specified prefix. Conflicts with `name`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name_prefix` argument for the `aws_sqs_queue` resource allows users to define a custom prefix for the queue's name, ensuring the creation of a unique name that begins with the specified string. This is particularly useful for dynamically generating queue names in environments where naming conventions or automated workflows require predictable prefixes, such as for organizing resources by project, environment, or application."
+    },
+    {
+      "name": "policy",
+      "description": "(Optional) JSON policy for the SQS queue. For more information about building AWS IAM policy documents with Terraform, see the AWS IAM Policy Document Guide.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `policy` argument for the `aws_sqs_queue` resource allows users to define a JSON-formatted IAM policy that governs access control and permissions for the SQS queue. By setting this argument, users can specify rules for who can send, receive, or manage messages, enabling fine-grained security and compliance configurations for queue operations."
+    },
+    {
+      "name": "receive_wait_time_seconds",
+      "description": "(Optional) Time for which a ReceiveMessage call will wait for a message to arrive (long polling) before returning. An integer from 0 to 20 (seconds). The default for this attribute is 0, meaning that the call will return immediately.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `receive_wait_time_seconds` argument configures the long polling behavior for an SQS queue by specifying the maximum time (0-20 seconds) a `ReceiveMessage` call will wait for a message to arrive before returning. Setting this value allows users to optimize message retrieval by reducing empty responses and improving efficiency in scenarios where messages are infrequent, aligning with common goals like enhancing queue performance and minimizing unnecessary API calls."
+    },
+    {
+      "name": "redrive_allow_policy",
+      "description": "(Optional) JSON policy to set up the Dead Letter Queue redrive permission, see AWS docs.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `redrive_allow_policy` argument for the `aws_sqs_queue` resource allows users to define a JSON policy that grants permissions for messages to be redriven to a Dead Letter Queue (DLQ). By configuring this policy, users can control the behavior and security of message redrive operations, ensuring proper handling of failed messages and aligning with specific access requirements."
+    },
+    {
+      "name": "redrive_policy",
+      "description": "(Optional) JSON policy to set up the Dead Letter Queue, see AWS docs. Note: when specifying `maxReceiveCount`, you must specify it as an integer (`5`), and not a string (`\"5\"`).",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `redrive_policy` argument for the `aws_sqs_queue` resource allows users to configure the behavior of a Dead Letter Queue (DLQ) by specifying a JSON policy. This policy defines how messages that fail processing multiple times (based on the `maxReceiveCount`) are redirected to a designated DLQ, enabling reliable error handling and message retention for troubleshooting or recovery purposes."
+    },
+    {
+      "name": "sqs_managed_sse_enabled",
+      "description": "(Optional) Boolean to enable server-side encryption (SSE) of message content with SQS-owned encryption keys. See Encryption at rest. Terraform will only perform drift detection of its value when present in a configuration.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `sqs_managed_sse_enabled` argument for the `aws_sqs_queue` resource allows users to enable server-side encryption (SSE) for message content using SQS-managed encryption keys. This configuration enhances data security by encrypting messages at rest, aligning with common goals of protecting sensitive information in cloud-based messaging systems."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of tags to assign to the queue. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_sqs_queue` resource allows users to assign key-value metadata to the SQS queue, enabling organization, categorization, and tracking of resources for purposes such as cost allocation, environment identification, or compliance. When set, it overrides provider-level default tags with matching keys, ensuring granular control over resource tagging."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_sqs_queue` resource allows users to define a comprehensive set of key-value tags that are applied to the SQS queue for organizational, management, or cost allocation purposes. By setting this argument, users can ensure consistent tagging across resources, enabling streamlined resource tracking, billing analysis, and compliance with tagging policies."
+    },
+    {
+      "name": "visibility_timeout_seconds",
+      "description": "(Optional) Visibility timeout for the queue. An integer from 0 to 43200 (12 hours). The default for this attribute is 30. For more information about visibility timeout, see AWS docs.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "\"Configures the visibility timeout for the SQS queue, which defines the duration (in seconds) a message remains invisible to other consumers after being retrieved by a worker. This setting helps control message processing behavior, ensuring workers have sufficient time to complete tasks before the message becomes available again.\""
+    }
+  ],
+  "blocks": [
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_sqs_queue` resource allows users to specify the maximum duration (as a string, e.g., \"5m\" for 5 minutes) Terraform should wait for the successful creation of an SQS queue. This configuration helps manage deployment workflows by preventing indefinite waits and enabling timeout control for resource provisioning."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block for the `aws_sqs_queue` resource allows users to specify the maximum duration (as a string) Terraform should wait for the deletion of an SQS queue to complete. By configuring this timeout, users can control the lifecycle behavior during resource destruction, ensuring operations do not exceed their desired time limits or fail prematurely in cases of extended deletion processes."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_sqs_queue` resource allows users to specify the maximum duration (as a string, e.g., \"30m\") Terraform will wait for updates to the SQS queue to complete. Configuring this timeout ensures predictable behavior during resource modifications, helping users manage long-running updates and avoid operation timeouts in their infrastructure workflows."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_sqs_queue` resource defines customizable time limits for specific operations, such as creating, updating, or deleting an SQS queue. By configuring this block, users can manage operation durations to prevent long-running tasks or handle infrastructure dependencies more effectively, ensuring reliable and predictable queue provisioning workflows."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN of the SQS queue.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "url",
+      "description": "Same as `id`: The URL for the created Amazon SQS queue.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

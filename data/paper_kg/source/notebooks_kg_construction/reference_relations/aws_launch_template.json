@@ -1,0 +1,67 @@
+[
+    {
+        "argument_path": "iam_instance_profile.arn",
+        "references_output": "aws_iam_instance_profile.arn",
+        "target_resource_type": "aws_iam_instance_profile"
+    },
+    {
+        "argument_path": "iam_instance_profile.name",
+        "references_output": "aws_iam_instance_profile.name",
+        "target_resource_type": "aws_iam_instance_profile"
+    },
+    {
+        "argument_path": "image_id",
+        "references_output": "aws_ami.id",
+        "target_resource_type": "aws_ami"
+    },
+    {
+        "argument_path": "license_specification.license_configuration_arn",
+        "references_output": "aws_license_manager_license_configuration.arn",
+        "target_resource_type": "aws_license_manager_license_configuration"
+    },
+    {
+        "argument_path": "network_interfaces.network_interface_id",
+        "references_output": "aws_network_interface.id",
+        "target_resource_type": "aws_network_interface"
+    },
+    {
+        "argument_path": "network_interfaces.subnet_id",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "network_interfaces.security_groups",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "placement.group_name",
+        "references_output": "aws_placement_group.name",
+        "target_resource_type": "aws_placement_group"
+    },
+    {
+        "argument_path": "placement.host_id",
+        "references_output": "aws_ec2_host.id",
+        "target_resource_type": "aws_ec2_host"
+    },
+    {
+        "argument_path": "placement.host_resource_group_arn",
+        "references_output": "aws_resourcegroups_group.arn",
+        "target_resource_type": "aws_resourcegroups_group"
+    },
+    {
+        "argument_path": "vpc_security_group_ids",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "block_device_mappings.ebs.kms_key_id",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "block_device_mappings.ebs.snapshot_id",
+        "references_output": "aws_ebs_snapshot.id",
+        "target_resource_type": "aws_ebs_snapshot"
+    }
+]

@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "notification.sns_topic",
+        "references_output": "aws_sns_topic.arn",
+        "target_resource_type": "aws_sns_topic"
+    },
+    {
+        "argument_path": "access_policy",
+        "references_output": "data.aws_iam_policy_document.json",
+        "target_resource_type": "aws_iam_policy_document"
+    }
+]

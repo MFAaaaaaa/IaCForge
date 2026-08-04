@@ -1,0 +1,46 @@
+{
+  "resource": {
+    "name": "aws_lightsail_disk_attachment",
+    "description": "Attaches a Lightsail disk to a Lightsail Instance",
+    "llm_summary": "The `aws_lightsail_disk_attachment` Terraform resource enables the attachment of Lightsail block storage disks to Lightsail instances, facilitating expanded storage capacity and persistent data management for applications hosted on Lightsail. Common use cases include scaling instance storage for web applications, databases, or file systems, and ensuring data durability by linking external disks. Users can configure disk-to-instance associations, manage attachment lifecycle, and optimize storage setups for Lightsail-based workloads."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "data \"aws_availability_zones\" \"available\" {\n  state = \"available\"\n\n  filter {\n    name   = \"opt-in-status\"\n    values = [\"opt-in-not-required\"]\n  }\n}\n\nresource \"aws_lightsail_disk\" \"test\" {\n  name              = \"test-disk\"\n  size_in_gb        = 8\n  availability_zone = data.aws_availability_zones.available.names[0]\n}\n\nresource \"aws_lightsail_instance\" \"test\" {\n  name              = \"test-instance\"\n  availability_zone = data.aws_availability_zones.available.names[0]\n  blueprint_id      = \"amazon_linux_2\"\n  bundle_id         = \"nano_3_0\"\n}\n\nresource \"aws_lightsail_disk_attachment\" \"test\" {\n  disk_name     = aws_lightsail_disk.test.name\n  instance_name = aws_lightsail_instance.test.name\n  disk_path     = \"/dev/xvdf\"\n}",
+      "llm_summary": "This example demonstrates how to attach an AWS Lightsail disk to an instance using the `aws_lightsail_disk_attachment` resource. It showcases the creation of a Lightsail disk and instance in the same availability zone, using data sources for zone filtering, and specifies the `disk_path` for the attachment."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "disk_name",
+      "description": "(Required) The name of the Lightsail Disk.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `disk_name` argument specifies the name of the Lightsail disk to be attached to an instance, enabling users to define which specific disk resource will be associated with the instance. By setting this required parameter, users ensure proper mapping and utilization of the desired storage resource within their Lightsail environment, supporting common goals like managing instance storage and data persistence."
+    },
+    {
+      "name": "disk_path",
+      "description": "(Required) The disk path to expose to the instance.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `disk_path` argument in the `aws_lightsail_disk_attachment` resource specifies the file system path where the attached Lightsail disk will be mounted on the instance. By defining this required parameter, users control how and where the disk is exposed within the instance's operating system, enabling seamless access to the disk's storage for applications or system processes."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_lightsail_disk_attachment` resource specifies a unique identifier for the disk attachment, allowing users to reference or manage the attachment within Terraform configurations. While optional, setting this argument can help track and distinguish specific disk attachments, supporting resource organization and lifecycle operations."
+    },
+    {
+      "name": "instance_name",
+      "description": "(Required) The name of the Lightsail Instance to attach to.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `instance_name` argument specifies the name of the Lightsail instance to which the disk will be attached, enabling users to define the target instance for storage expansion or data persistence. By setting this required parameter, users ensure the disk attachment is correctly associated with the intended compute resource, supporting common goals like enhancing instance storage capacity or managing application data."
+    }
+  ],
+  "blocks": [],
+  "attributes": []
+}

@@ -1,0 +1,483 @@
+{
+  "resource": {
+    "name": "aws_redshift_cluster",
+    "description": "Provides a Redshift Cluster Resource. All arguments including the username and password will be stored in the raw state as plain-text. Read more about sensitive data in state. A Redshift cluster's default IAM role can be managed both by this resource's default_iam_role_arn argument and the aws_redshift_cluster_iam_roles resource's default_iam_role_arn argument. Do not configure different values for both arguments. Doing so will cause a conflict of default IAM roles. Write-Only argument master_password_wo is available to use in place of master_password. Write-Only arguments are supported in HashiCorp Terraform 1.11.0 and later. Learn more.",
+    "llm_summary": "The `aws_redshift_cluster` Terraform resource enables the creation and management of Amazon Redshift clusters, a fully managed data warehouse solution optimized for large-scale analytics. It supports configuring key aspects such as cluster size, node types, IAM roles for access control, and secure authentication using master credentials. Common use cases include setting up scalable data warehouses for business intelligence, integrating Redshift with analytics tools, and managing sensitive data securely. Users can define default IAM roles, customize cluster settings, and leverage write-only password arguments for enhanced security."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_redshift_cluster\" \"example\" {\n  cluster_identifier = \"tf-redshift-cluster\"\n  database_name      = \"mydb\"\n  master_username    = \"exampleuser\"\n  master_password    = \"Mustbe8characters\"\n  node_type          = \"dc1.large\"\n  cluster_type       = \"single-node\"\n}",
+      "llm_summary": "This example demonstrates how to configure a basic AWS Redshift cluster using the `aws_redshift_cluster` resource, showcasing essential arguments such as `cluster_identifier`, `database_name`, `master_username`, `master_password`, `node_type`, and `cluster_type`. It illustrates the setup of a single-node cluster with minimal configuration, ideal for small-scale or development environments."
+    },
+    {
+      "title": "With Managed Credentials",
+      "code": "resource \"aws_redshift_cluster\" \"example\" {\n  cluster_identifier = \"tf-redshift-cluster\"\n  database_name      = \"mydb\"\n  master_username    = \"exampleuser\"\n  node_type          = \"dc1.large\"\n  cluster_type       = \"single-node\"\n\n  manage_master_password = true\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS Redshift cluster with managed credentials by enabling the `manage_master_password` argument, simplifying password management for the master user. This example sets up a single-node cluster with essential properties like `cluster_identifier`, `database_name`, and `node_type`.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "allow_version_upgrade",
+      "description": "(Optional) If true , major version upgrades can be applied during the maintenance window to the Amazon Redshift engine that is running on the cluster. Default is `true`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `allow_version_upgrade` argument in the `aws_redshift_cluster` resource controls whether major version upgrades to the Amazon Redshift engine can be automatically applied during the maintenance window. Enabling this option (default: `true`) ensures the cluster remains up-to-date with major engine improvements, aligning with user goals of maintaining compatibility and leveraging new features, while disabling it provides stricter version control for stability-sensitive environments."
+    },
+    {
+      "name": "apply_immediately",
+      "description": "(Optional) Specifies whether any cluster modifications are applied immediately, or during the next maintenance window. Default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `apply_immediately` argument for the `aws_redshift_cluster` resource controls whether configuration changes to the cluster, such as modifications to settings or parameters, are applied immediately or deferred to the next maintenance window. Setting this to `true` allows for immediate updates, which can minimize delays but may cause temporary disruptions, while leaving it as `false` (default) ensures changes are applied during scheduled maintenance, reducing potential impact on active workloads."
+    },
+    {
+      "name": "aqua_configuration_status",
+      "description": "(Optional, Deprecated) The value represents how the cluster is configured to use AQUA (Advanced Query Accelerator) after the cluster is restored. No longer supported by the AWS API. Always returns `auto`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `aqua_configuration_status` argument for the `aws_redshift_cluster` resource allows users to specify the cluster's configuration for AQUA (Advanced Query Accelerator) after restoration. However, this argument is deprecated and no longer functional, as the AWS API defaults to `auto` and does not support explicit configuration, making it irrelevant for current Redshift deployments."
+    },
+    {
+      "name": "automated_snapshot_retention_period",
+      "description": "(Optional) The number of days that automated snapshots are retained. If the value is 0, automated snapshots are disabled. Even if automated snapshots are disabled, you can still create manual snapshots when you want with create-cluster-snapshot. Default is 1.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `automated_snapshot_retention_period` argument allows users to define the number of days automated snapshots are retained for an Amazon Redshift cluster, directly controlling the backup lifecycle. Setting this value to `0` disables automated snapshots, while higher values ensure longer retention, supporting goals like disaster recovery and compliance with data retention policies."
+    },
+    {
+      "name": "availability_zone",
+      "description": "(Optional) The EC2 Availability Zone (AZ) in which you want Amazon Redshift to provision the cluster. For example, if you have several EC2 instances running in a specific Availability Zone, then you might want the cluster to be provisioned in the same zone in order to decrease network latency. Can only be changed if `availability_zone_relocation_enabled` is `true`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `availability_zone` argument allows users to specify the EC2 Availability Zone where the Amazon Redshift cluster will be provisioned, enabling optimized network performance by colocating the cluster with other resources in the same zone. This setting is particularly useful for reducing latency in distributed architectures and can only be modified if `availability_zone_relocation_enabled` is set to `true`."
+    },
+    {
+      "name": "availability_zone_relocation_enabled",
+      "description": "(Optional) If true, the cluster can be relocated to another availabity zone, either automatically by AWS or when requested. Default is `false`. Available for use on clusters from the RA3 instance family.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "\"Controls whether the Redshift cluster can be relocated to a different availability zone, enabling automatic or user-initiated failover for improved availability and resilience. Applicable to RA3 instance families, this setting supports disaster recovery and high availability goals.\""
+    },
+    {
+      "name": "cluster_identifier",
+      "description": "(Required) The Cluster Identifier. Must be a lower case string.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `cluster_identifier` argument specifies a unique, lowercase string to define the name of the Amazon Redshift cluster, serving as its primary identifier within AWS. Setting this argument allows users to distinguish and manage the cluster in their environment, enabling operations like monitoring, scaling, and integration with other resources."
+    },
+    {
+      "name": "cluster_parameter_group_name",
+      "description": "(Optional) The name of the parameter group to be associated with this cluster.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cluster_parameter_group_name` argument allows users to specify the name of a Redshift parameter group to associate with the cluster, enabling customization of database engine settings such as query performance, logging, and resource usage. By defining this parameter group, users can tailor the cluster's behavior to meet specific workload requirements or compliance standards."
+    },
+    {
+      "name": "cluster_public_key",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cluster_public_key` argument for the `aws_redshift_cluster` resource allows users to specify the public key associated with the cluster, typically used for secure communication or encryption purposes. Configuring this argument can enable secure data exchange between the Redshift cluster and external systems, aligning with user goals of enhancing security and compliance in cloud environments."
+    },
+    {
+      "name": "cluster_revision_number",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cluster_revision_number` argument for the `aws_redshift_cluster` resource allows users to specify the specific engine version or revision of the Redshift cluster. By setting this value, users can control the cluster's software version, enabling compatibility with desired features, bug fixes, or performance improvements tied to a particular revision."
+    },
+    {
+      "name": "cluster_subnet_group_name",
+      "description": "(Optional) The name of a cluster subnet group to be associated with this cluster. If this parameter is not provided the resulting cluster will be deployed outside virtual private cloud (VPC).",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cluster_subnet_group_name` argument allows users to specify the name of a subnet group for the Redshift cluster, enabling deployment within a Virtual Private Cloud (VPC) for enhanced network isolation and security. If omitted, the cluster is deployed outside the VPC, which may be less secure and suitable for simpler use cases or legacy configurations."
+    },
+    {
+      "name": "cluster_type",
+      "description": "(Optional) The cluster type to use. Either `single-node` or `multi-node`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cluster_type` argument for the `aws_redshift_cluster` resource allows users to specify the deployment configuration of the cluster, choosing between `single-node` for smaller, cost-effective setups or `multi-node` for scalable, high-performance workloads. This setting directly impacts the cluster's architecture and resource allocation, enabling users to tailor the Redshift environment to their data processing and storage needs."
+    },
+    {
+      "name": "cluster_version",
+      "description": "(Optional) The version of the Amazon Redshift engine software that you want to deploy on the cluster. The version selected runs on all the nodes in the cluster.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cluster_version` argument for the `aws_redshift_cluster` resource allows users to specify the version of the Amazon Redshift engine software to deploy across all nodes in the cluster. Configuring this argument enables users to control the software version for compatibility, feature availability, or compliance with organizational standards."
+    },
+    {
+      "name": "database_name",
+      "description": "(Optional) The name of the first database to be created when the cluster is created. If you do not provide a name, Amazon Redshift will create a default database called `dev`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `database_name` argument allows users to specify the name of the initial database created within the Amazon Redshift cluster, enabling customization of the default database environment. If not set, Redshift automatically creates a default database named `dev`, making this argument useful for tailoring the cluster to specific application or organizational requirements."
+    },
+    {
+      "name": "default_iam_role_arn",
+      "description": "(Optional) The Amazon Resource Name (ARN) for the IAM role that was set as default for the cluster when the cluster was created.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `default_iam_role_arn` argument for the `aws_redshift_cluster` resource allows users to specify the Amazon Resource Name (ARN) of the IAM role that will be set as the default for the cluster. This enables the cluster to assume the specified IAM role for accessing other AWS services, such as S3, during operations like data loading or unloading, streamlining permissions management and enhancing integration with external resources."
+    },
+    {
+      "name": "elastic_ip",
+      "description": "(Optional) The Elastic IP (EIP) address for the cluster.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `elastic_ip` argument allows users to associate a specific Elastic IP (EIP) address with the Redshift cluster, enabling the cluster to have a fixed, static public IP for consistent external access. This is particularly useful for scenarios requiring predictable IP-based whitelisting or integration with external systems."
+    },
+    {
+      "name": "encrypted",
+      "description": "(Optional) If true , the data in the cluster is encrypted at rest.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `encrypted` argument in the `aws_redshift_cluster` resource allows users to specify whether data stored in the Redshift cluster is encrypted at rest, enhancing security and compliance for sensitive data. Setting this argument to `true` enables encryption functionality, aligning with common goals like securing data in cloud environments and meeting regulatory requirements."
+    },
+    {
+      "name": "endpoint",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `endpoint` argument in the `aws_redshift_cluster` resource represents the connection endpoint for the Redshift cluster, typically used to define or retrieve the cluster's hostname or connection string for client applications. While not explicitly configurable, this argument is often referenced to facilitate database connectivity, enabling users to integrate the cluster with external systems or applications."
+    },
+    {
+      "name": "enhanced_vpc_routing",
+      "description": "(Optional) If true , enhanced VPC routing is enabled.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enhanced_vpc_routing` argument for the `aws_redshift_cluster` resource allows users to enable or disable Enhanced VPC Routing, which controls whether data traffic between the Redshift cluster and other services (e.g., S3, DynamoDB) flows through the VPC instead of the public internet. Enabling this feature enhances security and compliance by ensuring all data traffic remains within the VPC, aligning with common goals like secure data transfer and network isolation."
+    },
+    {
+      "name": "final_snapshot_identifier",
+      "description": "(Optional) The identifier of the final snapshot that is to be created immediately before deleting the cluster. If this parameter is provided, `skip_final_snapshot` must be false.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `final_snapshot_identifier` argument for the `aws_redshift_cluster` resource allows users to specify a custom identifier for the final snapshot that is automatically created when the cluster is deleted. This enables users to retain a backup of the cluster's data for future recovery or archival purposes, aligning with lifecycle management and disaster recovery goals."
+    },
+    {
+      "name": "iam_roles",
+      "description": "(Optional) A list of IAM Role ARNs to associate with the cluster. A Maximum of 10 can be associated to the cluster at any time.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `iam_roles` argument for the `aws_redshift_cluster` resource allows users to specify a set of IAM Role ARNs to associate with the cluster, enabling the cluster to access AWS services and resources securely on behalf of the user. This configuration is commonly used to grant the cluster permissions for tasks like reading from S3 or interacting with other AWS services, supporting data loading, unloading, and integration workflows."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_redshift_cluster` resource allows users to specify a unique identifier for the Redshift cluster, typically used to reference the cluster within Terraform configurations and outputs. While optional, setting this argument can help users track and manage the cluster's state or integrate it with other resources in their infrastructure."
+    },
+    {
+      "name": "kms_key_id",
+      "description": "(Optional) The ARN for the KMS encryption key. When specifying `kms_key_id`, `encrypted` needs to be set to true.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `kms_key_id` argument allows users to specify the ARN of a KMS encryption key to enable and manage encryption for the Redshift cluster's data at rest. By setting this argument (along with `encrypted = true`), users can enforce enhanced security and compliance requirements by leveraging customer-managed encryption keys."
+    },
+    {
+      "name": "maintenance_track_name",
+      "description": "(Optional) The name of the maintenance track for the restored cluster. When you take a snapshot, the snapshot inherits the MaintenanceTrack value from the cluster. The snapshot might be on a different track than the cluster that was the source for the snapshot. For example, suppose that you take a snapshot of a cluster that is on the current track and then change the cluster to be on the trailing track. In this case, the snapshot and the source cluster are on different tracks. Default value is `current`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `maintenance_track_name` argument for the `aws_redshift_cluster` resource allows users to specify the maintenance track for the cluster, which determines the versioning and update schedule applied to the cluster. By setting this argument, users can align the cluster with a specific maintenance track (e.g., `current` or `trailing`), enabling control over update timing and compatibility with snapshots or other clusters on different tracks."
+    },
+    {
+      "name": "manage_master_password",
+      "description": "(Optional) Whether to use AWS SecretsManager to manage the cluster admin credentials. Conflicts with `master_password` and `master_password_wo`. One of `master_password` or `manage_master_password` is required unless `snapshot_identifier` is provided.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `manage_master_password` argument in the `aws_redshift_cluster` resource allows users to enable AWS Secrets Manager for automatic management of the cluster's admin credentials, enhancing security and simplifying credential rotation. Setting this argument eliminates the need to manually specify `master_password` or `master_password_wo`, aligning with best practices for secure and automated password management."
+    },
+    {
+      "name": "manual_snapshot_retention_period",
+      "description": "(Optional) The default number of days to retain a manual snapshot. If the value is -1, the snapshot is retained indefinitely. This setting doesn't change the retention period of existing snapshots. Valid values are between `-1` and `3653`. Default value is `-1`.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `manual_snapshot_retention_period` argument for the `aws_redshift_cluster` resource allows users to define the retention period, in days, for manual snapshots of the cluster, enabling control over snapshot lifecycle management. Setting this argument impacts how long manual snapshots are preserved, with values ranging from `-1` (indefinite retention) to a maximum of `3653` days, helping users optimize storage costs and compliance with data retention policies."
+    },
+    {
+      "name": "master_password",
+      "description": "(Optional) Password for the master DB user. Conflicts with `manage_master_password` and `master_password_wo`. One of `master_password`, `master_password_wo` or `manage_master_password` is required unless `snapshot_identifier` is provided. Note that this may show up in logs, and it will be stored in the state file. Password must contain at least 8 characters and contain at least one uppercase letter, one lowercase letter, and one number.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `master_password` argument allows users to define the password for the master database user of the Redshift cluster, enabling secure access and control over the cluster's primary administrative account. This argument is critical for configuring authentication but must meet specific complexity requirements and is stored in the Terraform state file, which may have security implications."
+    },
+    {
+      "name": "master_password_secret_kms_key_id",
+      "description": "(Optional) ID of the KMS key used to encrypt the cluster admin credentials secret.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `master_password_secret_kms_key_id` argument allows users to specify the AWS KMS key ID used to encrypt the cluster administrator credentials for an `aws_redshift_cluster`. By setting this argument, users can enhance security by ensuring the master password is stored as a KMS-encrypted secret, aligning with best practices for sensitive data protection and compliance requirements."
+    },
+    {
+      "name": "master_password_wo",
+      "description": "(Optional, Write-Only) Password for the master DB user. Conflicts with `manage_master_password` and `master_password`. One of `master_password_wo`, `master_password` or `manage_master_password` is required unless `snapshot_identifier` is provided. Note that this may show up in logs. Password must contain at least 8 characters and contain at least one uppercase letter, one lowercase letter, and one number.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `master_password_wo` argument for the `aws_redshift_cluster` resource allows users to securely define the password for the master database user in a write-only manner, ensuring sensitive credentials are not stored in state files or exposed in logs. This argument is essential for configuring access control to the cluster's database and must meet specific complexity requirements, enabling secure authentication for administrative operations."
+    },
+    {
+      "name": "master_password_wo_version",
+      "description": "(Optional) Used together with `master_password_wo` to trigger an update. Increment this value when an update to the `master_password_wo` is required.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `master_password_wo_version` argument in the `aws_redshift_cluster` resource is a numeric value used to manage updates to the cluster's master password (`master_password_wo`). By incrementing this value, users can trigger a password update, ensuring controlled lifecycle changes for enhanced security or compliance without directly modifying other cluster configurations."
+    },
+    {
+      "name": "master_username",
+      "description": "(Required unless a `snapshot_identifier` is provided) Username for the master DB user.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `master_username` argument for the `aws_redshift_cluster` resource specifies the username for the master database user, enabling the configuration of administrative access to the cluster's database. This argument is essential for defining the primary credentials used to manage and interact with the database unless a `snapshot_identifier` is provided, which restores existing credentials from a snapshot."
+    },
+    {
+      "name": "multi_az",
+      "description": "(Optional) Specifies if the Redshift cluster is multi-AZ.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `multi_az` argument for the `aws_redshift_cluster` resource allows users to specify whether the Redshift cluster should be deployed across multiple Availability Zones (multi-AZ), enhancing fault tolerance and high availability. Setting this argument to `true` ensures the cluster is resilient to AZ-specific failures, aligning with goals like disaster recovery and minimizing downtime in distributed cloud environments."
+    },
+    {
+      "name": "node_type",
+      "description": "(Required) The node type to be provisioned for the cluster.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `node_type` argument specifies the hardware configuration of the compute nodes for the Redshift cluster, allowing users to define the performance, storage capacity, and cost characteristics of the cluster. Setting this value directly impacts the cluster's ability to handle workloads, making it a critical choice for optimizing resource allocation and meeting performance requirements."
+    },
+    {
+      "name": "number_of_nodes",
+      "description": "(Optional) The number of compute nodes in the cluster. This parameter is required when the ClusterType parameter is specified as multi-node. Default is 1.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `number_of_nodes` argument in the `aws_redshift_cluster` resource specifies the number of compute nodes in the cluster, allowing users to scale the cluster's processing capacity. It is required for multi-node configurations and impacts the cluster's performance and cost, enabling users to tailor the infrastructure to their workload requirements."
+    },
+    {
+      "name": "owner_account",
+      "description": "(Optional) The AWS customer account used to create or copy the snapshot. Required if you are restoring a snapshot you do not own, optional if you own the snapshot.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `owner_account` argument in the `aws_redshift_cluster` resource specifies the AWS account ID that owns the snapshot being restored, enabling users to restore snapshots created or copied by another account. This argument is essential for cross-account snapshot recovery scenarios, ensuring access to snapshots not owned by the current account while remaining optional for snapshots owned by the user."
+    },
+    {
+      "name": "port",
+      "description": "(Optional) The port number on which the cluster accepts incoming connections. Valid values are between `1115` and `65535`. The cluster is accessible only via the JDBC and ODBC connection strings. Part of the connection string requires the port on which the cluster will listen for incoming connections. Default port is `5439`.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `port` argument for the `aws_redshift_cluster` resource allows users to specify the port number on which the Redshift cluster listens for incoming connections, enabling control over the network configuration for JDBC and ODBC connection strings. By setting this argument, users can align the cluster's connectivity with their application's requirements or organizational standards, ensuring seamless integration and accessibility."
+    },
+    {
+      "name": "preferred_maintenance_window",
+      "description": "(Optional) The weekly time range (in UTC) during which automated cluster maintenance can occur. Format: ddd:hh24:mi-ddd:hh24:mi",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `preferred_maintenance_window` argument allows users to define a specific weekly time range (in UTC) during which automated maintenance tasks, such as software updates or hardware optimizations, can occur on the Redshift cluster. This configuration helps users align maintenance activities with their operational schedules, minimizing potential disruptions to workloads."
+    },
+    {
+      "name": "publicly_accessible",
+      "description": "(Optional) If true, the cluster can be accessed from a public network. Default is `true`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `publicly_accessible` argument for the `aws_redshift_cluster` resource controls whether the cluster can be accessed from a public network, such as the internet, by assigning it a public IP address. Setting this argument to `true` enables external connectivity, which is useful for public-facing workloads, while setting it to `false` restricts access to private networks for enhanced security in isolated environments."
+    },
+    {
+      "name": "skip_final_snapshot",
+      "description": "(Optional) Determines whether a final snapshot of the cluster is created before Amazon Redshift deletes the cluster. If true , a final cluster snapshot is not created. If false , a final cluster snapshot is created before the cluster is deleted. Default is false.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `skip_final_snapshot` argument for the `aws_redshift_cluster` resource allows users to control whether a final snapshot of the cluster is created before the cluster is deleted. Setting this to `true` skips the creation of the snapshot, which is useful for scenarios where snapshot retention is unnecessary, while leaving it as `false` ensures data preservation by creating a snapshot prior to deletion, aligning with lifecycle management and disaster recovery goals."
+    },
+    {
+      "name": "snapshot_arn",
+      "description": "(Optional) The ARN of the snapshot from which to create the new cluster. Conflicts with `snapshot_identifier`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `snapshot_arn` argument for the `aws_redshift_cluster` resource allows users to specify the Amazon Resource Name (ARN) of an existing snapshot to create a new Redshift cluster from. This enables users to restore cluster data and configuration from a specific snapshot, supporting disaster recovery, cloning, or migration workflows. Note that it conflicts with the `snapshot_identifier` argument, ensuring only one snapshot restoration method is used."
+    },
+    {
+      "name": "snapshot_cluster_identifier",
+      "description": "(Optional) The name of the cluster the source snapshot was created from.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `snapshot_cluster_identifier` argument allows users to specify the source Redshift cluster from which a snapshot was created, enabling the restoration of a new cluster based on the data and configuration of the specified source. This is commonly used to replicate or recover clusters for purposes such as disaster recovery, testing, or creating development environments from production data."
+    },
+    {
+      "name": "snapshot_identifier",
+      "description": "(Optional) The name of the snapshot from which to create the new cluster. Conflicts with `snapshot_arn`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `snapshot_identifier` argument for the `aws_redshift_cluster` resource allows users to specify the name of an existing snapshot to restore when creating a new Redshift cluster. By setting this argument, users can initialize the cluster with pre-existing data and configurations from the specified snapshot, enabling streamlined recovery, migration, or replication workflows."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_redshift_cluster` resource allows users to assign metadata in the form of key-value pairs to the Redshift cluster, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling (e.g., \"dev\" or \"prod\"), or compliance tracking. When set, these tags can override provider-level default tags with matching keys, ensuring granular control over resource tagging."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_redshift_cluster` resource allows users to define a comprehensive set of key-value tags that are applied to the cluster and any associated resources. This facilitates resource organization, cost allocation, and governance by enabling tagging for purposes such as identifying environments, tracking ownership, or categorizing workloads across AWS services."
+    },
+    {
+      "name": "vpc_security_group_ids",
+      "description": "(Optional) A list of Virtual Private Cloud (VPC) security groups to be associated with the cluster.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `vpc_security_group_ids` argument allows users to specify a set of VPC security groups to control network access to the Redshift cluster, enabling fine-grained management of inbound and outbound traffic. Configuring this argument helps secure the cluster by defining which resources or IP ranges can communicate with it, aligning with common goals of enforcing network-level security and compliance."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "logging",
+      "description": "(Optional, Deprecated) Logging, documented below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "bucket_name",
+          "description": "(Optional, required when `enable` is `true` and `log_destination_type` is `s3`) The name of an existing S3 bucket where the log files are to be stored. Must be in the same region as the cluster and the cluster must have read bucket and put object permissions. For more information on the permissions required for the bucket, please read the AWS documentation",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `bucket_name` argument specifies the name of an existing S3 bucket where Amazon Redshift will store logging data when logging is enabled and the destination type is set to S3. Configuring this argument allows users to define the storage location for log files, ensuring compliance, auditing, or debugging needs, provided the bucket resides in the same region as the cluster and has the necessary read and write permissions."
+        },
+        {
+          "name": "enable",
+          "description": "(Required) Enables logging information such as queries and connection attempts, for the specified Amazon Redshift cluster.",
+          "required": true,
+          "type": "bool",
+          "llm_summary": "\"Controls whether logging is activated for the Amazon Redshift cluster, enabling the capture of critical information such as query execution and connection attempts to support monitoring, auditing, and troubleshooting goals.\""
+        },
+        {
+          "name": "log_destination_type",
+          "description": "(Optional) The log destination type. An enum with possible values of `s3` and `cloudwatch`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `log_destination_type` argument for the `aws_redshift_cluster` resource allows users to specify where Redshift audit logs should be delivered, choosing between `s3` or `cloudwatch` as the destination. This configuration enables centralized log management and monitoring, supporting common goals like compliance, troubleshooting, and performance analysis by directing logs to either object storage or a log monitoring service."
+        },
+        {
+          "name": "log_exports",
+          "description": "(Optional) The collection of exported log types. Log types include the connection log, user log and user activity log. Required when `log_destination_type` is `cloudwatch`. Valid log types are `connectionlog`, `userlog`, and `useractivitylog`.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `log_exports` argument for the `aws_redshift_cluster` resource allows users to specify which types of logs (e.g., connection logs, user logs, and user activity logs) should be exported to a designated logging destination, such as CloudWatch. Configuring this argument enables enhanced monitoring and auditing capabilities, helping users track database activity and troubleshoot issues effectively."
+        },
+        {
+          "name": "s3_key_prefix",
+          "description": "(Optional) The prefix applied to the log file names.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `s3_key_prefix` argument for the `aws_redshift_cluster` resource's logging configuration allows users to define a custom prefix for log file names stored in the specified S3 bucket. By setting this argument, users can organize and categorize Redshift logs more effectively, enabling streamlined log management and easier identification of logs within the S3 bucket, which is particularly useful for environments with multiple clusters or complex logging requirements."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `logging` configuration block in the `aws_redshift_cluster` resource enables the setup of audit logging for Redshift clusters, allowing users to capture detailed logs of user activities and database operations. This block encapsulates settings related to log storage and management, helping users enhance security, monitor cluster usage, and comply with auditing requirements."
+    },
+    {
+      "name": "snapshot_copy",
+      "description": "(Optional, Deprecated) Configuration of automatic copy of snapshots from one region to another. Documented below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "destination_region",
+          "description": "(Required) The destination region that you want to copy snapshots to.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `destination_region` argument for the `snapshot_copy` feature in the `aws_redshift_cluster` resource specifies the AWS region where automated snapshots of the Redshift cluster will be copied. By defining this required parameter, users enable cross-region snapshot replication, which supports disaster recovery, data redundancy, and compliance with multi-region data storage requirements."
+        },
+        {
+          "name": "grant_name",
+          "description": "(Optional) The name of the snapshot copy grant to use when snapshots of an AWS KMS-encrypted cluster are copied to the destination region.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `grant_name` argument in the `snapshot_copy` configuration of the `aws_redshift_cluster` resource allows users to specify the name of an AWS KMS snapshot copy grant, enabling secure cross-region copying of snapshots for clusters encrypted with AWS KMS. By defining this argument, users can control the permissions and encryption context required for transferring snapshots to a destination region, aligning with compliance and data protection goals."
+        },
+        {
+          "name": "retention_period",
+          "description": "(Optional) The number of days to retain automated snapshots in the destination region after they are copied from the source region. Defaults to `7`.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `retention_period` argument for the `snapshot_copy` feature of the `aws_redshift_cluster` resource allows users to define the number of days automated snapshots are retained in the destination region after being copied from the source region. By configuring this, users can control the lifecycle of copied snapshots to meet data retention policies or disaster recovery requirements, ensuring snapshots are available for a specified duration before automatic deletion."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `snapshot_copy` block in the `aws_redshift_cluster` resource configures the automatic replication of Redshift cluster snapshots to a different AWS region, enabling cross-region disaster recovery and data redundancy. This block encapsulates settings related to snapshot copy behavior, such as destination region and retention period, allowing users to enhance data durability and meet compliance or backup requirements."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_redshift_cluster` resource allows users to specify the maximum duration (as a string) Terraform should wait for the creation of a Redshift cluster before timing out. By configuring this argument, users can control the lifecycle behavior of the resource, ensuring adequate time for cluster provisioning in environments where creation may take longer due to factors like large configurations or network delays."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_redshift_cluster` resource allows users to specify the maximum duration Terraform should wait for the deletion of a Redshift cluster to complete. By configuring this timeout, users can control the behavior of long-running delete operations, ensuring they align with operational requirements or avoid premature failures during resource teardown."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_redshift_cluster` resource allows users to specify the maximum duration (as a string) Terraform will wait for an update operation on the Redshift cluster to complete. By configuring this timeout, users can control how long Terraform should attempt to apply changes before timing out, ensuring smoother management of cluster updates in scenarios where operations may take longer due to resource constraints or complex configurations."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_redshift_cluster` resource allows users to define custom timeout durations for specific operations, such as creating, updating, or deleting a Redshift cluster. By configuring this block, users gain precise control over operation time limits, ensuring smoother management of long-running tasks and avoiding unexpected failures due to default timeout constraints."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) of cluster",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "cluster_namespace_arn",
+      "description": "The namespace Amazon Resource Name (ARN) of the cluster",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "cluster_nodes",
+      "description": "The nodes in the cluster. Cluster node blocks are documented below",
+      "optional": false,
+      "type": "list(object({node_role=string,private_ip_address=string,public_ip_address=string}))"
+    },
+    {
+      "name": "dns_name",
+      "description": "The DNS name of the cluster",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "master_password_secret_arn",
+      "description": "ARN of the cluster admin credentials secret",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

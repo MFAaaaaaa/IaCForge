@@ -1,0 +1,35 @@
+{
+    "resource": {
+        "name": "aws_route53_vpc_association_authorization",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "vpc_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "vpc_region",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "zone_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": []
+}

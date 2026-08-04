@@ -1,0 +1,94 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_cors_configuration",
+    "description": "Provides an S3 bucket CORS configuration resource. For more information about CORS, go to Enabling Cross-Origin Resource Sharing in the Amazon S3 User Guide. S3 Buckets only support a single CORS configuration. Declaring multiple aws_s3_bucket_cors_configuration resources to the same S3 Bucket will cause a perpetual difference in configuration. This resource cannot be used with S3 directory buckets.",
+    "llm_summary": "The `aws_s3_bucket_cors_configuration` resource manages the Cross-Origin Resource Sharing (CORS) settings for an Amazon S3 bucket, enabling controlled access to bucket resources from external origins. It is commonly used to configure rules for web applications that require cross-origin requests, such as APIs, static websites, or client-side applications interacting with S3-hosted assets. Users can define CORS rules specifying allowed origins, HTTP methods, headers, and exposed response headers to ensure secure and compliant cross-origin interactions."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"mybucket\"\n}\n\nresource \"aws_s3_bucket_cors_configuration\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n\n  cors_rule {\n    allowed_headers = [\"*\"]\n    allowed_methods = [\"PUT\", \"POST\"]\n    allowed_origins = [\"https://s3-website-test.hashicorp.com\"]\n    expose_headers  = [\"ETag\"]\n    max_age_seconds = 3000\n  }\n\n  cors_rule {\n    allowed_methods = [\"GET\"]\n    allowed_origins = [\"*\"]\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure Cross-Origin Resource Sharing (CORS) rules for an AWS S3 bucket using the `aws_s3_bucket_cors_configuration` resource. It showcases defining multiple `cors_rule` blocks to specify allowed methods, origins, headers, exposed headers, and max age settings, enabling fine-grained control over CORS behavior for the bucket."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bucket",
+      "description": "(Required, Forces new resource) Name of the bucket.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "Specifies the name of the S3 bucket to which the CORS (Cross-Origin Resource Sharing) configuration will be applied, enabling the user to define rules that control cross-origin access for the specified bucket. This argument is required and directly ties the CORS settings to a specific bucket, ensuring proper resource association and enforcing a new resource creation if changed."
+    },
+    {
+      "name": "expected_bucket_owner",
+      "description": "(Optional, Forces new resource) Account ID of the expected bucket owner.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `expected_bucket_owner` argument in the `aws_s3_bucket_cors_configuration` resource allows users to specify the AWS account ID of the bucket's expected owner, ensuring that the resource interacts only with a bucket owned by the defined account. This provides an additional layer of security and ownership validation, helping prevent accidental misconfigurations or unauthorized access to buckets in multi-account environments."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_s3_bucket_cors_configuration` resource allows users to optionally specify a unique identifier for the CORS configuration associated with an S3 bucket. While not required, setting this argument can help users manage and reference the configuration programmatically, particularly in scenarios involving complex infrastructure or automation workflows."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "cors_rule",
+      "description": "(Required) Set of origins and methods (cross-origin access that you want to allow). See below. You can configure up to 100 rules.",
+      "cardinality": [
+        1,
+        100
+      ],
+      "arguments": [
+        {
+          "name": "allowed_headers",
+          "description": "(Optional) Set of Headers that are specified in the `Access-Control-Request-Headers` header.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `allowed_headers` argument in the `cors_rule` block of the `aws_s3_bucket_cors_configuration` resource allows users to specify a set of HTTP headers that can be included in cross-origin requests to the S3 bucket. By defining these headers, users control which headers are permitted in the `Access-Control-Request-Headers` of preflight requests, enabling fine-grained customization of CORS behavior to support specific client-side application requirements."
+        },
+        {
+          "name": "allowed_methods",
+          "description": "(Required) Set of HTTP methods that you allow the origin to execute. Valid values are `GET`, `PUT`, `HEAD`, `POST`, and `DELETE`.",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `allowed_methods` argument in the `cors_rule` block of the `aws_s3_bucket_cors_configuration` resource specifies the set of HTTP methods (e.g., `GET`, `PUT`, `HEAD`, `POST`, `DELETE`) that are permitted for cross-origin requests to the S3 bucket. By defining this argument, users control which operations external origins can perform on the bucket, enabling fine-grained access for applications interacting with the bucket via CORS."
+        },
+        {
+          "name": "allowed_origins",
+          "description": "(Required) Set of origins you want customers to be able to access the bucket from.",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `allowed_origins` argument in the `cors_rule` block of the `aws_s3_bucket_cors_configuration` resource specifies the set of origins (domains) permitted to make cross-origin requests to the S3 bucket. By defining this argument, users enable fine-grained control over which external domains can interact with the bucket's resources, supporting use cases like web applications accessing S3-hosted assets securely."
+        },
+        {
+          "name": "expose_headers",
+          "description": "(Optional) Set of headers in the response that you want customers to be able to access from their applications (for example, from a JavaScript `XMLHttpRequest` object).",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `expose_headers` argument in the `cors_rule` block of the `aws_s3_bucket_cors_configuration` resource allows users to specify a set of response headers that client applications, such as JavaScript `XMLHttpRequest` objects, can access. Configuring this argument enables fine-grained control over which headers are exposed to the client, supporting cross-origin resource sharing (CORS) and enhancing interoperability for web applications accessing S3 bucket resources."
+        },
+        {
+          "name": "id",
+          "description": "(Optional) Unique identifier for the rule. The value cannot be longer than 255 characters.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `id` argument in the `cors_rule` block of the `aws_s3_bucket_cors_configuration` resource allows users to define a unique identifier for a specific CORS rule, enabling easier management and distinction of rules within the bucket's CORS configuration. While optional, setting this argument can help organize and reference individual rules, especially in complex configurations or automated workflows."
+        },
+        {
+          "name": "max_age_seconds",
+          "description": "(Optional) Time in seconds that your browser is to cache the preflight response for the specified resource.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `max_age_seconds` argument in the `cors_rule` block of the `aws_s3_bucket_cors_configuration` resource allows users to define the duration (in seconds) that a browser should cache the preflight response for cross-origin resource sharing (CORS) requests. Configuring this value helps optimize performance by reducing the frequency of preflight requests, which is particularly useful for applications with frequent cross-origin interactions."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `cors_rule` block within the `aws_s3_bucket_cors_configuration` resource defines cross-origin resource sharing (CORS) rules for an S3 bucket, enabling controlled access to bucket resources from specified origins and HTTP methods. It encapsulates settings such as allowed origins, methods, headers, and exposed headers, helping users configure up to 100 rules to manage secure and flexible cross-origin access for web applications or external systems interacting with the bucket."
+    }
+  ],
+  "attributes": []
+}

@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "dialog_code_hook.uri",
+        "references_output": "aws_lambda_function.arn",
+        "target_resource_type": "aws_lambda_function"
+    },
+    {
+        "argument_path": "fulfillment_activity.code_hook.uri",
+        "references_output": "aws_lambda_function.arn",
+        "target_resource_type": "aws_lambda_function"
+    }
+]

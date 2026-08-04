@@ -1,0 +1,168 @@
+{
+  "resource": {
+    "name": "aws_vpc_peering_connection",
+    "description": "Provides a resource to manage a VPC peering connection. Terraform provides both a standalone VPC Peering Connection Options and a VPC Peering Connection resource with accepter and requester attributes. Do not manage options for the same VPC peering connection in both a VPC Peering Connection resource and a VPC Peering Connection Options resource. Doing so will cause a conflict of options and will overwrite the options. Using a VPC Peering Connection Options resource decouples management of the connection options from management of the VPC Peering Connection and allows options to be set correctly in cross-account scenarios. For cross-account (requester's AWS account differs from the accepter's AWS account) or inter-region VPC Peering Connections use the aws_vpc_peering_connection resource to manage the requester's side of the connection and use the aws_vpc_peering_connection_accepter resource to manage the accepter's side of the connection. Creating multiple aws_vpc_peering_connection resources with the same peer_vpc_id and vpc_id will not produce an error. Instead, AWS will return the connection id that already exists, resulting in multiple aws_vpc_peering_connection resources with the same id.",
+    "llm_summary": "The `aws_vpc_peering_connection` resource enables the creation and management of VPC peering connections, facilitating secure communication between VPCs across accounts or regions. It is commonly used for integrating workloads, sharing resources, or enabling cross-account and inter-region networking. Users can configure requester and accepter attributes, manage connection options independently for cross-account scenarios, and ensure proper lifecycle management of peering connections without conflicts."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_vpc_peering_connection\" \"foo\" {\n  peer_owner_id = var.peer_owner_id\n  peer_vpc_id   = aws_vpc.bar.id\n  vpc_id        = aws_vpc.foo.id\n}",
+      "llm_summary": "\"Demonstrates the basic configuration of an `aws_vpc_peering_connection` resource to establish a peering connection between two VPCs, using the `peer_owner_id`, `peer_vpc_id`, and `vpc_id` arguments to define the connection between the local and peer VPCs.\""
+    },
+    {
+      "title": "Example 2",
+      "code": "resource \"aws_vpc_peering_connection\" \"foo\" {\n  peer_owner_id = var.peer_owner_id\n  peer_vpc_id   = aws_vpc.bar.id\n  vpc_id        = aws_vpc.foo.id\n\n  accepter {\n    allow_remote_vpc_dns_resolution = true\n  }\n\n  requester {\n    allow_remote_vpc_dns_resolution = true\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS VPC peering connection with DNS resolution enabled for both the requester and accepter VPCs using the `allow_remote_vpc_dns_resolution` argument within the `accepter` and `requester` blocks. This example highlights cross-account VPC peering by specifying `peer_owner_id` and linking two VPCs via their IDs.\""
+    },
+    {
+      "title": "Example 3",
+      "code": "resource \"aws_vpc_peering_connection\" \"foo\" {\n  peer_owner_id = var.peer_owner_id\n  peer_vpc_id   = aws_vpc.bar.id\n  vpc_id        = aws_vpc.foo.id\n  auto_accept   = true\n\n  tags = {\n    Name = \"VPC Peering between foo and bar\"\n  }\n}\n\nresource \"aws_vpc\" \"foo\" {\n  cidr_block = \"10.1.0.0/16\"\n}\n\nresource \"aws_vpc\" \"bar\" {\n  cidr_block = \"10.2.0.0/16\"\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS VPC peering connection (`aws_vpc_peering_connection`) between two VPCs (`aws_vpc`) with distinct CIDR blocks, using the `auto_accept` argument for automatic connection acceptance and tagging for identification. This example is ideal for learning how to establish cross-VPC communication within or across AWS accounts.\""
+    },
+    {
+      "title": "Example 4",
+      "code": "resource \"aws_vpc_peering_connection\" \"foo\" {\n  peer_owner_id = var.peer_owner_id\n  peer_vpc_id   = aws_vpc.bar.id\n  vpc_id        = aws_vpc.foo.id\n  peer_region   = \"us-east-1\"\n}\n\nresource \"aws_vpc\" \"foo\" {\n  provider   = aws.us-west-2\n  cidr_block = \"10.1.0.0/16\"\n}\n\nresource \"aws_vpc\" \"bar\" {\n  provider   = aws.us-east-1\n  cidr_block = \"10.2.0.0/16\"\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_vpc_peering_connection` between two VPCs in different AWS regions (`us-west-2` and `us-east-1`) using the `peer_region`, `peer_owner_id`, and `peer_vpc_id` arguments. This example also includes the creation of the VPCs (`aws_vpc`) with distinct CIDR blocks to establish the peering connection.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "auto_accept",
+      "description": "(Optional) Accept the peering (both VPCs need to be in the same AWS account and region).",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `auto_accept` argument in the `aws_vpc_peering_connection` resource controls whether the peering connection is automatically accepted upon creation, simplifying the setup process for VPCs within the same AWS account and region. Enabling this option streamlines workflows by bypassing manual acceptance, making it ideal for automating intra-account network configurations."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_vpc_peering_connection` resource represents the unique identifier of an existing VPC peering connection. While optional, it allows users to reference and manage a specific peering connection that has already been created, enabling operations such as importing or updating its configuration within Terraform."
+    },
+    {
+      "name": "peer_owner_id",
+      "description": "(Optional) The AWS account ID of the target peer VPC. Defaults to the account ID the AWS provider is currently connected to, so must be managed if connecting cross-account.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `peer_owner_id` argument in the `aws_vpc_peering_connection` resource specifies the AWS account ID of the target VPC's owner, enabling cross-account VPC peering connections. By setting this argument, users can establish peering relationships between VPCs in different AWS accounts, facilitating secure inter-account network communication."
+    },
+    {
+      "name": "peer_region",
+      "description": "(Optional) The region of the accepter VPC of the VPC Peering Connection. `auto_accept` must be `false`, and use the `aws_vpc_peering_connection_accepter` to manage the accepter side.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `peer_region` argument in the `aws_vpc_peering_connection` resource allows users to specify the AWS region of the accepter VPC in a cross-region VPC peering connection. This configuration is essential for establishing peering relationships between VPCs in different regions, enabling secure and scalable inter-region communication."
+    },
+    {
+      "name": "peer_vpc_id",
+      "description": "(Required) The ID of the target VPC with which you are creating the VPC Peering Connection.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `peer_vpc_id` argument specifies the ID of the target VPC to establish a VPC peering connection with, enabling network communication between the local VPC and the specified peer VPC. This is a required parameter that defines the remote VPC involved in the peering relationship, facilitating cross-VPC resource access and connectivity."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_vpc_peering_connection` resource allows users to assign metadata in the form of key-value pairs to the peering connection, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or compliance tracking. When configured, these tags can override provider-level default tags with matching keys, ensuring granular control over resource tagging."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_vpc_peering_connection` resource allows users to define a comprehensive set of key-value tags that are automatically merged with resource-specific tags, enabling consistent metadata management across AWS resources. By setting this argument, users can streamline tagging for purposes like cost allocation, environment identification, or organizational compliance, ensuring uniform tagging practices across their infrastructure."
+    },
+    {
+      "name": "vpc_id",
+      "description": "(Required) The ID of the requester VPC.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `vpc_id` argument specifies the ID of the requester VPC that initiates the peering connection, enabling users to define which VPC will establish a network link with a peer VPC. This is a required parameter that ensures the correct VPC is identified for creating the peering relationship, facilitating cross-VPC communication for workloads or resources in separate VPCs."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "accepter",
+      "description": "(Optional) - An optional configuration block that allows for VPC Peering Connection options to be set for the VPC that accepts the peering connection (a maximum of one).",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "allow_remote_vpc_dns_resolution",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `allow_remote_vpc_dns_resolution` argument in the \"accepter\" block of the `aws_vpc_peering_connection` resource controls whether DNS resolution requests from the accepter VPC can resolve private DNS hostnames in the peer VPC. Enabling this functionality facilitates seamless cross-VPC communication by allowing the accepter VPC to access private DNS records in the remote VPC, which is commonly used for integrating services across VPCs in multi-account or multi-region architectures."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"accepter\" configuration block within the `aws_vpc_peering_connection` resource defines optional settings for the VPC that accepts the peering connection, enabling fine-grained control over peering options such as DNS resolution and routing behavior. Configuring this block allows users to customize how the accepter VPC interacts with the requester VPC, ensuring seamless network integration and optimized connectivity between the two environments."
+    },
+    {
+      "name": "requester",
+      "description": "(Optional) - A optional configuration block that allows for VPC Peering Connection options to be set for the VPC that requests the peering connection (a maximum of one).",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "allow_remote_vpc_dns_resolution",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `allow_remote_vpc_dns_resolution` argument for the `requester` in the `aws_vpc_peering_connection` resource controls whether the requester VPC can resolve DNS hostnames for resources in the peer VPC. Enabling this functionality facilitates cross-VPC communication by allowing DNS queries to traverse the peering connection, which is commonly used to support seamless service discovery across VPCs."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"requester\" configuration block within the `aws_vpc_peering_connection` resource defines optional settings for managing VPC peering connection options specific to the requesting VPC. It enables fine-grained control over connection behaviors, such as routing and access permissions, ensuring the requesting VPC's preferences are applied during the peering setup."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_vpc_peering_connection` resource allows users to specify the maximum duration (as a string) Terraform should wait for the VPC peering connection creation process to complete. By configuring this timeout, users can control the behavior of Terraform during long-running operations, ensuring it either waits appropriately or fails gracefully if the process exceeds the defined time limit."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_vpc_peering_connection` resource allows users to specify the maximum duration Terraform will wait for the deletion of a VPC peering connection to complete. By configuring this timeout, users can control the behavior of resource teardown operations, ensuring they align with expected infrastructure deprovisioning timelines."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_vpc_peering_connection` resource allows users to specify the maximum duration (as a string, e.g., \"30m\") Terraform will wait for an update operation on a VPC peering connection to complete. Configuring this timeout ensures better control over resource lifecycle management, preventing prolonged or stalled updates during infrastructure changes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_vpc_peering_connection` resource allows users to define custom timeout durations for specific operations, such as creating, updating, or deleting a VPC peering connection. By configuring this block, users can ensure precise control over operation time limits, helping to manage long-running tasks and avoid unexpected delays or failures in resource provisioning."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "accept_status",
+      "description": "The status of the VPC Peering Connection request.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

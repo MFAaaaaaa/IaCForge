@@ -1,0 +1,127 @@
+{
+  "resource": {
+    "name": "aws_lambda_permission",
+    "description": "Gives an external source (like an EventBridge Rule, SNS, or S3) permission to access the Lambda function.",
+    "llm_summary": "The `aws_lambda_permission` Terraform resource enables the configuration of access permissions for AWS Lambda functions, allowing external services like EventBridge, SNS, or S3 to invoke the function. It is commonly used to integrate Lambda with event-driven architectures, automate workflows, or process data triggered by external sources. Users can define granular access controls, specify the invoking service, and manage cross-account permissions to securely connect Lambda functions with other AWS or third-party systems."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_lambda_permission\" \"allow_cloudwatch\" {\n  statement_id  = \"AllowExecutionFromCloudWatch\"\n  action        = \"lambda:InvokeFunction\"\n  function_name = aws_lambda_function.test_lambda.function_name\n  principal     = \"events.amazonaws.com\"\n  source_arn    = \"arn:aws:events:eu-west-1:111122223333:rule/RunDaily\"\n  qualifier     = aws_lambda_alias.test_alias.name\n}\n\nresource \"aws_lambda_alias\" \"test_alias\" {\n  name             = \"testalias\"\n  description      = \"a sample description\"\n  function_name    = aws_lambda_function.test_lambda.function_name\n  function_version = \"$LATEST\"\n}\n\nresource \"aws_lambda_function\" \"test_lambda\" {\n  filename      = \"lambdatest.zip\"\n  function_name = \"lambda_function_name\"\n  role          = aws_iam_role.iam_for_lambda.arn\n  handler       = \"exports.handler\"\n  runtime       = \"nodejs20.x\"\n}\n\nresource \"aws_iam_role\" \"iam_for_lambda\" {\n  name = \"iam_for_lambda\"\n\n  # Terraform's \"jsonencode\" function converts a\n  # Terraform expression result to valid JSON syntax.\n  assume_role_policy = jsonencode({\n    Version = \"2012-10-17\"\n    Statement = [\n      {\n        Action = \"sts:AssumeRole\"\n        Effect = \"Allow\"\n        Sid    = \"\"\n        Principal = {\n          Service = \"lambda.amazonaws.com\"\n        }\n      },\n    ]\n  })\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_lambda_permission` resource to allow CloudWatch Events to invoke a Lambda function, using the `source_arn` and `principal` arguments for event-based permissions. It also illustrates the setup of related resources, including a Lambda alias (`aws_lambda_alias`), a Lambda function (`aws_lambda_function`), and an IAM role (`aws_iam_role`) with an assume role policy, providing a complete workflow for enabling event-driven Lambda execution."
+    },
+    {
+      "title": "With SNS",
+      "code": "resource \"aws_lambda_permission\" \"with_sns\" {\n  statement_id  = \"AllowExecutionFromSNS\"\n  action        = \"lambda:InvokeFunction\"\n  function_name = aws_lambda_function.func.function_name\n  principal     = \"sns.amazonaws.com\"\n  source_arn    = aws_sns_topic.default.arn\n}\n\nresource \"aws_sns_topic\" \"default\" {\n  name = \"call-lambda-maybe\"\n}\n\nresource \"aws_sns_topic_subscription\" \"lambda\" {\n  topic_arn = aws_sns_topic.default.arn\n  protocol  = \"lambda\"\n  endpoint  = aws_lambda_function.func.arn\n}\n\nresource \"aws_lambda_function\" \"func\" {\n  filename      = \"lambdatest.zip\"\n  function_name = \"lambda_called_from_sns\"\n  role          = aws_iam_role.default.arn\n  handler       = \"exports.handler\"\n  runtime       = \"python3.12\"\n}\n\nresource \"aws_iam_role\" \"default\" {\n  name = \"iam_for_lambda_with_sns\"\n\n  # Terraform's \"jsonencode\" function converts a\n  # Terraform expression result to valid JSON syntax.\n  assume_role_policy = jsonencode({\n    Version = \"2012-10-17\"\n    Statement = [\n      {\n        Action = \"sts:AssumeRole\"\n        Effect = \"Allow\"\n        Sid    = \"\"\n        Principal = {\n          Service = \"lambda.amazonaws.com\"\n        }\n      },\n    ]\n  })\n}",
+      "llm_summary": "This example demonstrates how to configure `aws_lambda_permission` to allow an AWS Lambda function to be invoked by an SNS topic, showcasing integration between Lambda and SNS. It includes key configurations such as specifying the `principal` as `sns.amazonaws.com`, using the `source_arn` of the SNS topic, and setting up an SNS topic subscription to trigger the Lambda function."
+    },
+    {
+      "title": "With API Gateway REST API",
+      "code": "resource \"aws_api_gateway_rest_api\" \"MyDemoAPI\" {\n  name        = \"MyDemoAPI\"\n  description = \"This is my API for demonstration purposes\"\n}\n\nresource \"aws_lambda_permission\" \"lambda_permission\" {\n  statement_id  = \"AllowMyDemoAPIInvoke\"\n  action        = \"lambda:InvokeFunction\"\n  function_name = \"MyDemoFunction\"\n  principal     = \"apigateway.amazonaws.com\"\n\n  # The /* part allows invocation from any stage, method and resource path\n  # within API Gateway.\n  source_arn = \"${aws_api_gateway_rest_api.MyDemoAPI.execution_arn}/*\"\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_lambda_permission` resource to allow an AWS Lambda function to be invoked by an API Gateway REST API. It highlights the use of the `source_arn` argument to grant permissions for any stage, method, and resource path within the API Gateway, enabling seamless integration between the two services."
+    },
+    {
+      "title": "With CloudWatch Log Group",
+      "code": "resource \"aws_lambda_permission\" \"logging\" {\n  action        = \"lambda:InvokeFunction\"\n  function_name = aws_lambda_function.logging.function_name\n  principal     = \"logs.eu-west-1.amazonaws.com\"\n  source_arn    = \"${aws_cloudwatch_log_group.default.arn}:*\"\n}\n\nresource \"aws_cloudwatch_log_group\" \"default\" {\n  name = \"/default\"\n}\n\nresource \"aws_cloudwatch_log_subscription_filter\" \"logging\" {\n  depends_on      = [aws_lambda_permission.logging]\n  destination_arn = aws_lambda_function.logging.arn\n  filter_pattern  = \"\"\n  log_group_name  = aws_cloudwatch_log_group.default.name\n  name            = \"logging_default\"\n}\n\nresource \"aws_lambda_function\" \"logging\" {\n  filename      = \"lamba_logging.zip\"\n  function_name = \"lambda_called_from_cloudwatch_logs\"\n  handler       = \"exports.handler\"\n  role          = aws_iam_role.default.arn\n  runtime       = \"python3.12\"\n}\n\ndata \"aws_iam_policy_document\" \"assume_role\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"lambda.amazonaws.com\"]\n    }\n\n    actions = [\"sts:AssumeRole\"]\n  }\n}\n\nresource \"aws_iam_role\" \"default\" {\n  name               = \"iam_for_lambda_called_from_cloudwatch_logs\"\n  assume_role_policy = data.aws_iam_policy_document.assume_role.json\n}",
+      "llm_summary": "This example demonstrates how to configure `aws_lambda_permission` to allow a CloudWatch Log Group to invoke an AWS Lambda function, enabling log processing workflows. It showcases key configurations such as the `source_arn` referencing the log group ARN, and integrates resources like `aws_cloudwatch_log_subscription_filter` and `aws_iam_role` to establish permissions and event-driven invocation."
+    },
+    {
+      "title": "With Cross-Account Invocation Policy",
+      "code": "resource \"aws_lambda_function_url\" \"url\" {\n  function_name      = aws_lambda_function.example.function_name\n  authorization_type = \"AWS_IAM\"\n}\n\nresource \"aws_lambda_permission\" \"url\" {\n  action        = \"lambda:InvokeFunctionUrl\"\n  function_name = aws_lambda_function.example.function_name\n  principal     = \"arn:aws:iam::444455556666:role/example\"\n\n  source_account         = \"444455556666\"\n  function_url_auth_type = \"AWS_IAM\"\n\n  # Adds the following condition keys\n  # \"Condition\": {\n  #      \"StringEquals\": {\n  #        \"AWS:SourceAccount\": \"444455556666\",\n  #        \"lambda:FunctionUrlAuthType\": \"AWS_IAM\"\n  #      }\n  #    }\n\n}",
+      "llm_summary": "This example demonstrates how to configure cross-account invocation permissions for an AWS Lambda function URL using the `aws_lambda_permission` resource. It showcases the use of the `function_url_auth_type` argument and `source_account` condition to enforce AWS IAM-based authorization for a specific principal from another account, ensuring secure and controlled access."
+    },
+    {
+      "title": "With replace_triggered_by Lifecycle Configuration",
+      "code": "resource \"aws_lambda_permission\" \"logging\" {\n  action        = \"lambda:InvokeFunction\"\n  function_name = aws_lambda_function.example.function_name\n  principal     = \"events.amazonaws.com\"\n  source_arn    = \"arn:aws:events:eu-west-1:111122223333:rule/RunDaily\"\n\n  lifecycle {\n    replace_triggered_by = [\n      aws_lambda_function.example\n    ]\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_lambda_permission` resource with a `lifecycle` block using the `replace_triggered_by` argument to automatically recreate the permission when the associated `aws_lambda_function` resource changes. It illustrates granting `lambda:InvokeFunction` permissions to an EventBridge rule (`source_arn`) while ensuring dependency-driven updates for robust infrastructure management."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "action",
+      "description": "(Required) The AWS Lambda action you want to allow in this statement. (e.g., `lambda:InvokeFunction`)",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `action` argument in the `aws_lambda_permission` resource specifies the AWS Lambda API action (e.g., `lambda:InvokeFunction`) that is allowed by the permission statement. By defining this argument, users control which specific Lambda functionality can be invoked by the designated principal, enabling fine-grained access management for their Lambda functions."
+    },
+    {
+      "name": "event_source_token",
+      "description": "(Optional) The Event Source Token to validate. Used with Alexa Skills.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `event_source_token` argument in the `aws_lambda_permission` resource allows users to specify a validation token for event sources, particularly for Alexa Skills. By setting this token, users can ensure that incoming requests to the Lambda function are authenticated and originate from the intended event source, enhancing security and controlling access."
+    },
+    {
+      "name": "function_name",
+      "description": "(Required) Name of the Lambda function whose resource policy you are updating",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `function_name` argument specifies the name of the Lambda function whose resource-based policy is being updated, allowing users to define which function the `aws_lambda_permission` resource applies to. By setting this argument, users enable the configuration of access permissions for the specified Lambda function, typically to control which AWS services or external entities can invoke it."
+    },
+    {
+      "name": "function_url_auth_type",
+      "description": "(Optional) Lambda Function URLs authentication type. Valid values are: `AWS_IAM` or `NONE`. Only supported for `lambda:InvokeFunctionUrl` action.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `function_url_auth_type` argument in the `aws_lambda_permission` resource allows users to specify the authentication method for Lambda Function URLs, controlling access to the function when invoked via its URL. By setting this argument to either `AWS_IAM` (for IAM-based authentication) or `NONE` (for public access without authentication), users can define the security model for URL-based invocations, aligning with their access control requirements."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_lambda_permission` resource represents a unique identifier for the permission configuration, allowing users to reference or manage the specific permission entry within their Terraform state. While optional, setting this argument can help users track and organize permissions explicitly, supporting workflows that require precise identification or state management of Lambda permissions."
+    },
+    {
+      "name": "principal",
+      "description": "(Required) The principal who is getting this permission e.g., `s3.amazonaws.com`, an AWS account ID, or AWS IAM principal, or AWS service principal such as `events.amazonaws.com` or `sns.amazonaws.com`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `principal` argument in the `aws_lambda_permission` resource specifies the entity (e.g., AWS service, account ID, or IAM principal) authorized to invoke the Lambda function. By defining this, users control which external AWS services or accounts can trigger the function, enabling integration with services like S3, SNS, or EventBridge, or granting access to specific AWS accounts for custom workflows."
+    },
+    {
+      "name": "principal_org_id",
+      "description": "(Optional) The identifier for your organization in AWS Organizations. Use this to grant permissions to all the AWS accounts under this organization.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `principal_org_id` argument in the `aws_lambda_permission` resource allows users to specify the AWS Organizations ID to grant Lambda invocation permissions to all accounts within the organization. By setting this argument, users can streamline access control for Lambda functions across multiple accounts under a single organization, aligning with centralized management and governance goals."
+    },
+    {
+      "name": "qualifier",
+      "description": "(Optional) Query parameter to specify function version or alias name. The permission will then apply to the specific qualified ARN e.g., `arn:aws:lambda:aws-region:acct-id:function:function-name:2`",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `qualifier` argument in the `aws_lambda_permission` resource allows users to specify a function version or alias name, ensuring that the permission applies to a specific qualified Lambda ARN (e.g., a versioned or aliased function). This enables precise control over permissions for different versions or aliases of a Lambda function, supporting use cases like staged deployments, version-specific access, or alias-based routing."
+    },
+    {
+      "name": "source_account",
+      "description": "(Optional) This parameter is used when allowing cross-account access, or for S3 and SES. The AWS account ID (without a hyphen) of the source owner.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `source_account` argument in the `aws_lambda_permission` resource allows users to specify the AWS account ID of the source owner when configuring cross-account access or integrating with services like S3 and SES. By setting this argument, users can define which account is authorized to invoke the Lambda function, enabling secure and controlled access from external accounts or service-specific event sources."
+    },
+    {
+      "name": "source_arn",
+      "description": "(Optional) When the principal is an AWS service, the ARN of the specific resource within that service to grant permission to. Without this, any resource from `principal` will be granted permission \u2013 even if that resource is from another account. For S3, this should be the ARN of the S3 Bucket. For EventBridge events, this should be the ARN of the EventBridge Rule. For API Gateway, this should be the ARN of the API, as described here.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `source_arn` argument in the `aws_lambda_permission` resource allows users to specify the ARN of a specific AWS resource (e.g., S3 Bucket, EventBridge Rule, API Gateway) that is permitted to invoke the Lambda function. By defining this argument, users can restrict access to the Lambda function to a particular resource within the specified AWS service, enhancing security and ensuring precise control over invocation permissions."
+    },
+    {
+      "name": "statement_id",
+      "description": "(Optional) A unique statement identifier. By default generated by Terraform.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `statement_id` argument in the `aws_lambda_permission` resource allows users to define a unique identifier for the permission statement being created. This identifier helps manage and distinguish individual permission entries, enabling users to track, update, or reference specific permissions within their Lambda function's access control configuration. If not explicitly set, Terraform generates a default value."
+    },
+    {
+      "name": "statement_id_prefix",
+      "description": "(Optional) A statement identifier prefix. Terraform will generate a unique suffix. Conflicts with `statement_id`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `statement_id_prefix` argument in the `aws_lambda_permission` resource allows users to define a custom prefix for the statement identifier, which Terraform uses to generate a unique `statement_id`. This helps users avoid conflicts with manually specified `statement_id` values while ensuring predictable naming for permissions, supporting workflows that require consistent or structured identifier patterns."
+    }
+  ],
+  "blocks": [],
+  "attributes": []
+}

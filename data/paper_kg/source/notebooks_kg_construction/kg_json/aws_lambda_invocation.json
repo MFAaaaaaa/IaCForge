@@ -1,0 +1,60 @@
+{
+    "resource": {
+        "name": "aws_lambda_invocation",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "function_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "input",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "lifecycle_scope",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "qualifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "terraform_key",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "triggers",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "result",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

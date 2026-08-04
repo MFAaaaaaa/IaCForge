@@ -1,0 +1,17 @@
+[
+    {
+        "argument_path": "security_group_id",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "prefix_list_id",
+        "references_output": "aws_ec2_managed_prefix_list.id",
+        "target_resource_type": "aws_ec2_managed_prefix_list"
+    },
+    {
+        "argument_path": "referenced_security_group_id",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    }
+]

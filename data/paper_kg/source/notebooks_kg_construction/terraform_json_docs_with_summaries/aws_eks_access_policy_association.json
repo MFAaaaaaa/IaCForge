@@ -1,0 +1,112 @@
+{
+  "resource": {
+    "name": "aws_eks_access_policy_association",
+    "description": "Access Entry Policy Association for an EKS Cluster.",
+    "llm_summary": "The `aws_eks_access_policy_association` resource manages the association of IAM access policies with an Amazon EKS cluster, enabling fine-grained access control for users, roles, or services interacting with the cluster. Common use cases include configuring permissions for Kubernetes workloads, integrating external services, or enforcing security policies for cluster operations. This resource is essential for defining and maintaining access policies, ensuring secure and compliant access to EKS resources."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_eks_access_policy_association\" \"example\" {\n  cluster_name  = aws_eks_cluster.example.name\n  policy_arn    = \"arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy\"\n  principal_arn = aws_iam_user.example.arn\n\n  access_scope {\n    type       = \"namespace\"\n    namespaces = [\"example-namespace\"]\n  }\n}",
+      "llm_summary": "This example demonstrates how to associate an AWS IAM policy with an EKS cluster for a specific principal (e.g., an IAM user) using the `aws_eks_access_policy_association` resource. It showcases the configuration of the `access_scope` block to restrict access to a specific namespace, enabling fine-grained access control within the cluster."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "cluster_name",
+      "description": "\u2013 (Required) Name of the EKS Cluster.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `cluster_name` argument specifies the name of the Amazon EKS cluster to which the access policy association applies, enabling users to define the target cluster for managing IAM access policies. By setting this required argument, users ensure that the resource is linked to the correct EKS cluster, facilitating secure and controlled access to Kubernetes workloads within that environment."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_eks_access_policy_association` resource allows users to specify a unique identifier for the association between an EKS cluster and an access policy. While optional, setting this argument can help users manage and reference the association explicitly, enabling better organization and tracking of access policy configurations within their infrastructure."
+    },
+    {
+      "name": "policy_arn",
+      "description": "\u2013 (Required) The ARN of the access policy that you're associating.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `policy_arn` argument specifies the Amazon Resource Name (ARN) of the access policy to associate with an Amazon EKS cluster, enabling fine-grained control over permissions and access management. By setting this required argument, users define which IAM policy governs access to the cluster, aligning with security and compliance goals for managing Kubernetes workloads."
+    },
+    {
+      "name": "principal_arn",
+      "description": "\u2013 (Required) The IAM Principal ARN which requires Authentication access to the EKS cluster.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `principal_arn` argument specifies the IAM Principal (user, role, or group) that requires authentication access to the associated Amazon EKS cluster. By defining this string value, users grant permissions to the specified entity, enabling secure and controlled access to the cluster for operational or administrative purposes."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "access_scope",
+      "description": "\u2013 (Required) The configuration block to determine the scope of the access. See `access_scope` Block below.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "namespaces",
+          "description": "(Optional) The namespaces to which the access scope applies when type is namespace.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `namespaces` argument in the `aws_eks_access_policy_association` resource allows users to specify a set of Kubernetes namespaces to which the defined access scope applies when the scope type is set to `namespace`. By configuring this argument, users can granularly control access policies within an EKS cluster, ensuring that permissions are restricted to specific namespaces, aligning with security and isolation requirements for workloads."
+        },
+        {
+          "name": "type",
+          "description": "(Required) Valid values are `namespace` or `cluster`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument in the `aws_eks_access_policy_association` resource specifies the scope of access control for the associated policy, allowing users to define whether the policy applies at the `namespace` level or across the entire `cluster`. By setting this required argument, users can tailor access permissions to align with their security and operational requirements, such as isolating access to specific namespaces or enabling broader cluster-wide access."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `access_scope` configuration block in the `aws_eks_access_policy_association` resource defines the boundaries and conditions for access control within an associated EKS cluster. It encapsulates settings that specify the scope of access, enabling users to tailor permissions and governance for resources or identities interacting with the cluster, ensuring fine-grained access management aligned with security and compliance requirements."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_eks_access_policy_association` resource allows users to specify the maximum duration (in string format, e.g., \"10m\") Terraform will wait for the creation of an EKS access policy association. Configuring this timeout ensures predictable resource provisioning behavior, helping users avoid prolonged or indefinite waits during deployment."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block for the `aws_eks_access_policy_association` resource allows users to specify the maximum duration (in string format, e.g., \"5m\" for 5 minutes) Terraform should wait when deleting an EKS access policy association. Configuring this timeout ensures predictable behavior during resource deletion, helping users manage operations in cases where the deletion process may take longer due to dependencies or network delays."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_eks_access_policy_association` resource defines customizable time limits for operations such as creating, updating, or deleting the association between an EKS cluster and an IAM access policy. By configuring this block, users can manage operation durations to prevent long-running tasks from stalling workflows or exceeding acceptable execution windows, ensuring efficient and predictable resource management."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "associated_at",
+      "description": "Date and time in RFC3339 format that the policy was associated.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "modified_at",
+      "description": "Date and time in RFC3339 format that the policy was updated.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

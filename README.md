@@ -1,124 +1,86 @@
 # IaCForge
 
-IaCForge implements stage-specific task–provider grounding for Terraform AWS
-generation:
+IaCForge is the clean, paper-facing package for modular Terraform AWS
+generation and evaluation. It separates Graph IR, provider-schema grounding,
+three KG profiles, HCL generation, one-shot local repair, and post-generation
+evaluation.
+
+This directory was reconstructed on 2026-08-04 from trusted archives and the
+historical `iac-eval` workspace. It does not depend on the previously damaged
+`/home/fameng/zzzhong/IaCForge` contents.
+
+## Pipeline
 
 ```text
 Visible Prompt
-  -> Hybrid resource linking
-  -> Planner Evidence projection
-  -> LLM -> Typed task Graph IR v2
-  -> safe parse + provider-schema consistency checking
-     -> invalid bindings only: drop those bindings and re-check the IR
-     -> invalid IR: safe Prompt-only compiler fallback
-  -> IR-guided exact Schema Grounding
-  -> instance-level Provider Contract validation
-     -> invalid Contract: Graph IR + Schema compiler fallback
-  -> LLM -> one HCL candidate
-  -> deterministic input-variable safety check + optional prompt-only repair
-  -> common Normalize
-  -> validate -> plan -> OPA
+  -> optional KG retrieval/projection for the IR stage
+  -> LLM -> Graph IR
+  -> optional provider-schema grounding
+  -> optional KG-derived Provider Contract for the HCL stage
+  -> LLM -> HCL
+  -> normalize -> terraform validate -> terraform plan
+  -> optional one-shot local repair after plan failure
+  -> final validate/plan -> OPA evaluation
 ```
 
-The historical research workspace remains archived, unchanged, at:
+Local repair does **not directly receive KG evidence or a KG-derived Provider
+Contract**. Its inputs are the visible Prompt, generated Graph IR, provider
+schema context, current HCL, and Terraform plan diagnostic. Because Graph IR
+and current HCL were generated upstream, they may retain indirect influence
+from a KG-enabled run. OPA policy/results are never repair inputs.
 
-```text
-/home/fameng/zzzhong/iac-eval/evaluation
-```
+## Experiment Families
 
-## What changed in v2
+### Clean multigranular KG and ablations
 
-- Terraform, schema, KG and provider execution are aligned to AWS Provider
-  `5.90.0`.
-- Full KG evidence is projected into separate planner and compiler interfaces.
-- Graph IR v2 distinguishes resources, data sources and external inputs, and
-  represents field-level bindings and structured constraints.
-- Malformed or empty IR is never forwarded to the compiler as a hard
-  constraint. Schema-invalid bindings can be removed deterministically while
-  preserving valid provider nodes; the reduced IR is checked again.
-- Exact Schema Grounding returns a structured task-relevant projection rather
-  than all optional fields.
-- `Graph IR + Schema + KG` is compiled into one canonical, instance-level
-  Provider Contract with exactly matching prompt fields.
-- Planner and HCL calls use separate deterministic decoding settings.
-- Raw/normalized IR, raw/normalized HCL, normalization diffs, timings, token
-  counts and mechanism metrics are logged.
-- Optional `full_repair1` repair receives only Terraform diagnostics—never OPA
-  policies or results.
+Stored under `results/clean_multigranular_kg_and_ablations/`:
 
-## Modules
+| Variant | Graph IR | Schema | clean multigranular KG |
+| --- | ---: | ---: | ---: |
+| `baseline` | no | no | no |
+| `ir_only` | yes | no | no |
+| `ir_schema` | yes | yes | no |
+| `ir_schema_multigranular_kg` | yes | yes | IR and HCL |
 
-- `evaluation/graph_ir.py`: Graph IR v2 parsing, v1 compatibility, validation
-  and safe fallback.
-- `evaluation/ir_schema_checker.py`: exact kind/field/type consistency checking,
-  high-confidence path correction, and schema-invalid binding salvage.
-- `evaluation/evidence_projection.py`: planner-only KG projection.
-- `evaluation/schema_rag.py`: IR-guided exact schema grounding.
-- `evaluation/provider_schema.py`: provider schema access and structured schema
-  projections.
-- `evaluation/provider_contract.py`: canonical task-specific Provider Contract
-  compiler and HCL skeleton.
-- `evaluation/iac_kg/provider_contract_retriever.py`: exact, BM25, optional
-  dense and graph-aware hybrid retrieval.
-- `evaluation/iac_kg/typed_kg.py`: stable KG entity/edge identities,
-  provenance, confidence and quality reporting.
-- `evaluation/iac_kg/offline_provider_contract_cache.py`: canonical,
-  provenance-complete offline cache.
-- `evaluation/hcl_metrics.py`: pre-Terraform IR/HCL mechanism metrics.
-- `evaluation/hcl_safety.py`: deterministic undeclared/defaultless input-variable
-  detection before Terraform validation.
-- `evaluation/eval_verigraph.py`: generation, normalization, evaluation,
-  checkpoint and repair orchestration.
+`baseline` and `ir_schema` contain Qwen2.5-Coder 3B/14B plus the available
+additional models. The other two variants contain the available 3B and 14B
+runs.
 
-See [details.md](details.md) for every module’s concrete inputs and outputs.
+### KG and repair
 
-## Modes
+Stored under `results/kg_repair/`:
 
-| Mode | Planner KG | Schema | Compiler KG | Repair |
-| --- | ---: | ---: | ---: | ---: |
-| `baseline` | no | no | no | no |
-| `ir_only` | no | no | no | no |
-| `ir_schema` | no | yes | no | no |
-| `planner_kg` | yes | yes | no | no |
-| `compiler_kg` | no | yes | yes | no |
-| `full` / `full_strict` | yes | yes | yes | no |
-| `full_repair1` | yes | yes | yes | at most one |
+- `injection_stage_paperkg/{ir,hcl,both}`: paper KG injection-stage study.
+- `paperkg/ir_localrepair1_no_direct_kg` and
+  `paperkg/hcl_localrepair1_no_direct_kg`: historical stage-specific paper KG
+  repair runs for both 3B and 14B.
+- `paperkg/{both,both_localrepair1_no_direct_kg}`: both-stage paper KG without
+  repair for 3B/14B, plus the available 3B both-stage repair run.
+- `half_paper_half_fullkg/`: historical hybrid variants, including repair.
+- `clean_multigranular_kg/{both,both_localrepair1}`: clean KG with and without
+  repair.
 
-Retrieval ablations are selected with:
+Every available result has its matching log. `results/RESULT_MANIFEST.json`
+records source paths, SHA-256 digests, completion counts, and Validate/Plan/
+Pass@1 counts. Paper KG has 3B/14B results for both-stage no-repair and for the
+historical IR-only/HCL-only repair variants. The exact 14B **both-stage** paper
+KG plus no-direct-KG repair artifact was not found and is explicitly listed as
+missing; no stage-specific result was substituted for it.
 
-```bash
-IAC_RETRIEVAL_MODE=lexical       # exact/alias + BM25
-IAC_RETRIEVAL_MODE=dense         # exact/alias + configured dense index
-IAC_RETRIEVAL_MODE=hybrid
-IAC_RETRIEVAL_MODE=hybrid_graph  # default
-```
+## KG Profiles
 
-Dense retrieval is optional and activates only when
-`resource_dense_index.json` has been built and `IAC_DENSE_RETRIEVAL=1`.
+Set `IAC_KG_PROFILE` to one of:
 
-## Build version-aligned artifacts
+- `clean_multigranular`: public Terraform AWS 5.90.0 docs/schema, typed nodes,
+  typed edges, and prompt-keyed offline retrieval cache.
+- `paper`: paper replication JSON and Chroma retrieval. This profile may be
+  benchmark-scoped and requires `IAC_ALLOW_BENCHMARK_SCOPED_PAPER_KG=1`.
+- `hybrid_cached_evidence_rebuilt_kg`: first-construction evidence paired with
+  a second KG reconstruction after the original raw KG was lost.
 
-```bash
-python3 scripts/build_typed_kg.py
-python3 evaluation/iacforge_cli.py kg-quality \
-  --audit-sample results/reference_edge_audit.csv
-
-# Requires an OpenAI-compatible embeddings endpoint.
-python3 scripts/build_dense_index.py --model /path/or/served-embedding-model
-
-python3 scripts/build_offline_cache.py
-python3 scripts/evaluate_retrieval.py
-```
-
-The offline cache is an execution optimization, not benchmark-specific
-knowledge. A non-IaC-Eval prompt can use the same retriever:
-
-```bash
-cd evaluation
-python3 iacforge_cli.py retrieve \
-  --prompt "Create a VPC and a public subnet" \
-  --projection planner
-```
+For KG-enabled runs, set `IAC_KG_INJECTION_STAGE=ir`, `hcl`, or `both`.
+See `data/README.md`, `data/paper_kg/PROVENANCE.md`, and
+`data/hybrid_paper_fullkg/PROVENANCE.md` before comparing profiles.
 
 ## Run
 
@@ -126,47 +88,31 @@ python3 iacforge_cli.py retrieve \
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+
+# Needed for paper-KG Chroma retrieval/rebuilding.
+pip install -r requirements-paper-kg.txt
+
 python3 -m unittest discover -s tests -v
+python3 scripts/verify_package.py --strict
 
-MODE=full \
-MODEL=qwen2.5-coder-3b \
-MAX_ROWS=458 \
-./scripts/run_framework.sh
+MODE=full MODEL=qwen2.5-coder-3b MAX_ROWS=458 \
+  ./scripts/run_framework.sh
 ```
 
-Defaults:
+Additional modes are `baseline`, `ir_only`, `ir_schema`, `full_repair1`,
+`paper_ir`, `paper_hcl`, `paper_both`, `paper_both_repair1`, `hybrid_both`, and
+`hybrid_both_repair1`. Model endpoint and token settings are controlled by the
+`QWEN_*` environment variables documented in `REPRODUCIBILITY.md`.
 
-```text
-Terraform                 1.9.8
-AWS Provider              5.90.0
-Graph IR                  2.0
-Provider Contract         2.0
-retriever                 hybrid-v2
-IR decoding               temperature=0, top_p=1, guided JSON
-HCL decoding              temperature=0, top_p=1
-HCL skeleton              disabled (explicit ablation only)
-Planner candidate cap     8 (`IAC_PLANNER_MAX_CANDIDATES`)
-Variable safety repair    enabled (`IAC_REPAIR_UNDECLARED_VARIABLES=1`)
-```
+## Package Map
 
-Invalid Graph IR is never forwarded as an empty hard constraint. An IR with no
-AWS resource/data-source nodes falls back to visible-Prompt generation. If only
-bindings fail provider-schema checking, those bindings are dropped and the
-reduced IR is rechecked before Schema Grounding. A schema-valid IR with an
-invalid Provider Contract falls back to Prompt + Graph IR + exact Schema.
-Rejected artifacts remain in provenance but are not shown to the Compiler as
-binding implementation contracts.
-
-Changing the provider version without rebuilding the schema, documentation KG,
-dense index and offline cache fails closed.
-
-## Leakage boundary
-
-Before generation, the pipeline may read only the visible `Prompt` and public
-Terraform provider knowledge. The `Resource`, `Intent`, `Rego intent`,
-reference output, validation errors, plan errors, OPA results and historical
-repair traces are excluded. `Rego intent` is accessed only after the final HCL
-has been generated and planned.
-
-Local repair receives a Terraform validation/plan diagnostic but never an OPA
-policy or failure.
+- `evaluation/`: modular generation, retrieval, repair, and evaluation code.
+- `scripts/run_framework.sh`: common experiment launcher.
+- `scripts/assemble_results.py`: deterministic result archive assembly.
+- `scripts/verify_package.py`: data, leakage-boundary, and result integrity
+  checks.
+- `data/`: benchmark data, schema, all three KG profiles, and provenance.
+- `results/`: selected full-458 results and logs.
+- `ARCHITECTURE.md`: module flow and stage contracts.
+- `LEAKAGE_POLICY.md`: generation, repair, and evaluation boundaries.
+- `REPRODUCIBILITY.md`: environment and exact run commands.

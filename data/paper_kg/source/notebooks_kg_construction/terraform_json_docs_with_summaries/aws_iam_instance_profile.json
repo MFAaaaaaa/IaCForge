@@ -1,0 +1,86 @@
+{
+  "resource": {
+    "name": "aws_iam_instance_profile",
+    "description": "Provides an IAM instance profile. When managing instance profiles, remember that the name attribute must always be unique. This means that even if you have different role or path values, duplicating an existing instance profile name will lead to an EntityAlreadyExists error.",
+    "llm_summary": "The `aws_iam_instance_profile` resource enables the creation and management of IAM instance profiles, which are essential for granting EC2 instances permissions to interact with AWS services securely. Common use cases include configuring EC2 instances to assume IAM roles for tasks like accessing S3 buckets, DynamoDB, or other AWS resources without embedding credentials. Users can define unique instance profile names, associate roles, and manage paths to ensure proper lifecycle management and avoid conflicts like duplicate names or `EntityAlreadyExists` errors."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_iam_instance_profile\" \"test_profile\" {\n  name = \"test_profile\"\n  role = aws_iam_role.role.name\n}\n\ndata \"aws_iam_policy_document\" \"assume_role\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"ec2.amazonaws.com\"]\n    }\n\n    actions = [\"sts:AssumeRole\"]\n  }\n}\n\nresource \"aws_iam_role\" \"role\" {\n  name               = \"test_role\"\n  path               = \"/\"\n  assume_role_policy = data.aws_iam_policy_document.assume_role.json\n}",
+      "llm_summary": "This example demonstrates how to create an AWS IAM Instance Profile (`aws_iam_instance_profile`) and associate it with an IAM Role (`aws_iam_role`) configured with an assume role policy for EC2 service access. It illustrates key configurations, including the `name` and `role` arguments for the instance profile and the use of `aws_iam_policy_document` to define the trust relationship for the role."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument represents the unique identifier of the `aws_iam_instance_profile` resource, typically auto-generated upon creation. While not required for configuration, it is commonly used to reference the instance profile in other resources or outputs, enabling integration and dependency management within the Terraform configuration."
+    },
+    {
+      "name": "name",
+      "description": "(Optional, Forces new resource) Name of the instance profile. If omitted, Terraform will assign a random, unique name. Conflicts with `name_prefix`. Can be a string of characters consisting of upper and lowercase alphanumeric characters and these special characters: `_`, `+`, `=`, `,`, `.`, `@`, `-`. Spaces are not allowed. The `name` must be unique, regardless of the `path` or `role`. In other words, if there are different `role` or `path` values but the same `name` as an existing instance profile, it will still cause an `EntityAlreadyExists` error.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_iam_instance_profile` resource allows users to define a unique, human-readable identifier for the instance profile, ensuring clarity and control over naming conventions. Setting this argument enables users to specify a fixed name for the profile, which is useful for predictable resource management and integration with other AWS services, while avoiding conflicts with existing profiles due to its uniqueness requirement."
+    },
+    {
+      "name": "name_prefix",
+      "description": "(Optional, Forces new resource) Creates a unique name beginning with the specified prefix. Conflicts with `name`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name_prefix` argument for the `aws_iam_instance_profile` resource allows users to define a custom prefix for the instance profile's name, ensuring the generated name is unique while adhering to a specified naming convention. This is particularly useful for managing resources in dynamic or multi-environment setups, as it avoids naming conflicts and enables consistent identification of instance profiles."
+    },
+    {
+      "name": "path",
+      "description": "(Optional, default \"/\") Path to the instance profile. For more information about paths, see IAM Identifiers in the IAM User Guide. Can be a string of characters consisting of either a forward slash (`/`) by itself or a string that must begin and end with forward slashes. Can include any ASCII character from the ! (\\u0021) through the DEL character (\\u007F), including most punctuation characters, digits, and upper and lowercase letters.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `path` argument in the `aws_iam_instance_profile` resource allows users to define the hierarchical namespace for the instance profile within AWS IAM, enabling organization and categorization of IAM resources. By setting this argument, users can specify a custom path structure (defaulting to `/`) to align with their resource management practices, such as grouping profiles by environment, application, or team."
+    },
+    {
+      "name": "role",
+      "description": "(Optional) Name of the role to add to the profile.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `role` argument in the `aws_iam_instance_profile` resource allows users to specify the name of an IAM role to associate with the instance profile. By setting this argument, users define the permissions and policies that will be applied to EC2 instances or other AWS services using the profile, enabling controlled access to AWS resources based on the role's configuration."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of resource tags for the IAM Instance Profile. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_iam_instance_profile` resource allows users to define a map of key-value pairs to assign metadata tags to the IAM Instance Profile. This enables users to organize, categorize, and manage the resource for purposes such as cost allocation, environment identification, or compliance tracking, with the ability to override provider-level default tags if configured."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_iam_instance_profile` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to the resource and any associated resources. This enables consistent tagging for organizational, billing, or management purposes, helping users streamline resource identification, tracking, and governance across their AWS infrastructure."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN assigned by AWS to the instance profile.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "create_date",
+      "description": "Creation timestamp of the instance profile.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "unique_id",
+      "description": "Unique ID assigned by AWS.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

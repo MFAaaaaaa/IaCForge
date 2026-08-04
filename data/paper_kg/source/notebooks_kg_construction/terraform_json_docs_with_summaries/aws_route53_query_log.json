@@ -1,0 +1,46 @@
+{
+  "resource": {
+    "name": "aws_route53_query_log",
+    "description": "Provides a Route53 query logging configuration resource. There are restrictions on the configuration of query logging. Notably, the CloudWatch log group must be in the us-east-1 region, a permissive CloudWatch log resource policy must be in place, and the Route53 hosted zone must be public. See Configuring Logging for DNS Queries for additional details.",
+    "llm_summary": "The `aws_route53_query_log` resource enables the configuration of DNS query logging for public Route53 hosted zones, allowing users to capture and analyze DNS query data for monitoring, troubleshooting, and compliance purposes. It is commonly used to integrate Route53 with CloudWatch Logs for centralized log management, requiring the log group to reside in the `us-east-1` region and a permissive resource policy for CloudWatch Logs. This resource is ideal for scenarios involving DNS activity tracking, security auditing, and optimizing DNS performance through detailed query insights."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "# Example CloudWatch log group in us-east-1\n\nprovider \"aws\" {\n  alias  = \"us-east-1\"\n  region = \"us-east-1\"\n}\n\nresource \"aws_cloudwatch_log_group\" \"aws_route53_example_com\" {\n  provider = aws.us-east-1\n\n  name              = \"/aws/route53/${aws_route53_zone.example_com.name}\"\n  retention_in_days = 30\n}\n\n# Example CloudWatch log resource policy to allow Route53 to write logs\n# to any log group under /aws/route53/*\n\ndata \"aws_iam_policy_document\" \"route53-query-logging-policy\" {\n  statement {\n    actions = [\n      \"logs:CreateLogStream\",\n      \"logs:PutLogEvents\",\n    ]\n\n    resources = [\"arn:aws:logs:*:*:log-group:/aws/route53/*\"]\n\n    principals {\n      identifiers = [\"route53.amazonaws.com\"]\n      type        = \"Service\"\n    }\n  }\n}\n\nresource \"aws_cloudwatch_log_resource_policy\" \"route53-query-logging-policy\" {\n  provider = aws.us-east-1\n\n  policy_document = data.aws_iam_policy_document.route53-query-logging-policy.json\n  policy_name     = \"route53-query-logging-policy\"\n}\n\n# Example Route53 zone with query logging\n\nresource \"aws_route53_zone\" \"example_com\" {\n  name = \"example.com\"\n}\n\nresource \"aws_route53_query_log\" \"example_com\" {\n  depends_on = [aws_cloudwatch_log_resource_policy.route53-query-logging-policy]\n\n  cloudwatch_log_group_arn = aws_cloudwatch_log_group.aws_route53_example_com.arn\n  zone_id                  = aws_route53_zone.example_com.zone_id\n}",
+      "llm_summary": "This example demonstrates how to configure Route 53 query logging using the `aws_route53_query_log` resource, including setting up a CloudWatch log group and resource policy to allow Route 53 to write logs. It illustrates key configurations such as linking the log group to a Route 53 hosted zone and defining IAM permissions for query logging."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "cloudwatch_log_group_arn",
+      "description": "(Required) CloudWatch log group ARN to send query logs.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `cloudwatch_log_group_arn` argument specifies the Amazon Resource Name (ARN) of the CloudWatch log group where Route 53 query logs will be sent, enabling centralized logging and monitoring of DNS queries. By configuring this required parameter, users can track and analyze DNS activity for auditing, troubleshooting, or performance optimization purposes, aligning with common goals like enhancing observability and compliance."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_route53_query_log` resource represents the unique identifier of the query log configuration. While optional, it is typically used to reference or manage the specific query log resource within Terraform state, enabling users to track or interact with the resource programmatically for operations like updates or deletions."
+    },
+    {
+      "name": "zone_id",
+      "description": "(Required) Route53 hosted zone ID to enable query logs.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `zone_id` argument specifies the unique identifier of the Route53 hosted zone for which query logging is enabled. By setting this required parameter, users define the target DNS zone whose query logs will be captured, facilitating monitoring, debugging, and analysis of DNS queries for that specific zone."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) of the Query Logging Config.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

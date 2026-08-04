@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 import json
-import os
 from typing import Any
 
 
-PLANNER_EVIDENCE_VERSION = "2.1"
+PLANNER_EVIDENCE_VERSION = "2.0"
 
 
 def parse_evidence(value: str | dict[str, Any] | None) -> dict[str, Any]:
@@ -50,26 +49,9 @@ def project_planner_evidence(
             }
         )
 
-    # Small planners degrade when the projection repeats a long, low-precision
-    # tail. The full evidence remains available to the deterministic contract
-    # stage; the planner sees only the strongest resource-selection evidence.
-    max_candidates = max(1, int(os.environ.get("IAC_PLANNER_MAX_CANDIDATES", "8")))
-    candidates = sorted(candidates, key=lambda item: item["score"], reverse=True)[
-        :max_candidates
-    ]
-    candidate_types = {item["type"] for item in candidates}
-
     dependencies = []
     for item in evidence.get("dependency_hints", []):
         if not isinstance(item, dict):
-            continue
-        # Keep an edge when at least one endpoint survived candidate pruning:
-        # the other endpoint may be precisely the missing prerequisite that
-        # graph planning needs to recover.
-        if (
-            item.get("from_type") not in candidate_types
-            and item.get("to_type") not in candidate_types
-        ):
             continue
         dependencies.append(
             {

@@ -1,0 +1,125 @@
+{
+    "resource": {
+        "name": "aws_lambda_function_url",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "authorization_type",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "function_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "invoke_mode",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "qualifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "cors",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "allow_credentials",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "allow_headers",
+                    "description": "",
+                    "required": false,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "allow_methods",
+                    "description": "",
+                    "required": false,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "allow_origins",
+                    "description": "",
+                    "required": false,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "expose_headers",
+                    "description": "",
+                    "required": false,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "max_age",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "function_arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "function_url",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "url_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

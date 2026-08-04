@@ -1,0 +1,447 @@
+{
+  "resource": {
+    "name": "aws_kendra_index",
+    "description": "Provides an Amazon Kendra Index resource.",
+    "llm_summary": "The `aws_kendra_index` Terraform resource enables the creation and management of an Amazon Kendra Index, a machine learning-powered search service designed to deliver intelligent search capabilities across structured and unstructured data. Common use cases include setting up enterprise search solutions, integrating diverse data sources like S3, SharePoint, or databases, and customizing search relevance for specific business needs. Key configurations include defining data source connections, tuning search performance, enabling user access control, and managing logging and encryption settings for secure and efficient search operations."
+  },
+  "examples": [
+    {
+      "title": "Basic",
+      "code": "resource \"aws_kendra_index\" \"example\" {\n  name        = \"example\"\n  description = \"example\"\n  edition     = \"DEVELOPER_EDITION\"\n  role_arn    = aws_iam_role.this.arn\n\n  tags = {\n    \"Key1\" = \"Value1\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to create a basic AWS Kendra index using the `aws_kendra_index` resource, specifying key attributes such as `name`, `description`, `edition`, and an IAM role (`role_arn`) for permissions. It also illustrates the use of tags for resource metadata, providing a foundational setup for deploying a developer edition Kendra index."
+    },
+    {
+      "title": "With capacity units",
+      "code": "resource \"aws_kendra_index\" \"example\" {\n  name     = \"example\"\n  edition  = \"DEVELOPER_EDITION\"\n  role_arn = aws_iam_role.this.arn\n\n  capacity_units {\n    query_capacity_units   = 2\n    storage_capacity_units = 2\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_kendra_index` resource with custom capacity units using the `capacity_units` block, specifying `query_capacity_units` and `storage_capacity_units` for tailored performance and storage scaling in the DEVELOPER_EDITION. Includes integration with an IAM role via the `role_arn` argument.\""
+    },
+    {
+      "title": "With server side encryption configuration",
+      "code": "resource \"aws_kendra_index\" \"example\" {\n  name     = \"example\"\n  role_arn = aws_iam_role.this.arn\n\n  server_side_encryption_configuration {\n    kms_key_id = data.aws_kms_key.this.arn\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure server-side encryption for an AWS Kendra index using the `server_side_encryption_configuration` block with a specified KMS key. It illustrates the use of the `kms_key_id` argument to enable encryption at rest, ensuring secure data storage within the index."
+    },
+    {
+      "title": "With user group resolution configuration",
+      "code": "resource \"aws_kendra_index\" \"example\" {\n  name     = \"example\"\n  role_arn = aws_iam_role.this.arn\n\n  user_group_resolution_configuration {\n    user_group_resolution_mode = \"AWS_SSO\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_kendra_index` resource with a `user_group_resolution_configuration` block, enabling user group resolution through AWS SSO by setting the `user_group_resolution_mode` to `AWS_SSO`. This example is useful for implementing access control and user group management in Amazon Kendra using AWS Single Sign-On.\""
+    },
+    {
+      "title": "With Document Metadata Configuration Updates",
+      "code": "resource \"aws_kendra_index\" \"example\" {\n  name     = \"example\"\n  role_arn = aws_iam_role.this.arn\n\n  document_metadata_configuration_updates {\n    name = \"_authors\"\n    type = \"STRING_LIST_VALUE\"\n    search {\n      displayable = false\n      facetable   = false\n      searchable  = false\n      sortable    = false\n    }\n    relevance {\n      importance = 1\n    }\n  }\n\n  document_metadata_configuration_updates {\n    name = \"_category\"\n    type = \"STRING_VALUE\"\n    search {\n      displayable = false\n      facetable   = false\n      searchable  = false\n      sortable    = true\n    }\n    relevance {\n      importance            = 1\n      values_importance_map = {}\n    }\n  }\n\n  document_metadata_configuration_updates {\n    name = \"_created_at\"\n    type = \"DATE_VALUE\"\n    search {\n      displayable = false\n      facetable   = false\n      searchable  = false\n      sortable    = true\n    }\n    relevance {\n      freshness  = false\n      importance = 1\n      duration   = \"25920000s\"\n      rank_order = \"ASCENDING\"\n    }\n  }\n\n  document_metadata_configuration_updates {\n    name = \"_data_source_id\"\n    type = \"STRING_VALUE\"\n    search {\n      displayable = false\n      facetable   = false\n      searchable  = false\n      sortable    = true\n    }\n    relevance {\n      importance            = 1\n      values_importance_map = {}\n    }\n  }\n\n  document_metadata_configuration_updates {\n    name = \"_document_title\"\n    type = \"STRING_VALUE\"\n    search {\n      displayable = true\n      facetable   = false\n      searchable  = true\n      sortable    = true\n    }\n    relevance {\n      importance            = 2\n      values_importance_map = {}\n    }\n  }\n\n  document_metadata_configuration_updates {\n    name = \"_excerpt_page_number\"\n    type = \"LONG_VALUE\"\n    search {\n      displayable = false\n      facetable   = false\n      searchable  = false\n      sortable    = false\n    }\n    relevance {\n      importance = 2\n      rank_order = \"ASCENDING\"\n    }\n  }\n\n  document_metadata_configuration_updates {\n    name = \"_faq_id\"\n    type = \"STRING_VALUE\"\n    search {\n      displayable = false\n      facetable   = false\n      searchable  = false\n      sortable    = true\n    }\n    relevance {\n      importance            = 1\n      values_importance_map = {}\n    }\n  }\n\n  document_metadata_configuration_updates {\n    name = \"_file_type\"\n    type = \"STRING_VALUE\"\n    search {\n      displayable = false\n      facetable   = false\n      searchable  = false\n      sortable    = true\n    }\n    relevance {\n      importance            = 1\n      values_importance_map = {}\n    }\n  }\n\n  document_metadata_configuration_updates {\n    name = \"_language_code\"\n    type = \"STRING_VALUE\"\n    search {\n      displayable = false\n      facetable   = false\n      searchable  = false\n      sortable    = true\n    }\n    relevance {\n      importance            = 1\n      values_importance_map = {}\n    }\n  }\n\n  document_metadata_configuration_updates {\n    name = \"_last_updated_at\"\n    type = \"DATE_VALUE\"\n    search {\n      displayable = false\n      facetable   = false\n      searchable  = false\n      sortable    = true\n    }\n    relevance {\n      freshness  = false\n      importance = 1\n      duration   = \"25920000s\"\n      rank_order = \"ASCENDING\"\n    }\n  }\n\n  document_metadata_configuration_updates {\n    name = \"_source_uri\"\n    type = \"STRING_VALUE\"\n    search {\n      displayable = true\n      facetable   = false\n      searchable  = false\n      sortable    = false\n    }\n    relevance {\n      importance            = 1\n      values_importance_map = {}\n    }\n  }\n\n  document_metadata_configuration_updates {\n    name = \"_tenant_id\"\n    type = \"STRING_VALUE\"\n    search {\n      displayable = false\n      facetable   = false\n      searchable  = false\n      sortable    = true\n    }\n    relevance {\n      importance            = 1\n      values_importance_map = {}\n    }\n  }\n\n  document_metadata_configuration_updates {\n    name = \"_version\"\n    type = \"STRING_VALUE\"\n    search {\n      displayable = false\n      facetable   = false\n      searchable  = false\n      sortable    = true\n    }\n    relevance {\n      importance            = 1\n      values_importance_map = {}\n    }\n  }\n\n  document_metadata_configuration_updates {\n    name = \"_view_count\"\n    type = \"LONG_VALUE\"\n    search {\n      displayable = false\n      facetable   = false\n      searchable  = false\n      sortable    = true\n    }\n    relevance {\n      importance = 1\n      rank_order = \"ASCENDING\"\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure advanced document metadata settings for an AWS Kendra index using the `document_metadata_configuration_updates` block. It showcases how to define metadata fields with specific types, searchability, sortability, and relevance settings, enabling fine-grained control over document indexing and search behavior."
+    },
+    {
+      "title": "With JSON token type configuration",
+      "code": "resource \"aws_kendra_index\" \"example\" {\n  name     = \"example\"\n  role_arn = aws_iam_role.this.arn\n\n  user_token_configurations {\n    json_token_type_configuration {\n      group_attribute_field     = \"groups\"\n      user_name_attribute_field = \"username\"\n    }\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS Kendra index with a JSON token type for user token authentication, using the `user_token_configurations` block. Highlights the `json_token_type_configuration` settings, including `group_attribute_field` and `user_name_attribute_field`, to map user and group attributes for secure access control.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "description",
+      "description": "(Optional) The description of the Index.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_kendra_index` resource allows users to define a human-readable summary or purpose for the Kendra index, providing context about its intended use or scope. Setting this argument helps improve resource documentation and clarity, especially in environments with multiple indexes, by enabling users to distinguish and manage them effectively."
+    },
+    {
+      "name": "edition",
+      "description": "(Optional) The Amazon Kendra edition to use for the index. Choose `DEVELOPER_EDITION` for indexes intended for development, testing, or proof of concept. Use `ENTERPRISE_EDITION` for your production databases. Use `GEN_AI_ENTERPRISE_EDITION` for creating generative AI applications. Once you set the edition for an index, it can't be changed. Defaults to `ENTERPRISE_EDITION`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `edition` argument for the `aws_kendra_index` resource allows users to specify the operational tier of the Amazon Kendra index, determining its intended use case and capabilities. By setting this argument, users can configure the index for development and testing (`DEVELOPER_EDITION`), production workloads (`ENTERPRISE_EDITION`), or generative AI applications (`GEN_AI_ENTERPRISE_EDITION`), impacting cost, scalability, and feature availability."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_kendra_index` resource specifies the unique identifier of the Kendra index, allowing users to reference or manage the index programmatically within Terraform configurations. While optional, setting this argument can help ensure consistent identification of the resource across operations, supporting workflows like resource tracking or integration with other AWS services."
+    },
+    {
+      "name": "name",
+      "description": "(Required) Specifies the name of the Index.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_kendra_index` resource allows users to define a unique, human-readable identifier for the Amazon Kendra index, serving as a key attribute to distinguish and reference the index within the AWS environment. Setting this argument is essential for creating and managing the index, aligning with common user goals of organizing and identifying resources in a structured and meaningful way."
+    },
+    {
+      "name": "role_arn",
+      "description": "(Required) An AWS Identity and Access Management (IAM) role that gives Amazon Kendra permissions to access your Amazon CloudWatch logs and metrics. This is also the role you use when you call the `BatchPutDocument` API to index documents from an Amazon S3 bucket.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `role_arn` argument specifies the IAM role that grants Amazon Kendra permissions to access CloudWatch logs and metrics, as well as perform document indexing operations via the `BatchPutDocument` API. By configuring this required parameter, users enable Kendra to interact with associated AWS resources, ensuring proper monitoring and document ingestion functionality for the search index."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Tags to apply to the Index. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_kendra_index` resource allows users to assign key-value metadata to the Kendra index, enabling resource categorization, organization, and cost allocation. By defining tags, users can streamline management tasks such as tracking environments, applying policies, or integrating with tagging-based workflows, with provider-level default tags being overridden if matching keys are specified."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_kendra_index` resource allows users to define a comprehensive set of key-value tags inherited by the resource, including both user-defined and AWS-propagated tags. This facilitates resource organization, cost allocation, and management by enabling consistent tagging across the Kendra index and related AWS services."
+    },
+    {
+      "name": "user_context_policy",
+      "description": "(Optional) The user context policy. Valid values are `ATTRIBUTE_FILTER` or `USER_TOKEN`. For more information, refer to UserContextPolicy. Defaults to `ATTRIBUTE_FILTER`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `user_context_policy` argument in the `aws_kendra_index` resource allows users to define how Amazon Kendra handles user-specific context during search queries, enabling either attribute-based filtering (`ATTRIBUTE_FILTER`) or token-based user identification (`USER_TOKEN`). Configuring this argument impacts the personalization and security of search results, aligning with user access control goals and ensuring tailored query responses based on user context."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "capacity_units",
+      "description": "(Optional) A block that sets the number of additional document storage and query capacity units that should be used by the index. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "query_capacity_units",
+          "description": "(Required) The amount of extra query capacity for an index and GetQuerySuggestions capacity. For more information, refer to QueryCapacityUnits.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "\"Configures the additional query capacity for an Amazon Kendra index, allowing users to scale the number of queries and GetQuerySuggestions operations the index can handle. This argument helps optimize performance for high-demand search workloads and supports user goals of ensuring efficient query processing and responsiveness.\""
+        },
+        {
+          "name": "storage_capacity_units",
+          "description": "(Required) The amount of extra storage capacity for an index. A single capacity unit provides 30 GB of storage space or 100,000 documents, whichever is reached first. Minimum value of 0.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `storage_capacity_units` argument for the `aws_kendra_index` resource allows users to define the additional storage capacity allocated to the index, measured in capacity units. Each unit provides up to 30 GB of storage or supports up to 100,000 documents, enabling users to scale their index to accommodate larger datasets or document collections based on their search and knowledge management needs."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "\"Defines the scaling configuration for an AWS Kendra index by specifying additional document storage and query capacity units, enabling users to optimize performance and handle increased workloads effectively.\""
+    },
+    {
+      "name": "document_metadata_configuration_updates",
+      "description": "(Optional) One or more blocks that specify the configuration settings for any metadata applied to the documents in the index. Minimum number of 0 items. Maximum number of 500 items. If specified, you must define all elements, including those that are provided by default. These index fields are documented at Amazon Kendra Index documentation. For an example resource that defines these default index fields, refer to the default example above. For an example resource that appends additional index fields, refer to the append example above. All arguments for each block must be specified. Note that blocks cannot be removed since index fields cannot be deleted. This argument is detailed below.",
+      "cardinality": [
+        0,
+        500
+      ],
+      "arguments": [
+        {
+          "name": "name",
+          "description": "(Required) The name of the index field. Minimum length of 1. Maximum length of 30.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `name` argument specifies the unique identifier for a custom metadata field within the `document_metadata_configuration_updates` of an `aws_kendra_index`. By defining this name (1-30 characters), users can control how metadata fields are labeled and referenced, enabling precise organization, search, and retrieval of indexed documents based on custom attributes."
+        },
+        {
+          "name": "type",
+          "description": "(Required) The data type of the index field. Valid values are `STRING_VALUE`, `STRING_LIST_VALUE`, `LONG_VALUE`, `DATE_VALUE`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument in the `document_metadata_configuration_updates` block of the `aws_kendra_index` resource specifies the data type of the index field being updated, such as `STRING_VALUE`, `STRING_LIST_VALUE`, `LONG_VALUE`, or `DATE_VALUE`. This allows users to define how metadata fields are interpreted and stored in the Kendra index, enabling accurate search functionality and filtering based on the specified data type."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "relevance",
+          "description": "(Required) A block that provides manual tuning parameters to determine how the field affects the search results. Detailed below",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "duration",
+              "description": "(Required if type is of `DATE_VALUE`) Specifies the time period that the boost applies to. For more information, refer to Duration.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `duration` argument in the context of \"relevance\" for the `aws_kendra_index` resource allows users to specify the time period during which a relevance boost is applied to search results, particularly when the boost type is `DATE_VALUE`. By configuring this argument, users can fine-tune the ranking of search results based on temporal criteria, ensuring that content within the defined timeframe is prioritized for improved search accuracy and relevance."
+            },
+            {
+              "name": "freshness",
+              "description": "(Required if type is of `DATE_VALUE`) Indicates that this field determines how \"fresh\" a document is. For more information, refer to Freshness.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `freshness` argument in the `aws_kendra_index` resource allows users to specify whether a `DATE_VALUE` field should influence document relevance based on its recency. Enabling this argument ensures that newer documents are prioritized in search results, aligning with user goals of improving relevance by emphasizing the timeliness of indexed content."
+            },
+            {
+              "name": "importance",
+              "description": "(Required for all types) The relative importance of the field in the search. Larger numbers provide more of a boost than smaller numbers. Minimum value of 1. Maximum value of 10.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `importance` argument in the `aws_kendra_index` resource allows users to define the relative weight of a specific field in determining search relevance within Amazon Kendra. By assigning a value between 1 and 10, users can boost the significance of the field in search results, enabling fine-tuned control over ranking and prioritization to align with specific search optimization goals."
+            },
+            {
+              "name": "rank_order",
+              "description": "(Required if type is of `DATE_VALUE`, or `LONG_VALUE`) Determines how values should be interpreted. For more information, refer to RankOrder.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `rank_order` argument in the `aws_kendra_index` resource allows users to define the sorting behavior for relevance ranking when the field type is `DATE_VALUE` or `LONG_VALUE`. By specifying this argument, users control whether values are interpreted in ascending or descending order, directly impacting the prioritization of search results based on the configured field."
+            },
+            {
+              "name": "values_importance_map",
+              "description": "(Required if type is of `STRING_VALUE`) A list of values that should be given a different boost when they appear in the result list. For more information, refer to ValueImportanceMap.",
+              "required": false,
+              "type": "map(number)",
+              "llm_summary": "The `values_importance_map` argument in the `aws_kendra_index` resource allows users to define a custom relevance boost for specific string values in search results, enhancing the ranking of items based on their importance. By configuring this map, users can tailor search result prioritization to align with business goals, such as emphasizing high-value keywords or categories in query responses."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The \"relevance\" configuration block within \"document_metadata_configuration_updates\" for the \"aws_kendra_index\" resource enables manual tuning of search result ranking by defining how specific metadata fields influence relevance scoring. It encapsulates parameters for fine-grained control over search behavior, allowing users to optimize query results based on the importance of specific document attributes."
+        },
+        {
+          "name": "search",
+          "description": "(Required) A block that provides information about how the field is used during a search. Documented below. Detailed below",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "displayable",
+              "description": "(Required) Determines whether the field is returned in the query response. The default is `true`.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `displayable` argument in the `aws_kendra_index` resource controls whether a specific field is included in the query response for a search operation. Setting this to `true` ensures the field is visible in search results, aligning with user goals of customizing the data returned to enhance search relevance and user experience, while disabling it (`false`) hides the field from query responses for privacy or data management purposes."
+            },
+            {
+              "name": "facetable",
+              "description": "(Required) Indicates that the field can be used to create search facets, a count of results for each value in the field. The default is `false`.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `facetable` argument in the `aws_kendra_index` resource specifies whether a field can be used to create search facets, enabling users to group and count search results by field values. Setting this to `true` enhances search functionality by allowing users to refine and analyze results based on specific field categories, supporting common goals like building intuitive and interactive search experiences."
+            },
+            {
+              "name": "searchable",
+              "description": "(Required) Determines whether the field is used in the search. If the Searchable field is true, you can use relevance tuning to manually tune how Amazon Kendra weights the field in the search. The default is `true` for `string` fields and `false` for `number` and `date` fields.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `searchable` argument in the `aws_kendra_index` resource allows users to specify whether a field is included in search queries and contributes to relevance tuning within Amazon Kendra. Setting this argument to `true` enables the field to influence search results, supporting use cases like optimizing search relevance for specific data types or fields, while default behavior varies based on the field type (`true` for strings, `false` for numbers and dates)."
+            },
+            {
+              "name": "sortable",
+              "description": "(Required) Determines whether the field can be used to sort the results of a query. If you specify sorting on a field that does not have Sortable set to true, Amazon Kendra returns an exception. The default is `false`.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `sortable` argument in the `aws_kendra_index` resource allows users to specify whether a field can be used to sort search query results within Amazon Kendra. Enabling this functionality (`true`) ensures the field can be leveraged for sorting, supporting more refined and organized search experiences, while leaving it disabled (`false`) prevents sorting on the field and avoids exceptions during query execution."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The \"search\" configuration block within the \"document_metadata_configuration_updates\" of the \"aws_kendra_index\" resource defines how specific metadata fields are utilized during search operations, enabling fine-grained control over search behavior and relevance. By configuring this block, users can optimize search functionality by specifying field-level settings that influence query processing, ranking, and retrieval, ensuring tailored search experiences for their Kendra index."
+        }
+      ],
+      "llm_summary": "The `document_metadata_configuration_updates` block in the `aws_kendra_index` resource allows users to define and update metadata fields applied to documents within the Amazon Kendra index. It encapsulates settings for customizing index fields, enabling detailed control over document metadata to enhance search relevance and retrieval accuracy. Configuring this block ensures all metadata fields, including default and additional ones, are explicitly defined, supporting tailored search experiences without the ability to delete existing fields."
+    },
+    {
+      "name": "server_side_encryption_configuration",
+      "description": "(Optional) A block that specifies the identifier of the AWS KMS customer managed key (CMK) that's used to encrypt data indexed by Amazon Kendra. Amazon Kendra doesn't support asymmetric CMKs. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "kms_key_id",
+          "description": "(Optional) The identifier of the AWS KMScustomer master key (CMK). Amazon Kendra doesn't support asymmetric CMKs.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `kms_key_id` argument in the `server_side_encryption_configuration` of the `aws_kendra_index` resource allows users to specify the AWS KMS Customer Master Key (CMK) used to encrypt data at rest for the Kendra index. By setting this argument, users can enforce custom encryption standards and control access to the encryption key, aligning with security and compliance requirements. Note that only symmetric CMKs are supported."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `server_side_encryption_configuration` block in the `aws_kendra_index` resource defines encryption settings for securing indexed data using an AWS KMS customer managed key (CMK). It enables users to enforce data protection and compliance by specifying the CMK used for server-side encryption, ensuring sensitive information within the Amazon Kendra index is securely encrypted at rest."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_kendra_index` resource allows users to specify the maximum duration (as a string) Terraform should wait for the creation of an Amazon Kendra index to complete. By configuring this timeout, users can control the resource provisioning behavior to accommodate longer or shorter creation times based on their deployment needs, ensuring smoother automation workflows and avoiding premature failures during index creation."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_kendra_index` resource allows users to specify the maximum duration Terraform will wait for the deletion of an Amazon Kendra index to complete. By configuring this timeout, users can manage long-running delete operations, ensuring Terraform does not prematurely fail during resource cleanup."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_kendra_index` resource allows users to specify the maximum duration Terraform will wait for updates to the Kendra index to complete. By configuring this timeout, users can ensure Terraform operations do not fail prematurely during lengthy update processes, aligning resource provisioning with expected update durations."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"timeouts\" configuration block in the \"aws_kendra_index\" resource allows users to define custom timeout durations for specific operations, such as creating, updating, or deleting a Kendra index. By configuring this block, users can manage operation time limits to prevent long-running tasks from exceeding acceptable thresholds, ensuring better control over resource provisioning and lifecycle management."
+    },
+    {
+      "name": "user_group_resolution_configuration",
+      "description": "(Optional) A block that enables fetching access levels of groups and users from an AWS Single Sign-On identity source. To configure this, see UserGroupResolutionConfiguration. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "user_group_resolution_mode",
+          "description": "(Required) The identity store provider (mode) you want to use to fetch access levels of groups and users. AWS Single Sign-On is currently the only available mode. Your users and groups must exist in an AWS SSO identity source in order to use this mode. Valid Values are `AWS_SSO` or `NONE`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `user_group_resolution_mode` argument specifies the identity store provider used to determine access levels for users and groups in the `user_group_resolution_configuration` of an `aws_kendra_index`. By setting this required argument to either `AWS_SSO` or `NONE`, users define how Kendra resolves group memberships and permissions, enabling integration with AWS Single Sign-On for identity management or opting out of group resolution."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "\"Enables integration with AWS Single Sign-On to fetch access levels for users and groups, facilitating fine-grained access control within the Kendra index. This block configures identity resolution settings, ensuring seamless user and group permissions management for secure and personalized search experiences.\""
+    },
+    {
+      "name": "user_token_configurations",
+      "description": "(Optional) A block that specifies the user token configuration. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "json_token_type_configuration",
+          "description": "(Optional) A block that specifies the information about the JSON token type configuration. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "group_attribute_field",
+              "description": "(Required) The group attribute field. Minimum length of 1. Maximum length of 2048.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `group_attribute_field` argument in the `json_token_type_configuration` of the `aws_kendra_index` resource specifies the key in the JSON token that represents the group attribute used for access control in Amazon Kendra. By defining this field, users ensure that Kendra can correctly identify and enforce group-based permissions for search results, aligning with typical goals of securing and customizing search experiences based on user group memberships."
+            },
+            {
+              "name": "user_name_attribute_field",
+              "description": "(Required) The user name attribute field. Minimum length of 1. Maximum length of 2048.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `user_name_attribute_field` argument in the `json_token_type_configuration` of the `aws_kendra_index` resource specifies the JSON field that contains the user name attribute within the authentication token. This is a required configuration that enables Amazon Kendra to identify and map users for access control and personalized search results, ensuring proper user-specific functionality and security."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `json_token_type_configuration` block within the `user_token_configurations` of the `aws_kendra_index` resource defines settings for handling JSON-based authentication tokens, enabling Amazon Kendra to extract and validate user identity information from JSON token structures. This configuration allows users to customize how Kendra interprets token attributes, facilitating secure and precise access control for search queries and results."
+        },
+        {
+          "name": "jwt_token_type_configuration",
+          "description": "(Optional) A block that specifies the information about the JWT token type configuration. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "claim_regex",
+              "description": "(Optional) The regular expression that identifies the claim. Minimum length of 1. Maximum length of 100.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `claim_regex` argument in the `jwt_token_type_configuration` for the `aws_kendra_index` resource allows users to define a regular expression to identify specific claims within a JWT token. By configuring this, users can control how claims are extracted and matched for authentication and authorization purposes, enabling precise filtering and validation of token data to align with their application's security requirements."
+            },
+            {
+              "name": "group_attribute_field",
+              "description": "(Optional) The group attribute field. Minimum length of 1. Maximum length of 100.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "Defines the name of the attribute in the JWT token that specifies user group membership for access control in the Kendra index. Configuring this field enables fine-grained permissions by mapping user groups to search result visibility, supporting secure and personalized search experiences."
+            },
+            {
+              "name": "issuer",
+              "description": "(Optional) The issuer of the token. Minimum length of 1. Maximum length of 65.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `issuer` argument in the `jwt_token_type_configuration` for the `aws_kendra_index` resource allows users to specify the entity that issued the JWT token, typically a trusted authentication provider or identity service. Configuring this ensures that Kendra can validate the token's authenticity during user access control, supporting secure integration with external identity systems for search index access."
+            },
+            {
+              "name": "key_location",
+              "description": "(Required) The location of the key. Valid values are `URL` or `SECRET_MANAGER`",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `key_location` argument in the `jwt_token_type_configuration` of the `aws_kendra_index` resource specifies where the JWT signing key is stored, allowing users to define whether the key is retrieved from a URL or AWS Secrets Manager. This configuration is critical for enabling secure authentication and access control in Kendra by ensuring the index can validate JWT tokens against the specified key source."
+            },
+            {
+              "name": "secrets_manager_arn",
+              "description": "(Optional) The Amazon Resource Name (ARN) of the secret.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `secrets_manager_arn` argument in the `jwt_token_type_configuration` for the `aws_kendra_index` resource allows users to specify the Amazon Resource Name (ARN) of a secret stored in AWS Secrets Manager. This secret is typically used to securely manage sensitive information, such as keys or credentials, required for JWT token validation, enabling enhanced security and seamless integration with authentication workflows."
+            },
+            {
+              "name": "url",
+              "description": "(Optional) The signing key URL. Valid pattern is `^(https?|ftp|file):\\/\\/([^\\s]*)`",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `url` argument in the `jwt_token_type_configuration` block of the `aws_kendra_index` resource allows users to specify the signing key URL for validating JSON Web Tokens (JWTs). By configuring this URL, users enable secure authentication for their Kendra index by defining the location of the key used to verify token signatures, ensuring proper access control and integration with external identity providers."
+            },
+            {
+              "name": "user_name_attribute_field",
+              "description": "(Optional) The user name attribute field. Minimum length of 1. Maximum length of 100.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "Defines the specific JWT attribute field that represents the user's name for authentication within the \"jwt_token_type_configuration\" of an AWS Kendra index. Configuring this field ensures proper mapping of user identity during token validation, enabling personalized access and search experiences."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `jwt_token_type_configuration` block within the `user_token_configurations` of the `aws_kendra_index` resource defines settings for integrating JWT-based authentication, enabling secure user access to the Kendra index. It encapsulates configurations such as token attributes, issuer details, and claim mappings, allowing users to customize and validate JWT tokens for granular access control and enhanced security in search applications."
+        }
+      ],
+      "llm_summary": "The `user_token_configurations` block in the `aws_kendra_index` resource defines settings for integrating user authentication tokens, enabling secure access to Amazon Kendra indexes. It encapsulates configurations for token-based authentication mechanisms, such as OAuth or JSON Web Tokens (JWT), allowing users to manage how identity and access credentials are validated for search queries, ensuring personalized and secure search experiences."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) of the Index.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "created_at",
+      "description": "The Unix datetime that the index was created.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "error_message",
+      "description": "When the Status field value is `FAILED`, this contains a message that explains why.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "index_statistics",
+      "description": "A block that provides information about the number of FAQ questions and answers and the number of text documents indexed. Detailed below.",
+      "optional": false,
+      "type": "list(object({faq_statistics=list(object({indexed_question_answers_count=number})),text_document_statistics=list(object({indexed_text_bytes=number,indexed_text_documents_count=number}))}))"
+    },
+    {
+      "name": "status",
+      "description": "The current status of the index. When the value is `ACTIVE`, the index is ready for use. If the Status field value is `FAILED`, the `error_message` field contains a message that explains why.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "updated_at",
+      "description": "The Unix datetime that the index was last updated.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

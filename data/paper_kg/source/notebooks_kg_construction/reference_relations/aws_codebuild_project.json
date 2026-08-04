@@ -1,0 +1,52 @@
+[
+    {
+        "argument_path": "service_role",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "cache.location",
+        "references_output": "aws_s3_bucket.bucket",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "logs_config.s3_logs.location",
+        "references_output": "aws_s3_bucket.id",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "vpc_config.vpc_id",
+        "references_output": "aws_vpc.id",
+        "target_resource_type": "aws_vpc"
+    },
+    {
+        "argument_path": "vpc_config.subnets",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "vpc_config.security_group_ids",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "source.auth.resource",
+        "references_output": "aws_codestarconnections_connection.arn",
+        "target_resource_type": "aws_codestarconnections_connection"
+    },
+    {
+        "argument_path": "environment.certificate",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "environment.registry_credential.credential",
+        "references_output": "aws_secretsmanager_secret.arn",
+        "target_resource_type": "aws_secretsmanager_secret"
+    },
+    {
+        "argument_path": "environment_variable.value",
+        "references_output": "aws_ssm_parameter.value",
+        "target_resource_type": "aws_ssm_parameter"
+    }
+]

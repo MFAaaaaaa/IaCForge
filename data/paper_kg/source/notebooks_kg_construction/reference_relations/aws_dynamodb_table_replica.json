@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "global_table_arn",
+        "references_output": "aws_dynamodb_table.arn",
+        "target_resource_type": "aws_dynamodb_table"
+    },
+    {
+        "argument_path": "kms_key_arn",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    }
+]

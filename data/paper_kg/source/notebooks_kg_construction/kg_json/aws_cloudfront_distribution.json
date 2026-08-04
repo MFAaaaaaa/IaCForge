@@ -1,0 +1,1007 @@
+{
+    "resource": {
+        "name": "aws_cloudfront_distribution",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "aliases",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "comment",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "continuous_deployment_policy_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "default_root_object",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "enabled",
+            "description": "",
+            "required": true,
+            "type": "bool"
+        },
+        {
+            "name": "http_version",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "is_ipv6_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "price_class",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "retain_on_delete",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "staging",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "wait_for_deployment",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "web_acl_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "custom_error_response",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "error_caching_min_ttl",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "error_code",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                },
+                {
+                    "name": "response_code",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "response_page_path",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "default_cache_behavior",
+            "description": "",
+            "cardinality": [
+                1,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "allowed_methods",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "cache_policy_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "cached_methods",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "compress",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "default_ttl",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "field_level_encryption_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "max_ttl",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "min_ttl",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "origin_request_policy_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "realtime_log_config_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "response_headers_policy_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "smooth_streaming",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "target_origin_id",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "trusted_key_groups",
+                    "description": "",
+                    "required": false,
+                    "type": "list(string)"
+                },
+                {
+                    "name": "trusted_signers",
+                    "description": "",
+                    "required": false,
+                    "type": "list(string)"
+                },
+                {
+                    "name": "viewer_protocol_policy",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "forwarded_values",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "headers",
+                            "description": "",
+                            "required": false,
+                            "type": "set(string)"
+                        },
+                        {
+                            "name": "query_string",
+                            "description": "",
+                            "required": true,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "query_string_cache_keys",
+                            "description": "",
+                            "required": false,
+                            "type": "list(string)"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "cookies",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "forward",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "whitelisted_names",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "set(string)"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "function_association",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        2
+                    ],
+                    "arguments": [
+                        {
+                            "name": "event_type",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "function_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "grpc_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "lambda_function_association",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        4
+                    ],
+                    "arguments": [
+                        {
+                            "name": "event_type",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "include_body",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "lambda_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "logging_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "bucket",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "include_cookies",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "prefix",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "ordered_cache_behavior",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "allowed_methods",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "cache_policy_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "cached_methods",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "compress",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "default_ttl",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "field_level_encryption_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "max_ttl",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "min_ttl",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "origin_request_policy_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "path_pattern",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "realtime_log_config_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "response_headers_policy_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "smooth_streaming",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "target_origin_id",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "trusted_key_groups",
+                    "description": "",
+                    "required": false,
+                    "type": "list(string)"
+                },
+                {
+                    "name": "trusted_signers",
+                    "description": "",
+                    "required": false,
+                    "type": "list(string)"
+                },
+                {
+                    "name": "viewer_protocol_policy",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "forwarded_values",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "headers",
+                            "description": "",
+                            "required": false,
+                            "type": "set(string)"
+                        },
+                        {
+                            "name": "query_string",
+                            "description": "",
+                            "required": true,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "query_string_cache_keys",
+                            "description": "",
+                            "required": false,
+                            "type": "list(string)"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "cookies",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "forward",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "whitelisted_names",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "set(string)"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "function_association",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        2
+                    ],
+                    "arguments": [
+                        {
+                            "name": "event_type",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "function_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "grpc_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "lambda_function_association",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        4
+                    ],
+                    "arguments": [
+                        {
+                            "name": "event_type",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "include_body",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "lambda_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "origin",
+            "description": "",
+            "cardinality": [
+                1,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "connection_attempts",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "connection_timeout",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "domain_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "origin_access_control_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "origin_id",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "origin_path",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "custom_header",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        0
+                    ],
+                    "arguments": [
+                        {
+                            "name": "name",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "value",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "custom_origin_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "http_port",
+                            "description": "",
+                            "required": true,
+                            "type": "number"
+                        },
+                        {
+                            "name": "https_port",
+                            "description": "",
+                            "required": true,
+                            "type": "number"
+                        },
+                        {
+                            "name": "origin_keepalive_timeout",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "origin_protocol_policy",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "origin_read_timeout",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "origin_ssl_protocols",
+                            "description": "",
+                            "required": true,
+                            "type": "set(string)"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "origin_shield",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "enabled",
+                            "description": "",
+                            "required": true,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "origin_shield_region",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "s3_origin_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "origin_access_identity",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "vpc_origin_config",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "origin_keepalive_timeout",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "origin_read_timeout",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "vpc_origin_id",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "origin_group",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "origin_id",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "failover_criteria",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "status_codes",
+                            "description": "",
+                            "required": true,
+                            "type": "set(number)"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "member",
+                    "description": "",
+                    "cardinality": [
+                        2,
+                        2
+                    ],
+                    "arguments": [
+                        {
+                            "name": "origin_id",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "restrictions",
+            "description": "",
+            "cardinality": [
+                1,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "geo_restriction",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "locations",
+                            "description": "",
+                            "required": false,
+                            "type": "set(string)"
+                        },
+                        {
+                            "name": "restriction_type",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "viewer_certificate",
+            "description": "",
+            "cardinality": [
+                1,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "acm_certificate_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "cloudfront_default_certificate",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "iam_certificate_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "minimum_protocol_version",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "ssl_support_method",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "caller_reference",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "domain_name",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "etag",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "hosted_zone_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "in_progress_validation_batches",
+            "description": "",
+            "optional": false,
+            "type": "number"
+        },
+        {
+            "name": "last_modified_time",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "status",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "trusted_key_groups",
+            "description": "",
+            "optional": false,
+            "type": "list(object({enabled=bool,items=list(object({key_group_id=string,key_pair_ids=set(string)}))}))"
+        },
+        {
+            "name": "trusted_signers",
+            "description": "",
+            "optional": false,
+            "type": "list(object({enabled=bool,items=list(object({aws_account_number=string,key_pair_ids=set(string)}))}))"
+        }
+    ]
+}

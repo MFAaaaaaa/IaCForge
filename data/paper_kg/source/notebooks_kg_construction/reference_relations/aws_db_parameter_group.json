@@ -1,0 +1,7 @@
+[
+    {
+        "argument_path": "aws_db_instance.parameter_group_name",
+        "references_output": "aws_db_parameter_group.name",
+        "target_resource_type": "aws_db_parameter_group"
+    }
+]

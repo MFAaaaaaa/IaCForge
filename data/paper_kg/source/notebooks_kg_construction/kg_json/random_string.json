@@ -1,0 +1,96 @@
+{
+    "resource": {
+        "name": "random_string",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "keepers",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "length",
+            "description": "",
+            "required": true,
+            "type": "number"
+        },
+        {
+            "name": "lower",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "min_lower",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "min_numeric",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "min_special",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "min_upper",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "number",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "numeric",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "override_special",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "special",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "upper",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "result",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

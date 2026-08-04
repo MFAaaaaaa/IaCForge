@@ -1,0 +1,384 @@
+{
+  "resource": {
+    "name": "aws_lightsail_distribution",
+    "description": "Terraform resource for managing an AWS Lightsail Distribution.",
+    "llm_summary": "The `aws_lightsail_distribution` Terraform resource enables the creation and management of AWS Lightsail Distributions, which are simplified content delivery networks (CDNs) designed for small-scale applications. It is commonly used to accelerate website or application performance by distributing content globally with caching, HTTPS support, and customizable origin settings. Users can configure key features such as cache behaviors, origin resource integration (e.g., Lightsail instances or buckets), logging, and lifecycle policies to optimize content delivery and scalability."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_lightsail_bucket\" \"test\" {\n  name      = \"test-bucket\"\n  bundle_id = \"small_1_0\"\n}\nresource \"aws_lightsail_distribution\" \"test\" {\n  name      = \"test-distribution\"\n  bundle_id = \"small_1_0\"\n  origin {\n    name        = aws_lightsail_bucket.test.name\n    region_name = aws_lightsail_bucket.test.region\n  }\n  default_cache_behavior {\n    behavior = \"cache\"\n  }\n  cache_behavior_settings {\n    allowed_http_methods = \"GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE\"\n    cached_http_methods  = \"GET,HEAD\"\n    default_ttl          = 86400\n    maximum_ttl          = 31536000\n    minimum_ttl          = 0\n    forwarded_cookies {\n      option = \"none\"\n    }\n    forwarded_headers {\n      option = \"default\"\n    }\n    forwarded_query_strings {\n      option = false\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_lightsail_distribution` resource with an `aws_lightsail_bucket` as the origin, showcasing default and custom cache behavior settings. It illustrates key configurations such as TTL values, HTTP method allowances, and forwarding options for cookies, headers, and query strings, enabling users to set up a Lightsail CDN distribution with granular caching controls."
+    },
+    {
+      "title": "instance origin example",
+      "code": "data \"aws_availability_zones\" \"available\" {\n  state = \"available\"\n\n  filter {\n    name   = \"opt-in-status\"\n    values = [\"opt-in-not-required\"]\n  }\n}\n\nresource \"aws_lightsail_static_ip_attachment\" \"test\" {\n  static_ip_name = aws_lightsail_static_ip.test.name\n  instance_name  = aws_lightsail_instance.test.name\n}\n\nresource \"aws_lightsail_static_ip\" \"test\" {\n  name = \"test-static-ip\"\n}\n\nresource \"aws_lightsail_instance\" \"test\" {\n  name              = \"test-instance\"\n  availability_zone = data.aws_availability_zones.available.names[0]\n  blueprint_id      = \"amazon_linux_2\"\n  bundle_id         = \"micro_1_0\"\n}\n\nresource \"aws_lightsail_distribution\" \"test\" {\n  name       = \"test-distribution\"\n  depends_on = [aws_lightsail_static_ip_attachment.test]\n  bundle_id  = \"small_1_0\"\n  origin {\n    name        = aws_lightsail_instance.test.name\n    region_name = data.aws_availability_zones.available.id\n  }\n  default_cache_behavior {\n    behavior = \"cache\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_lightsail_distribution` with an instance origin in AWS Lightsail, using a static IP attached to a Lightsail instance as the origin source. It showcases key configurations such as the `origin` block for specifying the instance name and region, and the `default_cache_behavior` block for caching settings, while leveraging dependencies to ensure proper resource attachment."
+    },
+    {
+      "title": "lb origin example",
+      "code": "data \"aws_availability_zones\" \"available\" {\n  state = \"available\"\n\n  filter {\n    name   = \"opt-in-status\"\n    values = [\"opt-in-not-required\"]\n  }\n}\n\nresource \"aws_lightsail_lb\" \"test\" {\n  name              = \"test-load-balancer\"\n  health_check_path = \"/\"\n  instance_port     = \"80\"\n  tags = {\n    foo = \"bar\"\n  }\n}\n\nresource \"aws_lightsail_instance\" \"test\" {\n  name              = \"test-instance\"\n  availability_zone = data.aws_availability_zones.available.names[0]\n  blueprint_id      = \"amazon_linux_2\"\n  bundle_id         = \"nano_3_0\"\n}\n\nresource \"aws_lightsail_lb_attachment\" \"test\" {\n  lb_name       = aws_lightsail_lb.test.name\n  instance_name = aws_lightsail_instance.test.name\n}\n\nresource \"aws_lightsail_distribution\" \"test\" {\n  name       = \"test-distribution\"\n  depends_on = [aws_lightsail_lb_attachment.test]\n  bundle_id  = \"small_1_0\"\n  origin {\n    name        = aws_lightsail_lb.test.name\n    region_name = data.aws_availability_zones.available.id\n  }\n  default_cache_behavior {\n    behavior = \"cache\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_lightsail_distribution` with an origin tied to an `aws_lightsail_lb` (load balancer) and its attached instance, showcasing integration between Lightsail resources. Key configurations include the `origin` block referencing the load balancer, `default_cache_behavior` for caching, and dependencies ensuring proper resource creation order. Users can learn how to set up a Lightsail distribution for content delivery with a load balancer as the origin."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bundle_id",
+      "description": "(Required) Bundle ID to use for the distribution.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bundle_id` argument specifies the pricing plan or resource bundle to allocate for the Lightsail distribution, determining its performance, data transfer limits, and associated costs. Setting this value allows users to control the distribution's capacity and features, aligning it with their workload requirements and budget."
+    },
+    {
+      "name": "certificate_name",
+      "description": "(Optional) The name of the SSL/TLS certificate attached to the distribution, if any.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `certificate_name` argument for the `aws_lightsail_distribution` resource allows users to specify the name of an SSL/TLS certificate to attach to the distribution, enabling secure HTTPS communication for the content served. By configuring this argument, users can enhance security and meet compliance requirements for encrypted data transmission, aligning with common goals of securing web traffic and protecting sensitive information."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_lightsail_distribution` resource allows users to specify a unique identifier for the Lightsail distribution, typically used to reference or manage the resource programmatically within Terraform configurations. While optional, setting this argument can help ensure consistent identification of the distribution across workflows, enabling efficient resource tracking and updates."
+    },
+    {
+      "name": "ip_address_type",
+      "description": "(Optional) The IP address type of the distribution. Default: `dualstack`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ip_address_type` argument for the `aws_lightsail_distribution` resource allows users to specify the type of IP addressing used by the distribution, such as `dualstack` for both IPv4 and IPv6 support. Configuring this argument impacts network accessibility, enabling compatibility with modern IPv6 environments while maintaining support for legacy IPv4 systems."
+    },
+    {
+      "name": "is_enabled",
+      "description": "(Optional) Indicates whether the distribution is enabled. Default: `true`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `is_enabled` argument for the `aws_lightsail_distribution` resource allows users to control whether the distribution is active and serving content. Setting this argument to `true` enables the distribution, ensuring it delivers cached content to end users, while disabling it (`false`) pauses its functionality without deleting the resource, supporting use cases like temporary deactivation or testing."
+    },
+    {
+      "name": "name",
+      "description": "(Required) Name of the distribution.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_lightsail_distribution` resource specifies the unique identifier for the Lightsail distribution, allowing users to define a human-readable name that distinguishes the distribution within their AWS environment. Setting this argument is essential for creating and managing the distribution, as it serves as a reference point for configuration, monitoring, and integration with other resources."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of tags for the Lightsail Distribution. To create a key-only tag, use an empty string as the value. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_lightsail_distribution` resource allows users to define metadata in the form of key-value pairs to categorize and organize the distribution for easier identification, management, and cost allocation. By setting tags, users can achieve common goals such as tracking environments, associating resources with projects, or applying governance policies, with the ability to override provider-level default tags for more granular control."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_lightsail_distribution` resource allows users to define a comprehensive set of key-value tags that are applied to the distribution, including inherited tags from the provider's default configuration. This enables efficient resource organization, categorization, and management for purposes such as cost allocation, environment labeling, or compliance tracking."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "cache_behavior",
+      "description": "(Optional) A set of configuration blocks that describe the per-path cache behavior of the distribution. Detailed below",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "behavior",
+          "description": "(Required) The cache behavior for the specified path.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `behavior` argument in the `cache_behavior` block of the `aws_lightsail_distribution` resource allows users to define the caching strategy for a specific path, specifying how content is cached and served to end users. By setting this required string value, users can control the distribution's cache behavior, such as enabling or disabling caching, optimizing content delivery, or customizing cache rules to align with application performance and user experience goals."
+        },
+        {
+          "name": "path",
+          "description": "(Required) The path to a directory or file to cached, or not cache. Use an asterisk symbol to specify wildcard directories (path/to/assets/*), and file types (*.html, *jpg, *js). Directories and file paths are case-sensitive.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `path` argument in the `cache_behavior` block of the `aws_lightsail_distribution` resource specifies the directory or file paths to include or exclude from caching, allowing users to define granular caching rules. By setting this argument, users can control how specific assets (e.g., files or file types) are cached, optimizing content delivery and ensuring case-sensitive paths or wildcard patterns are handled as intended."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `cache_behavior` configuration block in the `aws_lightsail_distribution` resource defines per-path caching rules and behaviors for the distribution, enabling granular control over how specific content is cached and served to users. By configuring this block, users can optimize performance and tailor caching strategies for different paths, ensuring efficient content delivery and improved user experience."
+    },
+    {
+      "name": "cache_behavior_settings",
+      "description": "(Required) An object that describes the cache behavior settings of the distribution. Detailed below  The following arguments are optional:",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "allowed_http_methods",
+          "description": "(Optional) The HTTP methods that are processed and forwarded to the distribution's origin.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `allowed_http_methods` argument in the `cache_behavior_settings` of the `aws_lightsail_distribution` resource allows users to specify which HTTP methods (e.g., GET, POST, PUT) are processed and forwarded to the origin. This configuration controls the interaction between the distribution and its origin, enabling users to define the permitted request types for optimizing cache behavior and ensuring compatibility with application requirements."
+        },
+        {
+          "name": "cached_http_methods",
+          "description": "(Optional) The HTTP method responses that are cached by your distribution.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "Defines which HTTP methods (e.g., GET, HEAD) are cached by the Lightsail distribution, allowing users to optimize cache behavior for specific request types and improve performance by reducing backend load for frequently accessed resources. Configuring this argument helps tailor caching strategies to align with application needs and user access patterns."
+        },
+        {
+          "name": "default_ttl",
+          "description": "(Optional) The default amount of time that objects stay in the distribution's cache before the distribution forwards another request to the origin to determine whether the content has been updated.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `default_ttl` argument in the `cache_behavior_settings` of the `aws_lightsail_distribution` resource allows users to define the default time-to-live (TTL) for cached objects, specifying how long content remains in the distribution's cache before revalidating with the origin. Configuring this value helps optimize cache performance and control content freshness, balancing reduced origin requests with timely updates to cached data."
+        },
+        {
+          "name": "maximum_ttl",
+          "description": "(Optional) The maximum amount of time that objects stay in the distribution's cache before the distribution forwards another request to the origin to determine whether the object has been updated.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `maximum_ttl` argument in the `cache_behavior_settings` of the `aws_lightsail_distribution` resource allows users to define the maximum duration (in seconds) that cached objects remain valid before the distribution checks the origin for updates. Configuring this value helps optimize cache retention and balance between reducing origin requests and ensuring content freshness, aligning with user goals of efficient cache management and performance tuning."
+        },
+        {
+          "name": "minimum_ttl",
+          "description": "(Optional) The minimum amount of time that objects stay in the distribution's cache before the distribution forwards another request to the origin to determine whether the object has been updated.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `minimum_ttl` argument in the `cache_behavior_settings` of the `aws_lightsail_distribution` resource allows users to define the minimum duration (in seconds) that cached objects remain in the distribution's cache before revalidating with the origin. Configuring this value helps optimize cache performance and control how frequently the origin is queried, balancing faster content delivery with data freshness."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "forwarded_cookies",
+          "description": "(Required) An object that describes the cookies that are forwarded to the origin. Your content is cached based on the cookies that are forwarded. Detailed below",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "cookies_allow_list",
+              "description": "(Required) The specific cookies to forward to your distribution's origin.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `cookies_allow_list` argument in the `forwarded_cookies` block of the `aws_lightsail_distribution` resource allows users to specify a set of cookie names that should be forwarded to the origin. By configuring this, users can control which cookies are included in origin requests, enabling tailored caching behavior or dynamic content delivery based on specific client-side data."
+            },
+            {
+              "name": "option",
+              "description": "(Optional) Specifies which cookies to forward to the distribution's origin for a cache behavior: all, none, or allow-list to forward only the cookies specified in the cookiesAllowList parameter.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `option` argument in the `forwarded_cookies` block of the `aws_lightsail_distribution` resource allows users to specify the cookie forwarding behavior for cache management, defining whether all cookies, no cookies, or only specific cookies (via an allow-list) are sent to the origin. This configuration impacts cache efficiency and origin request customization, enabling users to optimize content delivery based on cookie-based logic."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `forwarded_cookies` block within the `cache_behavior_settings` of the `aws_lightsail_distribution` resource configures how cookies are forwarded to the origin, enabling fine-grained control over caching behavior based on cookie values. By specifying which cookies are forwarded, users can optimize content delivery and ensure dynamic content is appropriately cached or retrieved from the origin, aligning caching strategies with application requirements."
+        },
+        {
+          "name": "forwarded_headers",
+          "description": "(Required) An object that describes the headers that are forwarded to the origin. Your content is cached based on the headers that are forwarded. Detailed below",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "headers_allow_list",
+              "description": "(Required) The specific headers to forward to your distribution's origin.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `headers_allow_list` argument in the `forwarded_headers` block of the `aws_lightsail_distribution` resource allows users to specify a set of HTTP headers that should be forwarded from the distribution to the origin. Configuring this argument enables fine-grained control over the data passed to the origin, which can be used to optimize caching behavior, enforce security policies, or support custom application logic based on header values."
+            },
+            {
+              "name": "option",
+              "description": "(Optional) The headers that you want your distribution to forward to your origin and base caching on.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `option` argument in the `forwarded_headers` block of the `aws_lightsail_distribution` resource allows users to specify which HTTP headers the distribution should forward to the origin server and use as a basis for caching decisions. Configuring this argument enables fine-grained control over cache behavior and origin request customization, supporting user goals like optimizing content delivery and ensuring dynamic responses for specific header-based requests."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `forwarded_headers` block within the `cache_behavior_settings` of the `aws_lightsail_distribution` resource defines which HTTP headers are forwarded to the origin, enabling fine-grained control over caching behavior based on header values. Configuring this block allows users to optimize content delivery by ensuring the origin receives necessary request metadata while tailoring cache policies to specific header-based conditions."
+        },
+        {
+          "name": "forwarded_query_strings",
+          "description": "(Required) An object that describes the query strings that are forwarded to the origin. Your content is cached based on the query strings that are forwarded. Detailed below",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "option",
+              "description": "(Optional) Indicates whether the distribution forwards and caches based on query strings.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `option` argument in the `forwarded_query_strings` block of the `aws_lightsail_distribution` resource allows users to control whether query strings are forwarded to the origin and cached by the distribution. Enabling this option configures the distribution to include query strings in cache key calculations, which is useful for applications where query string parameters influence content delivery or personalization."
+            },
+            {
+              "name": "query_strings_allowed_list",
+              "description": "(Required) The specific query strings that the distribution forwards to the origin.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "Defines the specific query strings that the Lightsail distribution will forward to the origin, allowing users to control which query parameters are preserved for origin requests. This configuration is typically used to optimize caching behavior and ensure dynamic content is correctly served based on query string values."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `forwarded_query_strings` block within the `cache_behavior_settings` of the `aws_lightsail_distribution` resource defines how query strings are forwarded to the origin, enabling fine-grained control over caching behavior based on specific query parameters. By configuring this block, users can optimize content delivery and ensure dynamic content is appropriately cached or retrieved from the origin based on query string variations."
+        }
+      ],
+      "llm_summary": "The `cache_behavior_settings` block within the `aws_lightsail_distribution` resource defines and manages caching mechanisms for the distribution, enabling fine-grained control over how content is cached and served to end users. By configuring this block, users can optimize performance, reduce latency, and customize cache behavior settings such as TTLs, cookies, headers, and query strings to align with specific application requirements."
+    },
+    {
+      "name": "default_cache_behavior",
+      "description": "(Required) Object that describes the default cache behavior of the distribution. Detailed below",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "behavior",
+          "description": "(Required) The cache behavior of the distribution. Valid values: `cache` and `dont-cache`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `behavior` argument in the `default_cache_behavior` block of the `aws_lightsail_distribution` resource specifies whether the distribution's default cache behavior should store and serve cached content (`cache`) or bypass caching entirely (`dont-cache`). This configuration directly impacts content delivery performance and user experience by controlling how requests are handled\u2014either optimizing for speed via caching or ensuring real-time data retrieval by avoiding cache."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `default_cache_behavior` block in the `aws_lightsail_distribution` resource defines the core caching strategy for the distribution, specifying how content is cached and served to end users. It encapsulates settings related to request handling, such as cache policies, allowed HTTP methods, and behavior for origin requests, enabling users to optimize content delivery and control caching rules for improved performance and user experience."
+    },
+    {
+      "name": "origin",
+      "description": "(Required) Object that describes the origin resource of the distribution, such as a Lightsail instance, bucket, or load balancer. Detailed below",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "name",
+          "description": "(Required) The name of the origin resource. Your origin can be an instance with an attached static IP, a bucket, or a load balancer that has at least one instance attached to it.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `name` argument specifies the unique identifier of the origin resource for an AWS Lightsail distribution, allowing users to define the source of content to be served via the distribution. By setting this argument, users can configure the distribution to pull data from an instance with a static IP, a bucket, or a load balancer, enabling seamless content delivery from the chosen origin to end users."
+        },
+        {
+          "name": "protocol_policy",
+          "description": "(Optional) The protocol that your Amazon Lightsail distribution uses when establishing a connection with your origin to pull content.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `protocol_policy` argument for the `aws_lightsail_distribution` resource allows users to specify the protocol (e.g., HTTP or HTTPS) used by the distribution when connecting to the origin to retrieve content. Configuring this argument impacts the security and communication behavior of the distribution, enabling users to enforce secure connections or support legacy protocols based on their application's requirements."
+        },
+        {
+          "name": "region_name",
+          "description": "(Required) The AWS Region name of the origin resource.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `region_name` argument specifies the AWS Region where the origin resource for the Lightsail distribution is located, ensuring the distribution pulls content from the correct geographic location. Setting this argument is critical for aligning the distribution with the origin's physical location, optimizing latency, and meeting regional compliance or availability requirements."
+        },
+        {
+          "name": "resource_type",
+          "description": "(Computed) The resource type of the origin resource (e.g., Instance).",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `resource_type` argument for the `aws_lightsail_distribution` resource specifies the type of origin resource (e.g., an Instance) that serves as the content source for the distribution. This argument helps define the origin's behavior and compatibility, ensuring the distribution correctly routes requests to the appropriate resource type for content delivery."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"origin\" configuration block in the `aws_lightsail_distribution` resource defines the source resource (e.g., Lightsail instance, bucket, or load balancer) that serves as the content origin for the distribution. It encapsulates settings to establish the connection between the distribution and its origin, enabling users to specify and manage the primary content source for efficient delivery through Lightsail's CDN. Configuring this block ensures seamless integration with the origin resource, optimizing content delivery and performance."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_lightsail_distribution` resource allows users to specify the maximum duration, as a string, Terraform should wait for the creation of the Lightsail distribution to complete. By configuring this timeout, users can control the provisioning behavior to accommodate longer setup times, ensuring smoother resource deployment in scenarios where creation may take more time due to network or service delays."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_lightsail_distribution` resource allows users to specify the maximum duration Terraform should wait for the deletion of the Lightsail distribution to complete. By configuring this timeout, users can manage resource lifecycle behavior, ensuring Terraform does not prematurely fail or hang during the deletion process."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block of the `aws_lightsail_distribution` resource allows users to specify the maximum duration (as a string, e.g., \"30m\") Terraform should wait for updates to the Lightsail distribution to complete. Configuring this ensures that Terraform operations involving updates to the distribution do not time out prematurely, aligning with the expected duration of the update process."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_lightsail_distribution` resource defines customizable time limits for specific operations, such as creating, updating, or deleting the Lightsail distribution. By configuring this block, users can manage operation durations to prevent long-running tasks or handle infrastructure provisioning delays, ensuring smoother lifecycle management and better control over resource deployment."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "alternative_domain_names",
+      "description": "The alternate domain names of the distribution.",
+      "optional": false,
+      "type": "list(string)"
+    },
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) of the distribution.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "created_at",
+      "description": "The timestamp when the distribution was created.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "domain_name",
+      "description": "The domain name of the distribution.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "location",
+      "description": "An object that describes the location of the distribution, such as the AWS Region and Availability Zone. Detailed below",
+      "optional": false,
+      "type": "list(object({availability_zone=string,region_name=string}))"
+    },
+    {
+      "name": "origin_public_dns",
+      "description": "The public DNS of the origin.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "resource_type",
+      "description": "The Lightsail resource type (e.g., Distribution).",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "description": "The status of the distribution.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "support_code",
+      "description": "The support code. Include this code in your email to support when you have questions about your Lightsail distribution. This code enables our support team to look up your Lightsail information more easily.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

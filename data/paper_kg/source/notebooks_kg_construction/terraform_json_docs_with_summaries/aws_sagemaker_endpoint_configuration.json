@@ -1,0 +1,654 @@
+{
+  "resource": {
+    "name": "aws_sagemaker_endpoint_configuration",
+    "description": "Provides a SageMaker AI endpoint configuration resource.",
+    "llm_summary": "The `aws_sagemaker_endpoint_configuration` resource manages the setup of SageMaker endpoint configurations, enabling users to define how machine learning models are deployed and served in AWS. It is commonly used for configuring production-ready AI endpoints, specifying model variants, instance types, and scaling options to optimize performance and cost. This resource supports advanced settings such as multi-model endpoints, data capture for monitoring, and custom container configurations, making it ideal for deploying and managing scalable, secure, and efficient ML inference workflows."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_sagemaker_endpoint_configuration\" \"ec\" {\n  name = \"my-endpoint-config\"\n\n  production_variants {\n    variant_name           = \"variant-1\"\n    model_name             = aws_sagemaker_model.m.name\n    initial_instance_count = 1\n    instance_type          = \"ml.t2.medium\"\n  }\n\n  tags = {\n    Name = \"foo\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS SageMaker endpoint configuration using the `aws_sagemaker_endpoint_configuration` resource, including defining a production variant with a specific model, instance type (`ml.t2.medium`), and initial instance count. It also showcases the use of tags for resource metadata, providing a foundational setup for deploying machine learning models in SageMaker."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_sagemaker_endpoint_configuration` resource specifies a unique identifier for the endpoint configuration, allowing users to reference or manage the resource programmatically within Terraform. While optional, setting this argument can help ensure consistent identification of the resource across deployments and integrations, supporting workflows like state management and resource tracking."
+    },
+    {
+      "name": "kms_key_arn",
+      "description": "(Optional) Amazon Resource Name (ARN) of a AWS Key Management Service key that Amazon SageMaker AI uses to encrypt data on the storage volume attached to the ML compute instance that hosts the endpoint.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `kms_key_arn` argument in the `aws_sagemaker_endpoint_configuration` resource allows users to specify the Amazon Resource Name (ARN) of an AWS Key Management Service (KMS) key to encrypt data stored on the attached storage volume of the ML compute instance hosting the endpoint. Configuring this argument enhances data security by enabling encryption at rest, aligning with compliance and data protection requirements."
+    },
+    {
+      "name": "name",
+      "description": "(Optional) The name of the endpoint configuration. If omitted, Terraform will assign a random, unique name. Conflicts with `name_prefix`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_sagemaker_endpoint_configuration` resource allows users to define a custom, unique identifier for the endpoint configuration, ensuring clarity and consistency in resource naming. If omitted, Terraform generates a random name, making this argument useful for aligning endpoint configurations with naming conventions or organizational standards."
+    },
+    {
+      "name": "name_prefix",
+      "description": "(Optional) Creates a unique endpoint configuration name beginning with the specified prefix. Conflicts with `name`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name_prefix` argument in the `aws_sagemaker_endpoint_configuration` resource allows users to define a custom prefix for the automatically generated name of the endpoint configuration, ensuring uniqueness while avoiding manual name specification. This is particularly useful for managing dynamic or environment-specific deployments, as it simplifies naming conventions and avoids conflicts with the `name` argument."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A mapping of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_sagemaker_endpoint_configuration` resource allows users to assign key-value metadata to the endpoint configuration, enabling resource categorization, organization, and cost allocation. By defining tags, users can streamline management tasks such as tracking environments (e.g., \"dev\" or \"prod\"), applying governance policies, or integrating with billing and reporting workflows."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_sagemaker_endpoint_configuration` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to all resources associated with the endpoint configuration. This facilitates consistent tagging for resource organization, cost allocation, and access management across the AWS environment."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "async_inference_config",
+      "description": "(Optional) Specifies configuration for how an endpoint performs asynchronous inference.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "client_config",
+          "description": "(Optional) Configures the behavior of the client used by Amazon SageMaker AI to interact with the model container during asynchronous inference.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "max_concurrent_invocations_per_instance",
+              "description": "(Optional) The maximum number of concurrent requests sent by the SageMaker AI client to the model container. If no value is provided, Amazon SageMaker AI will choose an optimal value for you.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `max_concurrent_invocations_per_instance` argument allows users to define the maximum number of concurrent requests that the SageMaker AI client can send to a model container per instance, enabling fine-grained control over request throughput and resource utilization. By configuring this parameter, users can optimize model performance and scalability to align with workload demands, or rely on SageMaker's default value for automatic tuning."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `client_config` block within the `async_inference_config` of the `aws_sagemaker_endpoint_configuration` resource defines settings that control the behavior of the client interacting with the model container during asynchronous inference. It enables users to fine-tune client-side parameters for efficient communication and request handling, optimizing the performance and reliability of asynchronous AI model inference workflows."
+        },
+        {
+          "name": "output_config",
+          "description": "(Required) Specifies the configuration for asynchronous inference invocation outputs.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "kms_key_id",
+              "description": "(Optional) The Amazon Web Services Key Management Service (Amazon Web Services KMS) key that Amazon SageMaker AI uses to encrypt the asynchronous inference output in Amazon S3.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `kms_key_id` argument in the `output_config` block of the `aws_sagemaker_endpoint_configuration` resource allows users to specify the AWS KMS key used to encrypt asynchronous inference output stored in Amazon S3. By setting this argument, users can enhance data security and compliance by ensuring that inference results are encrypted using a customer-managed key."
+            },
+            {
+              "name": "s3_failure_path",
+              "description": "(Optional) The Amazon S3 location to upload failure inference responses to.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `s3_failure_path` argument in the `output_config` block of the `aws_sagemaker_endpoint_configuration` resource allows users to specify an Amazon S3 location where failure inference responses are uploaded. This enables the capture and storage of failed predictions for further analysis, debugging, or auditing, supporting workflows that require detailed error tracking and diagnostics."
+            },
+            {
+              "name": "s3_output_path",
+              "description": "(Required) The Amazon S3 location to upload inference responses to.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `s3_output_path` argument in the `output_config` block of the `aws_sagemaker_endpoint_configuration` resource specifies the Amazon S3 location where inference responses generated by the endpoint are uploaded. By defining this required parameter, users control the storage destination for model outputs, enabling efficient retrieval, post-processing, or integration with downstream workflows."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "notification_config",
+              "description": "(Optional) Specifies the configuration for notifications of inference results for asynchronous inference.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "error_topic",
+                  "description": "(Optional) Amazon SNS topic to post a notification to when inference fails. If no topic is provided, no notification is sent on failure.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "Defines the Amazon SNS topic to receive notifications when inference failures occur in the SageMaker endpoint, enabling automated alerts for error monitoring and response. If left unset, no failure notifications are sent, making this argument useful for configuring proactive error handling workflows."
+                },
+                {
+                  "name": "include_inference_response_in",
+                  "description": "(Optional) The Amazon SNS topics where you want the inference response to be included. Valid values are `SUCCESS_NOTIFICATION_TOPIC` and `ERROR_NOTIFICATION_TOPIC`.",
+                  "required": false,
+                  "type": "set(string)",
+                  "llm_summary": "The `include_inference_response_in` argument in the `notification_config` block of the `aws_sagemaker_endpoint_configuration` resource allows users to specify Amazon SNS topics (`SUCCESS_NOTIFICATION_TOPIC` or `ERROR_NOTIFICATION_TOPIC`) where inference responses are sent. This enables targeted notifications for successful or failed inference requests, helping users monitor and respond to endpoint activity effectively."
+                },
+                {
+                  "name": "success_topic",
+                  "description": "(Optional) Amazon SNS topic to post a notification to when inference completes successfully. If no topic is provided, no notification is sent on success.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `success_topic` argument in the `notification_config` block of the `aws_sagemaker_endpoint_configuration` resource allows users to specify an Amazon SNS topic to receive notifications when inference tasks complete successfully. By setting this argument, users can enable automated success notifications for monitoring or downstream processing, aligning with common goals like event-driven workflows and operational alerting."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `notification_config` block within the `output_config` of the `aws_sagemaker_endpoint_configuration` resource defines settings for delivering notifications about inference results in asynchronous inference workflows. It enables users to configure mechanisms for receiving updates, such as via Amazon SNS, ensuring efficient monitoring and integration of inference outcomes into downstream systems or workflows."
+            }
+          ],
+          "llm_summary": "The `output_config` block within the `async_inference_config` of the `aws_sagemaker_endpoint_configuration` resource defines the settings for managing the storage and location of asynchronous inference invocation outputs. It enables users to specify output destinations, such as S3 buckets, and related configurations, ensuring efficient handling and retrieval of inference results for downstream processing or analysis."
+        }
+      ],
+      "llm_summary": "The `async_inference_config` block in the `aws_sagemaker_endpoint_configuration` resource defines settings for enabling and managing asynchronous inference on a SageMaker endpoint, allowing users to process inference requests asynchronously. It encapsulates configurations such as input/output storage locations, notification settings, and related parameters, providing fine-grained control over how asynchronous inference jobs are queued, executed, and monitored, optimizing workflows for batch or delayed processing scenarios."
+    },
+    {
+      "name": "data_capture_config",
+      "description": "(Optional) Specifies the parameters to capture input/output of SageMaker AI models endpoints. Fields are documented below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "destination_s3_uri",
+          "description": "(Required) The URL for S3 location where the captured data is stored.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `destination_s3_uri` argument in the `data_capture_config` block of the `aws_sagemaker_endpoint_configuration` resource specifies the Amazon S3 location where inference request and response data captured from the SageMaker endpoint will be stored. By defining this required parameter, users enable data capture functionality for model monitoring, analysis, or debugging, ensuring captured data is securely stored and accessible for downstream processing or compliance purposes."
+        },
+        {
+          "name": "enable_capture",
+          "description": "(Optional) Flag to enable data capture. Defaults to `false`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enable_capture` argument in the `data_capture_config` block of the `aws_sagemaker_endpoint_configuration` resource allows users to control whether data capture functionality is activated for a SageMaker endpoint. When set to `true`, it enables the collection of inference request and response payloads, supporting use cases like model monitoring, debugging, and compliance."
+        },
+        {
+          "name": "initial_sampling_percentage",
+          "description": "(Required) Portion of data to capture. Should be between 0 and 100.",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `initial_sampling_percentage` argument in the `data_capture_config` block of the `aws_sagemaker_endpoint_configuration` resource specifies the percentage of inference data to capture during model invocations, allowing users to control the volume of data collected for monitoring, debugging, or compliance purposes. By setting this value (between 0 and 100), users can define the initial sampling rate for data capture, directly impacting the scope of data available for analysis and model performance evaluation."
+        },
+        {
+          "name": "kms_key_id",
+          "description": "(Optional) Amazon Resource Name (ARN) of a AWS Key Management Service key that Amazon SageMaker AI uses to encrypt the captured data on Amazon S3.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `kms_key_id` argument in the `data_capture_config` block of the `aws_sagemaker_endpoint_configuration` resource allows users to specify the AWS Key Management Service (KMS) key ARN for encrypting data captured from SageMaker endpoints and stored in Amazon S3. By setting this argument, users can enforce encryption at rest for captured data, aligning with security and compliance requirements for sensitive information."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "capture_content_type_header",
+          "description": "(Optional) The content type headers to capture. See `capture_content_type_header` below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "csv_content_types",
+              "description": "(Optional) The CSV content type headers to capture. One of `csv_content_types` or `json_content_types` is required.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `csv_content_types` argument in the `aws_sagemaker_endpoint_configuration` resource allows users to specify a set of CSV content type headers for data capture during inference requests. By defining this argument, users can ensure that the SageMaker endpoint captures and processes inference input or output data formatted as CSV, supporting use cases like model monitoring, debugging, or analytics workflows that rely on structured tabular data."
+            },
+            {
+              "name": "json_content_types",
+              "description": "(Optional) The JSON content type headers to capture. One of `json_content_types` or `csv_content_types` is required.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `json_content_types` argument in the `aws_sagemaker_endpoint_configuration` resource allows users to specify a set of JSON content type headers to capture when enabling data capture for inference requests. By defining this argument, users can control which JSON-formatted payloads are logged for analysis, supporting common goals like monitoring model performance, debugging, or auditing predictions."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `capture_content_type_header` block within the `data_capture_config` of the `aws_sagemaker_endpoint_configuration` resource specifies the content type headers to capture during data processing. This configuration enables fine-grained control over the types of data logged for model monitoring and analysis, ensuring users can capture specific content formats relevant to their machine learning workflows."
+        },
+        {
+          "name": "capture_options",
+          "description": "(Required) Specifies what data to capture. Fields are documented below.",
+          "cardinality": [
+            1,
+            2
+          ],
+          "arguments": [
+            {
+              "name": "capture_mode",
+              "description": "(Required) Specifies the data to be captured. Should be one of `Input`, `Output` or `InputAndOutput`.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `capture_mode` argument in the `capture_options` block of the `aws_sagemaker_endpoint_configuration` resource specifies which types of data\u2014`Input`, `Output`, or both (`InputAndOutput`)\u2014should be captured during inference requests to the endpoint. This configuration enables users to control the scope of data collection for model monitoring, debugging, or auditing purposes, aligning with common goals like ensuring data traceability and improving model performance analysis."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `capture_options` block within the `data_capture_config` of the `aws_sagemaker_endpoint_configuration` resource defines the specific types of data to capture from a SageMaker endpoint during inference, such as input or output payloads. Configuring this block enables granular control over data collection for monitoring, debugging, or model retraining purposes, ensuring users can tailor data capture to their machine learning workflow needs."
+        }
+      ],
+      "llm_summary": "The `data_capture_config` block in the `aws_sagemaker_endpoint_configuration` resource enables the capture of input and output data from SageMaker model endpoints for monitoring, debugging, or compliance purposes. It encapsulates settings related to data capture parameters, such as storage location, sampling percentage, and file formats, allowing users to configure detailed data logging and analysis workflows for AI model performance and behavior."
+    },
+    {
+      "name": "production_variants",
+      "description": "(Required) An list of ProductionVariant objects, one for each model that you want to host at this endpoint. Fields are documented below.",
+      "cardinality": [
+        1,
+        10
+      ],
+      "arguments": [
+        {
+          "name": "accelerator_type",
+          "description": "(Optional) The size of the Elastic Inference (EI) instance to use for the production variant.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `accelerator_type` argument allows users to specify the size of the Elastic Inference (EI) instance for a production variant in an Amazon SageMaker endpoint configuration. This enables enhanced inference performance by attaching hardware-accelerated compute resources, optimizing cost and efficiency for machine learning model deployments."
+        },
+        {
+          "name": "container_startup_health_check_timeout_in_seconds",
+          "description": "(Optional) The timeout value, in seconds, for your inference container to pass health check by SageMaker AI Hosting. For more information about health check, see How Your Container Should Respond to Health Check (Ping) Requests. Valid values between `60` and `3600`.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "Configures the maximum time, in seconds, that SageMaker waits for the inference container in a production variant to pass its startup health check during deployment. This setting helps ensure reliable endpoint initialization by allowing users to accommodate containers with longer startup times, balancing deployment speed with container readiness."
+        },
+        {
+          "name": "enable_ssm_access",
+          "description": "(Optional) You can use this parameter to turn on native Amazon Web Services Systems Manager (SSM) access for a production variant behind an endpoint. By default, SSM access is disabled for all production variants behind an endpoints.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enable_ssm_access` argument allows users to control whether native AWS Systems Manager (SSM) access is enabled for production variants behind a SageMaker endpoint. Enabling this functionality facilitates remote management and troubleshooting of the underlying resources, aligning with user goals such as operational monitoring and secure configuration management."
+        },
+        {
+          "name": "inference_ami_version",
+          "description": "(Optional) Specifies an option from a collection of preconfigured Amazon Machine Image (AMI) images. Each image is configured by Amazon Web Services with a set of software and driver versions. Amazon Web Services optimizes these configurations for different machine learning workloads.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `inference_ami_version` argument allows users to specify a preconfigured Amazon Machine Image (AMI) optimized by AWS for machine learning inference workloads within a `production_variants` configuration. By setting this argument, users can control the software and driver versions used for model deployment, ensuring compatibility and performance tailored to their specific inference requirements."
+        },
+        {
+          "name": "initial_instance_count",
+          "description": "(Optional) Initial number of instances used for auto-scaling.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `initial_instance_count` argument specifies the initial number of instances to deploy for a production variant in an Amazon SageMaker endpoint, allowing users to define the baseline capacity for handling inference requests before auto-scaling is triggered. This configuration helps ensure sufficient resources are provisioned at deployment to meet expected traffic demands."
+        },
+        {
+          "name": "initial_variant_weight",
+          "description": "(Optional) Determines initial traffic distribution among all of the models that you specify in the endpoint configuration. If unspecified, it defaults to `1.0`.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `initial_variant_weight` argument in the `production_variants` block of the `aws_sagemaker_endpoint_configuration` resource allows users to define the initial traffic distribution for a specific model variant within the endpoint. By setting this value (defaulting to `1.0` if unspecified), users can control how incoming requests are proportionally routed across multiple model variants, enabling fine-grained traffic management for load balancing or A/B testing scenarios."
+        },
+        {
+          "name": "instance_type",
+          "description": "(Optional) The type of instance to start.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `instance_type` argument in the `production_variants` block of the `aws_sagemaker_endpoint_configuration` resource allows users to specify the compute instance type for hosting the model variant. Configuring this argument impacts the performance, scalability, and cost of the endpoint by defining the hardware resources allocated for serving predictions, enabling users to tailor the infrastructure to their workload requirements."
+        },
+        {
+          "name": "model_data_download_timeout_in_seconds",
+          "description": "(Optional) The timeout value, in seconds, to download and extract the model that you want to host from Amazon S3 to the individual inference instance associated with this production variant. Valid values between `60` and `3600`.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `model_data_download_timeout_in_seconds` argument allows users to configure the maximum time, in seconds, for downloading and extracting model data from Amazon S3 to the inference instances associated with a production variant in an AWS SageMaker endpoint. By setting this timeout, users can control the behavior of model deployment, ensuring efficient resource initialization while preventing delays or failures due to prolonged download times."
+        },
+        {
+          "name": "model_name",
+          "description": "(Required) The name of the model to use.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `model_name` argument specifies the name of the machine learning model to be deployed as part of a production variant in the `aws_sagemaker_endpoint_configuration` resource. By defining this required parameter, users ensure the endpoint is linked to the correct model, enabling inference requests to utilize the specified model for predictions or processing tasks."
+        },
+        {
+          "name": "variant_name",
+          "description": "(Optional) The name of the variant. If omitted, Terraform will assign a random, unique name.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `variant_name` argument allows users to define a unique identifier for a specific production variant within an AWS SageMaker endpoint configuration. By setting this argument, users can explicitly name and organize variants for model deployment, facilitating easier management, tracking, and differentiation of multiple variants in production environments. If omitted, Terraform generates a random name, which may be less intuitive for identifying variants."
+        },
+        {
+          "name": "volume_size_in_gb",
+          "description": "(Optional) The size, in GB, of the ML storage volume attached to individual inference instance associated with the production variant. Valid values between `1` and `512`.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `volume_size_in_gb` argument allows users to define the storage capacity, in gigabytes, for the ML storage volume attached to each inference instance within a production variant in an Amazon SageMaker endpoint configuration. By configuring this parameter, users can optimize storage resources to meet the data and model requirements of their machine learning workloads, ensuring efficient inference performance and scalability."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "core_dump_config",
+          "description": "(Optional) Specifies configuration for a core dump from the model container when the process crashes. Fields are documented below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "destination_s3_uri",
+              "description": "(Required) The Amazon S3 bucket to send the core dump to.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `destination_s3_uri` argument specifies the Amazon S3 bucket location where core dump files generated by the SageMaker endpoint are stored, enabling users to capture and analyze system-level debugging information for troubleshooting and diagnostics. This is a required configuration to ensure proper handling of core dumps, supporting common goals like debugging model failures or performance issues."
+            },
+            {
+              "name": "kms_key_id",
+              "description": "(Required) The Amazon Web Services Key Management Service (Amazon Web Services KMS) key that SageMaker AI uses to encrypt the core dump data at rest using Amazon S3 server-side encryption.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `kms_key_id` argument allows users to specify the AWS KMS key used to encrypt core dump data at rest in Amazon S3, ensuring secure storage through server-side encryption. This configuration is essential for meeting compliance, security, or data protection requirements when managing sensitive data generated by SageMaker endpoints."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `core_dump_config` block within the `production_variants` configuration of the `aws_sagemaker_endpoint_configuration` resource enables the setup of core dump storage for debugging model container crashes. It encapsulates settings related to the storage location for crash data, allowing users to capture and analyze failure details to improve model reliability and troubleshoot issues in production environments."
+        },
+        {
+          "name": "managed_instance_scaling",
+          "description": "(Optional) Settings that control the range in the number of instances that the endpoint provisions as it scales up or down to accommodate traffic.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "max_instance_count",
+              "description": "(Optional) The maximum number of instances that the endpoint can provision when it scales up to accommodate an increase in traffic.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "\"max_instance_count\" in the context of \"managed_instance_scaling\" for the `aws_sagemaker_endpoint_configuration` resource allows users to define the upper limit on the number of instances the endpoint can provision during traffic surges. This argument enables dynamic scaling by setting a cap on resource allocation, ensuring cost control and performance optimization for machine learning workloads."
+            },
+            {
+              "name": "min_instance_count",
+              "description": "(Optional) The minimum number of instances that the endpoint must retain when it scales down to accommodate a decrease in traffic.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "\"min_instance_count\" allows users to define the minimum number of instances that an Amazon SageMaker endpoint retains during managed instance scaling, ensuring consistent availability and performance even during periods of reduced traffic. This argument is useful for configuring resource allocation to meet baseline service requirements and prevent complete scale-down."
+            },
+            {
+              "name": "status",
+              "description": "(Optional) Indicates whether managed instance scaling is enabled. Valid values are `ENABLED` and `DISABLED`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `status` argument in the `aws_sagemaker_endpoint_configuration` resource allows users to control whether managed instance scaling is enabled for the endpoint configuration. By setting this argument to `ENABLED` or `DISABLED`, users can define the scaling behavior of the underlying instances, optimizing resource utilization and cost efficiency based on workload demands."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `managed_instance_scaling` block within the `production_variants` configuration of the `aws_sagemaker_endpoint_configuration` resource defines settings to dynamically control the scaling behavior of endpoint instances, specifying the minimum and maximum number of instances provisioned based on traffic demands. This block enables fine-grained management of instance scaling, ensuring cost efficiency and optimal performance for machine learning model deployments in production environments."
+        },
+        {
+          "name": "routing_config",
+          "description": "(Optional) Sets how the endpoint routes incoming traffic. See routing_config below.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "routing_strategy",
+              "description": "(Required) Sets how the endpoint routes incoming traffic. Valid values are `LEAST_OUTSTANDING_REQUESTS` and `RANDOM`. `LEAST_OUTSTANDING_REQUESTS` routes requests to the specific instances that have more capacity to process them. `RANDOM` routes each request to a randomly chosen instance.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `routing_strategy` argument in the `routing_config` block of the `aws_sagemaker_endpoint_configuration` resource specifies how incoming traffic is distributed across endpoint instances, enabling users to control the request routing behavior. By setting this argument to either `LEAST_OUTSTANDING_REQUESTS` (optimizing for instance capacity) or `RANDOM` (distributing requests randomly), users can define the traffic management strategy to align with their application's performance and scalability goals."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `routing_config` block within the `production_variants` context of the `aws_sagemaker_endpoint_configuration` resource defines how incoming traffic is distributed across multiple model variants deployed to the endpoint. It encapsulates settings for traffic routing strategies, enabling users to control variant selection and optimize model performance or testing by directing requests based on predefined rules. Configuring this block allows for fine-grained traffic management, supporting use cases like A/B testing, gradual rollouts, or load balancing across models."
+        },
+        {
+          "name": "serverless_config",
+          "description": "(Optional) Specifies configuration for how an endpoint performs asynchronous inference.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "max_concurrency",
+              "description": "(Required) The maximum number of concurrent invocations your serverless endpoint can process. Valid values are between `1` and `200`.",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `max_concurrency` argument in the `serverless_config` of the `aws_sagemaker_endpoint_configuration` resource defines the maximum number of concurrent invocations the serverless endpoint can handle, directly controlling its scalability and throughput. By specifying this value (between 1 and 200), users can optimize the endpoint's performance to meet workload demands while managing resource limits for serverless inference."
+            },
+            {
+              "name": "memory_size_in_mb",
+              "description": "(Required) The memory size of your serverless endpoint. Valid values are in 1 GB increments: `1024` MB, `2048` MB, `3072` MB, `4096` MB, `5120` MB, or `6144` MB.",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `memory_size_in_mb` argument in the `serverless_config` of the `aws_sagemaker_endpoint_configuration` resource specifies the allocated memory for a serverless endpoint in SageMaker, directly impacting the endpoint's capacity to handle inference workloads. By defining this value in 1 GB increments (e.g., `1024`, `2048`, etc.), users can optimize performance and resource utilization to meet their application's computational requirements."
+            },
+            {
+              "name": "provisioned_concurrency",
+              "description": "The amount of provisioned concurrency to allocate for the serverless endpoint. Should be less than or equal to `max_concurrency`. Valid values are between `1` and `200`.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "\"Configures the number of concurrent requests that the serverless endpoint can handle with pre-allocated resources, ensuring consistent performance for high-demand workloads. This argument allows users to define predictable scaling behavior, supporting use cases like latency-sensitive applications or steady traffic patterns.\""
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `serverless_config` block within the `production_variants` of the `aws_sagemaker_endpoint_configuration` resource defines settings for enabling and managing asynchronous inference in a serverless environment. It encapsulates parameters related to resource allocation and scaling, allowing users to optimize endpoint performance without provisioning dedicated infrastructure, making it ideal for cost-efficient, on-demand machine learning workloads."
+        }
+      ],
+      "llm_summary": "The `production_variants` block in the `aws_sagemaker_endpoint_configuration` resource defines the models hosted at the endpoint by specifying a list of `ProductionVariant` objects. It enables detailed control over model deployment settings, such as instance types, model variants, and scaling configurations, allowing users to manage multiple models and optimize performance for production machine learning workloads."
+    },
+    {
+      "name": "shadow_production_variants",
+      "description": "(Optional) Array of ProductionVariant objects. There is one for each model that you want to host at this endpoint in shadow mode with production traffic replicated from the model specified on ProductionVariants. If you use this field, you can only specify one variant for ProductionVariants and one variant for ShadowProductionVariants. Fields are documented below.",
+      "cardinality": [
+        0,
+        10
+      ],
+      "arguments": [
+        {
+          "name": "accelerator_type",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `accelerator_type` argument for the `shadow_production_variants` in the `aws_sagemaker_endpoint_configuration` resource allows users to specify the type of hardware accelerator (e.g., GPUs or specialized inference chips) to be used for the variant's model inference. Configuring this argument enables optimized performance for machine learning workloads, particularly for models requiring high computational power, aligning with user goals of enhancing inference efficiency and scalability."
+        },
+        {
+          "name": "container_startup_health_check_timeout_in_seconds",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "\"Configures the maximum time, in seconds, for health checks to wait for container startup in shadow production variants within an AWS SageMaker endpoint configuration. This argument allows users to define a timeout threshold to ensure containers are ready before traffic is routed, optimizing deployment reliability and minimizing startup failures.\""
+        },
+        {
+          "name": "enable_ssm_access",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enable_ssm_access` argument for the `shadow_production_variants` in the `aws_sagemaker_endpoint_configuration` resource allows users to control whether Amazon SageMaker endpoints in shadow production variants can be accessed and managed via AWS Systems Manager (SSM). Enabling this functionality facilitates remote management, debugging, and operational tasks, such as running commands or retrieving logs, directly on the endpoint instances, aligning with common goals of enhancing observability and operational control."
+        },
+        {
+          "name": "inference_ami_version",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `inference_ami_version` argument for the `shadow_production_variants` in the `aws_sagemaker_endpoint_configuration` resource allows users to specify the version of the Amazon Machine Image (AMI) used for inference in shadow production environments. By setting this argument, users can control the runtime environment for model inference, ensuring compatibility with specific software dependencies or updates, which is critical for testing and validating model performance before full production deployment."
+        },
+        {
+          "name": "initial_instance_count",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `initial_instance_count` argument for the `shadow_production_variants` in the `aws_sagemaker_endpoint_configuration` resource specifies the number of instances to provision for the variant when the endpoint is deployed. This allows users to control the initial compute capacity allocated for shadow testing, ensuring sufficient resources to handle expected inference workloads during model evaluation or traffic mirroring scenarios."
+        },
+        {
+          "name": "initial_variant_weight",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `initial_variant_weight` argument in the `shadow_production_variants` block of the `aws_sagemaker_endpoint_configuration` resource allows users to specify the initial traffic distribution weight for a production variant in a shadow deployment. By setting this value, users can control how much inference traffic is routed to the variant during endpoint initialization, enabling fine-grained traffic management for testing or gradual rollout scenarios."
+        },
+        {
+          "name": "instance_type",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `instance_type` argument for the `shadow_production_variants` in the `aws_sagemaker_endpoint_configuration` resource allows users to specify the compute instance type for the shadow variant used in inference testing. By setting this argument, users can control the hardware resources allocated for the shadow variant, enabling performance benchmarking or validation of model behavior under production-like conditions without impacting the primary production variant."
+        },
+        {
+          "name": "model_data_download_timeout_in_seconds",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `model_data_download_timeout_in_seconds` argument allows users to specify the maximum time, in seconds, for downloading model data to a container when deploying shadow production variants in an Amazon SageMaker endpoint configuration. By configuring this timeout, users can control the behavior of model initialization, ensuring smoother deployments and preventing delays or failures caused by prolonged data retrieval during variant testing."
+        },
+        {
+          "name": "model_name",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `model_name` argument specifies the name of the SageMaker model to be used in the shadow production variant within the `aws_sagemaker_endpoint_configuration` resource. By defining this argument, users associate a specific pre-trained or custom model with the shadow variant, enabling traffic routing for testing or monitoring purposes alongside the primary production variant."
+        },
+        {
+          "name": "variant_name",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `variant_name` argument in the `shadow_production_variants` block of the `aws_sagemaker_endpoint_configuration` resource allows users to specify a unique identifier for a production variant used in shadow testing. By defining this name, users can distinguish and manage individual variants within the endpoint configuration, enabling targeted testing or monitoring of model performance in a shadow deployment scenario."
+        },
+        {
+          "name": "volume_size_in_gb",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `volume_size_in_gb` argument for the `shadow_production_variants` in the `aws_sagemaker_endpoint_configuration` resource specifies the size of the storage volume (in GB) allocated to the model container for shadow variant testing. Configuring this argument allows users to control the disk space available for temporary data, logs, or model artifacts during inference, ensuring sufficient resources for testing production-like workloads without impacting the primary endpoint."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "core_dump_config",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "destination_s3_uri",
+              "description": "(Required) The Amazon S3 bucket to send the core dump to.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `destination_s3_uri` argument specifies the Amazon S3 bucket location where core dump files generated by the SageMaker endpoint are stored, enabling users to configure the storage destination for debugging and failure analysis. By setting this required parameter, users ensure that critical diagnostic data is captured and accessible for troubleshooting model issues or system crashes."
+            },
+            {
+              "name": "kms_key_id",
+              "description": "(Required) The Amazon Web Services Key Management Service (Amazon Web Services KMS) key that SageMaker AI uses to encrypt the core dump data at rest using Amazon S3 server-side encryption.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `kms_key_id` argument in the `core_dump_config` of the `aws_sagemaker_endpoint_configuration` resource specifies the AWS KMS key used to encrypt core dump data at rest in Amazon S3. By defining this key, users ensure secure server-side encryption for sensitive debugging data, aligning with compliance and data protection goals."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `core_dump_config` block in the `aws_sagemaker_endpoint_configuration` resource defines settings for capturing and storing core dump files generated by shadow production variants during model execution. It encapsulates configurations such as the S3 bucket location for storing these files, enabling users to diagnose and debug model failures or runtime issues effectively. This block is essential for ensuring robust error analysis and improving model reliability in production environments."
+        },
+        {
+          "name": "managed_instance_scaling",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "max_instance_count",
+              "description": "(Optional) The maximum number of instances that the endpoint can provision when it scales up to accommodate an increase in traffic.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `max_instance_count` argument in the `aws_sagemaker_endpoint_configuration` resource allows users to define the upper limit on the number of instances that can be provisioned for a SageMaker endpoint during traffic scaling. By configuring this parameter, users can control the scalability of the endpoint to handle peak workloads, ensuring optimal resource allocation while preventing over-provisioning."
+            },
+            {
+              "name": "min_instance_count",
+              "description": "(Optional) The minimum number of instances that the endpoint must retain when it scales down to accommodate a decrease in traffic.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "\"min_instance_count\" allows users to define the minimum number of instances that an Amazon SageMaker endpoint retains during managed instance scaling, ensuring consistent availability and performance even during periods of reduced traffic. This argument is useful for configuring baseline resource allocation to meet reliability and service-level requirements."
+            },
+            {
+              "name": "status",
+              "description": "(Optional) Indicates whether managed instance scaling is enabled. Valid values are `ENABLED` and `DISABLED`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `status` argument in the context of `managed_instance_scaling` for the `aws_sagemaker_endpoint_configuration` resource allows users to control whether automatic scaling of instances is enabled or disabled for a SageMaker endpoint. By setting this argument to `ENABLED` or `DISABLED`, users can define the scaling behavior to optimize resource utilization and cost efficiency based on workload demands."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `managed_instance_scaling` block within the `shadow_production_variants` configuration of the `aws_sagemaker_endpoint_configuration` resource enables dynamic scaling of compute instances for machine learning model variants in shadow deployments. It encapsulates settings related to automatic scaling policies, such as minimum and maximum instance counts, ensuring efficient resource utilization and cost optimization while maintaining performance during shadow testing. Configuring this block allows users to fine-tune instance scaling behavior to support varying workloads and test production-like scenarios effectively."
+        },
+        {
+          "name": "routing_config",
+          "description": "",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "routing_strategy",
+              "description": "(Required) Sets how the endpoint routes incoming traffic. Valid values are `LEAST_OUTSTANDING_REQUESTS` and `RANDOM`. `LEAST_OUTSTANDING_REQUESTS` routes requests to the specific instances that have more capacity to process them. `RANDOM` routes each request to a randomly chosen instance.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `routing_strategy` argument in the `routing_config` block of the `aws_sagemaker_endpoint_configuration` resource specifies how incoming traffic is distributed across endpoint instances, enabling users to control the request routing behavior. By setting this argument to either `LEAST_OUTSTANDING_REQUESTS` (prioritizing instances with higher processing capacity) or `RANDOM` (distributing requests randomly), users can optimize endpoint performance or balance traffic based on their application's needs."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `routing_config` block within the `shadow_production_variants` context of the `aws_sagemaker_endpoint_configuration` resource defines routing behavior for inference requests between production and shadow variants. It encapsulates settings that control traffic distribution, enabling users to test model variants in shadow mode while maintaining production stability. Configuring this block allows precise management of request routing, facilitating safe experimentation and gradual deployment of new models."
+        },
+        {
+          "name": "serverless_config",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "max_concurrency",
+              "description": "(Required) The maximum number of concurrent invocations your serverless endpoint can process. Valid values are between `1` and `200`.",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `max_concurrency` argument in the `serverless_config` of the `aws_sagemaker_endpoint_configuration` resource defines the maximum number of concurrent invocations the serverless endpoint can handle, directly controlling its scalability and throughput. By specifying this value (between 1 and 200), users can optimize the endpoint's performance to meet workload demands while managing resource limits for serverless inference."
+            },
+            {
+              "name": "memory_size_in_mb",
+              "description": "(Required) The memory size of your serverless endpoint. Valid values are in 1 GB increments: `1024` MB, `2048` MB, `3072` MB, `4096` MB, `5120` MB, or `6144` MB.",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `memory_size_in_mb` argument in the `serverless_config` of the `aws_sagemaker_endpoint_configuration` resource specifies the allocated memory for a serverless endpoint, directly impacting its capacity to handle inference workloads. By setting this value (in 1 GB increments), users can optimize performance and resource utilization to meet the computational demands of their machine learning models."
+            },
+            {
+              "name": "provisioned_concurrency",
+              "description": "The amount of provisioned concurrency to allocate for the serverless endpoint. Should be less than or equal to `max_concurrency`. Valid values are between `1` and `200`.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "\"Configures the number of concurrent requests that the serverless endpoint can handle with pre-allocated resources, ensuring consistent performance for high-demand workloads. This argument allows users to optimize endpoint responsiveness by specifying provisioned concurrency levels between 1 and 200, tailored to their application's traffic requirements.\""
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `serverless_config` block within the `shadow_production_variants` configuration of the `aws_sagemaker_endpoint_configuration` resource defines serverless inference settings for SageMaker endpoints, enabling efficient, on-demand scaling without provisioning dedicated infrastructure. It encapsulates parameters such as memory allocation and maximum concurrency, allowing users to optimize resource usage and cost for production machine learning workloads while maintaining responsiveness."
+        }
+      ],
+      "llm_summary": "The `shadow_production_variants` block in the `aws_sagemaker_endpoint_configuration` resource enables the replication of production traffic to a shadow model for testing and validation purposes. It encapsulates settings for defining a single shadow variant, allowing users to safely evaluate model performance in parallel with the primary production variant without impacting live traffic."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) assigned by AWS to this endpoint configuration.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,125 @@
+{
+  "resource": {
+    "name": "aws_db_parameter_group",
+    "description": "Provides an RDS DB parameter group resource. Documentation of the available parameters for various RDS engines can be found at: - Aurora MySQL Parameters - Aurora PostgreSQL Parameters - MariaDB Parameters - Oracle Parameters - PostgreSQL Parameters Hands-on: For an example of the aws_db_parameter_group in use, follow the Manage AWS RDS Instances tutorial on HashiCorp Learn. If you encounter a Terraform plan showing parameter changes after an apply (i.e., perpetual diffs), see the Problematic Plan Changes example below for additional guidance.",
+    "llm_summary": "The `aws_db_parameter_group` resource in Terraform enables the creation and management of custom RDS database parameter groups, allowing users to fine-tune database engine configurations for Amazon RDS and Aurora instances. It is commonly used to customize database settings such as memory allocation, query optimization, and connection limits for engines like MySQL, PostgreSQL, MariaDB, and Oracle. This resource is essential for scenarios requiring tailored database performance, compliance with specific application requirements, or resolving perpetual configuration drift issues during Terraform deployments."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_db_parameter_group\" \"default\" {\n  name   = \"rds-pg\"\n  family = \"mysql5.6\"\n\n  parameter {\n    name  = \"character_set_server\"\n    value = \"utf8\"\n  }\n\n  parameter {\n    name  = \"character_set_client\"\n    value = \"utf8\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_db_parameter_group` resource to customize database parameters for an RDS instance. It showcases the use of the `parameter` block to set specific MySQL parameters (`character_set_server` and `character_set_client`) with the `family` argument defining the database engine version (`mysql5.6`)."
+    },
+    {
+      "title": "create_before_destroy Lifecycle Configuration",
+      "code": "resource \"aws_db_parameter_group\" \"example\" {\n  name_prefix = \"my-pg\"\n  family      = \"postgres13\"\n\n  parameter {\n    name  = \"log_connections\"\n    value = \"1\"\n  }\n\n  lifecycle {\n    create_before_destroy = true\n  }\n}\n\nresource \"aws_db_instance\" \"example\" {\n  # other attributes\n  parameter_group_name = aws_db_parameter_group.example.name\n  apply_immediately    = true\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_db_parameter_group` resource with a `create_before_destroy` lifecycle rule to ensure seamless updates without downtime, alongside setting custom database parameters like `log_connections`. It also shows how to associate the parameter group with an `aws_db_instance` and apply changes immediately using the `apply_immediately` argument."
+    },
+    {
+      "title": "Problematic Plan Changes",
+      "code": "resource \"aws_db_parameter_group\" \"test\" {\n  name   = \"random-test-parameter\"\n  family = \"mysql5.7\"\n\n  parameter {\n    # By default, the apply_method is being set to \"immediate\"\n    name  = \"default_password_lifetime\" # same as AWS default\n    value = \"0\"                         # same as AWS default\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_db_parameter_group` resource with custom database parameters, highlighting the default behavior of the `apply_method` set to \"immediate.\" It illustrates how to define a `parameter` block with a name and value matching AWS defaults, which can lead to problematic plan changes due to redundant updates."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "description",
+      "description": "(Optional, Forces new resource) The description of the DB parameter group. Defaults to \"Managed by Terraform\".",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_db_parameter_group` resource allows users to define a human-readable description for the DB parameter group, providing context or metadata about its purpose or configuration. Setting this argument can help users document the parameter group's role, such as identifying its association with specific environments, applications, or database configurations, and defaults to \"Managed by Terraform\" if not specified."
+    },
+    {
+      "name": "family",
+      "description": "(Required, Forces new resource) The family of the DB parameter group.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `family` argument specifies the database engine and version compatibility for the `aws_db_parameter_group`, ensuring the parameter group is tailored to a specific DB engine family (e.g., MySQL, PostgreSQL). Setting this argument is required and directly impacts the configuration of database parameters, aligning them with the chosen engine's supported features and behaviors."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_db_parameter_group` resource represents the unique identifier of the parameter group, typically auto-generated by Terraform or AWS. While optional, it can be used to reference the parameter group explicitly in other resources or outputs, enabling users to manage dependencies and interactions within their cloud infrastructure."
+    },
+    {
+      "name": "name",
+      "description": "(Optional, Forces new resource) The name of the DB parameter group. If omitted, Terraform will assign a random, unique name.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_db_parameter_group` resource allows users to define a custom, human-readable identifier for the DB parameter group, facilitating organization and recognition within their AWS environment. If omitted, Terraform generates a unique name automatically, but explicitly setting this argument is useful for aligning with naming conventions or simplifying resource management in multi-environment or multi-application setups."
+    },
+    {
+      "name": "name_prefix",
+      "description": "(Optional, Forces new resource) Creates a unique name beginning with the specified prefix. Conflicts with `name`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name_prefix` argument for the `aws_db_parameter_group` resource allows users to define a custom prefix for the name of the parameter group, ensuring the generated name is unique. This is useful for automating resource naming conventions, especially in environments requiring dynamic or programmatically created parameter groups, and it forces the creation of a new resource when modified."
+    },
+    {
+      "name": "skip_destroy",
+      "description": "(Optional) Set to true if you do not wish the parameter group to be deleted at destroy time, and instead just remove the parameter group from the Terraform state.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `skip_destroy` argument in the `aws_db_parameter_group` resource allows users to define the lifecycle behavior of the parameter group during resource destruction. When set to `true`, it prevents the parameter group from being deleted and instead removes it from Terraform's state, enabling users to retain the resource in AWS for manual management or future use while avoiding accidental deletion."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument allows users to assign key-value metadata to the `aws_db_parameter_group` resource, enabling resource organization, cost allocation, and environment identification. When used alongside a provider's `default_tags` configuration, it ensures resource-specific tags can override default tags, providing flexibility in tagging strategies."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_db_parameter_group` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to the resource and any related resources. This facilitates consistent tagging for organizational purposes, such as cost allocation, resource grouping, or environment identification, ensuring alignment with tagging policies across the cloud infrastructure."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "parameter",
+      "description": "(Optional) The DB parameters to apply. See `parameter` Block below for more details. Note that parameters may differ from a family to an other. Full list of all parameters can be discovered via `aws rds describe-db-parameters` after initial creation of the group.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "apply_method",
+          "description": "(Optional) \"immediate\" (default), or \"pending-reboot\". Some engines can't apply some parameters without a reboot, and you will need to specify \"pending-reboot\" here.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `apply_method` argument in the `aws_db_parameter_group` resource allows users to control how parameter changes are applied to the associated database instance. By specifying `\"immediate\"` (default) or `\"pending-reboot\"`, users can define whether updates take effect immediately or require a reboot, enabling flexibility in managing database configuration changes based on operational needs and engine-specific requirements."
+        },
+        {
+          "name": "name",
+          "description": "(Required) The name of the DB parameter.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `name` argument specifies the unique identifier for the DB parameter group, allowing users to define a custom name that distinguishes the group within the AWS environment. Setting this argument is essential for organizing and managing database configurations, as it serves as a reference point for applying parameter settings to associated RDS instances."
+        },
+        {
+          "name": "value",
+          "description": "(Required) The value of the DB parameter.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `value` argument in the `aws_db_parameter_group` resource specifies the desired configuration for a database parameter, allowing users to define the operational behavior or performance characteristics of the associated DB instance. By setting this argument, users can customize aspects such as query optimization, memory allocation, or timeout settings to align with application requirements and database tuning goals."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `parameter` block within the `aws_db_parameter_group` resource allows users to define and customize database engine parameters specific to a DB parameter group family. It encapsulates settings for fine-grained control over database behavior, enabling users to tailor configurations such as performance tuning, security, and compatibility for their RDS instances. Configuring this block helps achieve precise adjustments to database operations, ensuring optimal functionality for specific workloads or application requirements."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the db parameter group.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

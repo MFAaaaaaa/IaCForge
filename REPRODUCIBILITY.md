@@ -1,70 +1,108 @@
 # Reproducibility
 
-## Fixed version chain
-
-Formal v2 experiments use:
-
-```json
-{
-  "terraform_version": "1.9.8",
-  "provider_name": "hashicorp/aws",
-  "provider_version": "5.90.0",
-  "graph_ir_version": "2.0",
-  "contract_version": "2.0",
-  "retriever_version": "hybrid-v2"
-}
-```
-
-Every run additionally records the schema, KG and evidence SHA-256 values.
-Runtime code fails closed when the provider constraint differs from `5.90.0`.
-Changing provider version requires re-exporting schema, re-parsing matching
-documentation, rebuilding KG/dense index/cache and publishing a new manifest.
-
-Historical 5.100.0 CSV results remain historical artifacts; they must not be
-mixed with formal v2 comparisons.
-
 ## Environment
 
 - Python 3.10+
 - Terraform 1.9.8
-- AWS Provider 5.90.0
+- Terraform AWS Provider 5.90.0
 - OPA 0.61.0 or a validated compatible version
+- OpenAI-compatible model endpoint
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+
+# Only required for paper-KG Chroma retrieval/rebuilding.
+pip install -r requirements-paper-kg.txt
+
 python3 -m unittest discover -s tests -v
 python3 scripts/verify_package.py --strict
 ```
 
-## Determinism
+Formal clean runs use Graph IR 2.0, Provider Contract 2.0, and retriever
+`hybrid-v2`. Changing the provider version requires rebuilding the schema,
+documentation KG, typed graph, dense index, and offline cache.
 
-Planner decoding defaults to temperature 0, top-p 1 and JSON-object guided
-decoding. HCL/repair decoding defaults to temperature 0 and top-p 1. The
-OpenAI-compatible client records actual input/output tokens, latency, model
-name and request parameters.
-
-The offline and online retrieval paths are compared by canonical JSON SHA-256,
-not serialization order. The prompt cache stores retriever/provider versions,
-KG/schema hashes, retrieval parameters and candidate scores.
-
-## Offline provider mirror
+## Common Runner
 
 ```bash
-./scripts/prepare_provider_mirror.sh /path/to/aws-provider-5.90.0-mirror
-```
-
-Verify that the mirror contains exactly 5.90.0 before a formal run.
-
-## Row selection and checkpoints
-
-```bash
-ROW_IDS_FILE=/path/to/test_rows.json \
 MODE=full MODEL=qwen2.5-coder-3b MAX_ROWS=458 \
-RESUME=1 CHECKPOINT_EVERY=1 \
+QWEN_BASE_URL=http://127.0.0.1:8000/v1 \
 ./scripts/run_framework.sh
 ```
 
-`Evaluation Row ID` is the original zero-based dataset row. Checkpoints are
-written atomically after each configured interval.
+Supported models are listed in `configs/models/`. Key controls:
+
+```text
+MAX_ROWS=458
+ROW_IDS_FILE=/path/to/row_ids.json
+RESUME=1
+CHECKPOINT_EVERY=1
+QWEN_IR_MAX_TOKENS=1536
+QWEN_MAX_TOKENS=2048
+QWEN_TEMPERATURE=0
+QWEN_TOP_P=1
+```
+
+The evaluator dynamically caps an HCL/repair call at 4096 tokens based on IR
+resource count. To reproduce a historical result exactly, use the request
+parameters stored in that CSV/log; historical runs used several larger output
+limits and are retained as immutable artifacts rather than silently rerun.
+
+## Mode Matrix
+
+| Command mode | KG profile | KG stage | Repair |
+| --- | --- | --- | ---: |
+| `baseline` | none | none | no |
+| `ir_only` | none | none | no |
+| `ir_schema` | none | none | no |
+| `full` | clean multigranular | both | no |
+| `full_repair1` | clean multigranular | both | one plan-failure call |
+| `paper_ir` | paper | IR | no |
+| `paper_hcl` | paper | HCL | no |
+| `paper_both` | paper | both | no |
+| `paper_both_repair1` | paper | both | one plan-failure call |
+| `hybrid_both` | hybrid | both | no |
+| `hybrid_both_repair1` | hybrid | both | one plan-failure call |
+
+Paper modes explicitly enable the benchmark-scoped profile. Repair never gets
+raw KG evidence or the Provider Contract directly.
+
+## Paper KG Retrieval
+
+The bundled Chroma index uses
+`sentence-transformers/all-mpnet-base-v2`. Default resource top-k is 2.
+Retrieval starts from Prompt-to-document/resource matches, uses the in-code
+BM25/resource-label fallback and hybrid reranking, expands direct resources
+through `reference_relations`, and retrieves optional argument/block evidence
+from the corresponding Chroma collection.
+
+Expected Chroma counts:
+
+```text
+terraform_resources           5996
+terraform_doc_chunks          1390
+terraform_examples             422
+terraform_arguments_blocks    4419
+total                         12227
+```
+
+The embedding model must already be available locally because the retriever
+loads it with `local_files_only=True`.
+
+## Result Integrity
+
+`results/RESULT_MANIFEST.json` is authoritative for selected historical runs.
+It stores SHA-256 for each CSV/log and verifies 458 completed rows per CSV.
+Run:
+
+```bash
+python3 scripts/verify_package.py --strict
+sha256sum -c SHA256SUMS
+```
+
+The manifest intentionally reports one unavailable optional pair: the exact
+14B `paperkg/both_localrepair1_no_direct_kg` run. The available 14B IR-only and
+HCL-only paper repair runs are archived under their actual stage labels; do not
+substitute either for the missing both-stage configuration.

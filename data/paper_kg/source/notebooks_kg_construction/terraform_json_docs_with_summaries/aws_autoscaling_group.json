@@ -1,0 +1,1224 @@
+{
+  "resource": {
+    "name": "aws_autoscaling_group",
+    "description": "Provides an Auto Scaling Group resource. You must specify either launch_configuration, launch_template, or mixed_instances_policy. Terraform provides standalone Attachment (for attaching Classic Load Balancers and Application Load Balancer, Gateway Load Balancer, or Network Load Balancer target groups) and Traffic Source Attachment (for attaching Load Balancers and VPC Lattice target groups) resources and an Auto Scaling Group resource with load_balancers, target_group_arns and traffic_source attributes. Do not use the same traffic source in more than one of these resources. Doing so will cause a conflict of attachments. A lifecycle configuration block can be used to suppress differences if necessary. Hands-on: Try the Manage AWS Auto Scaling Groups tutorial on HashiCorp Learn.",
+    "llm_summary": "The `aws_autoscaling_group` Terraform resource enables the creation and management of scalable, self-healing compute environments by automatically adjusting EC2 instance capacity based on demand. It is commonly used for configuring dynamic scaling policies, integrating with load balancers (Classic, Application, Gateway, or Network), and optimizing resource utilization in high-availability architectures. Users can define launch configurations, templates, or mixed instance policies, manage lifecycle settings, and attach traffic sources like target groups or VPC Lattice for seamless workload distribution and fault tolerance."
+  },
+  "examples": [
+    {
+      "title": "With Latest Version Of Launch Template",
+      "code": "resource \"aws_launch_template\" \"foobar\" {\n  name_prefix   = \"foobar\"\n  image_id      = \"ami-1a2b3c\"\n  instance_type = \"t2.micro\"\n}\n\nresource \"aws_autoscaling_group\" \"bar\" {\n  availability_zones = [\"us-east-1a\"]\n  desired_capacity   = 1\n  max_size           = 1\n  min_size           = 1\n\n  launch_template {\n    id      = aws_launch_template.foobar.id\n    version = \"$Latest\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_autoscaling_group` to use the latest version of an `aws_launch_template` for instance provisioning, showcasing the use of the `launch_template` block with the `version = \"$Latest\"` argument to ensure the most up-to-date template is applied.\""
+    },
+    {
+      "title": "Mixed Instances Policy",
+      "code": "resource \"aws_launch_template\" \"example\" {\n  name_prefix   = \"example\"\n  image_id      = data.aws_ami.example.id\n  instance_type = \"c5.large\"\n}\n\nresource \"aws_autoscaling_group\" \"example\" {\n  availability_zones = [\"us-east-1a\"]\n  desired_capacity   = 1\n  max_size           = 1\n  min_size           = 1\n\n  mixed_instances_policy {\n    launch_template {\n      launch_template_specification {\n        launch_template_id = aws_launch_template.example.id\n      }\n\n      override {\n        instance_type     = \"c4.large\"\n        weighted_capacity = \"3\"\n      }\n\n      override {\n        instance_type     = \"c3.large\"\n        weighted_capacity = \"2\"\n      }\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_autoscaling_group` with a mixed instances policy, enabling the use of multiple instance types and weighted capacities for flexible scaling. It showcases the `launch_template` block with overrides to specify alternative instance types (`c4.large`, `c3.large`) and their respective weighted capacities, providing a cost-effective and resilient scaling strategy."
+    },
+    {
+      "title": "Mixed Instances Policy with Spot Instances and Capacity Rebalance",
+      "code": "resource \"aws_launch_template\" \"example\" {\n  name_prefix   = \"example\"\n  image_id      = data.aws_ami.example.id\n  instance_type = \"c5.large\"\n}\n\nresource \"aws_autoscaling_group\" \"example\" {\n  capacity_rebalance  = true\n  desired_capacity    = 12\n  max_size            = 15\n  min_size            = 12\n  vpc_zone_identifier = [aws_subnet.example1.id, aws_subnet.example2.id]\n\n  mixed_instances_policy {\n    instances_distribution {\n      on_demand_base_capacity                  = 0\n      on_demand_percentage_above_base_capacity = 25\n      spot_allocation_strategy                 = \"capacity-optimized\"\n    }\n\n    launch_template {\n      launch_template_specification {\n        launch_template_id = aws_launch_template.example.id\n      }\n\n      override {\n        instance_type     = \"c4.large\"\n        weighted_capacity = \"3\"\n      }\n\n      override {\n        instance_type     = \"c3.large\"\n        weighted_capacity = \"2\"\n      }\n    }\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_autoscaling_group` with a mixed instances policy, utilizing Spot Instances with a `capacity-optimized` allocation strategy and enabling `capacity_rebalance` for improved availability. Includes overrides for instance types and weighted capacities, showcasing advanced scaling configurations for cost optimization and flexibility.\""
+    },
+    {
+      "title": "Mixed Instances Policy with Instance level LaunchTemplateSpecification Overrides",
+      "code": "resource \"aws_launch_template\" \"example\" {\n  name_prefix   = \"example\"\n  image_id      = data.aws_ami.example.id\n  instance_type = \"c5.large\"\n}\n\nresource \"aws_launch_template\" \"example2\" {\n  name_prefix = \"example2\"\n  image_id    = data.aws_ami.example2.id\n}\n\nresource \"aws_autoscaling_group\" \"example\" {\n  availability_zones = [\"us-east-1a\"]\n  desired_capacity   = 1\n  max_size           = 1\n  min_size           = 1\n\n  mixed_instances_policy {\n    launch_template {\n      launch_template_specification {\n        launch_template_id = aws_launch_template.example.id\n      }\n\n      override {\n        instance_type     = \"c4.large\"\n        weighted_capacity = \"3\"\n      }\n\n      override {\n        instance_type = \"c6g.large\"\n        launch_template_specification {\n          launch_template_id = aws_launch_template.example2.id\n        }\n        weighted_capacity = \"2\"\n      }\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_autoscaling_group` with a mixed instances policy, utilizing multiple `aws_launch_template` resources and instance-level `launch_template_specification` overrides. It showcases how to define instance type overrides with custom weighted capacities and associate specific launch templates for advanced scaling flexibility across instance types."
+    },
+    {
+      "title": "Mixed Instances Policy with Attribute-based Instance Type Selection",
+      "code": "resource \"aws_launch_template\" \"example\" {\n  name_prefix   = \"example\"\n  image_id      = data.aws_ami.example.id\n  instance_type = \"c5.large\"\n}\n\nresource \"aws_autoscaling_group\" \"example\" {\n  availability_zones = [\"us-east-1a\"]\n  desired_capacity   = 1\n  max_size           = 1\n  min_size           = 1\n\n  mixed_instances_policy {\n    launch_template {\n      launch_template_specification {\n        launch_template_id = aws_launch_template.example.id\n      }\n\n      override {\n        instance_requirements {\n          memory_mib {\n            min = 1000\n          }\n\n          vcpu_count {\n            min = 4\n          }\n        }\n      }\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_autoscaling_group` with a mixed instances policy that uses attribute-based instance type selection. It showcases the use of the `override` block within the `mixed_instances_policy` to define instance requirements, such as minimum memory and vCPU count, while leveraging a launch template for base configuration."
+    },
+    {
+      "title": "Dynamic tagging",
+      "code": "variable \"extra_tags\" {\n  default = [\n    {\n      key                 = \"Foo\"\n      value               = \"Bar\"\n      propagate_at_launch = true\n    },\n    {\n      key                 = \"Baz\"\n      value               = \"Bam\"\n      propagate_at_launch = true\n    },\n  ]\n}\n\nresource \"aws_autoscaling_group\" \"test\" {\n  name                 = \"foobar3-terraform-test\"\n  max_size             = 5\n  min_size             = 2\n  launch_configuration = aws_launch_configuration.foobar.name\n  vpc_zone_identifier  = [aws_subnet.example1.id, aws_subnet.example2.id]\n\n  tag {\n    key                 = \"explicit1\"\n    value               = \"value1\"\n    propagate_at_launch = true\n  }\n  tag {\n    key                 = \"explicit2\"\n    value               = \"value2\"\n    propagate_at_launch = true\n  }\n\n  dynamic \"tag\" {\n    for_each = var.extra_tags\n    content {\n      key                 = tag.value.key\n      propagate_at_launch = tag.value.propagate_at_launch\n      value               = tag.value.value\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to dynamically configure tags for an AWS Auto Scaling Group using the `dynamic` block in Terraform. It showcases the use of the `tag` argument to define both static and dynamically generated tags, with the `propagate_at_launch` attribute ensuring tags are applied to instances at launch."
+    },
+    {
+      "title": "Automatically refresh all instances after the group is updated",
+      "code": "resource \"aws_autoscaling_group\" \"example\" {\n  availability_zones = [\"us-east-1a\"]\n  desired_capacity   = 1\n  max_size           = 2\n  min_size           = 1\n\n  launch_template {\n    id      = aws_launch_template.example.id\n    version = aws_launch_template.example.latest_version\n  }\n\n  tag {\n    key                 = \"Key\"\n    value               = \"Value\"\n    propagate_at_launch = true\n  }\n\n  instance_refresh {\n    strategy = \"Rolling\"\n    preferences {\n      min_healthy_percentage = 50\n    }\n    triggers = [\"tag\"]\n  }\n}\n\ndata \"aws_ami\" \"example\" {\n  most_recent = true\n  owners      = [\"amazon\"]\n\n  filter {\n    name   = \"name\"\n    values = [\"amzn-ami-hvm-*-x86_64-gp2\"]\n  }\n}\n\nresource \"aws_launch_template\" \"example\" {\n  image_id      = data.aws_ami.example.id\n  instance_type = \"t3.nano\"\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_autoscaling_group` with automatic instance refresh using the `instance_refresh` block, enabling rolling updates triggered by changes such as tags. It showcases integration with an `aws_launch_template` for instance configuration and highlights key settings like `min_healthy_percentage` for update preferences and `propagate_at_launch` for tag propagation."
+    },
+    {
+      "title": "Auto Scaling group with Warm Pool",
+      "code": "resource \"aws_launch_template\" \"example\" {\n  name_prefix   = \"example\"\n  image_id      = data.aws_ami.example.id\n  instance_type = \"c5.large\"\n}\n\nresource \"aws_autoscaling_group\" \"example\" {\n  availability_zones = [\"us-east-1a\"]\n  desired_capacity   = 1\n  max_size           = 5\n  min_size           = 1\n\n  warm_pool {\n    pool_state                  = \"Hibernated\"\n    min_size                    = 1\n    max_group_prepared_capacity = 10\n\n    instance_reuse_policy {\n      reuse_on_scale_in = true\n    }\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS Auto Scaling Group with a Warm Pool to optimize instance readiness and scaling efficiency, using the `warm_pool` block with `pool_state` set to `Hibernated` and an `instance_reuse_policy` to enable instance reuse during scale-in events. Includes integration with an AWS Launch Template for specifying instance details like `image_id` and `instance_type`.\""
+    },
+    {
+      "title": "Auto Scaling group with Traffic Sources",
+      "code": "resource \"aws_autoscaling_group\" \"test\" {\n  vpc_zone_identifier = aws_subnet.test.id\n  max_size            = 1\n  min_size            = 1\n\n  force_delete = true\n  dynamic \"traffic_source\" {\n    for_each = aws_vpclattice_target_group.test[*]\n    content {\n      identifier = traffic_source.value.arn\n      type       = \"vpc-lattice\"\n    }\n  }\n\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS Auto Scaling Group with dynamic traffic sources using the `traffic_source` block, integrating with multiple VPC Lattice target groups. Highlights the use of `dynamic` blocks for flexible resource associations and the `force_delete` argument for seamless resource cleanup.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "availability_zones",
+      "description": "(Optional) A list of Availability Zones where instances in the Auto Scaling group can be created. Used for launching into the default VPC subnet in each Availability Zone when not using the `vpc_zone_identifier` attribute, or for attaching a network interface when an existing network interface ID is specified in a launch template. Conflicts with `vpc_zone_identifier`.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `availability_zones` argument in the `aws_autoscaling_group` resource allows users to specify the set of Availability Zones where instances in the Auto Scaling group can be launched. This configuration ensures high availability and fault tolerance by distributing instances across multiple zones, particularly when using the default VPC subnets or attaching existing network interfaces. It conflicts with `vpc_zone_identifier` and is typically used to define the geographic scope of the Auto Scaling group's infrastructure."
+    },
+    {
+      "name": "capacity_rebalance",
+      "description": "(Optional) Whether capacity rebalance is enabled. Otherwise, capacity rebalance is disabled.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `capacity_rebalance` argument in the `aws_autoscaling_group` resource allows users to enable or disable the capacity rebalance feature, which automatically replaces instances in the Auto Scaling group that receive a Spot Instance interruption notice. Enabling this functionality helps maintain application availability and resilience by proactively reallocating capacity before interruptions occur, aligning with common goals of ensuring workload stability in dynamic cloud environments."
+    },
+    {
+      "name": "context",
+      "description": "(Optional) Reserved.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `context` argument in the `aws_autoscaling_group` resource is a reserved field with no current functionality, meaning it does not directly influence the configuration or behavior of the Auto Scaling group. It may be intended for future use or internal purposes, and users typically do not need to set this argument."
+    },
+    {
+      "name": "default_cooldown",
+      "description": "(Optional) Amount of time, in seconds, after a scaling activity completes before another scaling activity can start.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `default_cooldown` argument for the `aws_autoscaling_group` resource allows users to define the cooldown period (in seconds) that must elapse after a scaling activity completes before another scaling action can be initiated. This helps control the frequency of scaling operations, ensuring stability and preventing excessive or rapid adjustments to the group's capacity."
+    },
+    {
+      "name": "default_instance_warmup",
+      "description": "(Optional) Amount of time, in seconds, until a newly launched instance can contribute to the Amazon CloudWatch metrics. This delay lets an instance finish initializing before Amazon EC2 Auto Scaling aggregates instance metrics, resulting in more reliable usage data. Set this value equal to the amount of time that it takes for resource consumption to become stable after an instance reaches the InService state. (See Set the default instance warmup for an Auto Scaling group)",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `default_instance_warmup` argument for the `aws_autoscaling_group` resource allows users to define the initialization delay (in seconds) for newly launched instances before they contribute to Amazon CloudWatch metrics. This ensures more accurate and reliable metric aggregation by accounting for the time required for instances to stabilize after entering the `InService` state, supporting optimized scaling decisions and resource management."
+    },
+    {
+      "name": "desired_capacity",
+      "description": "(Optional) Number of Amazon EC2 instances that should be running in the group. (See also Waiting for Capacity below.)",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `desired_capacity` argument in the `aws_autoscaling_group` resource specifies the target number of Amazon EC2 instances that should be running in the Auto Scaling group at any given time. By setting this value, users can control the baseline capacity of the group to meet application demands, ensuring consistent performance and resource availability while balancing cost efficiency."
+    },
+    {
+      "name": "desired_capacity_type",
+      "description": "(Optional) The unit of measurement for the value specified for `desired_capacity`. Supported for attribute-based instance type selection only. Valid values: `\"units\"`, `\"vcpu\"`, `\"memory-mib\"`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `desired_capacity_type` argument in the `aws_autoscaling_group` resource allows users to specify the unit of measurement for the `desired_capacity` value, enabling precise control over how the scaling group determines resource allocation. By setting this argument to `\"units\"`, `\"vcpu\"`, or `\"memory-mib\"`, users can align scaling behavior with attribute-based instance type selection, optimizing resource provisioning to meet specific workload requirements such as compute power or memory capacity."
+    },
+    {
+      "name": "enabled_metrics",
+      "description": "(Optional) List of metrics to collect. The allowed values are defined by the underlying AWS API.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `enabled_metrics` argument for the `aws_autoscaling_group` resource allows users to specify a set of metrics to be collected for the Auto Scaling group, enabling detailed monitoring of its performance and operational health. By defining this argument, users can configure which metrics (e.g., group size, instance lifecycle events) are reported to CloudWatch, supporting goals like optimizing scaling policies, troubleshooting, and ensuring resource efficiency."
+    },
+    {
+      "name": "force_delete",
+      "description": "(Optional) Allows deleting the Auto Scaling Group without waiting for all instances in the pool to terminate. You can force an Auto Scaling Group to delete even if it's in the process of scaling a resource. Normally, Terraform drains all the instances before deleting the group. This bypasses that behavior and potentially leaves resources dangling.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `force_delete` argument in the `aws_autoscaling_group` resource allows users to control the deletion behavior of the Auto Scaling Group by bypassing the default instance draining process. When set to `true`, it enables immediate deletion of the group, even if instances are still running or scaling activities are in progress, which can expedite teardown workflows but may leave associated resources unmanaged."
+    },
+    {
+      "name": "force_delete_warm_pool",
+      "description": "(Optional) Allows deleting the Auto Scaling Group without waiting for all instances in the warm pool to terminate.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `force_delete_warm_pool` argument in the `aws_autoscaling_group` resource allows users to control the deletion behavior of the Auto Scaling Group by enabling the immediate removal of the associated warm pool without waiting for its instances to terminate. This is useful for streamlining lifecycle management during resource cleanup or decommissioning, especially in scenarios where instance termination delays are not critical."
+    },
+    {
+      "name": "health_check_grace_period",
+      "description": "(Optional, Default: 300) Time (in seconds) after instance comes into service before checking health.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `health_check_grace_period` argument for the `aws_autoscaling_group` resource defines the time (in seconds) to wait after a new instance is launched and marked as \"in service\" before performing health checks. This allows users to account for initialization processes, ensuring instances are not prematurely marked unhealthy during startup, which is critical for maintaining application stability and avoiding unnecessary replacements."
+    },
+    {
+      "name": "health_check_type",
+      "description": "(Optional) \"EC2\" or \"ELB\". Controls how health checking is done.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `health_check_type` argument in the `aws_autoscaling_group` resource allows users to specify the method used to evaluate the health of instances within the Auto Scaling group, either through EC2 instance status checks (`\"EC2\"`) or Elastic Load Balancer (ELB) health checks (`\"ELB\"`). Configuring this argument ensures the Auto Scaling group uses the appropriate health monitoring mechanism to determine whether instances should be replaced or terminated, aligning with the user's infrastructure and load balancing strategy."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_autoscaling_group` resource allows users to specify a unique identifier for the autoscaling group, typically used for referencing or managing the resource programmatically. While optional, setting this argument can help ensure consistent identification of the autoscaling group across Terraform configurations and integrations, supporting workflows that require explicit resource tracking or external system interactions."
+    },
+    {
+      "name": "ignore_failed_scaling_activities",
+      "description": "(Optional) Whether to ignore failed Auto Scaling scaling activities while waiting for capacity. The default is `false` -- failed scaling activities cause errors to be returned.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `ignore_failed_scaling_activities` argument in the `aws_autoscaling_group` resource allows users to control whether failed scaling activities are ignored during capacity adjustments. Setting this to `true` ensures the Auto Scaling process continues without errors caused by failed scaling attempts, which can be useful for maintaining availability in dynamic environments or during transient issues."
+    },
+    {
+      "name": "launch_configuration",
+      "description": "(Optional) Name of the launch configuration to use.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `launch_configuration` argument in the `aws_autoscaling_group` resource allows users to specify the name of an existing launch configuration that defines the instance settings (e.g., AMI, instance type, key pair, security groups) for the Auto Scaling group. By setting this argument, users can control the provisioning behavior and runtime configuration of EC2 instances launched within the group, aligning with deployment requirements and scaling strategies."
+    },
+    {
+      "name": "load_balancers",
+      "description": "(Optional) List of elastic load balancer names to add to the autoscaling group names. Only valid for classic load balancers. For ALBs, use `target_group_arns` instead. To remove all load balancer attachments an empty list should be specified.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `load_balancers` argument in the `aws_autoscaling_group` resource allows users to associate a list of classic Elastic Load Balancer (ELB) names with the Auto Scaling group, enabling automatic distribution of incoming traffic across instances in the group. This configuration is essential for users managing legacy load balancing setups, as it ensures seamless traffic routing and scaling, but should be replaced with `target_group_arns` for modern Application Load Balancers (ALBs)."
+    },
+    {
+      "name": "max_instance_lifetime",
+      "description": "(Optional) Maximum amount of time, in seconds, that an instance can be in service, values must be either equal to 0 or between 86400 and 31536000 seconds.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `max_instance_lifetime` argument in the `aws_autoscaling_group` resource allows users to define the maximum duration, in seconds, that an EC2 instance can remain in service before being replaced. This configuration helps enforce instance lifecycle policies, ensuring instances are periodically refreshed to maintain performance, security, or compliance standards."
+    },
+    {
+      "name": "max_size",
+      "description": "(Required) Maximum size of the Auto Scaling Group.",
+      "required": true,
+      "type": "number",
+      "llm_summary": "The `max_size` argument defines the maximum number of instances that the Auto Scaling Group can scale up to, allowing users to control the upper limit of compute resources for handling peak workloads. This ensures the group does not exceed a specified capacity, aligning with cost management and performance requirements."
+    },
+    {
+      "name": "metrics_granularity",
+      "description": "(Optional) Granularity to associate with the metrics to collect. The only valid value is `1Minute`. Default is `1Minute`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `metrics_granularity` argument in the `aws_autoscaling_group` resource specifies the level of detail for monitoring metrics collected from the Auto Scaling group, with the only valid option being `1Minute`. By configuring this argument, users enable high-resolution metric collection at one-minute intervals, supporting detailed performance analysis and fine-grained scaling decisions."
+    },
+    {
+      "name": "min_elb_capacity",
+      "description": "(Optional) Setting this causes Terraform to wait for this number of instances from this Auto Scaling Group to show up healthy in the ELB only on creation. Updates will not wait on ELB instance number changes. (See also Waiting for Capacity below.)",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `min_elb_capacity` argument for the `aws_autoscaling_group` resource allows users to define the minimum number of instances that must be registered as healthy in the associated Elastic Load Balancer (ELB) during the initial creation of the Auto Scaling Group. This ensures that a baseline capacity is met for load balancing before Terraform considers the resource creation complete, supporting user goals related to application availability and reliability during deployment."
+    },
+    {
+      "name": "min_size",
+      "description": "(Required) Minimum size of the Auto Scaling Group. (See also Waiting for Capacity below.)",
+      "required": true,
+      "type": "number",
+      "llm_summary": "The `min_size` argument for the `aws_autoscaling_group` resource specifies the minimum number of instances that must always be running in the Auto Scaling Group, ensuring baseline capacity to meet application demands or maintain system availability. By defining this value, users can control the group's lower bound for scaling, aligning with reliability and performance goals in dynamic environments."
+    },
+    {
+      "name": "name",
+      "description": "(Optional) Name of the Auto Scaling Group. By default generated by Terraform. Conflicts with `name_prefix`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_autoscaling_group` resource allows users to explicitly define a unique, human-readable identifier for the Auto Scaling Group, overriding Terraform's default name generation. This is useful for aligning the resource with naming conventions, improving clarity in resource management, and ensuring predictable integration with other systems or workflows. Note that it conflicts with the `name_prefix` argument."
+    },
+    {
+      "name": "name_prefix",
+      "description": "(Optional) Creates a unique name beginning with the specified prefix. Conflicts with `name`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name_prefix` argument for the `aws_autoscaling_group` resource allows users to define a unique, automatically generated name for the Auto Scaling group that begins with the specified prefix. This is useful for dynamically creating resource names in environments where naming conventions or uniqueness are required, such as managing multiple environments or automating deployments. It cannot be used alongside the `name` argument."
+    },
+    {
+      "name": "placement_group",
+      "description": "(Optional) Name of the placement group into which you'll launch your instances, if any.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `placement_group` argument in the `aws_autoscaling_group` resource allows users to specify the name of an existing placement group where instances in the Auto Scaling group will be launched. This enables users to optimize instance placement for specific workloads, such as achieving low-latency networking or high-performance computing, aligning with goals like improving resource efficiency or meeting specialized infrastructure requirements."
+    },
+    {
+      "name": "protect_from_scale_in",
+      "description": "(Optional) Whether newly launched instances are automatically protected from termination by Amazon EC2 Auto Scaling when scaling in. For more information about preventing instances from terminating on scale in, see Using instance scale-in protection in the Amazon EC2 Auto Scaling User Guide.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `protect_from_scale_in` argument in the `aws_autoscaling_group` resource allows users to define whether newly launched instances are automatically safeguarded from termination during scale-in operations. This configuration is typically used to ensure critical instances remain active, supporting lifecycle management and high availability goals within an Auto Scaling group."
+    },
+    {
+      "name": "service_linked_role_arn",
+      "description": "(Optional) ARN of the service-linked role that the ASG will use to call other AWS services",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `service_linked_role_arn` argument allows users to specify the ARN of a service-linked IAM role that the Auto Scaling Group (ASG) will use to interact with other AWS services on their behalf. Configuring this ensures the ASG has the necessary permissions to perform tasks like scaling instances or managing resources, aligning with specific security and operational requirements."
+    },
+    {
+      "name": "suspended_processes",
+      "description": "(Optional) List of processes to suspend for the Auto Scaling Group. The allowed values are `Launch`, `Terminate`, `HealthCheck`, `ReplaceUnhealthy`, `AZRebalance`, `AlarmNotification`, `ScheduledActions`, `AddToLoadBalancer`, `InstanceRefresh`. Note that if you suspend either the `Launch` or `Terminate` process types, it can prevent your Auto Scaling Group from functioning properly.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `suspended_processes` argument for the `aws_autoscaling_group` resource allows users to specify which scaling-related processes (e.g., `Launch`, `Terminate`, `HealthCheck`) should be temporarily disabled for the Auto Scaling Group. This configuration is typically used to control or pause specific operational behaviors, such as instance launches or health checks, to support maintenance, debugging, or custom workflows, but suspending critical processes like `Launch` or `Terminate` may impact the group's functionality."
+    },
+    {
+      "name": "target_group_arns",
+      "description": "(Optional) Set of `aws_alb_target_group` ARNs, for use with Application or Network Load Balancing. To remove all target group attachments an empty list should be specified.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `target_group_arns` argument allows users to associate an Auto Scaling group with one or more Application or Network Load Balancer target groups by specifying their ARNs. This configuration enables the Auto Scaling group to dynamically register or deregister instances with the specified target groups, facilitating load balancing and traffic distribution for scalable applications."
+    },
+    {
+      "name": "termination_policies",
+      "description": "(Optional) List of policies to decide how the instances in the Auto Scaling Group should be terminated. The allowed values are `OldestInstance`, `NewestInstance`, `OldestLaunchConfiguration`, `ClosestToNextInstanceHour`, `OldestLaunchTemplate`, `AllocationStrategy`, `Default`. Additionally, the ARN of a Lambda function can be specified for custom termination policies.",
+      "required": false,
+      "type": "list(string)",
+      "llm_summary": "The `termination_policies` argument in the `aws_autoscaling_group` resource allows users to define the rules and priorities for determining which instances should be terminated during scaling or group updates. By specifying policies such as `OldestInstance`, `NewestInstance`, or custom Lambda function ARNs, users can control the lifecycle behavior of instances to align with operational goals like cost optimization, instance freshness, or custom termination logic."
+    },
+    {
+      "name": "vpc_zone_identifier",
+      "description": "(Optional) List of subnet IDs to launch resources in. Subnets automatically determine which availability zones the group will reside. Conflicts with `availability_zones`.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `vpc_zone_identifier` argument for the `aws_autoscaling_group` resource allows users to specify a set of subnet IDs within a VPC where the Auto Scaling group will launch its instances. By defining this argument, users control the placement of resources across specific subnets, which inherently determines the availability zones used by the group. This configuration is essential for aligning instance deployment with network architecture and ensuring high availability or compliance with specific subnet-level requirements."
+    },
+    {
+      "name": "wait_for_capacity_timeout",
+      "description": "(Optional, Default: \"10m\") Maximum duration that Terraform should wait for ASG instances to be healthy before timing out. (See also Waiting for Capacity below.) Setting this to \"0\" causes Terraform to skip all Capacity Waiting behavior.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `wait_for_capacity_timeout` argument in the `aws_autoscaling_group` resource allows users to define the maximum duration Terraform will wait for Auto Scaling Group instances to reach a healthy state during deployment. By configuring this timeout, users can control the behavior of capacity waiting, ensuring deployments either proceed after the specified time or skip health checks entirely when set to \"0,\" aligning with goals like optimizing deployment speed or enforcing stricter health validation."
+    },
+    {
+      "name": "wait_for_elb_capacity",
+      "description": "(Optional) Setting this will cause Terraform to wait for exactly this number of healthy instances from this Auto Scaling Group in all attached load balancers on both create and update operations. (Takes precedence over `min_elb_capacity` behavior.) (See also Waiting for Capacity below.)",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `wait_for_elb_capacity` argument in the `aws_autoscaling_group` resource allows users to specify the exact number of healthy instances that must be registered with all attached load balancers before Terraform considers the Auto Scaling Group creation or update complete. This ensures precise control over deployment readiness and load balancer health checks, supporting user goals like reliable application scaling and minimizing downtime during infrastructure changes."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "availability_zone_distribution",
+      "description": "(Optional) The instance capacity distribution across Availability Zones. See Availability Zone Distribution below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "capacity_distribution_strategy",
+          "description": "(Required) The strategy to use for distributing capacity across the Availability Zones. Valid values are `balanced-only` and `balanced-best-effort`. Default is `balanced-best-effort`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `capacity_distribution_strategy` argument in the `availability_zone_distribution` context of the `aws_autoscaling_group` resource allows users to define how instance capacity is distributed across Availability Zones within the Auto Scaling Group. By specifying either `balanced-only` or `balanced-best-effort`, users can control whether capacity is strictly balanced or optimized for best effort in scenarios with uneven resource availability, ensuring efficient scaling and high availability across zones."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `availability_zone_distribution` block in the `aws_autoscaling_group` resource configures how instance capacity is distributed across multiple Availability Zones, ensuring balanced resource allocation and high availability. By defining this block, users can optimize fault tolerance and scalability within their Auto Scaling Groups, enabling precise control over zone-level capacity management."
+    },
+    {
+      "name": "initial_lifecycle_hook",
+      "description": "(Optional) One or more Lifecycle Hooks to attach to the Auto Scaling Group before instances are launched. The syntax is exactly the same as the separate `aws_autoscaling_lifecycle_hook` resource, without the `autoscaling_group_name` attribute. Please note that this will only work when creating a new Auto Scaling Group. For all other use-cases, please use `aws_autoscaling_lifecycle_hook` resource.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "default_result",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `default_result` argument in the `initial_lifecycle_hook` of the `aws_autoscaling_group` resource allows users to specify the default action taken when a lifecycle hook times out without receiving a callback. This argument controls whether the instance proceeds (`CONTINUE`) or is terminated (`ABANDON`), enabling users to define the fallback behavior for managing instance transitions during scaling events."
+        },
+        {
+          "name": "heartbeat_timeout",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `heartbeat_timeout` argument for the `initial_lifecycle_hook` in the `aws_autoscaling_group` resource specifies the maximum time (in seconds) that an instance can remain in the \"Pending:Wait\" or \"Terminating:Wait\" state while the lifecycle hook is active. By configuring this timeout, users can control how long an external process or system has to complete tasks (e.g., initialization, cleanup, or custom workflows) before the instance transitions to the next lifecycle state, ensuring smoother automation and integration with external systems."
+        },
+        {
+          "name": "lifecycle_transition",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `lifecycle_transition` argument specifies the lifecycle event in the Auto Scaling process (e.g., `autoscaling:EC2_INSTANCE_LAUNCHING` or `autoscaling:EC2_INSTANCE_TERMINATING`) that triggers the associated `initial_lifecycle_hook`. By defining this transition, users can control when custom actions or processes are executed during instance launch or termination, enabling fine-grained management of application state or resource cleanup."
+        },
+        {
+          "name": "name",
+          "description": "(Optional) Name of the Auto Scaling Group. By default generated by Terraform. Conflicts with `name_prefix`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `name` argument for the `initial_lifecycle_hook` in the `aws_autoscaling_group` resource allows users to explicitly define a unique identifier for the lifecycle hook, ensuring precise control over its configuration and behavior within the Auto Scaling Group. By setting this argument, users can establish a clear reference for managing lifecycle transitions, such as custom actions during instance launch or termination, aligning with specific operational workflows or automation requirements."
+        },
+        {
+          "name": "notification_metadata",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `notification_metadata` argument for the `initial_lifecycle_hook` in the `aws_autoscaling_group` resource allows users to specify a custom string of metadata that is sent alongside lifecycle hook notifications. This enables users to include contextual information, such as environment details or operational instructions, which can be leveraged by downstream systems or processes to handle the lifecycle event more effectively."
+        },
+        {
+          "name": "notification_target_arn",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `notification_target_arn` argument for the `initial_lifecycle_hook` in the `aws_autoscaling_group` resource specifies the Amazon Resource Name (ARN) of the target (e.g., an SNS topic or SQS queue) to which lifecycle hook notifications are sent. Configuring this argument enables users to define where notifications about instance launch or termination transitions are delivered, facilitating automated workflows or monitoring during the Auto Scaling process."
+        },
+        {
+          "name": "role_arn",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `role_arn` argument specifies the ARN of an IAM role that grants permissions for the initial lifecycle hook to perform actions, such as invoking AWS services or sending notifications during Auto Scaling events. Configuring this argument allows users to define the role responsible for managing lifecycle transitions, enabling custom workflows or integrations during instance launch or termination."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `initial_lifecycle_hook` block in the `aws_autoscaling_group` resource allows users to define one or more lifecycle hooks that execute custom actions during specific instance state transitions (e.g., before launch or termination) within the Auto Scaling Group. This configuration encapsulates lifecycle management settings, enabling users to integrate workflows such as logging, monitoring, or configuration scripts during instance initialization or shutdown, ensuring greater control and automation in scaling operations."
+    },
+    {
+      "name": "instance_maintenance_policy",
+      "description": "(Optional) If this block is configured, add a instance maintenance policy to the specified Auto Scaling group. Defined below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "max_healthy_percentage",
+          "description": "(Required) Specifies the upper limit on the number of instances that are in the InService or Pending state with a healthy status during an instance replacement activity.",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `max_healthy_percentage` argument in the `instance_maintenance_policy` of the `aws_autoscaling_group` resource defines the maximum percentage of instances allowed to remain in a healthy state (InService or Pending) during instance replacement activities. This ensures controlled instance turnover while maintaining high availability, enabling users to balance system stability and maintenance efficiency."
+        },
+        {
+          "name": "min_healthy_percentage",
+          "description": "(Required) Specifies the lower limit on the number of instances that must be in the InService state with a healthy status during an instance replacement activity.",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `min_healthy_percentage` argument in the `instance_maintenance_policy` of the `aws_autoscaling_group` resource defines the minimum percentage of instances that must remain in the `InService` state and marked as healthy during instance replacement activities. This ensures high availability and continuity by controlling the threshold for healthy instances, aligning with user goals of maintaining application stability during scaling or maintenance operations."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `instance_maintenance_policy` block in the `aws_autoscaling_group` resource defines policies for managing the maintenance and lifecycle of instances within the Auto Scaling group. It encapsulates settings that enable users to control how instances are handled during maintenance events, ensuring operational stability and alignment with scaling strategies. Configuring this block allows users to optimize instance behavior during updates or maintenance, enhancing reliability and minimizing disruptions."
+    },
+    {
+      "name": "instance_refresh",
+      "description": "(Optional) If this block is configured, start an Instance Refresh when this Auto Scaling Group is updated. Defined below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "strategy",
+          "description": "(Required) Strategy to use for instance refresh. The only allowed value is `Rolling`. See StartInstanceRefresh Action for more information.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `strategy` argument in the `instance_refresh` configuration of the `aws_autoscaling_group` resource specifies the method used to update instances within the Auto Scaling group during a refresh operation. By setting this required argument to `Rolling`, users define a rolling update strategy, ensuring instances are replaced incrementally to maintain application availability and minimize downtime during updates."
+        },
+        {
+          "name": "triggers",
+          "description": "(Optional) Set of additional property names that will trigger an Instance Refresh. A refresh will always be triggered by a change in any of `launch_configuration`, `launch_template`, or `mixed_instances_policy`.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `triggers` argument in the `instance_refresh` block of the `aws_autoscaling_group` resource allows users to specify additional property names that will initiate an Instance Refresh when their values change. This enables fine-grained control over refresh behavior, ensuring the Auto Scaling Group updates instances not only for core changes like `launch_configuration`, `launch_template`, or `mixed_instances_policy`, but also for user-defined properties, aligning with dynamic infrastructure needs and deployment workflows."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "preferences",
+          "description": "(Optional) Override default parameters for Instance Refresh.`checkpoint_delay` - (Optional) Number of seconds to wait after a checkpoint. Defaults to `3600`. `checkpoint_percentages` - (Optional) List of percentages for each checkpoint. Values must be unique and in ascending order. To replace all instances, the final number must be `100`. `instance_warmup` - (Optional) Number of seconds until a newly launched instance is configured and ready to use. Default behavior is to use the Auto Scaling Group's health check grace period. `max_healthy_percentage` - (Optional) Amount of capacity in the Auto Scaling group that can be in service and healthy, or pending, to support your workload when an instance refresh is in place, as a percentage of the desired capacity of the Auto Scaling group. Values must be between `100` and `200`, defaults to `100`. `min_healthy_percentage` - (Optional) Amount of capacity in the Auto Scaling group that must remain healthy during an instance refresh to allow the operation to continue, as a percentage of the desired capacity of the Auto Scaling group. Defaults to `90`. `skip_matching` - (Optional) Replace instances that already have your desired configuration. Defaults to `false`. `auto_rollback` - (Optional) Automatically rollback if instance refresh fails. Defaults to `false`. This option may only be set to `true` when specifying a `launch_template` or `mixed_instances_policy`. `alarm_specification` - (Optional) Alarm Specification for Instance Refresh.`alarms` - (Required) List of Cloudwatch alarms. If any of these alarms goes into ALARM state, Instance Refresh is failed. `scale_in_protected_instances` - (Optional) Behavior when encountering instances protected from scale in are found. Available behaviors are `Refresh`, `Ignore`, and `Wait`. Default is `Ignore`. `standby_instances` - (Optional) Behavior when encountering instances in the `Standby` state in are found. Available behaviors are `Terminate`, `Ignore`, and `Wait`. Default is `Ignore`.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "auto_rollback",
+              "description": "(Optional) Automatically rollback if instance refresh fails. Defaults to `false`. This option may only be set to `true` when specifying a `launch_template` or `mixed_instances_policy`.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `auto_rollback` argument in the `preferences` block of the `aws_autoscaling_group` resource controls whether the Auto Scaling group automatically reverts to the previous configuration if an instance refresh fails. Enabling this option (`true`) enhances deployment reliability by ensuring failed updates do not leave the group in an unstable state, but it requires the use of a `launch_template` or `mixed_instances_policy`."
+            },
+            {
+              "name": "checkpoint_delay",
+              "description": "(Optional) Number of seconds to wait after a checkpoint. Defaults to `3600`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `checkpoint_delay` argument in the `preferences` block of the `aws_autoscaling_group` resource allows users to define the wait time, in seconds, after a checkpoint before further actions are taken. This configuration helps control the timing of processes like scaling activities or updates, ensuring smoother transitions and reducing potential disruptions in dynamic environments."
+            },
+            {
+              "name": "checkpoint_percentages",
+              "description": "(Optional) List of percentages for each checkpoint. Values must be unique and in ascending order. To replace all instances, the final number must be `100`.",
+              "required": false,
+              "type": "list(number)",
+              "llm_summary": "\"Defines a list of unique, ascending percentage values to configure checkpoint thresholds for scaling operations within the preferences of an Auto Scaling Group. This argument allows users to control the progression of scaling checkpoints, ensuring orderly transitions, with the final checkpoint typically set to 100% for complete replacement scenarios.\""
+            },
+            {
+              "name": "instance_warmup",
+              "description": "(Optional) Number of seconds until a newly launched instance is configured and ready to use. Default behavior is to use the Auto Scaling Group's health check grace period.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `instance_warmup` argument in the `aws_autoscaling_group` resource allows users to define the number of seconds required for a newly launched instance to become fully configured and operational before it is considered for scaling activities. By setting this value, users can control the initialization period for instances, ensuring accurate scaling decisions and avoiding premature health checks or scaling actions during the instance's setup phase."
+            },
+            {
+              "name": "max_healthy_percentage",
+              "description": "(Optional) Amount of capacity in the Auto Scaling group that can be in service and healthy, or pending, to support your workload when an instance refresh is in place, as a percentage of the desired capacity of the Auto Scaling group. Values must be between `100` and `200`, defaults to `100`.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `max_healthy_percentage` argument in the \"preferences\" context of the `aws_autoscaling_group` resource allows users to define the maximum percentage of desired capacity that must remain healthy or pending during an instance refresh. This setting ensures workload stability by controlling the proportion of instances that can be replaced simultaneously, supporting seamless updates without compromising service availability."
+            },
+            {
+              "name": "min_healthy_percentage",
+              "description": "(Optional) Amount of capacity in the Auto Scaling group that must remain healthy during an instance refresh to allow the operation to continue, as a percentage of the desired capacity of the Auto Scaling group. Defaults to `90`.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `min_healthy_percentage` argument in the \"preferences\" context of the `aws_autoscaling_group` resource allows users to define the minimum percentage of desired capacity that must remain healthy during an instance refresh operation. This ensures operational stability by controlling the threshold for healthy instances, enabling users to balance refresh progress with maintaining application availability."
+            },
+            {
+              "name": "scale_in_protected_instances",
+              "description": "(Optional) Behavior when encountering instances protected from scale in are found. Available behaviors are `Refresh`, `Ignore`, and `Wait`. Default is `Ignore`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `scale_in_protected_instances` argument in the \"preferences\" context of the `aws_autoscaling_group` resource allows users to define how the Auto Scaling group handles instances marked as protected from scale-in during scaling operations. By specifying behaviors such as `Refresh`, `Ignore`, or `Wait`, users can control whether protected instances are bypassed, refreshed, or cause scaling actions to pause, enabling fine-grained management of instance lifecycle and operational stability during scale-in events."
+            },
+            {
+              "name": "skip_matching",
+              "description": "(Optional) Replace instances that already have your desired configuration. Defaults to `false`.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `skip_matching` argument in the `preferences` block of the `aws_autoscaling_group` resource allows users to control whether instances that already match the desired configuration are replaced during updates. Setting this to `true` optimizes instance lifecycle management by skipping unnecessary replacements, which can reduce downtime and improve deployment efficiency."
+            },
+            {
+              "name": "standby_instances",
+              "description": "(Optional) Behavior when encountering instances in the `Standby` state in are found. Available behaviors are `Terminate`, `Ignore`, and `Wait`. Default is `Ignore`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `standby_instances` argument in the `preferences` context of the `aws_autoscaling_group` resource allows users to define how the Auto Scaling group handles instances in the `Standby` state. By specifying behaviors such as `Terminate`, `Ignore`, or `Wait`, users can control the lifecycle management and operational response to inactive instances, impacting resource utilization and scaling strategies."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "alarm_specification",
+              "description": "(Optional) Alarm Specification for Instance Refresh.`alarms` - (Required) List of Cloudwatch alarms. If any of these alarms goes into ALARM state, Instance Refresh is failed.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "alarms",
+                  "description": "(Required) List of Cloudwatch alarms. If any of these alarms goes into ALARM state, Instance Refresh is failed. A refresh is started when any of the following Auto Scaling Group properties change: launch_configuration, launch_template, mixed_instances_policy. Additional properties can be specified in the triggers property of instance_refresh. A refresh will not start when version = \"$Latest\" is configured in the launch_template block. To trigger the instance refresh when a launch template is changed, configure version to use the latest_version attribute of the aws_launch_template resource. Auto Scaling Groups support up to one active instance refresh at a time. When this resource is updated, any existing refresh is cancelled. Depending on health check settings and group size, an instance refresh may take a long time or fail. This resource does not wait for the instance refresh to complete.",
+                  "required": false,
+                  "type": "list(string)",
+                  "llm_summary": "The `alarms` argument in the `alarm_specification` block of the `aws_autoscaling_group` resource allows users to specify a list of CloudWatch alarm names that act as failure conditions for an instance refresh operation. If any of the defined alarms enter the `ALARM` state during the refresh, the operation is terminated, ensuring tighter control over the health and stability of the Auto Scaling Group during updates triggered by changes to configurations like launch templates or policies."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `alarm_specification` block within the `preferences` context of the `aws_autoscaling_group` resource defines monitoring criteria for instance refresh operations by specifying a list of required CloudWatch alarms. Configuring this block enables users to enforce automated failure detection during instance refreshes, ensuring operational stability by halting the process if any specified alarm enters an ALARM state."
+            }
+          ],
+          "llm_summary": "The `preferences` configuration block within the `instance_refresh` context of the `aws_autoscaling_group` resource provides granular control over the behavior and parameters of instance refresh operations. It encapsulates settings for checkpoint timing, instance warmup, health capacity thresholds, alarm handling, and behaviors for protected or standby instances, enabling users to customize the refresh process to ensure minimal disruption, optimize resource availability, and automate rollback in case of failures. Configuring this block allows users to fine-tune the refresh lifecycle to align with workload requirements and operational constraints."
+        }
+      ],
+      "llm_summary": "The `instance_refresh` block in the `aws_autoscaling_group` resource enables automated updates to instances within the Auto Scaling Group by initiating an Instance Refresh during configuration changes. It encapsulates settings related to instance replacement and update strategies, allowing users to ensure seamless, controlled updates to maintain application availability and consistency during scaling or infrastructure modifications."
+    },
+    {
+      "name": "launch_template",
+      "description": "(Optional) Nested argument with Launch template specification to use to launch instances. See Launch Template below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "id",
+          "description": "(Optional) ID of the launch template. Conflicts with `name`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `id` argument for the `launch_template` in the `aws_autoscaling_group` resource allows users to specify the unique identifier of an existing launch template to define the configuration for instances within the Auto Scaling group. By setting this argument, users can directly reference a pre-created launch template, enabling precise control over instance settings such as AMI, instance type, and networking, while avoiding conflicts with the `name` argument."
+        },
+        {
+          "name": "name",
+          "description": "(Optional) Name of the launch template. Conflicts with `id`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `name` argument for the `launch_template` in the `aws_autoscaling_group` resource allows users to specify the human-readable name of the launch template to be associated with the Auto Scaling group. By setting this argument, users can reference and organize launch templates by name, facilitating easier identification and management of compute instance configurations. Note that it conflicts with the `id` argument, meaning users must choose between naming the template or referencing it by its unique identifier."
+        },
+        {
+          "name": "version",
+          "description": "(Optional) Template version. Can be version number, `$Latest`, or `$Default`. (Default: `$Default`).",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `version` argument for the `launch_template` in the `aws_autoscaling_group` resource allows users to specify which version of the launch template to use when creating or updating the Auto Scaling group. By setting this argument to a specific version number, `$Latest`, or `$Default` (defaulting to `$Default` if unspecified), users can control the configuration of instances launched by the group, ensuring alignment with desired template updates or stability requirements."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `launch_template` configuration block in the `aws_autoscaling_group` resource specifies the launch template to use for provisioning EC2 instances within the Auto Scaling group. It encapsulates settings related to instance configuration, such as AMI, instance type, networking, and other parameters defined in the launch template, enabling users to standardize and streamline instance provisioning while ensuring consistency across scaling operations. Configuring this block allows for precise control over instance specifications and simplifies management of dynamic scaling environments."
+    },
+    {
+      "name": "mixed_instances_policy",
+      "description": "(Optional) Configuration block containing settings to define launch targets for Auto Scaling groups. See Mixed Instances Policy below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "instances_distribution",
+          "description": "(Optional) Nested argument containing settings on how to mix on-demand and Spot instances in the Auto Scaling group. Defined below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "on_demand_allocation_strategy",
+              "description": "(Optional) Strategy to use when launching on-demand instances. Valid values: `prioritized`, `lowest-price`. Default: `prioritized`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `on_demand_allocation_strategy` argument in the `instances_distribution` block of the `aws_autoscaling_group` resource allows users to define the strategy for selecting on-demand instances during scaling operations. By specifying either `prioritized` (default) or `lowest-price`, users can control whether instance types are launched based on a predefined priority order or cost optimization, enabling tailored instance allocation to meet performance or budget goals."
+            },
+            {
+              "name": "on_demand_base_capacity",
+              "description": "(Optional) Absolute minimum amount of desired capacity that must be fulfilled by on-demand instances. Default: `0`.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `on_demand_base_capacity` argument in the `instances_distribution` block of the `aws_autoscaling_group` resource specifies the minimum number of desired instances that must be fulfilled using On-Demand instances before Spot instances are used. This allows users to ensure a baseline level of predictable, non-preemptible capacity for their application, balancing cost optimization with reliability."
+            },
+            {
+              "name": "on_demand_percentage_above_base_capacity",
+              "description": "(Optional) Percentage split between on-demand and Spot instances above the base on-demand capacity. Default: `100`.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `on_demand_percentage_above_base_capacity` argument in the `instances_distribution` block of the `aws_autoscaling_group` resource allows users to define the percentage of on-demand instances to provision for capacity exceeding the base on-demand level. By configuring this, users can optimize cost and availability by controlling the balance between on-demand and Spot instances in their scaling strategy, with a default of 100% favoring on-demand instances."
+            },
+            {
+              "name": "spot_allocation_strategy",
+              "description": "(Optional) How to allocate capacity across the Spot pools. Valid values: `lowest-price`, `capacity-optimized`, `capacity-optimized-prioritized`, and `price-capacity-optimized`. Default: `lowest-price`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `spot_allocation_strategy` argument in the `instances_distribution` block of the `aws_autoscaling_group` resource allows users to define how Spot Instance capacity is allocated across available Spot pools. By specifying strategies such as `lowest-price`, `capacity-optimized`, or `capacity-optimized-prioritized`, users can optimize cost efficiency or prioritize capacity availability, aligning instance provisioning with workload requirements and budget constraints."
+            },
+            {
+              "name": "spot_instance_pools",
+              "description": "(Optional) Number of Spot pools per availability zone to allocate capacity. EC2 Auto Scaling selects the cheapest Spot pools and evenly allocates Spot capacity across the number of Spot pools that you specify. Only available with `spot_allocation_strategy` set to `lowest-price`. Otherwise it must be set to `0`, if it has been defined before. Default: `2`.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `spot_instance_pools` argument in the `instances_distribution` block of the `aws_autoscaling_group` resource specifies the number of Spot Instance pools per availability zone to distribute capacity across, enabling cost optimization by selecting the cheapest pools. This argument is relevant for configuring Spot Instance allocation behavior when the `spot_allocation_strategy` is set to `lowest-price`, helping users balance cost efficiency and availability in their Auto Scaling strategy."
+            },
+            {
+              "name": "spot_max_price",
+              "description": "(Optional) Maximum price per unit hour that the user is willing to pay for the Spot instances. Default: an empty string which means the on-demand price.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `spot_max_price` argument in the `instances_distribution` block of the `aws_autoscaling_group` resource allows users to define the maximum hourly price they are willing to pay for Spot Instances within the Auto Scaling group. By setting this value, users can control cost optimization for workloads by capping the price of Spot Instances, ensuring they do not exceed a specified budget while leveraging discounted compute capacity."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `instances_distribution` block within the `mixed_instances_policy` of the `aws_autoscaling_group` resource defines how on-demand and Spot instances are allocated and prioritized in the Auto Scaling group. It encapsulates settings such as instance type allocation, Spot instance strategies, and capacity limits, enabling users to optimize cost and availability by customizing the balance between on-demand and Spot instances."
+        },
+        {
+          "name": "launch_template",
+          "description": "(Required) Nested argument containing launch template settings along with the overrides to specify multiple instance types and weights. Defined below.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "launch_template_specification",
+              "description": "(Required) Nested argument defines the Launch Template. Defined below.",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "launch_template_id",
+                  "description": "(Optional) ID of the launch template. Conflicts with `launch_template_name`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `launch_template_id` argument in the `launch_template_specification` block of the `aws_autoscaling_group` resource allows users to specify the unique identifier of an existing EC2 launch template to define instance configuration details for the Auto Scaling group. By setting this argument, users can control aspects like instance type, networking, and storage settings, ensuring consistent and reusable configurations for scaling operations. Note that it conflicts with `launch_template_name`, requiring users to choose one method of reference."
+                },
+                {
+                  "name": "launch_template_name",
+                  "description": "(Optional) Name of the launch template. Conflicts with `launch_template_id`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `launch_template_name` argument in the `launch_template_specification` block of the `aws_autoscaling_group` resource allows users to specify the name of an existing EC2 launch template to define instance configuration details, such as AMI, instance type, and networking settings, for the Auto Scaling group. This enables users to standardize and reuse predefined instance configurations, ensuring consistency across scaling operations while avoiding conflicts with `launch_template_id`."
+                },
+                {
+                  "name": "version",
+                  "description": "(Optional) Template version. Can be version number, `$Latest`, or `$Default`. (Default: `$Default`).",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `version` argument in the `launch_template_specification` for the `aws_autoscaling_group` resource allows users to specify which version of the associated launch template should be used when creating or updating instances in the Auto Scaling group. By setting this argument to a specific version number, `$Latest`, or `$Default`, users can control the instance configuration and behavior, ensuring alignment with desired application or infrastructure requirements, such as using the most recent template updates or a predefined default configuration."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `launch_template_specification` block within the `aws_autoscaling_group` resource defines the launch template to be used for provisioning EC2 instances in the Auto Scaling group, enabling precise control over instance configuration, including AMI, instance type, and networking settings. By encapsulating details such as the launch template ID and version, this block ensures consistent and scalable instance deployment aligned with user-defined infrastructure requirements."
+            },
+            {
+              "name": "override",
+              "description": "(Optional) List of nested arguments provides the ability to specify multiple instance types. This will override the same parameter in the launch template. For on-demand instances, Auto Scaling considers the order of preference of instance types to launch based on the order specified in the overrides list. Defined below.",
+              "cardinality": [
+                0,
+                0
+              ],
+              "arguments": [
+                {
+                  "name": "instance_type",
+                  "description": "(Optional) Override the instance type in the Launch Template.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `instance_type` argument in the `override` context of the `aws_autoscaling_group` resource allows users to specify a custom EC2 instance type that overrides the default configuration in the associated Launch Template. This enables fine-grained control over the compute resources used in the Auto Scaling Group, supporting scenarios like optimizing performance, cost, or compatibility for specific workloads."
+                },
+                {
+                  "name": "weighted_capacity",
+                  "description": "(Optional) Number of capacity units, which gives the instance type a proportional weight to other instance types. This configuration block supports the following: Both memory_mib.min and vcpu_count.min must be specified.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `weighted_capacity` argument in the `override` block of the `aws_autoscaling_group` resource allows users to define the proportional weight of an instance type in terms of capacity units within a mixed-instance policy. By specifying this value, users can influence how Auto Scaling allocates capacity across different instance types, enabling fine-grained control over resource distribution based on instance performance characteristics like memory and vCPU."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "instance_requirements",
+                  "description": "(Optional) Override the instance type in the Launch Template with instance types that satisfy the requirements.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "accelerator_manufacturers",
+                      "description": "(Optional) List of accelerator manufacturer names. Default is any manufacturer.",
+                      "required": false,
+                      "type": "set(string)",
+                      "llm_summary": "The `accelerator_manufacturers` argument in the `instance_requirements` block of the `aws_autoscaling_group` resource allows users to specify a set of preferred accelerator manufacturers (e.g., NVIDIA, AMD) for EC2 instances within the Auto Scaling group. By defining this argument, users can control the compatibility and performance of instances for workloads requiring specialized hardware accelerators, such as GPUs, ensuring alignment with specific computational or machine learning requirements."
+                    },
+                    {
+                      "name": "accelerator_names",
+                      "description": "(Optional) List of accelerator names. Default is any acclerator. ```hcl Valid names: * a100 - NVIDIA A100 GPUs * v100 - NVIDIA V100 GPUs * k80 - NVIDIA K80 GPUs * t4 - NVIDIA T4 GPUs * m60 - NVIDIA M60 GPUs * radeon-pro-v520 - AMD Radeon Pro V520 GPUs * vu9p - Xilinx VU9P FPGAs ```",
+                      "required": false,
+                      "type": "set(string)",
+                      "llm_summary": "The `accelerator_names` argument within the `instance_requirements` block of the `aws_autoscaling_group` resource allows users to specify a set of GPU or FPGA accelerator types (e.g., NVIDIA A100, AMD Radeon Pro V520) that instances in the Auto Scaling group must support. By defining this argument, users can optimize workloads for specific computational needs, such as machine learning, high-performance computing, or graphics processing, ensuring the Auto Scaling group provisions instances with compatible hardware accelerators."
+                    },
+                    {
+                      "name": "accelerator_types",
+                      "description": "(Optional) List of accelerator types. Default is any accelerator type. accelerator_total_memory_mib - (Optional) Block describing the minimum and maximum total memory of the accelerators. Default is no minimum or maximum.",
+                      "required": false,
+                      "type": "set(string)",
+                      "llm_summary": "The `accelerator_types` argument in the `instance_requirements` block of the `aws_autoscaling_group` resource allows users to specify a set of desired accelerator types (e.g., GPUs or specialized hardware) for EC2 instances within the Auto Scaling group. By defining this argument, users can control the compatibility of instance types with specific workloads requiring hardware acceleration, ensuring optimal performance for tasks like machine learning, high-performance computing, or data processing."
+                    },
+                    {
+                      "name": "allowed_instance_types",
+                      "description": "(Optional) List of instance types to apply your specified attributes against. All other instance types are ignored, even if they match your specified attributes. You can use strings with one or more wild cards, represented by an asterisk (*), to allow an instance type, size, or generation. The following are examples: `m5.8xlarge`, `c5*.*`, `m5a.*`, `r*`, `*3*`. For example, if you specify `c5*`, you are allowing the entire C5 instance family, which includes all C5a and C5n instance types. If you specify `m5a.*`, you are allowing all the M5a instance types, but not the M5n instance types. Maximum of 400 entries in the list; each entry is limited to 30 characters. Default is all instance types. NOTE:If you specify `allowed_instance_types`, you can't specify `excluded_instance_types`.",
+                      "required": false,
+                      "type": "set(string)",
+                      "llm_summary": "The `allowed_instance_types` argument in the `instance_requirements` block of the `aws_autoscaling_group` resource allows users to explicitly define a set of EC2 instance types (or families) that meet their scaling requirements, using exact matches or wildcard patterns. By configuring this argument, users can control which instance types are eligible for selection during Auto Scaling, ensuring alignment with workload performance, cost, or compatibility goals while excluding all other instance types by default."
+                    },
+                    {
+                      "name": "bare_metal",
+                      "description": "(Optional) Indicate whether bare metal instace types should be `included`, `excluded`, or `required`. Default is `excluded`.",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `bare_metal` argument in the `instance_requirements` block of the `aws_autoscaling_group` resource allows users to specify whether bare metal instance types should be included, excluded, or required when defining the instance type constraints for the Auto Scaling group. This configuration impacts the hardware provisioning by controlling whether instances without virtualization layers are eligible, aligning with user goals such as optimizing performance for workloads requiring direct access to physical hardware."
+                    },
+                    {
+                      "name": "burstable_performance",
+                      "description": "(Optional) Indicate whether burstable performance instance types should be `included`, `excluded`, or `required`. Default is `excluded`.",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `burstable_performance` argument in the `instance_requirements` block of the `aws_autoscaling_group` resource allows users to specify whether burstable performance instance types (e.g., T-series instances) should be included, excluded, or required when selecting EC2 instances for the Auto Scaling group. This configuration impacts instance type eligibility based on workload needs, enabling users to optimize cost and performance by controlling the use of instances designed for variable CPU usage patterns."
+                    },
+                    {
+                      "name": "cpu_manufacturers",
+                      "description": "(Optional) List of CPU manufacturer names. Default is any manufacturer. NOTE:Don't confuse the CPU hardware manufacturer with the CPU hardware architecture. Instances will be launched with a compatible CPU architecture based on the Amazon Machine Image (AMI) that you specify in your launch template. allowed_instance_types - (Optional) List of instance types to apply your specified attributes against. All other instance types are ignored, even if they match your specified attributes. You can use strings with one or more wild cards, represented by an asterisk (*), to allow an instance type, size, or generation. The following are examples: m5.8xlarge, c5*.*, m5a.*, r*, *3*. For example, if you specify c5*, you are allowing the entire C5 instance family, which includes all C5a and C5n instance types. If you specify m5a.*, you are allowing all the M5a instance types, but not the M5n instance types. Maximum of 400 entries in the list; each entry is limited to 30 characters. Default is all instance types. If you specify allowed_instance_types, you can't specify excluded_instance_types. bare_metal - (Optional) Indicate whether bare metal instace types should be included, excluded, or required. Default is excluded. baseline_ebs_bandwidth_mbps - (Optional) Block describing the minimum and maximum baseline EBS bandwidth, in Mbps. Default is no minimum or maximum.",
+                      "required": false,
+                      "type": "set(string)",
+                      "llm_summary": "The `cpu_manufacturers` argument in the `instance_requirements` block of the `aws_autoscaling_group` resource allows users to specify a set of preferred CPU manufacturers (e.g., Intel, AMD) for the EC2 instances launched by the Auto Scaling group. This enables users to control the underlying CPU vendor for their instances, aligning with workload requirements or cost optimization strategies, while defaulting to any manufacturer if not specified."
+                    },
+                    {
+                      "name": "excluded_instance_types",
+                      "description": "(Optional) List of instance types to exclude. You can use strings with one or more wild cards, represented by an asterisk (*), to exclude an instance type, size, or generation. The following are examples: `m5.8xlarge`, `c5*.*`, `m5a.*`, `r*`, `*3*`. For example, if you specify `c5*`, you are excluding the entire C5 instance family, which includes all C5a and C5n instance types. If you specify `m5a.*`, you are excluding all the M5a instance types, but not the M5n instance types. Maximum of 400 entries in the list; each entry is limited to 30 characters. Default is no excluded instance types. NOTE:If you specify `excluded_instance_types`, you can't specify `allowed_instance_types`.",
+                      "required": false,
+                      "type": "set(string)",
+                      "llm_summary": "The `excluded_instance_types` argument allows users to define a set of EC2 instance types to exclude from consideration when fulfilling the instance requirements for an Auto Scaling group. By specifying instance types, sizes, or generations (with optional wildcards), users can fine-tune instance selection to avoid certain families or configurations, ensuring compliance with cost, performance, or compatibility constraints."
+                    },
+                    {
+                      "name": "instance_generations",
+                      "description": "(Optional) List of instance generation names. Default is any generation. excluded_instance_types - (Optional) List of instance types to exclude. You can use strings with one or more wild cards, represented by an asterisk (*), to exclude an instance type, size, or generation. The following are examples: m5.8xlarge, c5*.*, m5a.*, r*, *3*. For example, if you specify c5*, you are excluding the entire C5 instance family, which includes all C5a and C5n instance types. If you specify m5a.*, you are excluding all the M5a instance types, but not the M5n instance types. Maximum of 400 entries in the list; each entry is limited to 30 characters. Default is no excluded instance types. If you specify excluded_instance_types, you can't specify allowed_instance_types. instance_generations - (Optional) List of instance generation names. Default is any generation. ```hcl Valid names: * current - Recommended for best performance. * previous - For existing applications optimized for older instance types. ```",
+                      "required": false,
+                      "type": "set(string)",
+                      "llm_summary": "The `instance_generations` argument within the `instance_requirements` block of the `aws_autoscaling_group` resource allows users to specify the preferred generation of EC2 instances (e.g., `current` for modern, high-performance instances or `previous` for compatibility with older workloads). By setting this argument, users can optimize instance selection for performance or legacy application requirements, aligning the Auto Scaling Group's instance provisioning with workload needs."
+                    },
+                    {
+                      "name": "local_storage",
+                      "description": "(Optional) Indicate whether instance types with local storage volumes are `included`, `excluded`, or `required`. Default is `included`.",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `local_storage` argument in the `instance_requirements` block of the `aws_autoscaling_group` resource allows users to specify whether instance types with local storage volumes should be included, excluded, or required when selecting EC2 instances for the Auto Scaling group. This configuration impacts the instance type selection process, enabling users to align storage capabilities with workload requirements, such as optimizing for ephemeral storage or avoiding local storage entirely."
+                    },
+                    {
+                      "name": "local_storage_types",
+                      "description": "(Optional) List of local storage type names. Default any storage type. ```hcl Value names: * hdd - hard disk drive * ssd - solid state drive ```",
+                      "required": false,
+                      "type": "set(string)",
+                      "llm_summary": "The `local_storage_types` argument in the `instance_requirements` block of the `aws_autoscaling_group` resource allows users to specify the preferred types of local storage (e.g., HDD or SSD) for instances launched within the Auto Scaling group. By defining this argument, users can optimize instance selection based on storage performance needs, ensuring compatibility with workload requirements such as high-speed data access or cost-effective storage solutions."
+                    },
+                    {
+                      "name": "max_spot_price_as_percentage_of_optimal_on_demand_price",
+                      "description": "(Optional) The price protection threshold for Spot Instances. This is the maximum you\u2019ll pay for a Spot Instance, expressed as a percentage higher than the cheapest M, C, or R instance type with your specified attributes. When Amazon EC2 Auto Scaling selects instance types with your attributes, we will exclude instance types whose price is higher than your threshold. The parameter accepts an integer, which Amazon EC2 Auto Scaling interprets as a percentage. To turn off price protection, specify a high value, such as 999999. Conflicts with `spot_max_price_percentage_over_lowest_price`",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "Defines the maximum price threshold for Spot Instances as a percentage above the optimal On-Demand price for M, C, or R instance types matching specified attributes. This argument enables cost control by excluding instance types that exceed the defined percentage, helping users optimize instance selection within budget constraints while configuring Auto Scaling behavior."
+                    },
+                    {
+                      "name": "on_demand_max_price_percentage_over_lowest_price",
+                      "description": "(Optional) Price protection threshold for On-Demand Instances. This is the maximum you\u2019ll pay for an On-Demand Instance, expressed as a percentage higher than the cheapest M, C, or R instance type with your specified attributes. When Amazon EC2 Auto Scaling selects instance types with your attributes, we will exclude instance types whose price is higher than your threshold. The parameter accepts an integer, which Amazon EC2 Auto Scaling interprets as a percentage. To turn off price protection, specify a high value, such as 999999. Default is 20. If you set DesiredCapacityType to vcpu or memory-mib, the price protection threshold is applied based on the per vCPU or per memory price instead of the per instance price.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "Defines the maximum price threshold, as a percentage above the lowest-priced compatible instance type, for On-Demand Instances within the \"instance_requirements\" of an Auto Scaling Group. This argument enables cost control by excluding instance types that exceed the specified price limit, ensuring optimized instance selection based on budget constraints and resource attributes."
+                    },
+                    {
+                      "name": "require_hibernate_support",
+                      "description": "(Optional) Indicate whether instance types must support On-Demand Instance Hibernation, either `true` or `false`. Default is `false`.",
+                      "required": false,
+                      "type": "bool",
+                      "llm_summary": "The `require_hibernate_support` argument in the `instance_requirements` block of the `aws_autoscaling_group` resource allows users to specify whether the selected instance types must support On-Demand Instance Hibernation. Setting this to `true` ensures that only instance types capable of hibernation are considered, which is useful for workloads requiring fast recovery and state preservation during instance restarts."
+                    },
+                    {
+                      "name": "spot_max_price_percentage_over_lowest_price",
+                      "description": "(Optional) Price protection threshold for Spot Instances. This is the maximum you\u2019ll pay for a Spot Instance, expressed as a percentage higher than the cheapest M, C, or R instance type with your specified attributes. When Amazon EC2 Auto Scaling selects instance types with your attributes, we will exclude instance types whose price is higher than your threshold. The parameter accepts an integer, which Amazon EC2 Auto Scaling interprets as a percentage. To turn off price protection, specify a high value, such as 999999. Default is 100. Conflicts with `max_spot_price_as_percentage_of_optimal_on_demand_price` If you set DesiredCapacityType to vcpu or memory-mib, the price protection threshold is applied based on the per vCPU or per memory price instead of the per instance price.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "Defines the maximum price threshold for Spot Instances as a percentage above the lowest-priced compatible instance type, allowing users to control cost optimization and exclude higher-priced instance types during Auto Scaling. This setting helps balance cost efficiency with instance availability and can be adjusted to align with budget constraints or performance needs."
+                    }
+                  ],
+                  "blocks": [
+                    {
+                      "name": "accelerator_count",
+                      "description": "(Optional) Block describing the minimum and maximum number of accelerators (GPUs, FPGAs, or AWS Inferentia chips). Default is no minimum or maximum.`min` - (Optional) Minimum. `max` - (Optional) Maximum. Set to `0` to exclude instance types with accelerators.",
+                      "cardinality": [
+                        0,
+                        1
+                      ],
+                      "arguments": [
+                        {
+                          "name": "max",
+                          "description": "(Optional) Maximum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `max` argument within the `accelerator_count` configuration for the `aws_autoscaling_group` resource allows users to define the maximum number of accelerators (e.g., GPUs or specialized hardware) that can be provisioned for instances in the Auto Scaling group. By setting this value, users can control resource scaling limits to optimize performance and cost, ensuring the group does not exceed a specified threshold of accelerator capacity."
+                        },
+                        {
+                          "name": "min",
+                          "description": "(Required) Minimum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `min` argument for the `accelerator_count` in the `aws_autoscaling_group` resource specifies the minimum number of accelerators (e.g., GPUs or specialized hardware) required for instances within the autoscaling group. Configuring this value ensures that the group maintains a baseline level of computational resources, supporting workloads that depend on hardware acceleration for consistent performance."
+                        }
+                      ],
+                      "blocks": [],
+                      "llm_summary": "The `accelerator_count` block within the `instance_requirements` configuration of the `aws_autoscaling_group` resource defines constraints on the minimum and maximum number of hardware accelerators (e.g., GPUs, FPGAs, AWS Inferentia chips) for selected instance types. This block enables users to optimize instance selection by excluding or prioritizing instances with specific accelerator capabilities, ensuring alignment with workload requirements such as machine learning, high-performance computing, or inference tasks."
+                    },
+                    {
+                      "name": "accelerator_total_memory_mib",
+                      "description": "(Optional) Block describing the minimum and maximum total memory of the accelerators. Default is no minimum or maximum. `min` - (Optional) Minimum. `max` - (Optional) Maximum.",
+                      "cardinality": [
+                        0,
+                        1
+                      ],
+                      "arguments": [
+                        {
+                          "name": "max",
+                          "description": "(Optional) Maximum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `max` argument for `accelerator_total_memory_mib` in the `aws_autoscaling_group` resource allows users to specify the maximum amount of memory (in MiB) allocated to GPU accelerators within the autoscaling group. By setting this value, users can define an upper limit for GPU memory resources, ensuring optimized performance and cost control for workloads requiring hardware acceleration."
+                        },
+                        {
+                          "name": "min",
+                          "description": "(Required) Minimum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `min` argument for `accelerator_total_memory_mib` in the `aws_autoscaling_group` resource allows users to specify the minimum amount of memory (in MiB) required for GPU accelerators in the Auto Scaling group. By setting this value, users can ensure that instances launched meet a baseline memory threshold for workloads requiring GPU acceleration, supporting performance optimization and resource compatibility."
+                        }
+                      ],
+                      "blocks": [],
+                      "llm_summary": "The `accelerator_total_memory_mib` block within the `instance_requirements` configuration of the `aws_autoscaling_group` resource defines constraints on the minimum and maximum total memory available to instance accelerators (e.g., GPUs or specialized hardware). This block enables users to fine-tune instance selection based on accelerator memory requirements, ensuring optimal performance for workloads that rely on hardware acceleration."
+                    },
+                    {
+                      "name": "baseline_ebs_bandwidth_mbps",
+                      "description": "(Optional) Block describing the minimum and maximum baseline EBS bandwidth, in Mbps. Default is no minimum or maximum. `min` - (Optional) Minimum. `max` - (Optional) Maximum.",
+                      "cardinality": [
+                        0,
+                        1
+                      ],
+                      "arguments": [
+                        {
+                          "name": "max",
+                          "description": "(Optional) Maximum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `max` argument for `baseline_ebs_bandwidth_mbps` in the `aws_autoscaling_group` resource allows users to specify the maximum baseline bandwidth (in Mbps) allocated to Elastic Block Store (EBS) volumes for instances within the Auto Scaling group. Configuring this value helps optimize EBS performance for workloads with high I/O demands, ensuring sufficient bandwidth for storage operations while balancing resource allocation across instances."
+                        },
+                        {
+                          "name": "min",
+                          "description": "(Required) Minimum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `min` argument for the `baseline_ebs_bandwidth_mbps` in the `aws_autoscaling_group` resource allows users to define the minimum baseline EBS bandwidth (in Mbps) allocated to instances within the Auto Scaling group. By setting this value, users can ensure a guaranteed level of EBS throughput for instances, optimizing performance for workloads that rely on consistent disk I/O."
+                        }
+                      ],
+                      "blocks": [],
+                      "llm_summary": "The `baseline_ebs_bandwidth_mbps` block within the `instance_requirements` configuration of the `aws_autoscaling_group` resource defines the minimum and maximum baseline EBS bandwidth (in Mbps) required for instances in the group. This block enables fine-grained control over storage performance requirements, ensuring that selected instances meet specific throughput criteria for optimized data transfer and workload efficiency."
+                    },
+                    {
+                      "name": "memory_gib_per_vcpu",
+                      "description": "(Optional) Block describing the minimum and maximum amount of memory (GiB) per vCPU. Default is no minimum or maximum. `min` - (Optional) Minimum. May be a decimal number, e.g. `0.5`. `max` - (Optional) Maximum. May be a decimal number, e.g. `0.5`.",
+                      "cardinality": [
+                        0,
+                        1
+                      ],
+                      "arguments": [
+                        {
+                          "name": "max",
+                          "description": "(Optional) Maximum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `max` argument for `memory_gib_per_vcpu` in the `aws_autoscaling_group` resource allows users to define the maximum amount of memory (in GiB) allocated per virtual CPU for instances within the Auto Scaling group. By setting this value, users can control resource allocation limits to optimize instance performance and ensure compliance with workload requirements or cost constraints."
+                        },
+                        {
+                          "name": "min",
+                          "description": "(Required) Minimum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `min` argument for `memory_gib_per_vcpu` in the `aws_autoscaling_group` resource allows users to specify the minimum amount of memory (in GiB) allocated per virtual CPU for instances within the Auto Scaling group. Configuring this value ensures that instance types meet baseline memory requirements, supporting workloads with specific memory-to-CPU ratio needs and optimizing resource selection during scaling operations."
+                        }
+                      ],
+                      "blocks": [],
+                      "llm_summary": "The `memory_gib_per_vcpu` block within the `instance_requirements` configuration of the `aws_autoscaling_group` resource defines constraints on the minimum and maximum memory (in GiB) allocated per vCPU for EC2 instances in the group. This block enables fine-grained control over instance selection based on memory-to-vCPU ratios, helping users optimize resource performance and cost by ensuring instances meet specific workload requirements."
+                    },
+                    {
+                      "name": "memory_mib",
+                      "description": "(Required) Block describing the minimum and maximum amount of memory (MiB). Default is no maximum. `min` - (Required) Minimum. `max` - (Optional) Maximum.",
+                      "cardinality": [
+                        0,
+                        1
+                      ],
+                      "arguments": [
+                        {
+                          "name": "max",
+                          "description": "(Optional) Maximum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `max` argument within the `memory_mib` configuration for the `aws_autoscaling_group` resource allows users to define the maximum amount of memory (in MiB) that can be allocated to instances in the Auto Scaling group. By setting this value, users can enforce upper memory limits for instance configurations, ensuring resource constraints align with workload requirements and cost optimization goals."
+                        },
+                        {
+                          "name": "min",
+                          "description": "(Required) Minimum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `min` argument for `memory_mib` in the `aws_autoscaling_group` resource allows users to define the minimum amount of memory (in MiB) required for instances within the Auto Scaling group. By setting this value, users ensure that only instances meeting the specified memory threshold are considered for scaling, aligning resource allocation with workload requirements and optimizing performance."
+                        }
+                      ],
+                      "blocks": [],
+                      "llm_summary": "The `memory_mib` block within the `instance_requirements` configuration of the `aws_autoscaling_group` resource defines memory constraints for EC2 instances by specifying the minimum required and optionally the maximum allowable memory in MiB. This block enables precise control over instance selection based on memory requirements, ensuring the autoscaling group provisions instances that meet workload-specific performance needs."
+                    },
+                    {
+                      "name": "network_bandwidth_gbps",
+                      "description": "(Optional) Block describing the minimum and maximum amount of network bandwidth, in gigabits per second (Gbps). Default is no minimum or maximum. `min` - (Optional) Minimum. `max` - (Optional) Maximum.",
+                      "cardinality": [
+                        0,
+                        1
+                      ],
+                      "arguments": [
+                        {
+                          "name": "max",
+                          "description": "(Optional) Maximum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `max` argument for `network_bandwidth_gbps` in the `aws_autoscaling_group` resource allows users to define the maximum network bandwidth (in Gbps) allocated to instances within the Auto Scaling group. By setting this value, users can control the upper limit of network performance for scaling workloads, ensuring optimal resource utilization and preventing over-allocation in high-demand scenarios."
+                        },
+                        {
+                          "name": "min",
+                          "description": "(Required) Minimum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `min` argument for `network_bandwidth_gbps` in the `aws_autoscaling_group` resource specifies the minimum guaranteed network bandwidth (in Gbps) allocated to instances within the Auto Scaling group. This allows users to define baseline network performance requirements, ensuring instances meet specific workload demands or service-level agreements."
+                        }
+                      ],
+                      "blocks": [],
+                      "llm_summary": "The `network_bandwidth_gbps` block within the `instance_requirements` configuration of the `aws_autoscaling_group` resource defines constraints for the minimum and maximum network bandwidth (in Gbps) that instances must support. This block enables users to optimize instance selection based on network performance requirements, ensuring autoscaled instances meet specific workload demands for data transfer capacity."
+                    },
+                    {
+                      "name": "network_interface_count",
+                      "description": "(Optional) Block describing the minimum and maximum number of network interfaces. Default is no minimum or maximum. `min` - (Optional) Minimum. `max` - (Optional) Maximum.",
+                      "cardinality": [
+                        0,
+                        1
+                      ],
+                      "arguments": [
+                        {
+                          "name": "max",
+                          "description": "(Optional) Maximum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `max` argument for the `network_interface_count` in the `aws_autoscaling_group` resource allows users to define the maximum number of network interfaces that can be attached to instances within the Auto Scaling group. By setting this value, users can control the upper limit of network connectivity for instances, ensuring scalability while adhering to resource constraints or specific networking requirements."
+                        },
+                        {
+                          "name": "min",
+                          "description": "(Required) Minimum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `min` argument for the `network_interface_count` in the `aws_autoscaling_group` resource specifies the minimum number of network interfaces that must be attached to instances within the Auto Scaling group. By setting this value, users can ensure baseline network connectivity requirements are met for their instances, supporting scenarios like high-availability networking or compliance with infrastructure standards."
+                        }
+                      ],
+                      "blocks": [],
+                      "llm_summary": "The `network_interface_count` block within the `instance_requirements` configuration of the `aws_autoscaling_group` resource defines constraints on the minimum and maximum number of network interfaces for instances launched by the Auto Scaling group. This block enables fine-grained control over instance networking capabilities, ensuring compatibility with workload-specific requirements or compliance standards for network interface provisioning."
+                    },
+                    {
+                      "name": "total_local_storage_gb",
+                      "description": "(Optional) Block describing the minimum and maximum total local storage (GB). Default is no minimum or maximum. `min` - (Optional) Minimum. May be a decimal number, e.g. `0.5`. `max` - (Optional) Maximum. May be a decimal number, e.g. `0.5`.",
+                      "cardinality": [
+                        0,
+                        1
+                      ],
+                      "arguments": [
+                        {
+                          "name": "max",
+                          "description": "(Optional) Maximum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `max` argument for `total_local_storage_gb` in the `aws_autoscaling_group` resource allows users to define the maximum amount of local storage (in gigabytes) that an instance in the Auto Scaling group can utilize. By setting this value, users can enforce storage capacity limits for instances, ensuring resource optimization and alignment with workload requirements or cost constraints."
+                        },
+                        {
+                          "name": "min",
+                          "description": "(Required) Minimum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `min` argument for `total_local_storage_gb` in the `aws_autoscaling_group` resource allows users to specify the minimum amount of local storage (in gigabytes) required for instances within the Auto Scaling group. By setting this value, users ensure that only instances meeting this storage threshold are considered for scaling, aligning infrastructure capacity with application storage requirements."
+                        }
+                      ],
+                      "blocks": [],
+                      "llm_summary": "The `total_local_storage_gb` block within the `instance_requirements` configuration of the `aws_autoscaling_group` resource defines constraints for the minimum and maximum total local storage capacity (in GB) required for instances in the group. This block enables precise control over instance selection based on storage needs, ensuring the autoscaling group provisions instances that meet specific local storage requirements for workloads or applications."
+                    },
+                    {
+                      "name": "vcpu_count",
+                      "description": "(Required) Block describing the minimum and maximum number of vCPUs. Default is no maximum. `min` - (Required) Minimum. `max` - (Optional) Maximum.",
+                      "cardinality": [
+                        0,
+                        1
+                      ],
+                      "arguments": [
+                        {
+                          "name": "max",
+                          "description": "(Optional) Maximum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `max` argument for the `vcpu_count` in the `aws_autoscaling_group` resource allows users to define the maximum number of virtual CPU cores that can be allocated to instances within the autoscaling group. By setting this value, users can enforce resource limits to optimize cost management and ensure workloads do not exceed predefined compute capacity thresholds."
+                        },
+                        {
+                          "name": "min",
+                          "description": "(Required) Minimum.",
+                          "required": false,
+                          "type": "number",
+                          "llm_summary": "The `min` argument for the `vcpu_count` in the `aws_autoscaling_group` resource specifies the minimum number of virtual CPU cores required for instances within the Auto Scaling group. By setting this value, users can ensure that the group's instances meet baseline compute capacity requirements, supporting workloads with predictable performance needs or resource constraints."
+                        }
+                      ],
+                      "blocks": [],
+                      "llm_summary": "The `vcpu_count` block within the `instance_requirements` configuration of the `aws_autoscaling_group` resource defines the minimum and optional maximum number of virtual CPUs (vCPUs) required for EC2 instances in the group. This block enables precise control over instance selection based on compute capacity, ensuring the autoscaling group provisions instances that meet specific performance requirements for workloads."
+                    }
+                  ],
+                  "llm_summary": "The `instance_requirements` block within the `override` context of the `aws_autoscaling_group` resource allows users to specify criteria for overriding the instance type defined in the Launch Template, ensuring that Auto Scaling selects instance types that meet specific performance, cost, or compatibility requirements. This block encapsulates settings related to instance attributes, such as CPU, memory, storage, and networking capabilities, enabling fine-grained control over the infrastructure to optimize resource allocation and meet workload demands."
+                },
+                {
+                  "name": "launch_template_specification",
+                  "description": "(Optional) Override the instance launch template specification in the Launch Template.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "launch_template_id",
+                      "description": "",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `launch_template_id` argument in the `launch_template_specification` block of the `aws_autoscaling_group` resource allows users to specify the unique identifier of an existing EC2 launch template to define instance configuration details for the Auto Scaling group. By setting this argument, users can control key aspects such as instance type, networking, and storage settings, ensuring consistent and reusable configurations for scaling operations."
+                    },
+                    {
+                      "name": "launch_template_name",
+                      "description": "",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `launch_template_name` argument in the `launch_template_specification` block of the `aws_autoscaling_group` resource allows users to specify the name of an existing EC2 launch template to define instance configuration details, such as AMI, instance type, and networking settings, for the Auto Scaling group. By setting this argument, users can ensure consistent and reusable instance configurations across scaling operations, aligning with common goals like standardizing infrastructure and automating instance provisioning."
+                    },
+                    {
+                      "name": "version",
+                      "description": "(Optional) Template version. Can be version number, `$Latest`, or `$Default`. (Default: `$Default`).",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `version` argument in the `launch_template_specification` of the `aws_autoscaling_group` resource allows users to specify which version of the associated launch template should be used for provisioning instances in the Auto Scaling group. By setting this argument to a specific version number, `$Latest`, or `$Default` (defaulting to `$Default` if unspecified), users can control the instance configuration and behavior, ensuring alignment with desired application or infrastructure requirements, such as using the most recent updates or a stable default configuration."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `launch_template_specification` block within the `override` context of the `aws_autoscaling_group` resource allows users to customize the instance launch template used by the Auto Scaling group, overriding default configurations. It encapsulates settings related to specifying an alternative launch template or version, enabling precise control over instance provisioning to meet specific application or infrastructure requirements."
+                }
+              ],
+              "llm_summary": "The \"override\" configuration block within the \"launch_template\" context of the \"aws_autoscaling_group\" resource enables fine-grained control over instance type selection by specifying multiple instance types to override those defined in the launch template. This block allows users to prioritize instance types for on-demand instances based on their order in the list, optimizing cost and performance for dynamic scaling scenarios."
+            }
+          ],
+          "llm_summary": "The `launch_template` block within the `mixed_instances_policy` of the `aws_autoscaling_group` resource defines the configuration for instance provisioning by specifying a launch template and overrides for multiple instance types and weights. This block enables fine-grained control over instance diversity and allocation, allowing users to optimize cost and performance by customizing instance type distribution within an Auto Scaling group."
+        }
+      ],
+      "llm_summary": "The `mixed_instances_policy` block in the `aws_autoscaling_group` resource enables flexible configuration of launch targets by combining multiple instance types and purchase options (e.g., On-Demand and Spot instances) within an Auto Scaling group. It encapsulates settings for instance diversification, such as defining launch templates and allocation strategies, allowing users to optimize cost, performance, and availability for dynamic workloads."
+    },
+    {
+      "name": "tag",
+      "description": "(Optional) Configuration block(s) containing resource tags. See Tag below for more details.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "key",
+          "description": "(Required) Key",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `key` argument specifies the unique identifier for a tag applied to the AWS Auto Scaling Group, allowing users to define a meaningful label or category for resource organization, management, and filtering. Setting this argument enables tagging functionality, which is commonly used to group resources by environment, cost center, or application, facilitating operational tasks like billing, access control, and automation."
+        },
+        {
+          "name": "propagate_at_launch",
+          "description": "(Required) Enables propagation of the tag to Amazon EC2 instances launched via this ASG To declare multiple tags, additional tag blocks can be specified. Other AWS APIs may automatically add special tags to their associated Auto Scaling Group for management purposes, such as ECS Capacity Providers adding the AmazonECSManaged tag. These generally should be included in the configuration so Terraform does not attempt to remove them and so if the min_size was greater than zero on creation, that these tag(s) are applied to any initial EC2 Instances in the Auto Scaling Group. If these tag(s) were missing in the Auto Scaling Group configuration on creation, affected EC2 Instances missing the tags may require manual intervention of adding the tags to ensure they work properly with the other AWS service.",
+          "required": true,
+          "type": "bool",
+          "llm_summary": "The `propagate_at_launch` argument in the `tag` block of the `aws_autoscaling_group` resource controls whether the specified tag is automatically applied to all EC2 instances launched by the Auto Scaling Group. Setting this to `true` ensures consistent tagging across instances, which is critical for resource organization, cost tracking, and integration with other AWS services that rely on tags for functionality, such as ECS Capacity Providers."
+        },
+        {
+          "name": "value",
+          "description": "(Required) Value",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `value` argument specifies the content or data associated with a tag applied to the AWS Auto Scaling Group, allowing users to define metadata that categorizes or identifies the resource (e.g., environment, project, or cost center). Setting this argument enables tagging functionality, which is commonly used for resource organization, tracking, and automation in cloud environments."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `tag` configuration block in the `aws_autoscaling_group` resource allows users to define and manage resource tags, which are key-value pairs used for categorization, organization, and identification of the Auto Scaling group within AWS. By configuring this block, users can streamline resource management, enable cost tracking, and apply policies or automation workflows based on tags, enhancing operational efficiency and governance."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_autoscaling_group` resource allows users to specify the maximum duration (in string format, e.g., \"5m\" for 5 minutes) Terraform will wait for the deletion of the Auto Scaling group and its associated resources. Configuring this argument helps control the timeout behavior during resource teardown, ensuring predictable and managed cleanup processes in scenarios where deletion may take longer due to dependencies or scaling activities."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block of the `aws_autoscaling_group` resource allows users to specify the maximum duration (as a string) Terraform should wait for updates to the Auto Scaling group to complete. Configuring this timeout ensures predictable behavior during updates, helping users manage deployment workflows and avoid prolonged or stalled operations in dynamic scaling environments."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_autoscaling_group` resource defines customizable time limits for specific operations, such as creating, updating, or deleting an Auto Scaling group. By configuring this block, users can manage operation durations to prevent timeouts in long-running processes, ensuring reliable deployment and lifecycle management of Auto Scaling groups in dynamic cloud environments."
+    },
+    {
+      "name": "traffic_source",
+      "description": "(Optional) Attaches one or more traffic sources to the specified Auto Scaling group.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "identifier",
+          "description": "Identifies the traffic source. For Application Load Balancers, Gateway Load Balancers, Network Load Balancers, and VPC Lattice, this will be the Amazon Resource Name (ARN) for a target group in this account and Region. For Classic Load Balancers, this will be the name of the Classic Load Balancer in this account and Region.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `identifier` argument for the `traffic_source` in the `aws_autoscaling_group` resource specifies the unique reference to the traffic source that the Auto Scaling group will route traffic to. This can be the Amazon Resource Name (ARN) of a target group (for ALB, NLB, Gateway Load Balancer, or VPC Lattice) or the name of a Classic Load Balancer, enabling users to define the integration point for distributing traffic to their application infrastructure."
+        },
+        {
+          "name": "type",
+          "description": "Provides additional context for the value of Identifier. The following lists the valid values: `elb` if `identifier` is the name of a Classic Load Balancer. `elbv2` if `identifier` is the ARN of an Application Load Balancer, Gateway Load Balancer, or Network Load Balancer target group. `vpc-lattice` if `identifier` is the ARN of a VPC Lattice target group.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `type` argument in the `traffic_source` block of the `aws_autoscaling_group` resource allows users to specify the kind of load balancer or target group associated with the autoscaling group. By defining this argument (`elb`, `elbv2`, or `vpc-lattice`), users ensure proper integration with the corresponding traffic source, enabling the autoscaling group to route traffic effectively based on the specified load balancer or target group type."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `traffic_source` block in the `aws_autoscaling_group` resource enables the attachment of one or more traffic sources, such as load balancers or target groups, to the Auto Scaling group. This configuration facilitates routing incoming traffic to instances within the group, ensuring seamless integration with application load balancing and improving scalability and fault tolerance for workloads."
+    },
+    {
+      "name": "warm_pool",
+      "description": "(Optional) If this block is configured, add a Warm Pool to the specified Auto Scaling group. Defined below",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "max_group_prepared_capacity",
+          "description": "(Optional) Total maximum number of instances that are allowed to be in the warm pool or in any state except Terminated for the Auto Scaling group.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `max_group_prepared_capacity` argument for the `warm_pool` in the `aws_autoscaling_group` resource allows users to define the maximum number of instances that can be in the warm pool or in any state other than `Terminated` within the Auto Scaling group. This configuration helps control resource allocation and cost by limiting the number of pre-provisioned instances available for rapid scaling, aligning with user goals like optimizing performance while managing infrastructure expenses."
+        },
+        {
+          "name": "min_size",
+          "description": "(Optional) Minimum number of instances to maintain in the warm pool. This helps you to ensure that there is always a certain number of warmed instances available to handle traffic spikes. Defaults to 0 if not specified.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "\"Configures the minimum number of pre-initialized instances to retain in the warm pool for an Auto Scaling group, ensuring a baseline capacity of warmed instances is always available to handle sudden traffic spikes. By setting this value, users can optimize response times and reduce instance startup delays during scaling events.\""
+        },
+        {
+          "name": "pool_state",
+          "description": "(Optional) Sets the instance state to transition to after the lifecycle hooks finish. Valid values are: Stopped (default), Running or Hibernated.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `pool_state` argument for the `warm_pool` in the `aws_autoscaling_group` resource allows users to define the desired instance state (Stopped, Running, or Hibernated) after lifecycle hooks are completed. This configuration impacts the behavior of warm pool instances by specifying their readiness level, optimizing resource utilization and startup times based on application needs."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "instance_reuse_policy",
+          "description": "(Optional) Whether instances in the Auto Scaling group can be returned to the warm pool on scale in. The default is to terminate instances in the Auto Scaling group when the group scales in.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "reuse_on_scale_in",
+              "description": "(Optional) Whether instances in the Auto Scaling group can be returned to the warm pool on scale in.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `reuse_on_scale_in` argument in the `instance_reuse_policy` of the `aws_autoscaling_group` resource allows users to control whether instances removed during a scale-in operation are returned to the warm pool for potential reuse. Enabling this option optimizes resource utilization by retaining instances in a pre-warmed state, reducing startup time for future scaling events and supporting efficient lifecycle management in dynamic environments."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `instance_reuse_policy` block within the `warm_pool` configuration of the `aws_autoscaling_group` resource defines lifecycle rules for scaling operations, specifically whether instances are retained in the warm pool or terminated during scale-in events. Configuring this block enables users to optimize resource reuse and reduce instance launch times by retaining scaled-in instances for future use, rather than terminating them, aligning with cost-efficiency and performance goals."
+        }
+      ],
+      "llm_summary": "The `warm_pool` configuration block in the `aws_autoscaling_group` resource enables the addition of a Warm Pool to the Auto Scaling group, allowing pre-initialized instances to remain in a ready state for faster scaling. It encapsulates settings related to instance lifecycle management, such as retention policies and pre-warming configurations, helping users optimize scaling performance and reduce latency during demand spikes."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN for this Auto Scaling Group",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "predicted_capacity",
+      "description": "Predicted capacity of the group.",
+      "optional": false,
+      "type": "number"
+    },
+    {
+      "name": "warm_pool_size",
+      "description": "Current size of the warm pool. When using ELB as the health_check_type, health_check_grace_period is required. Terraform has two types of ways you can add lifecycle hooks - via the initial_lifecycle_hook attribute from this resource, or via the separate aws_autoscaling_lifecycle_hook resource. initial_lifecycle_hook exists here because any lifecycle hooks added with aws_autoscaling_lifecycle_hook will not be added until the Auto Scaling Group has been created, and depending on your capacity settings, after the initial instances have been launched, creating unintended behavior. If you need hooks to run on all instances, add them with initial_lifecycle_hook here, but take care to not duplicate these hooks in aws_autoscaling_lifecycle_hook.",
+      "optional": false,
+      "type": "number"
+    }
+  ]
+}

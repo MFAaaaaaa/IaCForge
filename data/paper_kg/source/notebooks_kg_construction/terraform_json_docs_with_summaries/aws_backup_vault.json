@@ -1,0 +1,93 @@
+{
+  "resource": {
+    "name": "aws_backup_vault",
+    "description": "Provides an AWS Backup vault resource.",
+    "llm_summary": "The `aws_backup_vault` Terraform resource enables the creation and management of AWS Backup vaults, which serve as secure storage containers for backup data. It is commonly used to centralize and organize backups across AWS services, supporting scenarios like disaster recovery, compliance, and data retention policies. Users can configure key features such as encryption settings, access policies, lifecycle rules for automated retention and deletion, and event logging for audit and monitoring purposes."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_backup_vault\" \"example\" {\n  name        = \"example_backup_vault\"\n  kms_key_arn = aws_kms_key.example.arn\n}",
+      "llm_summary": "\"Demonstrates the basic configuration of an `aws_backup_vault` resource, showcasing how to create a backup vault with a custom name and associate it with a specified KMS key for encryption using the `name` and `kms_key_arn` arguments.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "force_destroy",
+      "description": "(Optional, Default: `false`) A boolean that indicates that all recovery points stored in the vault are deleted so that the vault can be destroyed without error.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `force_destroy` argument in the `aws_backup_vault` resource allows users to control whether all recovery points stored in the backup vault are automatically deleted when the vault is destroyed. Setting this to `true` enables a lifecycle behavior that ensures the vault can be removed without manual cleanup, supporting scenarios where automated resource teardown is required."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_backup_vault` resource allows users to specify a unique identifier for the backup vault, which serves as a reference point for managing and accessing the vault within AWS Backup. While optional, setting this argument can help users define a custom ID for organizational purposes or to ensure consistency across infrastructure configurations."
+    },
+    {
+      "name": "kms_key_arn",
+      "description": "(Optional) The server-side encryption key that is used to protect your backups.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `kms_key_arn` argument for the `aws_backup_vault` resource allows users to specify the ARN of a KMS key for server-side encryption, enabling enhanced security by encrypting backups stored in the vault. This configuration is optional but critical for users aiming to meet compliance requirements or enforce data protection policies through custom encryption keys."
+    },
+    {
+      "name": "name",
+      "description": "(Required) Name of the backup vault to create.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies the unique identifier for the backup vault, allowing users to define a distinct and human-readable name for organizing and managing backup storage within AWS Backup. Setting this argument is essential for creating the vault and is typically aligned with user goals like structuring backup resources by environment, application, or compliance requirements."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Metadata that you can assign to help organize the resources that you create. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument allows users to assign key-value metadata to the `aws_backup_vault` resource, enabling resource organization, categorization, and management (e.g., by environment, cost center, or project). When used alongside a provider-level `default_tags` configuration, it ensures resource-specific tags can override default tags, providing flexibility in tagging strategies."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_backup_vault` resource allows users to define a comprehensive set of key-value tags that are applied to the backup vault for organizational, management, or cost allocation purposes. By setting this argument, users can ensure consistent tagging across resources, enabling streamlined resource tracking, billing analysis, and compliance with tagging policies."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_backup_vault` resource allows users to specify the maximum duration (as a string) Terraform should wait for the deletion of a backup vault to complete. By configuring this timeout, users can control the behavior of resource lifecycle operations, ensuring smoother management of infrastructure changes and avoiding potential delays or errors during vault removal."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_backup_vault` resource defines customizable time limits for operations such as creating, updating, or deleting a backup vault. By configuring this block, users can manage operation durations to prevent long-running tasks from exceeding acceptable thresholds, ensuring better control over resource provisioning and lifecycle management."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the vault.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "recovery_points",
+      "description": "The number of recovery points that are stored in a backup vault.",
+      "optional": false,
+      "type": "number"
+    }
+  ]
+}

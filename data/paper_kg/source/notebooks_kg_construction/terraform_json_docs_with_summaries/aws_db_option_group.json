@@ -1,0 +1,182 @@
+{
+  "resource": {
+    "name": "aws_db_option_group",
+    "description": "Provides an RDS DB option group resource. Documentation of the available options for various RDS engines can be found at: - MariaDB Options - Microsoft SQL Server Options - MySQL Options - Oracle Options",
+    "llm_summary": "The `aws_db_option_group` Terraform resource enables the creation and management of RDS database option groups, allowing users to customize database engine-specific features and extensions for Amazon RDS instances. Common use cases include configuring advanced functionalities such as logging, caching, replication, or encryption for engines like MySQL, MariaDB, Oracle, and Microsoft SQL Server. This resource is essential for tailoring database behavior to meet specific application requirements, supporting fine-grained control over engine options and feature sets."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_db_option_group\" \"example\" {\n  name                     = \"option-group-test-terraform\"\n  option_group_description = \"Terraform Option Group\"\n  engine_name              = \"sqlserver-ee\"\n  major_engine_version     = \"11.00\"\n\n  option {\n    option_name = \"Timezone\"\n\n    option_settings {\n      name  = \"TIME_ZONE\"\n      value = \"UTC\"\n    }\n  }\n\n  option {\n    option_name = \"SQLSERVER_BACKUP_RESTORE\"\n\n    option_settings {\n      name  = \"IAM_ROLE_ARN\"\n      value = aws_iam_role.example.arn\n    }\n  }\n\n  option {\n    option_name = \"TDE\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_db_option_group` resource for a SQL Server Enterprise Edition database, showcasing the use of the `option` block to enable and customize database options such as `Timezone`, `SQLSERVER_BACKUP_RESTORE` (with an IAM role), and `TDE`. It highlights key configurations like `option_settings` for specifying parameters (e.g., `TIME_ZONE` and `IAM_ROLE_ARN`), providing a foundation for managing advanced database features."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "engine_name",
+      "description": "(Required) Specifies the name of the engine that this option group should be associated with.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `engine_name` argument specifies the database engine (e.g., MySQL, PostgreSQL, Oracle) that the `aws_db_option_group` is associated with, ensuring compatibility and enabling engine-specific options to be configured. This is a required parameter that defines the foundational context for the option group, aligning it with the desired database type to support tailored functionality and features."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_db_option_group` resource allows users to specify a unique identifier for the option group, typically used to reference or manage the resource programmatically within Terraform configurations. While optional, setting this argument can help ensure consistent identification of the option group across workflows, enabling better organization and tracking of database option group resources."
+    },
+    {
+      "name": "major_engine_version",
+      "description": "(Required) Specifies the major version of the engine that this option group should be associated with.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `major_engine_version` argument specifies the primary database engine version that the `aws_db_option_group` is compatible with, ensuring the option group is correctly configured for the desired database engine. Setting this value aligns the option group with the appropriate engine features and capabilities, enabling users to manage database options tailored to a specific engine version."
+    },
+    {
+      "name": "name",
+      "description": "(Optional, Forces new resource) Name of the option group. If omitted, Terraform will assign a random, unique name. Must be lowercase, to match as it is stored in AWS.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_db_option_group` resource allows users to define a custom, lowercase name for the option group, providing a meaningful identifier for organizational or operational purposes. If not specified, Terraform generates a unique name, and changes to this value will force the creation of a new resource, making it useful for managing lifecycle and naming conventions in database configurations."
+    },
+    {
+      "name": "name_prefix",
+      "description": "(Optional, Forces new resource) Creates a unique name beginning with the specified prefix. Conflicts with `name`. Must be lowercase, to match as it is stored in AWS.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name_prefix` argument for the `aws_db_option_group` resource allows users to define a custom prefix for the name of the option group, ensuring uniqueness while delegating the remainder of the name generation to Terraform. This is useful for automating resource naming conventions, especially in environments requiring consistent prefixes for organizational or environment-specific identification, and it forces the creation of a new resource when modified."
+    },
+    {
+      "name": "option_group_description",
+      "description": "(Optional) Description of the option group. Defaults to \"Managed by Terraform\".",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `option_group_description` argument allows users to define a custom description for the `aws_db_option_group`, providing meaningful context or metadata about the option group\u2019s purpose or configuration. This is useful for improving resource organization and clarity, especially in environments with multiple option groups, and defaults to \"Managed by Terraform\" if not specified."
+    },
+    {
+      "name": "skip_destroy",
+      "description": "(Optional) Set to true if you do not wish the option group to be deleted at destroy time, and instead just remove the option group from the Terraform state.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `skip_destroy` argument in the `aws_db_option_group` resource allows users to control the lifecycle behavior of the option group during resource destruction. When set to `true`, it prevents the deletion of the option group, ensuring its retention while removing it from Terraform's state, which is useful for preserving database configurations in production or critical environments."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_db_option_group` resource allows users to assign metadata in the form of key-value pairs to the option group, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or compliance tracking. When configured, it can override provider-level default tags, ensuring granular control over tagging specific to this resource."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_db_option_group` resource allows users to define a comprehensive set of key-value tags that are applied to the resource, including inherited tags from the provider's default configuration. This facilitates resource organization, cost allocation, and governance by enabling consistent tagging across cloud infrastructure for purposes such as tracking environments, ownership, or compliance."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "option",
+      "description": "(Optional) The options to apply. See `option` Block below for more details.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "db_security_group_memberships",
+          "description": "(Optional) List of DB Security Groups for which the option is enabled.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `db_security_group_memberships` argument in the `aws_db_option_group` resource allows users to specify a set of DB Security Groups that the database option will be associated with, enabling fine-grained access control and security configurations for the option. By defining this argument, users can ensure that the option is applied only to databases within the specified security groups, aligning with common goals like managing database access and enforcing network-level security policies."
+        },
+        {
+          "name": "option_name",
+          "description": "(Required) Name of the option (e.g., MEMCACHED).",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `option_name` argument specifies the name of the database option to be enabled or configured within the `aws_db_option_group`, such as `MEMCACHED` for caching functionality. By defining this required string, users control the specific feature or extension to be applied to the database instance, enabling tailored behaviors like performance optimization, data processing, or integration with external services."
+        },
+        {
+          "name": "port",
+          "description": "(Optional) Port number when connecting to the option (e.g., 11211). Leaving out or removing `port` from your configuration does not remove or clear a port from the option in AWS. AWS may assign a default port. Not including `port` in your configuration means that the AWS provider will ignore a previously set value, a value set by AWS, and any port changes.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `port` argument in the `option` block of the `aws_db_option_group` resource allows users to specify the port number for connecting to a database option, such as a caching or replication service (e.g., Memcached on port 11211). Setting this argument ensures precise control over the connection configuration, while omitting it may result in AWS assigning a default port or retaining a previously set value without modification."
+        },
+        {
+          "name": "version",
+          "description": "(Optional) Version of the option (e.g., 13.1.0.0). Leaving out or removing `version` from your configuration does not remove or clear a version from the option in AWS. AWS may assign a default version. Not including `version` in your configuration means that the AWS provider will ignore a previously set value, a value set by AWS, and any version changes.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `version` argument in the `option` block of the `aws_db_option_group` resource allows users to specify the version of a database option (e.g., `13.1.0.0`) to control compatibility and functionality for the associated database engine. If omitted, AWS may assign a default version, and the Terraform provider will ignore previously set values or changes, making this argument useful for explicitly defining or locking the desired option version to meet specific application or environment requirements."
+        },
+        {
+          "name": "vpc_security_group_memberships",
+          "description": "(Optional) List of VPC Security Groups for which the option is enabled.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `vpc_security_group_memberships` argument in the `aws_db_option_group` resource allows users to specify a set of VPC security groups that control network access for the database option being configured. By defining this argument, users can enforce security boundaries and manage connectivity rules, ensuring the option operates within the desired network isolation and access policies."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "option_settings",
+          "description": "(Optional) The option settings to apply. See `option_settings` Block below for more details.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "name",
+              "description": "(Required) Name of the setting.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `name` argument in the `option_settings` block of the `aws_db_option_group` resource specifies the unique identifier for a specific database option setting. This allows users to define which configuration parameter within the option group is being customized, enabling precise control over database behavior, such as tuning performance, enabling features, or setting environment-specific properties."
+            },
+            {
+              "name": "value",
+              "description": "(Required) Value of the setting.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `value` argument in the `option_settings` block of the `aws_db_option_group` resource specifies the configuration parameter or property value for a database option within the option group. By defining this argument, users can control specific behaviors or features of the associated database option, such as enabling functionality, setting thresholds, or customizing operational parameters to meet application requirements."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `option_settings` block within the `option` configuration of the `aws_db_option_group` resource allows for fine-grained customization of specific parameters and behaviors for a database option. It encapsulates key-value pairs that define advanced settings, enabling users to tailor the functionality of the selected option to meet specific application or performance requirements, such as configuring timeouts, enabling features, or adjusting resource limits."
+        }
+      ],
+      "llm_summary": "The `option` configuration block within the `aws_db_option_group` resource defines specific database options and their settings, enabling fine-grained control over database features and extensions. It encapsulates related settings such as option name, version, and parameters, allowing users to customize and manage advanced database functionalities to meet application-specific requirements."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_db_option_group` resource allows users to specify the maximum duration (as a string) Terraform should wait for the deletion of the database option group to complete. By configuring this timeout, users can control the lifecycle behavior during resource destruction, ensuring operations do not exceed their desired time limits or fail prematurely due to default timeout constraints."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_db_option_group` resource allows users to define custom timeout durations for create, update, and delete operations, ensuring precise control over the lifecycle management of the database option group. By configuring this block, users can optimize operation execution times to align with their infrastructure requirements and avoid potential delays or timeouts during resource provisioning or modification."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN of the DB option group.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

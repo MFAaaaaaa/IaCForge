@@ -1,0 +1,66 @@
+{
+    "resource": {
+        "name": "aws_eks_pod_identity_association",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "cluster_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "namespace",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "role_arn",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "service_account",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "association_arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "association_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "optional": false,
+            "type": "map(string)"
+        }
+    ]
+}

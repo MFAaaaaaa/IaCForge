@@ -1,0 +1,863 @@
+{
+  "resource": {
+    "name": "aws_ec2_fleet",
+    "description": "Provides a resource to manage EC2 Fleets.",
+    "llm_summary": "The `aws_ec2_fleet` Terraform resource enables the creation and management of EC2 Fleets, allowing users to provision and scale diverse EC2 instances across multiple instance types, availability zones, and purchase models (e.g., On-Demand, Spot). It is commonly used for optimizing cost and capacity in dynamic workloads, batch processing, or high-availability applications. Key configurations include instance diversification, allocation strategies, fleet lifecycle management, and automated scaling to meet performance and budget requirements."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_ec2_fleet\" \"example\" {\n  launch_template_config {\n    launch_template_specification {\n      launch_template_id = aws_launch_template.example.id\n      version            = aws_launch_template.example.latest_version\n    }\n  }\n\n  target_capacity_specification {\n    default_target_capacity_type = \"spot\"\n    total_target_capacity        = 5\n  }\n}",
+      "llm_summary": "This example demonstrates the basic configuration of the `aws_ec2_fleet` resource to provision EC2 instances using a launch template and spot instances. It showcases the use of the `launch_template_config` block to specify the launch template ID and version, and the `target_capacity_specification` block to define a total target capacity of 5 instances with a default capacity type of \"spot.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "context",
+      "description": "(Optional) Reserved.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `context` argument in the `aws_ec2_fleet` resource is a string that allows users to optionally define a reserved identifier or metadata associated with the fleet. While its specific functionality is not detailed, it may be used to tag or reference the fleet in a broader operational or organizational context, aiding in resource tracking or integration with external systems."
+    },
+    {
+      "name": "excess_capacity_termination_policy",
+      "description": "(Optional) Whether running instances should be terminated if the total target capacity of the EC2 Fleet is decreased below the current size of the EC2. Valid values: `no-termination`, `termination`. Defaults to `termination`. Supported only for fleets of type `maintain`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `excess_capacity_termination_policy` argument in the `aws_ec2_fleet` resource allows users to define how the fleet handles running instances when the total target capacity is reduced below the current fleet size. By specifying either `no-termination` or `termination`, users can control whether excess instances are retained or terminated, enabling lifecycle management for fleets of type `maintain` to align with scaling and cost optimization goals."
+    },
+    {
+      "name": "fleet_state",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `fleet_state` argument in the `aws_ec2_fleet` resource allows users to specify the desired operational state of the EC2 Fleet, such as `active` or `deleted`. This configuration determines whether the fleet is actively managing instances or has been terminated, enabling users to control the lifecycle and availability of the fleet in alignment with their infrastructure needs."
+    },
+    {
+      "name": "fulfilled_capacity",
+      "description": "",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `fulfilled_capacity` argument in the `aws_ec2_fleet` resource allows users to specify the number of EC2 instances successfully launched and running as part of the fleet. This argument provides insight into the fleet's current capacity fulfillment, enabling users to monitor or define thresholds for scaling and resource allocation based on operational needs."
+    },
+    {
+      "name": "fulfilled_on_demand_capacity",
+      "description": "",
+      "required": false,
+      "type": "number",
+      "llm_summary": "\"Defines the minimum number of On-Demand instances to be provisioned within the EC2 Fleet, ensuring predictable capacity for workloads requiring guaranteed availability while balancing cost and resource allocation.\""
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_ec2_fleet` resource represents the unique identifier of the EC2 Fleet, allowing users to reference or retrieve the fleet's configuration and state after creation. While optional, it is typically used for tracking and managing the fleet programmatically, enabling workflows that require fleet-specific operations or integrations."
+    },
+    {
+      "name": "replace_unhealthy_instances",
+      "description": "(Optional) Whether EC2 Fleet should replace unhealthy instances. Defaults to `false`. Supported only for fleets of type `maintain`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `replace_unhealthy_instances` argument in the `aws_ec2_fleet` resource allows users to control whether the fleet automatically replaces instances identified as unhealthy, ensuring continuous availability and optimal performance. This functionality is only applicable to fleets of type `maintain` and supports user goals related to instance lifecycle management and high availability."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of Fleet tags. To tag instances at launch, specify the tags in the Launch Template. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument in the `aws_ec2_fleet` resource allows users to define a map of key-value pairs to assign metadata tags to the EC2 Fleet itself, enabling resource organization, identification, and categorization for purposes like cost allocation, environment labeling, or compliance tracking. While it does not directly tag instances launched by the fleet (which must be configured in the Launch Template), it can override provider-level default tags if matching keys are specified."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_ec2_fleet` resource allows users to define a comprehensive set of key-value tags that are applied to all resources created within the EC2 Fleet, ensuring consistent metadata and organization across instances. This facilitates resource categorization, cost allocation, and automation workflows by enabling users to uniformly label fleet-managed resources for tracking, filtering, and integration with other AWS services."
+    },
+    {
+      "name": "terminate_instances",
+      "description": "(Optional) Whether to terminate instances for an EC2 Fleet if it is deleted successfully. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `terminate_instances` argument in the `aws_ec2_fleet` resource allows users to define the lifecycle behavior of EC2 instances associated with the fleet upon its deletion. When set to `true`, it ensures that all instances launched by the fleet are terminated automatically, supporting cleanup and resource management goals; when left as `false` (default), the instances persist even after the fleet is deleted, enabling continued use or manual management."
+    },
+    {
+      "name": "terminate_instances_with_expiration",
+      "description": "(Optional) Whether running instances should be terminated when the EC2 Fleet expires. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "Controls the lifecycle behavior of the EC2 Fleet by specifying whether running instances should be automatically terminated when the fleet expires. This argument enables users to define instance retention policies, ensuring resources are either preserved for manual management or cleaned up to optimize cost and resource usage."
+    },
+    {
+      "name": "type",
+      "description": "(Optional) The type of request. Indicates whether the EC2 Fleet only requests the target capacity, or also attempts to maintain it. Valid values: `maintain`, `request`, `instant`. Defaults to `maintain`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `type` argument in the `aws_ec2_fleet` resource allows users to define the request behavior for the EC2 Fleet, specifying whether it should only fulfill the target capacity (`request` or `instant`) or actively maintain the capacity over time (`maintain`). This configuration impacts the fleet's lifecycle management, enabling users to align the fleet's provisioning strategy with their workload requirements, such as one-time capacity fulfillment or ongoing resource stability."
+    },
+    {
+      "name": "valid_from",
+      "description": "(Optional) The start date and time of the request, in UTC format (for example, YYYY-MM-DDTHH:MM:SSZ). The default is to start fulfilling the request immediately.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `valid_from` argument in the `aws_ec2_fleet` resource allows users to define the UTC start date and time for when the EC2 Fleet request begins fulfilling capacity. By specifying this argument, users can control the fleet's activation timing to align with scheduled workloads or deployment windows, ensuring resources are provisioned only when needed."
+    },
+    {
+      "name": "valid_until",
+      "description": "(Optional) The end date and time of the request, in UTC format (for example, YYYY-MM-DDTHH:MM:SSZ). At this point, no new EC2 Fleet requests are placed or able to fulfill the request. If no value is specified, the request remains until you cancel it.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `valid_until` argument in the `aws_ec2_fleet` resource allows users to define the expiration date and time for the EC2 Fleet request in UTC format, controlling the lifecycle of the fleet's provisioning process. By setting this argument, users can ensure that no new instances are launched after the specified time, aligning resource allocation with time-bound workloads or project deadlines."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "fleet_instance_set",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "instance_ids",
+          "description": "",
+          "required": false,
+          "type": "list(string)",
+          "llm_summary": "The `instance_ids` argument in the `fleet_instance_set` of the `aws_ec2_fleet` resource allows users to specify a list of EC2 instance IDs to include in the fleet. By defining this argument, users can explicitly control which existing instances are part of the fleet, enabling targeted management and scaling of specific resources within the fleet's configuration."
+        },
+        {
+          "name": "instance_type",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `instance_type` argument in the `fleet_instance_set` of the `aws_ec2_fleet` resource allows users to specify the EC2 instance type (e.g., `t2.micro`, `m5.large`) for the fleet's instances. By defining this argument, users control the compute capacity, performance characteristics, and cost profile of the instances within the fleet, enabling tailored resource allocation to meet workload requirements."
+        },
+        {
+          "name": "lifecycle",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `lifecycle` argument in the `fleet_instance_set` of the `aws_ec2_fleet` resource allows users to specify the operational lifecycle of instances within the fleet, such as whether they are `spot` or `on-demand`. Configuring this argument helps define the cost model and availability strategy for the instances, enabling users to optimize resource allocation based on budget and workload requirements."
+        },
+        {
+          "name": "platform",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `platform` argument in the `fleet_instance_set` of the `aws_ec2_fleet` resource allows users to specify the operating system or virtualization platform for the instances in the fleet (e.g., \"Linux/UNIX\" or \"Windows\"). Configuring this argument ensures that the fleet provisions instances compatible with the desired platform, aligning with application requirements or compliance needs."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `fleet_instance_set` configuration block within the `aws_ec2_fleet` resource defines the specifications and parameters for individual instance types or groups within an EC2 Fleet. It encapsulates settings such as instance type, weighted capacity, and launch template configurations, enabling users to customize and optimize the composition of their fleet for cost efficiency, performance, and workload requirements. Configuring this block allows detailed control over the allocation and scaling of diverse EC2 instances in a fleet."
+    },
+    {
+      "name": "launch_template_config",
+      "description": "(Required) Nested argument containing EC2 Launch Template configurations. Defined below.",
+      "cardinality": [
+        1,
+        50
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "launch_template_specification",
+          "description": "(Optional) Nested argument containing EC2 Launch Template to use. Defined below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "launch_template_id",
+              "description": "(Optional) The ID of the launch template.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `launch_template_id` argument in the `launch_template_specification` block of the `aws_ec2_fleet` resource allows users to specify the unique identifier of an existing EC2 launch template to define instance configuration details for the fleet. By setting this argument, users can streamline the provisioning of instances with pre-defined settings such as AMI, instance type, and networking, aligning with common goals like standardizing infrastructure and automating deployments."
+            },
+            {
+              "name": "launch_template_name",
+              "description": "(Optional) The name of the launch template.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `launch_template_name` argument in the `launch_template_specification` block of the `aws_ec2_fleet` resource allows users to specify the name of an existing EC2 launch template to define instance configuration details such as AMI, instance type, and networking settings. By setting this argument, users can streamline fleet provisioning by reusing predefined templates, ensuring consistency and simplifying the management of instance configurations across the fleet."
+            },
+            {
+              "name": "version",
+              "description": "(Required) The launch template version number, `$Latest`, or `$Default.`",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `version` argument in the `launch_template_specification` block of the `aws_ec2_fleet` resource specifies the exact version of the launch template to use (`$Latest`, `$Default`, or a specific version number). This allows users to control which configuration of the launch template is applied when provisioning EC2 instances, ensuring consistency and alignment with desired instance settings such as AMI, instance type, and networking options."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `launch_template_specification` block within the `launch_template_config` of the `aws_ec2_fleet` resource specifies the EC2 Launch Template to be used for provisioning instances in the fleet. It encapsulates settings related to the template's version and identifier, enabling users to define instance configurations such as AMI, instance type, and networking details. Configuring this block allows for precise control over instance provisioning, ensuring consistency and scalability in fleet deployments."
+        },
+        {
+          "name": "override",
+          "description": "(Optional) Nested argument(s) containing parameters to override the same parameters in the Launch Template. Defined below.",
+          "cardinality": [
+            0,
+            300
+          ],
+          "arguments": [
+            {
+              "name": "availability_zone",
+              "description": "(Optional) Availability Zone in which to launch the instances.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "\"Defines the specific Availability Zone for launching instances within the EC2 Fleet override configuration, enabling precise control over instance placement to optimize for latency, redundancy, or compliance requirements. This argument supports user goals like tailoring resource distribution across zones to meet workload or geographic constraints.\""
+            },
+            {
+              "name": "instance_type",
+              "description": "(Optional) Instance type.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `instance_type` argument in the `override` block for the `aws_ec2_fleet` resource allows users to specify the EC2 instance type for overriding default configurations within the fleet. By setting this argument, users can fine-tune the fleet's instance composition to meet specific workload requirements, such as optimizing performance, cost, or compatibility with application needs."
+            },
+            {
+              "name": "max_price",
+              "description": "(Optional) Maximum price per unit hour that you are willing to pay for a Spot Instance.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `max_price` argument in the `override` block of the `aws_ec2_fleet` resource allows users to define the maximum hourly price they are willing to pay for Spot Instances within the fleet. By setting this value, users can control cost optimization and ensure that instances are only provisioned if their price falls within the specified budget, aligning with common goals of cost management in cloud infrastructure."
+            },
+            {
+              "name": "priority",
+              "description": "(Optional) Priority for the launch template override. If `on_demand_options` `allocation_strategy` is set to `prioritized`, EC2 Fleet uses priority to determine which launch template override to use first in fulfilling On-Demand capacity. The highest priority is launched first. The lower the number, the higher the priority. If no number is set, the launch template override has the lowest priority. Valid values are whole numbers starting at 0.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `priority` argument in the `aws_ec2_fleet` resource's `override` block allows users to define the order in which launch template overrides are considered when fulfilling On-Demand capacity, specifically when the `on_demand_options` `allocation_strategy` is set to `prioritized`. By assigning a whole number (lower values indicate higher priority), users can control which override is used first, enabling fine-grained control over instance selection to optimize cost, performance, or resource allocation strategies."
+            },
+            {
+              "name": "subnet_id",
+              "description": "(Optional) ID of the subnet in which to launch the instances.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `subnet_id` argument in the `override` block for the `aws_ec2_fleet` resource allows users to specify the ID of the subnet where instances in the fleet will be launched, overriding default placement settings. By defining this argument, users can control the network configuration and ensure instances are deployed within a specific subnet to meet requirements such as security, connectivity, or resource isolation."
+            },
+            {
+              "name": "weighted_capacity",
+              "description": "(Optional) Number of units provided by the specified instance type.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `weighted_capacity` argument in the `override` block for the `aws_ec2_fleet` resource allows users to define the relative weight or capacity units assigned to a specific instance type within the fleet. By setting this value, users can influence how the fleet allocates resources and scales based on the weighted contribution of different instance types, enabling fine-grained control over cost optimization and workload distribution."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "instance_requirements",
+              "description": "(Optional) Override the instance type in the Launch Template with instance types that satisfy the requirements.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "accelerator_manufacturers",
+                  "description": "(Optional) List of accelerator manufacturer names. Default is any manufacturer.",
+                  "required": false,
+                  "type": "set(string)",
+                  "llm_summary": "The `accelerator_manufacturers` argument in the `instance_requirements` block of the `aws_ec2_fleet` resource allows users to specify a set of preferred accelerator manufacturers (e.g., NVIDIA, AMD) for EC2 instances. By defining this argument, users can control the hardware compatibility of instances to meet specific workload requirements, such as machine learning or GPU-intensive tasks, ensuring alignment with their application's performance needs."
+                },
+                {
+                  "name": "accelerator_names",
+                  "description": "(Optional) List of accelerator names. Default is any acclerator.",
+                  "required": false,
+                  "type": "set(string)",
+                  "llm_summary": "The `accelerator_names` argument in the `instance_requirements` block of the `aws_ec2_fleet` resource allows users to specify a set of desired hardware accelerators (e.g., GPUs or FPGAs) for EC2 instances in the fleet. By defining this argument, users can ensure that the instances provisioned meet specific computational needs, such as machine learning, high-performance computing, or graphics processing, aligning the fleet's capabilities with specialized workloads."
+                },
+                {
+                  "name": "accelerator_types",
+                  "description": "(Optional) The accelerator types that must be on the instance type. Default is any accelerator type.",
+                  "required": false,
+                  "type": "set(string)",
+                  "llm_summary": "The `accelerator_types` argument in the `instance_requirements` block of the `aws_ec2_fleet` resource allows users to specify the types of hardware accelerators (e.g., GPUs, FPGAs, or inference accelerators) required for the EC2 instances in the fleet. By defining this parameter, users can ensure that the selected instances meet specific computational needs for workloads like machine learning, high-performance computing, or data processing, aligning the fleet's capabilities with specialized application requirements."
+                },
+                {
+                  "name": "allowed_instance_types",
+                  "description": "(Optional) The instance types to apply your specified attributes against. All other instance types are ignored, even if they match your specified attributes. You can use strings with one or more wild cards,represented by an asterisk (*). The following are examples: `c5*`, `m5a.*`, `r*`, `*3*`. For example, if you specify `c5*`, you are excluding the entire C5 instance family, which includes all C5a and C5n instance types. If you specify `m5a.*`, you are excluding all the M5a instance types, but not the M5n instance types. Maximum of 400 entries in the list; each entry is limited to 30 characters. Default is no excluded instance types. Default is any instance type. If you specify `AllowedInstanceTypes`, you can't specify `ExcludedInstanceTypes`.",
+                  "required": false,
+                  "type": "set(string)",
+                  "llm_summary": "The `allowed_instance_types` argument in the `instance_requirements` block of the `aws_ec2_fleet` resource allows users to explicitly define a set of EC2 instance types (or patterns using wildcards) that meet their fleet's requirements, ensuring only specified instance types are considered for provisioning. This enables precise control over instance selection, aligning with workload needs or cost optimization strategies, while excluding all other instance types from consideration."
+                },
+                {
+                  "name": "bare_metal",
+                  "description": "(Optional) Indicate whether bare metal instace types should be `included`, `excluded`, or `required`. Default is `excluded`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `bare_metal` argument in the `instance_requirements` block of the `aws_ec2_fleet` resource allows users to specify whether bare metal instance types should be included, excluded, or required when provisioning EC2 instances. This configuration impacts the fleet's hardware selection, enabling users to tailor their infrastructure for workloads that require direct access to physical hardware, such as high-performance computing or specialized applications."
+                },
+                {
+                  "name": "burstable_performance",
+                  "description": "(Optional) Indicates whether burstable performance T instance types are `included`, `excluded`, or `required`. Default is `excluded`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `burstable_performance` argument in the `instance_requirements` block of the `aws_ec2_fleet` resource allows users to specify whether burstable performance T instance types should be included, excluded, or required in the fleet's instance selection criteria. This configuration impacts the fleet's ability to utilize cost-efficient, burstable instances for workloads with variable CPU performance needs, aligning instance selection with performance and budget goals."
+                },
+                {
+                  "name": "cpu_manufacturers",
+                  "description": "(Optional) The CPU manufacturers to include. Default is any manufacturer. ~> NOTE: Don't confuse the CPU hardware manufacturer with the CPU hardware architecture. Instances will be launched with a compatible CPU architecture based on the Amazon Machine Image (AMI) that you specify in your launch template.",
+                  "required": false,
+                  "type": "set(string)",
+                  "llm_summary": "The `cpu_manufacturers` argument within the `instance_requirements` block of the `aws_ec2_fleet` resource allows users to specify a set of preferred CPU hardware manufacturers (e.g., Intel, AMD) for EC2 instances in the fleet. By defining this argument, users can optimize instance selection based on compatibility, performance preferences, or licensing requirements, ensuring the fleet aligns with workload-specific needs while maintaining flexibility for AMI-based CPU architecture compatibility."
+                },
+                {
+                  "name": "excluded_instance_types",
+                  "description": "(Optional) The instance types to exclude. You can use strings with one or more wild cards, represented by an asterisk (*). The following are examples: `c5*`, `m5a.*`, `r*`, `*3*`. For example, if you specify `c5*`, you are excluding the entire C5 instance family, which includes all C5a and C5n instance types. If you specify `m5a.*`, you are excluding all the M5a instance types, but not the M5n instance types. Maximum of 400 entries in the list; each entry is limited to 30 characters. Default is no excluded instance types. If you specify `AllowedInstanceTypes`, you can't specify `ExcludedInstanceTypes`.",
+                  "required": false,
+                  "type": "set(string)",
+                  "llm_summary": "The `excluded_instance_types` argument in the `instance_requirements` block of the `aws_ec2_fleet` resource allows users to define a set of EC2 instance types to exclude from consideration when launching instances in the fleet. By specifying patterns with wildcards (e.g., `c5*`, `m5a.*`), users can prevent certain instance families or specific types from being used, ensuring alignment with workload requirements, cost constraints, or compliance policies. This argument is particularly useful for refining fleet composition and avoiding undesired instance types when optimizing for performance or pricing."
+                },
+                {
+                  "name": "instance_generations",
+                  "description": "(Optional) Indicates whether current or previous generation instance types are included. The current generation instance types are recommended for use. Valid values are `current` and `previous`. Default is `current` and `previous` generation instance types.",
+                  "required": false,
+                  "type": "set(string)",
+                  "llm_summary": "The `instance_generations` argument in the `instance_requirements` block of the `aws_ec2_fleet` resource allows users to specify whether the fleet should include current-generation or previous-generation EC2 instance types. By defining this parameter, users can control the compatibility and performance characteristics of the instances in their fleet, aligning with goals such as optimizing for modern hardware or maintaining support for legacy workloads."
+                },
+                {
+                  "name": "local_storage",
+                  "description": "(Optional) Indicate whether instance types with local storage volumes are `included`, `excluded`, or `required`. Default is `included`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `local_storage` argument in the `instance_requirements` block of the `aws_ec2_fleet` resource allows users to specify whether EC2 instance types with local storage volumes should be included, excluded, or required in the fleet's provisioning criteria. By configuring this argument, users can control the presence of ephemeral storage in their instances to align with workload needs, such as optimizing for high-performance temporary storage or excluding instances without local storage for data-sensitive applications."
+                },
+                {
+                  "name": "local_storage_types",
+                  "description": "(Optional) List of local storage type names. Valid values are `hdd` and `ssd`. Default any storage type.",
+                  "required": false,
+                  "type": "set(string)",
+                  "llm_summary": "The `local_storage_types` argument in the `instance_requirements` block of the `aws_ec2_fleet` resource allows users to specify the preferred types of local storage (`hdd` or `ssd`) for EC2 instances in the fleet. By setting this argument, users can optimize instance selection based on storage performance needs, ensuring alignment with workload requirements such as high-speed data access or cost-effective storage."
+                },
+                {
+                  "name": "max_spot_price_as_percentage_of_optimal_on_demand_price",
+                  "description": "(Optional) The price protection threshold for Spot Instances. This is the maximum you\u2019ll pay for a Spot Instance, expressed as a percentage higher than the cheapest M, C, or R instance type with your specified attributes. When Amazon EC2 Auto Scaling selects instance types with your attributes, we will exclude instance types whose price is higher than your threshold. The parameter accepts an integer, which Amazon EC2 Auto Scaling interprets as a percentage. To turn off price protection, specify a high value, such as 999999. Conflicts with `spot_max_price_percentage_over_lowest_price`",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `max_spot_price_as_percentage_of_optimal_on_demand_price` argument allows users to define a price protection threshold for Spot Instances within the `instance_requirements` of an `aws_ec2_fleet`. By specifying a percentage above the cheapest M, C, or R instance types that meet the desired attributes, users can control cost optimization and exclude overly expensive instance types, ensuring budget-conscious fleet provisioning."
+                },
+                {
+                  "name": "on_demand_max_price_percentage_over_lowest_price",
+                  "description": "(Optional) The price protection threshold for On-Demand Instances. This is the maximum you\u2019ll pay for an On-Demand Instance, expressed as a percentage higher than the cheapest M, C, or R instance type with your specified attributes. When Amazon EC2 Auto Scaling selects instance types with your attributes, we will exclude instance types whose price is higher than your threshold. The parameter accepts an integer, which Amazon EC2 Auto Scaling interprets as a percentage. To turn off price protection, specify a high value, such as 999999. Default is 20. If you set `target_capacity_unit_type` to `vcpu` or `memory-mib`, the price protection threshold is applied based on the per-vCPU or per-memory price instead of the per-instance price.",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `on_demand_max_price_percentage_over_lowest_price` argument in the `instance_requirements` block of the `aws_ec2_fleet` resource allows users to define a price protection threshold for On-Demand Instances, expressed as a percentage above the lowest-priced compatible instance type. By configuring this, users can control cost optimization by excluding instance types that exceed the specified price limit, ensuring budget-conscious instance selection while maintaining flexibility in resource provisioning."
+                },
+                {
+                  "name": "require_hibernate_support",
+                  "description": "(Optional) Indicate whether instance types must support On-Demand Instance Hibernation, either `true` or `false`. Default is `false`.",
+                  "required": false,
+                  "type": "bool",
+                  "llm_summary": "The `require_hibernate_support` argument in the `instance_requirements` block of the `aws_ec2_fleet` resource allows users to specify whether selected instance types must support On-Demand Instance Hibernation. Setting this to `true` ensures that only instance types capable of hibernation are considered, which is useful for workloads requiring state preservation during shutdowns, while leaving it as `false` broadens the pool of eligible instance types for greater flexibility."
+                },
+                {
+                  "name": "spot_max_price_percentage_over_lowest_price",
+                  "description": "(Optional) The price protection threshold for Spot Instances. This is the maximum you\u2019ll pay for a Spot Instance, expressed as a percentage higher than the cheapest M, C, or R instance type with your specified attributes. When Amazon EC2 Auto Scaling selects instance types with your attributes, we will exclude instance types whose price is higher than your threshold. The parameter accepts an integer, which Amazon EC2 Auto Scaling interprets as a percentage. To turn off price protection, specify a high value, such as 999999. Default is 100. Conflicts with `max_spot_price_as_percentage_of_optimal_on_demand_price` If you set DesiredCapacityType to vcpu or memory-mib, the price protection threshold is applied based on the per vCPU or per memory price instead of the per instance price.",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `spot_max_price_percentage_over_lowest_price` argument allows users to define a price protection threshold for Spot Instances within the `instance_requirements` of an `aws_ec2_fleet`. By specifying a percentage above the lowest-priced compatible instance type, users can control cost optimization and exclude higher-priced instance types from selection. This helps balance budget constraints with resource requirements, particularly for workloads sensitive to Spot Instance pricing."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "accelerator_count",
+                  "description": "(Optional) Block describing the minimum and maximum number of accelerators (GPUs, FPGAs, or AWS Inferentia chips). Default is no minimum or maximum limits. `min` - (Optional) Minimum. `max` - (Optional) Maximum. Set to `0` to exclude instance types with accelerators.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "max",
+                      "description": "(Optional) The maximum number of vCPUs. To specify no maximum limit, omit this parameter.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `max` argument within the `accelerator_count` configuration for the `aws_ec2_fleet` resource allows users to define the upper limit on the number of virtual CPUs (vCPUs) allocated to accelerators in the fleet. By setting this parameter, users can control resource scaling and cost management, ensuring the fleet does not exceed a specified compute capacity; omitting it removes any maximum constraint."
+                    },
+                    {
+                      "name": "min",
+                      "description": "(Required) The minimum number of vCPUs. To specify no minimum limit, specify `0`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `min` argument for `accelerator_count` in the `aws_ec2_fleet` resource allows users to define the minimum number of vCPUs required for instances with accelerators, ensuring a baseline compute capacity for workloads that depend on hardware accelerators. Setting this value to `0` removes the minimum constraint, offering flexibility for fleets with varying instance types and accelerator configurations."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `accelerator_count` block within the `instance_requirements` configuration of the `aws_ec2_fleet` resource defines constraints on the minimum and maximum number of hardware accelerators (e.g., GPUs, FPGAs, AWS Inferentia chips) for selected instance types. This block enables precise control over instance selection by excluding or prioritizing instances based on accelerator availability, helping users optimize workloads for compute-intensive tasks or exclude accelerators when unnecessary."
+                },
+                {
+                  "name": "accelerator_total_memory_mib",
+                  "description": "(Optional) Block describing the minimum and maximum total memory of the accelerators. Default is no minimum or maximum. `min` - (Optional) The minimum amount of accelerator memory, in MiB. To specify no minimum limit, omit this parameter. `max` - (Optional) The maximum amount of accelerator memory, in MiB. To specify no maximum limit, omit this parameter.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "max",
+                      "description": "(Optional) The maximum number of vCPUs. To specify no maximum limit, omit this parameter.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `max` argument for `accelerator_total_memory_mib` in the `aws_ec2_fleet` resource allows users to define the upper limit for the total memory (in MiB) available to GPU or hardware accelerators in the fleet. By setting this parameter, users can control resource constraints to optimize fleet performance or cost, while omitting it removes any maximum limit, enabling unrestricted memory allocation for accelerators."
+                    },
+                    {
+                      "name": "min",
+                      "description": "(Required) The minimum number of vCPUs. To specify no minimum limit, specify `0`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `min` argument for `accelerator_total_memory_mib` in the `aws_ec2_fleet` resource allows users to define the minimum amount of memory (in MiB) required for GPU or hardware accelerators in the fleet's instances. Setting this value ensures that instances meet specific performance requirements for workloads reliant on accelerator memory, while specifying `0` removes any minimum constraint, enabling broader instance selection."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `accelerator_total_memory_mib` block within the `instance_requirements` context of the `aws_ec2_fleet` resource defines constraints for the minimum and maximum total memory (in MiB) required by instance accelerators, such as GPUs or specialized hardware. This configuration enables users to fine-tune fleet provisioning by ensuring instances meet specific accelerator memory requirements, optimizing performance for workloads like machine learning, high-performance computing, or graphics processing."
+                },
+                {
+                  "name": "baseline_ebs_bandwidth_mbps",
+                  "description": "(Optional) Block describing the minimum and maximum baseline EBS bandwidth, in Mbps. Default is no minimum or maximum. `min` - (Optional) The minimum baseline bandwidth, in Mbps. To specify no minimum limit, omit this parameter.. `max` - (Optional) The maximum baseline bandwidth, in Mbps. To specify no maximum limit, omit this parameter..",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "max",
+                      "description": "(Optional) The maximum number of vCPUs. To specify no maximum limit, omit this parameter.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `max` argument for the `baseline_ebs_bandwidth_mbps` in the `aws_ec2_fleet` resource allows users to define the upper limit for baseline EBS bandwidth in megabits per second (Mbps) for EC2 instances within the fleet. By setting this parameter, users can control resource allocation to optimize storage performance and ensure instances do not exceed a specified bandwidth threshold, supporting workload-specific performance goals."
+                    },
+                    {
+                      "name": "min",
+                      "description": "(Required) The minimum number of vCPUs. To specify no minimum limit, specify `0`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `min` argument for `baseline_ebs_bandwidth_mbps` in the `aws_ec2_fleet` resource allows users to define the minimum baseline EBS bandwidth (in Mbps) required for EC2 instances in the fleet. By setting this value, users can ensure that instances meet specific performance thresholds for EBS throughput, supporting workloads with defined storage I/O requirements or optimizing cost-performance balance."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `baseline_ebs_bandwidth_mbps` block within the `instance_requirements` configuration of the `aws_ec2_fleet` resource defines minimum and maximum baseline EBS bandwidth limits (in Mbps) for EC2 instances, enabling precise control over storage performance requirements. By configuring this block, users can optimize instance selection to meet specific workload demands, ensuring adequate throughput for applications reliant on EBS volumes."
+                },
+                {
+                  "name": "memory_gib_per_vcpu",
+                  "description": "(Optional) Block describing the minimum and maximum amount of memory (GiB) per vCPU. Default is no minimum or maximum. `min` - (Optional) The minimum amount of memory per vCPU, in GiB. To specify no minimum limit, omit this parameter. `max` - (Optional) The maximum amount of memory per vCPU, in GiB. To specify no maximum limit, omit this parameter.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "max",
+                      "description": "(Optional) The maximum number of vCPUs. To specify no maximum limit, omit this parameter.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `max` argument for `memory_gib_per_vcpu` in the `aws_ec2_fleet` resource allows users to define the upper limit on the number of vCPUs allocated per GiB of memory for EC2 instances in the fleet. By setting this parameter, users can control instance selection to optimize resource allocation and ensure compliance with workload requirements, while omitting it removes any restriction on the maximum vCPU-to-memory ratio."
+                    },
+                    {
+                      "name": "min",
+                      "description": "(Required) The minimum number of vCPUs. To specify no minimum limit, specify `0`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `min` argument for `memory_gib_per_vcpu` in the `aws_ec2_fleet` resource allows users to define the minimum number of vCPUs required for instances in the fleet, ensuring that only instances meeting this threshold are considered. Setting this value helps optimize resource selection based on compute requirements, aligning instance provisioning with workload performance needs."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `memory_gib_per_vcpu` block within the `instance_requirements` configuration of the `aws_ec2_fleet` resource defines constraints on the minimum and maximum memory (in GiB) allocated per vCPU for EC2 instances. This block enables users to fine-tune instance selection criteria, ensuring that fleet instances meet specific performance requirements for memory-to-vCPU ratios, which is critical for optimizing workloads and resource efficiency."
+                },
+                {
+                  "name": "memory_mib",
+                  "description": "(Required) The minimum and maximum amount of memory per vCPU, in GiB. Default is no minimum or maximum limits. `min` - (Required) The minimum amount of memory, in MiB. To specify no minimum limit, specify `0`. `max` - (Optional) The maximum amount of memory, in MiB. To specify no maximum limit, omit this parameter.",
+                  "cardinality": [
+                    1,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "max",
+                      "description": "(Optional) The maximum number of vCPUs. To specify no maximum limit, omit this parameter.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `max` argument for `memory_mib` in the `aws_ec2_fleet` resource allows users to define the upper limit for the memory allocation (in MiB) across EC2 instances in the fleet. By setting this parameter, users can control resource constraints to optimize cost and performance, or omit it to allow unlimited memory allocation, aligning with flexible scaling goals."
+                    },
+                    {
+                      "name": "min",
+                      "description": "(Required) The minimum number of vCPUs. To specify no minimum limit, specify `0`.",
+                      "required": true,
+                      "type": "number",
+                      "llm_summary": "The `min` argument for the `memory_mib` configuration in the `aws_ec2_fleet` resource specifies the minimum amount of memory (in MiB) required for EC2 instances within the fleet. By setting this value, users can enforce resource constraints to ensure instances meet specific performance requirements, aligning with workload needs or compliance standards."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `memory_mib` block within the `instance_requirements` context of the `aws_ec2_fleet` resource defines constraints for the minimum and optional maximum memory (in MiB) per instance, enabling precise control over instance selection based on memory requirements. By configuring this block, users can optimize fleet composition to meet workload-specific performance needs, ensuring instances align with desired memory specifications."
+                },
+                {
+                  "name": "network_bandwidth_gbps",
+                  "description": "(Optional) The minimum and maximum amount of network bandwidth, in gigabits per second (Gbps). Default is No minimum or maximum. `min` - (Optional) The minimum amount of network bandwidth, in Gbps. To specify no minimum limit, omit this parameter. `max` - (Optional) The maximum amount of network bandwidth, in Gbps. To specify no maximum limit, omit this parameter.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "max",
+                      "description": "(Optional) The maximum number of vCPUs. To specify no maximum limit, omit this parameter.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `max` argument for the `network_bandwidth_gbps` configuration in the `aws_ec2_fleet` resource allows users to define the upper limit for the network bandwidth in gigabits per second (Gbps) allocated to EC2 instances within the fleet. By setting this parameter, users can control resource scaling and ensure bandwidth constraints align with workload requirements, while omitting it removes any maximum limit for bandwidth allocation."
+                    },
+                    {
+                      "name": "min",
+                      "description": "(Required) The minimum number of vCPUs. To specify no minimum limit, specify `0`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `min` argument for the `network_bandwidth_gbps` configuration in the `aws_ec2_fleet` resource allows users to define the minimum number of vCPUs required for instances within the fleet, ensuring a baseline level of compute capacity. By setting this value, users can control resource allocation to meet performance requirements or leave it at `0` to impose no lower limit, enabling flexibility in fleet provisioning."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `network_bandwidth_gbps` block within the `instance_requirements` context of the `aws_ec2_fleet` resource defines constraints for the minimum and maximum network bandwidth (in Gbps) that EC2 instances must meet. This configuration enables users to optimize instance selection based on network performance requirements, ensuring fleet instances align with workload demands for data transfer and connectivity."
+                },
+                {
+                  "name": "network_interface_count",
+                  "description": "(Optional) Block describing the minimum and maximum number of network interfaces. Default is no minimum or maximum. `min` - (Optional) The minimum number of network interfaces. To specify no minimum limit, omit this parameter. `max` - (Optional) The maximum number of network interfaces. To specify no maximum limit, omit this parameter.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "max",
+                      "description": "(Optional) The maximum number of vCPUs. To specify no maximum limit, omit this parameter.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `max` argument for `network_interface_count` in the `aws_ec2_fleet` resource allows users to define the upper limit on the number of network interfaces that can be attached to EC2 instances within the fleet. By setting this parameter, users can control resource scaling and ensure compliance with workload requirements or infrastructure constraints, while omitting it removes any restriction on the maximum count."
+                    },
+                    {
+                      "name": "min",
+                      "description": "(Required) The minimum number of vCPUs. To specify no minimum limit, specify `0`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `min` argument for `network_interface_count` in the `aws_ec2_fleet` resource allows users to define the minimum number of network interfaces required for EC2 instances in the fleet. Setting this value ensures a baseline for network connectivity, enabling users to control resource allocation and meet specific networking requirements, with `0` indicating no minimum limit."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `network_interface_count` block within the `instance_requirements` context of the `aws_ec2_fleet` resource defines constraints on the minimum and maximum number of network interfaces for EC2 instances in the fleet. This configuration enables users to control instance networking capabilities, ensuring compatibility with workload requirements or compliance with specific infrastructure policies."
+                },
+                {
+                  "name": "total_local_storage_gb",
+                  "description": "(Optional) Block describing the minimum and maximum total local storage (GB). Default is no minimum or maximum. `min` - (Optional) The minimum amount of total local storage, in GB. To specify no minimum limit, omit this parameter. `max` - (Optional) The maximum amount of total local storage, in GB. To specify no maximum limit, omit this parameter.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "max",
+                      "description": "(Optional) The maximum number of vCPUs. To specify no maximum limit, omit this parameter.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `max` argument for `total_local_storage_gb` in the `aws_ec2_fleet` resource allows users to define an upper limit on the total local storage capacity (in GB) provisioned across the fleet. By setting this parameter, users can control resource allocation to optimize cost and performance, or omit it to allow unlimited storage scaling based on fleet requirements."
+                    },
+                    {
+                      "name": "min",
+                      "description": "(Required) The minimum number of vCPUs. To specify no minimum limit, specify `0`.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `min` argument for `total_local_storage_gb` in the `aws_ec2_fleet` resource allows users to define the minimum amount of local storage (in GB) required for EC2 instances within the fleet. By setting this value, users can ensure that instances meet specific storage capacity requirements, supporting workloads that depend on a guaranteed baseline of local storage."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `total_local_storage_gb` block within the `instance_requirements` configuration of the `aws_ec2_fleet` resource defines constraints for the minimum and maximum total local storage (in GB) required by EC2 instances in the fleet. This block enables users to optimize instance selection based on storage capacity needs, ensuring the fleet meets specific workload requirements, such as high-performance applications or data-intensive tasks."
+                },
+                {
+                  "name": "vcpu_count",
+                  "description": "(Required) Block describing the minimum and maximum number of vCPUs. Default is no maximum. `min` - (Required) The minimum number of vCPUs. To specify no minimum limit, specify `0`. `max` - (Optional) The maximum number of vCPUs. To specify no maximum limit, omit this parameter.",
+                  "cardinality": [
+                    1,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "max",
+                      "description": "(Optional) The maximum number of vCPUs. To specify no maximum limit, omit this parameter.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `max` argument for the `vcpu_count` in the `aws_ec2_fleet` resource allows users to define the upper limit on the number of virtual CPUs (vCPUs) that the fleet can provision, enabling control over resource scaling and cost management. By omitting this parameter, users can allow unlimited vCPU allocation, making it suitable for scenarios requiring flexible or unrestricted compute capacity."
+                    },
+                    {
+                      "name": "min",
+                      "description": "(Required) The minimum number of vCPUs. To specify no minimum limit, specify `0`.",
+                      "required": true,
+                      "type": "number",
+                      "llm_summary": "The `min` argument for the `vcpu_count` in the `aws_ec2_fleet` resource specifies the minimum number of virtual CPUs (vCPUs) required for the fleet's instance allocation. By setting this value, users can enforce a lower bound on compute capacity to ensure sufficient processing power for workloads, aligning with resource scaling and performance requirements."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `vcpu_count` block within the `instance_requirements` configuration of the `aws_ec2_fleet` resource defines constraints for the minimum and optional maximum number of virtual CPUs (vCPUs) required for EC2 instances in the fleet. This block enables users to optimize instance selection by specifying compute capacity requirements, ensuring the fleet meets workload demands while maintaining flexibility in resource allocation."
+                }
+              ],
+              "llm_summary": "The `instance_requirements` block within the `override` context of the `aws_ec2_fleet` resource allows users to specify criteria for overriding the instance type defined in the Launch Template, ensuring that selected instances meet specific performance, hardware, or cost requirements. This block encapsulates settings related to instance attributes, such as CPU, memory, storage, and networking capabilities, enabling fine-grained control over fleet composition to optimize resource allocation and meet workload demands."
+            }
+          ],
+          "llm_summary": "The \"override\" configuration block within the `launch_template_config` of the `aws_ec2_fleet` resource allows users to customize specific parameters that override default settings defined in the associated Launch Template. This block enables granular control over instance configurations, such as instance type, AMI, or other attributes, ensuring flexibility in tailoring fleet behavior to meet specific workload or cost optimization goals."
+        }
+      ],
+      "llm_summary": "The `launch_template_config` block within the `aws_ec2_fleet` resource defines EC2 Launch Template configurations, enabling users to specify instance provisioning details such as templates, overrides, and instance types. This block provides granular control over fleet composition and scaling by encapsulating settings that dictate how instances are launched and managed, ensuring optimized resource allocation and flexibility in meeting workload requirements."
+    },
+    {
+      "name": "on_demand_options",
+      "description": "(Optional) Nested argument containing On-Demand configurations. Defined below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "allocation_strategy",
+          "description": "(Optional) The order of the launch template overrides to use in fulfilling On-Demand capacity. Valid values: `lowestPrice`, `prioritized`. Default: `lowestPrice`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `allocation_strategy` argument in the `on_demand_options` block of the `aws_ec2_fleet` resource allows users to define how On-Demand instances are selected from the specified launch template overrides. By setting this argument to `lowestPrice` (default) or `prioritized`, users can control whether the fleet prioritizes cost optimization or follows a predefined order, enabling tailored instance allocation strategies to meet budget or operational requirements."
+        },
+        {
+          "name": "max_total_price",
+          "description": "(Optional) The maximum amount per hour for On-Demand Instances that you're willing to pay.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `max_total_price` argument in the `on_demand_options` block of the `aws_ec2_fleet` resource allows users to define the maximum hourly cost they are willing to pay for On-Demand Instances within the fleet. By setting this limit, users can control cost constraints and ensure their fleet operates within a predefined budget, aligning with financial optimization goals for cloud infrastructure."
+        },
+        {
+          "name": "min_target_capacity",
+          "description": "(Optional) The minimum target capacity for On-Demand Instances in the fleet. If the minimum target capacity is not reached, the fleet launches no instances. Supported only for fleets of type `instant`. If you specify `min_target_capacity`, at least one of the following must be specified: `single_availability_zone` or `single_instance_type`.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `min_target_capacity` argument in the `on_demand_options` block of the `aws_ec2_fleet` resource allows users to define the minimum number of On-Demand Instances that must be launched for the fleet to be considered successful. This ensures a baseline capacity for workloads requiring immediate provisioning, and is applicable only to fleets of type `instant`. If specified, it requires additional configuration of either `single_availability_zone` or `single_instance_type` to control instance placement or type consistency."
+        },
+        {
+          "name": "single_availability_zone",
+          "description": "(Optional) Indicates that the fleet launches all On-Demand Instances into a single Availability Zone. Supported only for fleets of type `instant`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `single_availability_zone` argument in the `on_demand_options` block of the `aws_ec2_fleet` resource allows users to control whether all On-Demand Instances in the fleet are launched within a single Availability Zone. This configuration is supported only for fleets of type `instant` and is typically used to optimize network latency or simplify resource management within a specific zone."
+        },
+        {
+          "name": "single_instance_type",
+          "description": "(Optional) Indicates that the fleet uses a single instance type to launch all On-Demand Instances in the fleet. Supported only for fleets of type `instant`. allocation_strategy - (Optional) The order of the launch template overrides to use in fulfilling On-Demand capacity. Valid values: lowestPrice, prioritized. Default: lowestPrice. capacity_reservation_options (Optional) The strategy for using unused Capacity Reservations for fulfilling On-Demand capacity. Supported only for fleets of type instant.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `single_instance_type` argument in the `on_demand_options` block of the `aws_ec2_fleet` resource allows users to specify whether all On-Demand Instances in the fleet should be launched using a single instance type. This configuration is supported only for fleets of type `instant` and is typically used to enforce uniformity in instance types for predictable performance or compatibility within the fleet."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "capacity_reservation_options",
+          "description": "(Optional) The strategy for using unused Capacity Reservations for fulfilling On-Demand capacity. Supported only for fleets of type `instant`. `usage_strategy` - (Optional) Indicates whether to use unused Capacity Reservations for fulfilling On-Demand capacity. Valid values: `use-capacity-reservations-first`.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "usage_strategy",
+              "description": "(Optional) Indicates whether to use unused Capacity Reservations for fulfilling On-Demand capacity. Valid values: `use-capacity-reservations-first`. max_total_price - (Optional) The maximum amount per hour for On-Demand Instances that you're willing to pay. min_target_capacity - (Optional) The minimum target capacity for On-Demand Instances in the fleet. If the minimum target capacity is not reached, the fleet launches no instances. Supported only for fleets of type instant. If you specify min_target_capacity, at least one of the following must be specified: single_availability_zone or single_instance_type. single_availability_zone - (Optional) Indicates that the fleet launches all On-Demand Instances into a single Availability Zone. Supported only for fleets of type instant. single_instance_type - (Optional) Indicates that the fleet uses a single instance type to launch all On-Demand Instances in the fleet. Supported only for fleets of type instant.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `usage_strategy` argument within the `capacity_reservation_options` block of the `aws_ec2_fleet` resource allows users to specify whether unused Capacity Reservations should be prioritized for fulfilling On-Demand instance capacity. By setting this argument to `use-capacity-reservations-first`, users can optimize resource utilization and reduce costs by leveraging existing reserved capacity before provisioning new On-Demand instances."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `capacity_reservation_options` block within the `on_demand_options` configuration of the `aws_ec2_fleet` resource enables control over how unused Capacity Reservations are utilized to fulfill On-Demand capacity for fleets of type `instant`. It encapsulates settings related to reservation usage strategies, allowing users to optimize resource allocation by prioritizing the use of existing Capacity Reservations, thereby improving cost efficiency and resource utilization."
+        }
+      ],
+      "llm_summary": "The `on_demand_options` configuration block within the `aws_ec2_fleet` resource enables detailed control over On-Demand instance allocation strategies and settings, allowing users to optimize cost and performance for their EC2 fleet. It encapsulates related settings such as allocation preferences and instance distribution, helping users tailor On-Demand capacity provisioning to meet workload requirements efficiently."
+    },
+    {
+      "name": "spot_options",
+      "description": "(Optional) Nested argument containing Spot configurations. Defined below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "allocation_strategy",
+          "description": "(Optional) How to allocate the target capacity across the Spot pools. Valid values: `diversified`, `lowestPrice`, `capacity-optimized`, `capacity-optimized-prioritized` and `price-capacity-optimized`. Default: `lowestPrice`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `allocation_strategy` argument in the `spot_options` block of the `aws_ec2_fleet` resource allows users to define how Spot Instances are distributed across available pools to meet the fleet's target capacity. By specifying strategies such as `lowestPrice`, `diversified`, or `capacity-optimized`, users can optimize for cost, availability, or resource prioritization, enabling tailored control over instance allocation based on workload requirements and budget constraints."
+        },
+        {
+          "name": "instance_interruption_behavior",
+          "description": "(Optional) Behavior when a Spot Instance is interrupted. Valid values: `hibernate`, `stop`, `terminate`. Default: `terminate`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `instance_interruption_behavior` argument in the `spot_options` block of the `aws_ec2_fleet` resource allows users to define how Spot Instances should respond when interrupted, enabling control over their lifecycle during disruptions. By specifying values like `hibernate`, `stop`, or `terminate` (default), users can tailor instance behavior to align with workload requirements, such as preserving state (`hibernate` or `stop`) or releasing resources (`terminate`) for cost optimization."
+        },
+        {
+          "name": "instance_pools_to_use_count",
+          "description": "(Optional) Number of Spot pools across which to allocate your target Spot capacity. Valid only when Spot `allocation_strategy` is set to `lowestPrice`. Default: `1`.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `instance_pools_to_use_count` argument in the `spot_options` block of the `aws_ec2_fleet` resource specifies the number of Spot Instance pools to distribute the target capacity across when the `allocation_strategy` is set to `lowestPrice`. By configuring this, users can control the diversity of Spot pools utilized, balancing cost optimization and availability, with a default of 1 pool."
+        },
+        {
+          "name": "max_total_price",
+          "description": "(Optional) The maximum amount per hour for Spot Instances that you're willing to pay.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `max_total_price` argument in the `spot_options` block of the `aws_ec2_fleet` resource allows users to define the maximum hourly cost they are willing to pay for all Spot Instances in the fleet. By setting this limit, users can control cost expenditure and ensure the fleet operates within a predefined budget, aligning with cost optimization goals for dynamic workloads."
+        },
+        {
+          "name": "min_target_capacity",
+          "description": "(Optional) The minimum target capacity for Spot Instances in the fleet. If the minimum target capacity is not reached, the fleet launches no instances. Supported only for fleets of type `instant`.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "\"min_target_capacity\" in the \"spot_options\" block of the \"aws_ec2_fleet\" resource allows users to define the minimum number of Spot Instances the fleet must provision to meet capacity requirements. If this threshold is not met, no instances are launched, enabling precise control over fleet deployment behavior for instant-type fleets."
+        },
+        {
+          "name": "single_availability_zone",
+          "description": "(Optional) Indicates that the fleet launches all Spot Instances into a single Availability Zone. Supported only for fleets of type `instant`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `single_availability_zone` argument in the `spot_options` block of the `aws_ec2_fleet` resource allows users to control whether all Spot Instances in an `instant` fleet are launched within a single Availability Zone. Enabling this option simplifies deployment by ensuring zonal consistency, which can be useful for minimizing latency or optimizing resource placement in specific scenarios."
+        },
+        {
+          "name": "single_instance_type",
+          "description": "(Optional) Indicates that the fleet uses a single instance type to launch all Spot Instances in the fleet. Supported only for fleets of type `instant`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `single_instance_type` argument in the `spot_options` block of the `aws_ec2_fleet` resource allows users to specify whether all Spot Instances in the fleet should be launched using a single instance type. Setting this to `true` ensures uniformity in instance types, which is particularly useful for fleets of type `instant` when optimizing for consistent performance or simplifying resource management."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "maintenance_strategies",
+          "description": "(Optional) Nested argument containing maintenance strategies for managing your Spot Instances that are at an elevated risk of being interrupted. Defined below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "capacity_rebalance",
+              "description": "(Optional) Nested argument containing the capacity rebalance for your fleet request. Defined below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "replacement_strategy",
+                  "description": "(Optional) The replacement strategy to use. Only available for fleets of `type` set to `maintain`. Valid values: `launch`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `replacement_strategy` argument in the `capacity_rebalance` configuration of the `aws_ec2_fleet` resource allows users to define how replacement instances are launched when maintaining fleet capacity during instance interruptions. By specifying this strategy (e.g., `launch`), users can control the behavior of instance replacement to ensure uninterrupted fleet performance, aligning with goals like high availability and fault tolerance in dynamic environments."
+                },
+                {
+                  "name": "termination_delay",
+                  "description": "",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `termination_delay` argument in the `capacity_rebalance` context of the `aws_ec2_fleet` resource allows users to specify the amount of time (in seconds) to delay the termination of an instance after a replacement instance is launched during capacity rebalancing. This helps ensure smoother transitions and minimizes disruptions by providing a buffer period for workloads to migrate or stabilize before the original instance is terminated."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `capacity_rebalance` block within the `maintenance_strategies` configuration of the `aws_ec2_fleet` resource enables automated management of instance replacement when a Spot Instance is at risk of interruption. It encapsulates settings that trigger proactive rebalancing to maintain fleet capacity and stability, helping users ensure high availability and minimize disruptions in workloads running on Spot Instances."
+            }
+          ],
+          "llm_summary": "The `maintenance_strategies` block within the `spot_options` configuration of the `aws_ec2_fleet` resource defines strategies for managing Spot Instances at elevated risk of interruption. It encapsulates settings to optimize instance lifecycle and ensure workload continuity by handling maintenance scenarios, enabling users to proactively mitigate disruptions and maintain application reliability."
+        }
+      ],
+      "llm_summary": "The `spot_options` configuration block within the `aws_ec2_fleet` resource defines settings for managing Spot Instance behavior, including allocation strategies, interruption handling, and instance lifecycle preferences. By configuring this block, users can optimize cost savings and control how Spot Instances are provisioned and maintained within an EC2 Fleet, enabling detailed customization of Spot capacity management."
+    },
+    {
+      "name": "target_capacity_specification",
+      "description": "(Required) Nested argument containing target capacity configurations. Defined below.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "default_target_capacity_type",
+          "description": "(Required) Default target capacity type. Valid values: `on-demand`, `spot`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `default_target_capacity_type` argument in the `target_capacity_specification` block of the `aws_ec2_fleet` resource specifies the default allocation type for the fleet's target capacity, allowing users to define whether instances should be provisioned as `on-demand` or `spot`. This configuration directly impacts cost optimization and availability, enabling users to align instance provisioning with their workload requirements and budgetary goals."
+        },
+        {
+          "name": "on_demand_target_capacity",
+          "description": "(Optional) The number of On-Demand units to request.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `on_demand_target_capacity` argument in the `target_capacity_specification` block of the `aws_ec2_fleet` resource allows users to define the number of On-Demand instances to provision within the fleet. By setting this value, users can control the allocation of On-Demand capacity to meet workload demands, ensuring predictable pricing and immediate availability for critical applications."
+        },
+        {
+          "name": "spot_target_capacity",
+          "description": "(Optional) The number of Spot units to request.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `spot_target_capacity` argument in the `target_capacity_specification` block of the `aws_ec2_fleet` resource allows users to define the number of Spot instances (measured in units) to be provisioned within the fleet. By configuring this value, users can optimize cost savings by prioritizing Spot capacity for their workload, aligning with common goals like scaling compute resources efficiently while leveraging AWS's discounted pricing for Spot instances."
+        },
+        {
+          "name": "target_capacity_unit_type",
+          "description": "(Optional) The unit for the target capacity. If you specify `target_capacity_unit_type`, `instance_requirements` must be specified.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `target_capacity_unit_type` argument in the `target_capacity_specification` block of the `aws_ec2_fleet` resource allows users to define the unit of measurement for the fleet's target capacity, such as instances, vCPUs, or memory. Setting this argument enables precise control over how capacity requirements are calculated and ensures alignment with specific workload needs, especially when combined with `instance_requirements`."
+        },
+        {
+          "name": "total_target_capacity",
+          "description": "(Required) The number of units to request, filled using `default_target_capacity_type`. default_target_capacity_type - (Required) Default target capacity type. Valid values: on-demand, spot. on_demand_target_capacity - (Optional) The number of On-Demand units to request. spot_target_capacity - (Optional) The number of Spot units to request. target_capacity_unit_type - (Optional) The unit for the target capacity. If you specify target_capacity_unit_type, instance_requirements must be specified. total_target_capacity - (Required) The number of units to request, filled using default_target_capacity_type.",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `total_target_capacity` argument in the `target_capacity_specification` block of the `aws_ec2_fleet` resource defines the total number of compute units (instances or vCPUs) to be provisioned in the fleet, based on the specified `default_target_capacity_type` (e.g., On-Demand or Spot). By setting this required value, users control the scale of the fleet to meet workload demands, ensuring sufficient capacity is allocated for their application or infrastructure needs."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `target_capacity_specification` block in the `aws_ec2_fleet` resource defines the target capacity configurations for the fleet, enabling users to specify and manage the desired number and type of EC2 instances to be provisioned. This block encapsulates settings related to capacity allocation, such as total target capacity, on-demand vs. spot instance distribution, and default capacity type, allowing users to optimize cost and performance while meeting workload requirements."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_ec2_fleet` resource allows users to specify the maximum duration (as a string) Terraform will wait for the EC2 Fleet creation process to complete. By configuring this timeout, users can control how long Terraform should attempt to provision the fleet before timing out, ensuring alignment with deployment expectations and preventing indefinite waits during resource creation."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_ec2_fleet` resource allows users to specify the maximum duration (as a string, e.g., \"5m\" for 5 minutes) Terraform should wait for the deletion of the EC2 Fleet to complete. Configuring this timeout helps manage resource lifecycle operations by preventing long-running or stalled delete processes from blocking Terraform workflows."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block of the `aws_ec2_fleet` resource allows users to specify the maximum duration (as a string) Terraform will wait for updates to the EC2 Fleet configuration to complete. By setting this argument, users can control the timeout behavior for operations like modifying fleet settings, ensuring smoother management of fleet updates in scenarios where changes may take longer to propagate."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_ec2_fleet` resource defines customizable time limits for specific operations, such as creating or deleting an EC2 Fleet. It enables users to manage operation durations, ensuring better control over resource provisioning and cleanup processes, especially in scenarios with long-running tasks or potential delays in fleet management."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the fleet",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

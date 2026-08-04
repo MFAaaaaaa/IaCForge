@@ -9,12 +9,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "evaluation"))
 
 import evidence_projection
-import eval_verigraph
 import graph_ir
 import hcl_metrics
-import hcl_safety
 import ir_schema_checker
-import prompt_templates_verigraph
 import provider_contract
 import versioning
 from iac_kg import offline_provider_contract_cache
@@ -48,43 +45,6 @@ class SafeGraphIRTests(unittest.TestCase):
         }
         validation = graph_ir.validate_graph_ir(graph)
         self.assertTrue(validation.valid, validation.errors)
-
-    def test_consumer_producer_binding_roles_are_normalized(self):
-        graph = {
-            "graph_ir_version": "2.0",
-            "resources": [
-                {"id": "main", "type": "aws_vpc", "kind": "resource"},
-                {"id": "public", "type": "aws_subnet", "kind": "resource"},
-            ],
-            "bindings": [
-                {
-                    "consumer": {"resource": "public", "path": "vpc_id"},
-                    "producer": {"resource": "main", "path": "id"},
-                    "kind": "attribute_reference",
-                }
-            ],
-            "constraints": [],
-            "explicit_dependencies": [],
-            "requirements": [],
-        }
-        validation = graph_ir.validate_graph_ir(graph)
-        self.assertTrue(validation.valid, validation.errors)
-        binding = validation.graph["bindings"][0]
-        self.assertEqual(binding["source"], {"resource": "public", "path": "vpc_id"})
-        self.assertEqual(binding["target"], {"resource": "main", "path": "id"})
-
-
-class CheckpointResumeTests(unittest.TestCase):
-    def test_nan_checkpoint_cells_are_not_completed(self):
-        row = {
-            "LLM Output #0": float("nan"),
-            "LLM Compile Phase Error #0": float("nan"),
-        }
-        self.assertFalse(eval_verigraph.row_completed(row))
-
-    def test_hcl_output_marks_checkpoint_row_completed(self):
-        row = {"LLM Output #0": 'resource "aws_vpc" "main" {}'}
-        self.assertTrue(eval_verigraph.row_completed(row))
 
 
 class EvidenceProjectionTests(unittest.TestCase):
@@ -125,68 +85,8 @@ class EvidenceProjectionTests(unittest.TestCase):
             "REQUIRES_VALUE_OF_TYPE",
         )
 
-    def test_planner_projection_caps_candidates_and_prunes_dangling_edges(self):
-        full = {
-            "candidate_resources": [
-                {"type": f"aws_type_{index}", "score": 100 - index}
-                for index in range(12)
-            ],
-            "dependency_hints": [
-                {
-                    "from_type": "aws_type_0",
-                    "to_type": "aws_type_10",
-                    "attr": "target_id",
-                }
-            ],
-        }
-        with mock.patch.dict("os.environ", {"IAC_PLANNER_MAX_CANDIDATES": "8"}):
-            planner = evidence_projection.project_planner_evidence(full)
-        self.assertEqual(len(planner["candidate_resources"]), 8)
-        self.assertEqual(len(planner["dependency_candidates"]), 1)
-
 
 class SchemaCheckerTests(unittest.TestCase):
-    def test_invalid_binding_is_dropped_without_dropping_provider_nodes(self):
-        graph = {
-            "resources": [
-                {"id": "main", "type": "aws_vpc", "kind": "resource"},
-                {"id": "public", "type": "aws_subnet", "kind": "resource"},
-            ],
-            "bindings": [
-                {
-                    "source": {"resource": "public", "path": "not_assignable"},
-                    "target": {"resource": "main", "path": "id"},
-                }
-            ],
-        }
-        failed = ir_schema_checker.IRSchemaCheck(
-            False,
-            graph,
-            (
-                {
-                    "code": "UNKNOWN_OR_UNASSIGNABLE_SOURCE_ARGUMENT",
-                    "path": "bindings[0].source.path",
-                    "message": "invalid",
-                },
-            ),
-            (),
-        )
-        with mock.patch.object(
-            ir_schema_checker,
-            "check_graph_ir",
-            side_effect=lambda value: ir_schema_checker.IRSchemaCheck(
-                True, value, (), ()
-            ),
-        ):
-            salvaged = ir_schema_checker.salvage_by_dropping_invalid_bindings(failed)
-        self.assertTrue(salvaged.valid)
-        self.assertEqual(len(salvaged.graph["resources"]), 2)
-        self.assertEqual(salvaged.graph["bindings"], [])
-        self.assertEqual(
-            salvaged.normalization_actions[-1]["code"],
-            "DROP_SCHEMA_INVALID_BINDING",
-        )
-
     def test_high_confidence_source_path_repair_is_recorded(self):
         graph = {
             "graph_ir_version": "2.0",
@@ -302,46 +202,6 @@ class ProviderContractTests(unittest.TestCase):
             subnet["should_assign"]["map_public_ip_on_launch"]["value"]
         )
         self.assertIn("id", subnet["forbidden_assignments"])
-        binding = contract["bindings"][0]
-        self.assertEqual(binding["consumer_assignment"], "public.vpc_id")
-        self.assertEqual(binding["producer_reference"], "main.id")
-
-
-class HCLSafetyTests(unittest.TestCase):
-    def test_undeclared_and_defaultless_variables_are_reported(self):
-        hcl = '''
-variable "declared_without_default" { type = string }
-resource "aws_vpc" "main" {
-  cidr_block = var.missing
-  tags = { Name = var.declared_without_default }
-}
-'''
-        report = hcl_safety.diagnostics(hcl)
-        self.assertEqual(report["undeclared_input_variables"], ["missing"])
-        self.assertEqual(
-            report["referenced_variables_without_defaults"],
-            ["declared_without_default"],
-        )
-
-    def test_variables_with_defaults_pass(self):
-        hcl = '''
-variable "cidr" {
-  type = string
-  default = "10.0.0.0/16"
-}
-resource "aws_vpc" "main" { cidr_block = var.cidr }
-'''
-        self.assertFalse(hcl_safety.has_issues(hcl_safety.diagnostics(hcl)))
-
-        one_line = 'variable "name" { default = "main" }\noutput "x" { value = var.name }'
-        self.assertFalse(hcl_safety.has_issues(hcl_safety.diagnostics(one_line)))
-
-    def test_contract_prompt_forbids_variable_shortcuts(self):
-        prompt = prompt_templates_verigraph.resource_graph_ir_schema_contract_generation_prompt(
-            "Create a VPC", "{}", "{}", "{}"
-        )
-        self.assertIn("Never reference `var.NAME`", prompt)
-        self.assertIn("consumer_assignment", prompt)
 
 
 class HCLMetricTests(unittest.TestCase):

@@ -1,0 +1,66 @@
+{
+    "resource": {
+        "name": "aws_redshift_endpoint_access",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "cluster_identifier",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "endpoint_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "resource_owner",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "subnet_group_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "vpc_security_group_ids",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "address",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "port",
+            "description": "",
+            "optional": false,
+            "type": "number"
+        },
+        {
+            "name": "vpc_endpoint",
+            "description": "",
+            "optional": false,
+            "type": "list(object({network_interface=list(object({availability_zone=string,network_interface_id=string,private_ip_address=string,subnet_id=string})),vpc_endpoint_id=string,vpc_id=string}))"
+        }
+    ]
+}

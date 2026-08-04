@@ -1,0 +1,182 @@
+{
+  "resource": {
+    "name": "aws_vpc",
+    "description": "Provides a VPC resource.",
+    "llm_summary": "The `aws_vpc` Terraform resource enables the creation and management of an Amazon Virtual Private Cloud (VPC), providing a secure and isolated network environment for AWS resources. Common use cases include setting up custom IP address ranges, subnet configurations, and routing tables to support scalable cloud architectures, multi-tier applications, or hybrid cloud setups. Users can configure key features such as CIDR blocks, DNS support, internet gateways, and network ACLs to optimize connectivity, security, and resource segmentation within their cloud infrastructure."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_vpc\" \"main\" {\n  cidr_block = \"10.0.0.0/16\"\n}",
+      "llm_summary": "\"Demonstrates the basic setup of an AWS VPC using the `aws_vpc` resource, specifying a `cidr_block` of `10.0.0.0/16` to define the IP address range for the network. This example is ideal for users looking to create a foundational VPC configuration.\""
+    },
+    {
+      "title": "Example 2",
+      "code": "resource \"aws_vpc\" \"main\" {\n  cidr_block       = \"10.0.0.0/16\"\n  instance_tenancy = \"default\"\n\n  tags = {\n    Name = \"main\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to create an AWS VPC with a specified CIDR block (`10.0.0.0/16`) and default instance tenancy, while applying a `tags` block to assign a name (`main`) for resource identification. This example is ideal for users looking to set up a basic VPC configuration with minimal customization.\""
+    },
+    {
+      "title": "Example 3",
+      "code": "data \"aws_region\" \"current\" {}\n\nresource \"aws_vpc_ipam\" \"test\" {\n  operating_regions {\n    region_name = data.aws_region.current.name\n  }\n}\n\nresource \"aws_vpc_ipam_pool\" \"test\" {\n  address_family = \"ipv4\"\n  ipam_scope_id  = aws_vpc_ipam.test.private_default_scope_id\n  locale         = data.aws_region.current.name\n}\n\nresource \"aws_vpc_ipam_pool_cidr\" \"test\" {\n  ipam_pool_id = aws_vpc_ipam_pool.test.id\n  cidr         = \"172.20.0.0/16\"\n}\n\nresource \"aws_vpc\" \"test\" {\n  ipv4_ipam_pool_id   = aws_vpc_ipam_pool.test.id\n  ipv4_netmask_length = 28\n  depends_on = [\n    aws_vpc_ipam_pool_cidr.test\n  ]\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS VPC with IPAM (IP Address Manager) integration, including creating an IPAM, an IPAM pool, assigning a CIDR block to the pool, and provisioning a VPC with an IPv4 address from the pool. It highlights the use of `ipv4_ipam_pool_id` and `ipv4_netmask_length` in the `aws_vpc` resource, showcasing dependency management and dynamic region-based configurations using the `aws_region` data source."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "assign_generated_ipv6_cidr_block",
+      "description": "(Optional) Requests an Amazon-provided IPv6 CIDR block with a /56 prefix length for the VPC. You cannot specify the range of IP addresses, or the size of the CIDR block. Default is `false`. Conflicts with `ipv6_ipam_pool_id`",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "Controls whether an Amazon-provided IPv6 CIDR block with a /56 prefix is automatically assigned to the VPC. Enabling this argument allows the VPC to support IPv6 networking without specifying a custom address range, commonly used for enabling dual-stack environments or IPv6 connectivity."
+    },
+    {
+      "name": "cidr_block",
+      "description": "(Optional) The IPv4 CIDR block for the VPC. CIDR can be explicitly set or it can be derived from IPAM using `ipv4_netmask_length`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cidr_block` argument allows users to define the primary IPv4 address range for the VPC in CIDR notation, enabling control over the network's address space. This can be explicitly specified or dynamically derived from IPAM using `ipv4_netmask_length`, impacting how subnets and IP allocations are structured within the VPC."
+    },
+    {
+      "name": "enable_dns_hostnames",
+      "description": "(Optional) A boolean flag to enable/disable DNS hostnames in the VPC. Defaults false.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_dns_hostnames` argument in the `aws_vpc` resource allows users to control whether DNS hostnames are assigned to instances launched within the VPC. Enabling this feature is typically used to facilitate hostname-based communication and integration with services that rely on DNS resolution, supporting common goals like simplifying network management and enabling seamless service discovery."
+    },
+    {
+      "name": "enable_dns_support",
+      "description": "(Optional) A boolean flag to enable/disable DNS support in the VPC. Defaults to true.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_dns_support` argument in the `aws_vpc` resource allows users to control whether DNS resolution is supported within the VPC. Enabling this feature (default: true) ensures that instances in the VPC can resolve domain names to IP addresses, which is essential for common networking tasks like accessing external services or internal resources via DNS."
+    },
+    {
+      "name": "enable_network_address_usage_metrics",
+      "description": "(Optional) Indicates whether Network Address Usage metrics are enabled for your VPC. Defaults to false.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_network_address_usage_metrics` argument for the `aws_vpc` resource allows users to control whether Network Address Usage metrics are enabled for the VPC, providing insights into IP address utilization within the network. Setting this argument to `true` helps monitor and optimize resource allocation, supporting goals like network performance analysis and cost management."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_vpc` resource represents the unique identifier of an existing VPC. It allows users to reference and manage a pre-existing VPC within their Terraform configuration, enabling operations like attaching resources or modifying attributes without creating a new VPC. This is typically used for scenarios where users need to integrate Terraform with an already provisioned cloud environment."
+    },
+    {
+      "name": "instance_tenancy",
+      "description": "(Optional) A tenancy option for instances launched into the VPC. Default is `default`, which ensures that EC2 instances launched in this VPC use the EC2 instance tenancy attribute specified when the EC2 instance is launched. The only other option is `dedicated`, which ensures that EC2 instances launched in this VPC are run on dedicated tenancy instances regardless of the tenancy attribute specified at launch. This has a dedicated per region fee of $2 per hour, plus an hourly per instance usage fee.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `instance_tenancy` argument in the `aws_vpc` resource allows users to specify the tenancy model for EC2 instances launched within the VPC, controlling whether instances use shared (`default`) or dedicated (`dedicated`) hardware. Configuring this argument impacts cost and isolation, with `dedicated` tenancy ensuring instances run on physically isolated hardware, typically for compliance or performance-sensitive workloads."
+    },
+    {
+      "name": "ipv4_ipam_pool_id",
+      "description": "(Optional) The ID of an IPv4 IPAM pool you want to use for allocating this VPC's CIDR. IPAM is a VPC feature that you can use to automate your IP address management workflows including assigning, tracking, troubleshooting, and auditing IP addresses across AWS Regions and accounts. Using IPAM you can monitor IP address usage throughout your AWS Organization.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ipv4_ipam_pool_id` argument allows users to specify the ID of an IPv4 IPAM pool for automating the allocation of CIDR blocks to the VPC. By configuring this, users can leverage AWS IP Address Manager (IPAM) to streamline IP address management workflows, enabling centralized tracking, auditing, and monitoring of IP usage across regions and accounts within their AWS Organization."
+    },
+    {
+      "name": "ipv4_netmask_length",
+      "description": "(Optional) The netmask length of the IPv4 CIDR you want to allocate to this VPC. Requires specifying a `ipv4_ipam_pool_id`.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "\"Defines the subnet mask length for the IPv4 CIDR block allocated to the VPC, enabling precise control over the size of the address space within an IPAM pool. Typically used to configure the network's scalability and segmentation, this argument is optional and requires an associated `ipv4_ipam_pool_id` for dynamic CIDR assignment.\""
+    },
+    {
+      "name": "ipv6_cidr_block",
+      "description": "(Optional) IPv6 CIDR block to request from an IPAM Pool. Can be set explicitly or derived from IPAM using `ipv6_netmask_length`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ipv6_cidr_block` argument for the `aws_vpc` resource allows users to define or request an IPv6 CIDR block for the VPC, either explicitly or dynamically derived from an IPAM pool using `ipv6_netmask_length`. Configuring this argument enables IPv6 addressing within the VPC, supporting dual-stack networking and expanding the addressable range for workloads requiring IPv6 compatibility."
+    },
+    {
+      "name": "ipv6_cidr_block_network_border_group",
+      "description": "(Optional) By default when an IPv6 CIDR is assigned to a VPC a default ipv6_cidr_block_network_border_group will be set to the region of the VPC. This can be changed to restrict advertisement of public addresses to specific Network Border Groups such as LocalZones.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ipv6_cidr_block_network_border_group` argument for the `aws_vpc` resource allows users to specify the network border group that controls the advertisement of public IPv6 addresses associated with the VPC. By setting this argument, users can restrict IPv6 address advertisement to specific geographic zones, such as LocalZones, instead of defaulting to the region-wide network border group, enabling more granular control over traffic routing and address visibility."
+    },
+    {
+      "name": "ipv6_ipam_pool_id",
+      "description": "(Optional) IPAM Pool ID for a IPv6 pool. Conflicts with `assign_generated_ipv6_cidr_block`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ipv6_ipam_pool_id` argument allows users to specify the ID of an IPv6 IPAM (IP Address Manager) pool for the VPC, enabling the allocation of IPv6 CIDR blocks from a managed pool. This configuration is typically used to integrate the VPC with centralized IP address management, ensuring consistent and automated IPv6 address assignment across resources while avoiding conflicts with generated IPv6 CIDR blocks."
+    },
+    {
+      "name": "ipv6_netmask_length",
+      "description": "(Optional) Netmask length to request from IPAM Pool. Conflicts with `ipv6_cidr_block`. This can be omitted if IPAM pool as a `allocation_default_netmask_length` set. Valid values are from `44` to `60` in increments of 4.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `ipv6_netmask_length` argument in the `aws_vpc` resource allows users to define the subnet size for an IPv6 CIDR block allocated from an IPAM pool, specifying the netmask length in increments of 4 between 44 and 60. This configuration impacts the address space and granularity of the IPv6 network within the VPC, enabling users to tailor the network size to their application's scalability and resource requirements."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_vpc` resource allows users to assign key-value metadata to the VPC, enabling organization, categorization, and identification of the resource within AWS. By setting this argument, users can define custom labels for purposes such as cost allocation, environment tracking (e.g., \"dev\" or \"prod\"), or compliance, with the ability to override provider-level default tags if applicable."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_vpc` resource allows users to define a comprehensive set of key-value tags that are automatically applied to the VPC and all associated resources supporting tagging. This facilitates consistent resource organization, cost allocation, and metadata management across the infrastructure, aligning with common goals like environment labeling, compliance tracking, and operational visibility."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) of VPC",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "default_network_acl_id",
+      "description": "The ID of the network ACL created by default on VPC creation",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "default_route_table_id",
+      "description": "The ID of the route table created by default on VPC creation",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "default_security_group_id",
+      "description": "The ID of the security group created by default on VPC creation",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "dhcp_options_id",
+      "description": "DHCP options id of the desired VPC.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "ipv6_association_id",
+      "description": "The association ID for the IPv6 CIDR block.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "main_route_table_id",
+      "description": "The ID of the main route table associated with this VPC. Note that you can change a VPC's main route table by using an `aws_main_route_table_association`.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "owner_id",
+      "description": "The ID of the AWS account that owns the VPC.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

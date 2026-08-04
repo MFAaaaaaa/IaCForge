@@ -1,0 +1,151 @@
+{
+  "resource": {
+    "name": "aws_mskconnect_custom_plugin",
+    "description": "Provides an Amazon MSK Connect Custom Plugin Resource.",
+    "llm_summary": "\"Enables the creation and management of custom plugins for Amazon MSK Connect, allowing users to extend and customize Kafka data streaming capabilities. Common use cases include integrating proprietary or third-party connectors, transforming data streams, and enhancing compatibility with external systems. Supports configurations for plugin lifecycle management, versioning, and deployment, making it ideal for tailored streaming solutions in event-driven architectures.\""
+  },
+  "examples": [
+    {
+      "title": "Basic configuration",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"example\"\n}\n\nresource \"aws_s3_object\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n  key    = \"debezium.zip\"\n  source = \"debezium.zip\"\n}\n\nresource \"aws_mskconnect_custom_plugin\" \"example\" {\n  name         = \"debezium-example\"\n  content_type = \"ZIP\"\n  location {\n    s3 {\n      bucket_arn = aws_s3_bucket.example.arn\n      file_key   = aws_s3_object.example.key\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_mskconnect_custom_plugin` resource using a ZIP file stored in an S3 bucket. It illustrates the setup of the `location` block with `s3` configuration, including key arguments like `bucket_arn` and `file_key`, enabling users to deploy a custom plugin for MSK Connect sourced from S3."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "content_type",
+      "description": "(Required, Forces new resource) The type of the plugin file. Allowed values are `ZIP` and `JAR`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `content_type` argument specifies the format of the custom plugin file for the `aws_mskconnect_custom_plugin` resource, allowing users to define whether the plugin is packaged as a `ZIP` or `JAR` file. This required setting ensures compatibility with the MSK Connect service by enforcing the correct file type for plugin deployment, which is critical for enabling custom connector functionality."
+    },
+    {
+      "name": "description",
+      "description": "(Optional, Forces new resource) A summary description of the custom plugin.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_mskconnect_custom_plugin` resource allows users to define a human-readable summary that provides context or details about the custom plugin's purpose or functionality. Setting this argument helps document the plugin's role within the MSK Connect environment, aiding in resource identification and organization, and forces the creation of a new resource if modified."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_mskconnect_custom_plugin` resource represents the unique identifier for the custom plugin within Amazon MSK Connect. While optional, it allows users to explicitly define or reference the plugin's ID, which can be useful for tracking, managing, or integrating the plugin with other resources or workflows in their infrastructure."
+    },
+    {
+      "name": "name",
+      "description": "(Required, Forces new resource) The name of the custom plugin..",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies the unique identifier for the custom plugin in AWS MSK Connect, allowing users to define a meaningful and recognizable name for the resource. Setting this argument is required and impacts resource creation, as it ensures the plugin is uniquely identifiable and triggers the creation of a new resource when modified."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level. The following arguments are optional:",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_mskconnect_custom_plugin` resource allows users to assign metadata in the form of key-value pairs to the custom plugin, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or automation workflows. By configuring this argument, users can streamline resource management and integrate tagging strategies with provider-level defaults or override them for granular control."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_mskconnect_custom_plugin` resource allows users to define a comprehensive set of key-value tags that are applied to the custom plugin, including inherited tags from the provider's default configuration. This facilitates resource organization, cost allocation, and searchability within AWS by enabling consistent tagging across all resources, aligning with common user goals like governance and resource management."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "location",
+      "description": "(Required, Forces new resource) Information about the location of a custom plugin. See `location` Block for details.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "s3",
+          "description": "(Required, Forces new resource) Information of the plugin file stored in Amazon S3. See `s3` Block for details..",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "bucket_arn",
+              "description": "(Required, Forces new resource) The Amazon Resource Name (ARN) of an S3 bucket.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "Defines the Amazon Resource Name (ARN) of the S3 bucket that stores the custom plugin artifacts for MSK Connect. Setting this argument ensures the plugin's source location is specified, enabling MSK Connect to retrieve and deploy the plugin during connector creation or updates."
+            },
+            {
+              "name": "file_key",
+              "description": "(Required, Forces new resource) The file key for an object in an S3 bucket.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `file_key` argument specifies the exact path and name of the object within an S3 bucket that contains the custom plugin file for MSK Connect. By defining this required value, users ensure the plugin's source file is correctly located and retrieved during resource creation, enabling the deployment of custom connectors for Kafka."
+            },
+            {
+              "name": "object_version",
+              "description": "(Optional, Forces new resource) The version of an object in an S3 bucket.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `object_version` argument allows users to specify a specific version of an object stored in an S3 bucket for use with the `aws_mskconnect_custom_plugin` resource. By defining this, users can control which version of the plugin artifact is retrieved, ensuring precise versioning and consistency in deployments, especially when managing updates or rollbacks."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `s3` configuration block within the `aws_mskconnect_custom_plugin` resource specifies the location and details of the plugin file stored in Amazon S3, enabling the integration of custom plugins into MSK Connect. It encapsulates settings related to the S3 bucket and object key, ensuring precise control over the source artifact for plugin deployment, and forces resource recreation if modified, supporting versioning and artifact management for reliable plugin updates."
+        }
+      ],
+      "llm_summary": "The \"location\" configuration block in the `aws_mskconnect_custom_plugin` resource specifies the source location of the custom plugin artifact, enabling users to define where the plugin is stored (e.g., S3 bucket or other storage). This block is essential for managing the deployment of custom plugins by providing precise details about the artifact's storage, ensuring the plugin can be retrieved and used in MSK Connect workflows. Configuring this block allows users to control the plugin's source and versioning, facilitating seamless integration and updates."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_mskconnect_custom_plugin` resource allows users to specify the maximum duration (in string format, e.g., \"30m\") Terraform will wait for the custom plugin creation process to complete. Configuring this timeout ensures users can control the lifecycle behavior of the resource, preventing long-running operations from stalling deployments or exceeding expected provisioning times."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_mskconnect_custom_plugin` resource allows users to specify the maximum duration Terraform should wait for the deletion of the custom plugin resource. By configuring this timeout, users can control the lifecycle behavior during resource removal, ensuring operations do not exceed a defined time limit and align with infrastructure management goals."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_mskconnect_custom_plugin` resource defines customizable time limits for specific operations, such as creating, updating, or deleting the custom plugin. This block enables users to manage operation durations, ensuring better control over resource provisioning and lifecycle management in scenarios where default timeout values may not suffice."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "the Amazon Resource Name (ARN) of the custom plugin.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "latest_revision",
+      "description": "an ID of the latest successfully created revision of the custom plugin.",
+      "optional": false,
+      "type": "number"
+    },
+    {
+      "name": "state",
+      "description": "the state of the custom plugin.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

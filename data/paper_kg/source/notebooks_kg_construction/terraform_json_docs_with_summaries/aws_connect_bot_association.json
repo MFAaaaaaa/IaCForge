@@ -1,0 +1,64 @@
+{
+  "resource": {
+    "name": "aws_connect_bot_association",
+    "description": "Allows the specified Amazon Connect instance to access the specified Amazon Lex (V1) bot. For more information see Amazon Connect: Getting Started and Add an Amazon Lex bot. This resource only currently supports Amazon Lex (V1) Associations.",
+    "llm_summary": "The `aws_connect_bot_association` Terraform resource enables seamless integration between an Amazon Connect instance and an Amazon Lex (V1) bot, allowing users to enhance customer interactions with automated conversational AI. Common use cases include configuring contact center workflows to leverage Lex bots for tasks like self-service, FAQ handling, or call routing. This resource facilitates the association setup, ensuring Amazon Connect can access and utilize the specified Lex bot, making it ideal for deploying intelligent voice and chat solutions in customer support environments."
+  },
+  "examples": [
+    {
+      "title": "Basic",
+      "code": "resource \"aws_connect_bot_association\" \"example\" {\n  instance_id = aws_connect_instance.example.id\n  lex_bot {\n    lex_region = \"us-west-2\"\n    name       = \"Test\"\n\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Connect Bot Association by linking an Amazon Lex bot to an AWS Connect instance using the `lex_bot` block. It highlights key configurations such as specifying the Lex bot's region (`lex_region`) and name (`name`), providing a basic setup for integrating Lex bots with AWS Connect."
+    },
+    {
+      "title": "Including a sample Lex bot",
+      "code": "data \"aws_region\" \"current\" {}\n\nresource \"aws_lex_intent\" \"example\" {\n  create_version = true\n  name           = \"connect_lex_intent\"\n  fulfillment_activity {\n    type = \"ReturnIntent\"\n  }\n  sample_utterances = [\n    \"I would like to pick up flowers.\",\n  ]\n}\n\nresource \"aws_lex_bot\" \"example\" {\n  abort_statement {\n    message {\n      content      = \"Sorry, I am not able to assist at this time.\"\n      content_type = \"PlainText\"\n    }\n  }\n  clarification_prompt {\n    max_attempts = 2\n    message {\n      content      = \"I didn't understand you, what would you like to do?\"\n      content_type = \"PlainText\"\n    }\n  }\n  intent {\n    intent_name    = aws_lex_intent.example.name\n    intent_version = \"1\"\n  }\n\n  child_directed   = false\n  name             = \"connect_lex_bot\"\n  process_behavior = \"BUILD\"\n}\n\nresource \"aws_connect_bot_association\" \"example\" {\n  instance_id = aws_connect_instance.example.id\n  lex_bot {\n    lex_region = data.aws_region.current.name\n    name       = aws_lex_bot.example.name\n  }\n}",
+      "llm_summary": "This example demonstrates how to associate an Amazon Lex bot with an Amazon Connect instance using the `aws_connect_bot_association` resource. It includes the creation of a Lex bot (`aws_lex_bot`) and intent (`aws_lex_intent`) with sample utterances, fulfillment activity, and user prompts, showcasing how to configure the bot's behavior and link it to a Connect instance for conversational AI integration."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_connect_bot_association` resource specifies the unique identifier for the bot association within an Amazon Connect instance. While optional, setting this argument allows users to reference or manage the specific bot association, enabling precise control over its lifecycle and integration with Connect workflows."
+    },
+    {
+      "name": "instance_id",
+      "description": "(Required) The identifier of the Amazon Connect instance. You can find the instanceId in the ARN of the instance.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `instance_id` argument specifies the unique identifier of the Amazon Connect instance to which the bot association will be applied. By setting this required value, users define the target Connect instance where the bot integration will operate, enabling functionality such as automated customer interactions within that specific environment."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "lex_bot",
+      "description": "(Required) Configuration information of an Amazon Lex (V1) bot. Detailed below.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "lex_region",
+          "description": "(Optional) The Region that the Amazon Lex (V1) bot was created in. Defaults to current region.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `lex_region` argument allows users to specify the AWS region where the associated Amazon Lex (V1) bot was created, ensuring proper integration with the `aws_connect_bot_association` resource. By setting this argument, users can control cross-region compatibility and explicitly define the bot's location if it differs from the default region, supporting scenarios like multi-region deployments or compliance requirements."
+        },
+        {
+          "name": "name",
+          "description": "(Required) The name of the Amazon Lex (V1) bot.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `name` argument specifies the unique identifier for the Amazon Lex (V1) bot to be associated with an Amazon Connect instance, enabling users to define which bot will handle automated conversational interactions within their contact center. By setting this required value, users ensure the correct bot is linked, facilitating seamless integration of AI-driven customer support workflows."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `lex_bot` configuration block within the `aws_connect_bot_association` resource specifies the integration details for an Amazon Lex V1 bot, enabling seamless interaction between the bot and an Amazon Connect instance. This block encapsulates settings required to define and associate the Lex bot, facilitating automated conversational experiences for customer interactions."
+    }
+  ],
+  "attributes": []
+}

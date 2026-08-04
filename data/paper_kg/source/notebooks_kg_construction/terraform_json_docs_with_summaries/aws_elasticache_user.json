@@ -1,0 +1,172 @@
+{
+  "resource": {
+    "name": "aws_elasticache_user",
+    "description": "Provides an ElastiCache user resource. All arguments including the username and passwords will be stored in the raw state as plain-text. Read more about sensitive data in state.",
+    "llm_summary": "The `aws_elasticache_user` Terraform resource enables the creation and management of ElastiCache user accounts, allowing fine-grained access control for Redis clusters. It is commonly used to configure authentication and authorization settings, such as usernames and passwords, for secure access to caching infrastructure. This resource is ideal for scenarios requiring multi-user environments, role-based access control, or enhanced security for Redis-based applications, with support for defining sensitive credentials and permissions."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_elasticache_user\" \"test\" {\n  user_id       = \"testUserId\"\n  user_name     = \"testUserName\"\n  access_string = \"on ~app::* -@all +@read +@hash +@bitmap +@geo -setbit -bitfield -hset -hsetnx -hmset -hincrby -hincrbyfloat -hdel -bitop -geoadd -georadius -georadiusbymember\"\n  engine        = \"redis\"\n  passwords     = [\"password123456789\"]\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS ElastiCache user with fine-grained access control using the `aws_elasticache_user` resource. It showcases key arguments such as `user_id`, `user_name`, `access_string` for defining permissions, `engine` set to Redis, and `passwords` for authentication, enabling users to manage access and security for Redis clusters effectively."
+    },
+    {
+      "title": "Example 2",
+      "code": "resource \"aws_elasticache_user\" \"test\" {\n  user_id       = \"testUserId\"\n  user_name     = \"testUserName\"\n  access_string = \"on ~* +@all\"\n  engine        = \"redis\"\n\n  authentication_mode {\n    type = \"iam\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS ElastiCache user with IAM-based authentication for a Redis engine, using the `authentication_mode` block and specifying key attributes like `user_id`, `user_name`, and `access_string` to define access permissions.\""
+    },
+    {
+      "title": "Example 3",
+      "code": "resource \"aws_elasticache_user\" \"test\" {\n  user_id       = \"testUserId\"\n  user_name     = \"testUserName\"\n  access_string = \"on ~* +@all\"\n  engine        = \"redis\"\n\n  authentication_mode {\n    type      = \"password\"\n    passwords = [\"password1\", \"password2\"]\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS ElastiCache user with Redis engine, specifying a custom access string for permissions and enabling password-based authentication using the `authentication_mode` block. This example highlights key arguments such as `user_id`, `user_name`, and `passwords` for secure and granular access control.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "access_string",
+      "description": "(Required) Access permissions string used for this user. See Specifying Permissions Using an Access String for more details.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `access_string` argument defines the specific access permissions for an ElastiCache user, allowing you to control which commands and operations the user is authorized to perform within the cache. By configuring this string, you enforce fine-grained access control, aligning user permissions with security and operational requirements for your ElastiCache environment."
+    },
+    {
+      "name": "engine",
+      "description": "(Required) The current supported values are `redis`, `valkey` (case insensitive).",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `engine` argument for the `aws_elasticache_user` resource specifies the type of caching engine the user is associated with, allowing you to define whether the user operates within a `redis` or `valkey` environment. Setting this argument ensures compatibility with the chosen engine, enabling the configuration of user-specific permissions and behaviors tailored to the selected caching system."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_elasticache_user` resource allows users to specify a unique identifier for the ElastiCache user, which serves as a reference for managing and interacting with the user within the ElastiCache system. Setting this argument typically defines the user's identity, enabling configuration of access controls, permissions, and authentication for Redis clusters."
+    },
+    {
+      "name": "no_password_required",
+      "description": "(Optional) Indicates a password is not required for this user.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `no_password_required` argument for the `aws_elasticache_user` resource allows users to specify whether the Elasticache user can authenticate without a password. Setting this to `true` simplifies access control by enabling passwordless authentication, which may be useful for environments prioritizing ease of use over strict security measures."
+    },
+    {
+      "name": "passwords",
+      "description": "(Optional) Passwords used for this user. You can create up to two passwords for each user.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `passwords` argument for the `aws_elasticache_user` resource allows users to define up to two passwords for the ElastiCache user, enabling secure authentication and access control to Redis clusters. By configuring this argument, users can enhance the security of their cache environment by specifying credentials required for client connections."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A list of tags to be added to this resource. A tag is a key-value pair.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_elasticache_user` resource allows users to define metadata in the form of key-value pairs to organize, categorize, and manage the resource within their AWS environment. By setting this argument, users can streamline resource identification, enable cost allocation tracking, and support automation workflows tied to tagging policies."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_elasticache_user` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to the resource and any associated elements. This enables streamlined resource organization, cost allocation, and metadata management, supporting common goals like tagging for environments, ownership, or compliance tracking."
+    },
+    {
+      "name": "user_id",
+      "description": "(Required) The ID of the user.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `user_id` argument specifies the unique identifier for an ElastiCache user, enabling the creation or management of a distinct user within the ElastiCache system. By defining this required string, users can control access permissions, authentication, and behavior for the associated cache environment, aligning with common goals like configuring secure and individualized access to caching resources."
+    },
+    {
+      "name": "user_name",
+      "description": "(Required) The username of the user. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `user_name` argument specifies the unique username for the ElastiCache user, serving as an identifier for access control and authentication within the ElastiCache environment. Setting this required value enables the creation and management of a user account, which can be associated with specific permissions and roles to control access to Redis clusters."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "authentication_mode",
+      "description": "(Optional) Denotes the user's authentication properties. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "password_count",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `password_count` argument specifies the number of passwords to configure for the ElastiCache user within the `authentication_mode` block, enabling the management of password rotation or redundancy for enhanced security. By setting this value, users can define how many active passwords are maintained, supporting use cases like seamless credential updates or compliance with security policies."
+        },
+        {
+          "name": "passwords",
+          "description": "(Optional) Passwords used for this user. You can create up to two passwords for each user.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `passwords` argument in the `authentication_mode` block of the `aws_elasticache_user` resource allows users to define up to two passwords for securing access to the ElastiCache user. By configuring this argument, users can enforce authentication credentials for the user, aligning with best practices for cache security and access control."
+        },
+        {
+          "name": "type",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument within the `authentication_mode` block of the `aws_elasticache_user` resource specifies the authentication mechanism used to secure access to the ElastiCache user, such as password-based authentication (`password`). Setting this argument defines the method by which clients authenticate, ensuring controlled and secure access to the cache environment."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `authentication_mode` block in the `aws_elasticache_user` resource configures the user's authentication properties, including mechanisms like password-based access or disabling authentication. This block enables secure access control for ElastiCache users by defining authentication methods, helping users enforce security policies and manage access credentials effectively."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_elasticache_user` resource allows users to specify the maximum duration (in string format, e.g., \"10m\") Terraform will wait for the creation of an Elasticache user to complete. Configuring this timeout ensures predictable provisioning behavior, helping users manage resource lifecycle operations and avoid prolonged or stalled deployments."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block for the `aws_elasticache_user` resource allows users to specify the maximum duration (as a string) Terraform will wait for the deletion of an Elasticache user to complete. By configuring this timeout, users can control the lifecycle behavior during resource removal, ensuring operations do not hang indefinitely or fail prematurely due to time constraints."
+        },
+        {
+          "name": "read",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `read` argument within the `timeouts` block for the `aws_elasticache_user` resource allows users to specify the maximum duration (in string format) Terraform will wait for read operations related to the Elasticache user configuration to complete. Configuring this timeout ensures smoother resource provisioning by preventing operations from failing prematurely due to extended processing times, aligning with user goals of reliable infrastructure deployment and lifecycle management."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_elasticache_user` resource allows users to specify the maximum duration (in string format) Terraform should wait for updates to an Elasticache user to complete. Configuring this argument helps manage resource lifecycle operations by defining a timeout for modifications, ensuring smoother updates and preventing prolonged or stalled processes during infrastructure changes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_elasticache_user` resource allows users to define custom timeout durations for specific operations, such as creating, updating, or deleting an ElastiCache user. By configuring this block, users gain precise control over operation time limits, ensuring smoother management of resource lifecycle processes and preventing disruptions due to default timeout constraints."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the created ElastiCache User.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

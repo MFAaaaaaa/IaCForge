@@ -1,0 +1,108 @@
+{
+  "resource": {
+    "name": "aws_neptune_cluster_parameter_group",
+    "description": "Manages a Neptune Cluster Parameter Group",
+    "llm_summary": "The `aws_neptune_cluster_parameter_group` resource manages the configuration of custom parameter groups for Amazon Neptune clusters, enabling fine-tuned control over database engine settings. It is commonly used to optimize cluster performance, customize query execution, and configure advanced features like caching, logging, and security parameters. This resource is ideal for scenarios requiring tailored database behavior to support graph or relational workloads in Neptune."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_neptune_cluster_parameter_group\" \"example\" {\n  family      = \"neptune1\"\n  name        = \"example\"\n  description = \"neptune cluster parameter group\"\n\n  parameter {\n    name  = \"neptune_enable_audit_log\"\n    value = 1\n  }\n}",
+      "llm_summary": "\"Demonstrates the basic setup of an `aws_neptune_cluster_parameter_group` resource, including specifying the `family`, `name`, and `description`, and configuring a `parameter` block to enable audit logging (`neptune_enable_audit_log`). This example illustrates how to customize Neptune cluster parameters for enhanced logging and compliance.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "description",
+      "description": "(Optional) The description of the neptune cluster parameter group. Defaults to \"Managed by Terraform\".",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_neptune_cluster_parameter_group` resource allows users to define a human-readable explanation or label for the parameter group, providing context or purpose for its configuration. Setting this argument helps users document the intended use or environment of the parameter group, aiding in resource organization and clarity, especially in multi-environment or collaborative setups."
+    },
+    {
+      "name": "family",
+      "description": "(Required) The family of the neptune cluster parameter group.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `family` argument specifies the database engine version compatibility for the Neptune cluster parameter group, ensuring the parameter group is tailored to the appropriate Neptune engine version. Setting this argument is critical for aligning cluster configurations with the desired engine family, enabling proper functionality and compatibility of database parameters."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_neptune_cluster_parameter_group` resource represents the unique identifier of the parameter group, allowing users to reference or manage the specific configuration set for a Neptune cluster. While optional, setting this argument can help users explicitly define or retrieve the resource's identity for operations like updates, dependencies, or integrations with other Terraform resources."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name of the neptune parameter.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_neptune_cluster_parameter_group` resource allows users to specify a unique identifier for the parameter group, enabling them to define and reference a distinct configuration set for Neptune database cluster parameters. Setting this argument helps organize and manage parameter groups effectively, supporting use cases like environment-specific configurations or custom tuning for database performance."
+    },
+    {
+      "name": "name_prefix",
+      "description": "(Optional, Forces new resource) Creates a unique name beginning with the specified prefix. Conflicts with `name`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name_prefix` argument allows users to define a custom prefix for the name of the Neptune cluster parameter group, ensuring the generated name is unique while adhering to the specified prefix. This is useful for organizing and identifying resources by environment, project, or purpose, and it forces the creation of a new resource if modified, making it ideal for scenarios requiring consistent naming conventions without direct name conflicts."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level. Parameter blocks support the following:",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_neptune_cluster_parameter_group` resource allows users to assign metadata in the form of key-value pairs to the parameter group, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or automation workflows. When configured, these tags can override provider-level default tags, ensuring precise control over tagging behavior for this specific resource."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_neptune_cluster_parameter_group` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to the resource and any associated resources. This enables streamlined resource organization, cost allocation, and metadata management across the AWS environment, supporting common goals like tagging for billing, environment identification, or compliance tracking."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "parameter",
+      "description": "(Optional) A list of neptune parameters to apply.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "apply_method",
+          "description": "(Optional) Valid values are `immediate` and `pending-reboot`. Defaults to `pending-reboot`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `apply_method` argument in the `aws_neptune_cluster_parameter_group` resource specifies how changes to cluster parameters are applied, allowing users to control whether updates take effect immediately (`immediate`) or require a cluster reboot (`pending-reboot`). This configuration impacts the timing and operational disruption of parameter updates, enabling users to balance real-time adjustments with system stability during maintenance."
+        },
+        {
+          "name": "name",
+          "description": "(Required) The name of the neptune parameter.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `name` argument specifies the unique identifier for the Neptune cluster parameter group, allowing users to define and reference the group when configuring database engine parameters. Setting this argument ensures the parameter group can be distinctly managed and associated with Neptune clusters to customize database behavior, such as performance tuning or feature enablement."
+        },
+        {
+          "name": "value",
+          "description": "(Required) The value of the neptune parameter.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `value` argument for the `aws_neptune_cluster_parameter_group` resource specifies the desired configuration setting for a Neptune database parameter, allowing users to define the operational behavior or performance characteristics of the database cluster. By setting this argument, users can customize aspects such as query optimization, memory allocation, or connection handling to align with specific application requirements or workload demands."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `parameter` configuration block within the `aws_neptune_cluster_parameter_group` resource allows users to define and customize a list of database parameters for an Amazon Neptune cluster. This block encapsulates settings that control the behavior and performance of the cluster, enabling fine-grained adjustments to optimize query execution, memory usage, and other database-specific features. Configuring this block helps users tailor the cluster's operational parameters to meet specific application requirements or workloads."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the neptune cluster parameter group.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

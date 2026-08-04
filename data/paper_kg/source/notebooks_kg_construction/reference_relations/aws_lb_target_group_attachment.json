@@ -1,0 +1,22 @@
+[
+    {
+        "argument_path": "target_group_arn",
+        "references_output": "aws_lb_target_group.arn",
+        "target_resource_type": "aws_lb_target_group"
+    },
+    {
+        "argument_path": "target_id",
+        "references_output": "aws_instance.id",
+        "target_resource_type": "aws_instance"
+    },
+    {
+        "argument_path": "target_id",
+        "references_output": "aws_lambda_function.arn",
+        "target_resource_type": "aws_lambda_function"
+    },
+    {
+        "argument_path": "target_id",
+        "references_output": "aws_lb.arn",
+        "target_resource_type": "aws_lb"
+    }
+]

@@ -1,0 +1,80 @@
+{
+  "resource": {
+    "name": "aws_redshift_cluster_iam_roles",
+    "description": "Provides a Redshift Cluster IAM Roles resource. A Redshift cluster's default IAM role can be managed both by this resource's default_iam_role_arn argument and the aws_redshift_cluster resource's default_iam_role_arn argument. Do not configure different values for both arguments. Doing so will cause a conflict of default IAM roles.",
+    "llm_summary": "The `aws_redshift_cluster_iam_roles` Terraform resource manages the association of IAM roles with an Amazon Redshift cluster, enabling fine-grained access control for Redshift's integration with other AWS services. Common use cases include granting Redshift permissions to access S3 for data loading/unloading, integrating with AWS Glue for ETL operations, or enabling cross-service functionality. Users can configure the default IAM role for the cluster, ensuring seamless role-based access management while avoiding conflicts with other resources managing the same setting."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_redshift_cluster_iam_roles\" \"example\" {\n  cluster_identifier = aws_redshift_cluster.example.cluster_identifier\n  iam_role_arns      = [aws_iam_role.example.arn]\n}",
+      "llm_summary": "This example demonstrates how to associate IAM roles with an Amazon Redshift cluster using the `aws_redshift_cluster_iam_roles` resource. It showcases the configuration of the `cluster_identifier` and `iam_role_arns` arguments to enable role-based access control for Redshift operations."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "cluster_identifier",
+      "description": "(Required) The name of the Redshift Cluster IAM Roles.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `cluster_identifier` argument specifies the unique name of the Redshift cluster to which IAM roles will be associated, enabling the configuration of role-based access permissions for the cluster. By defining this required string, users ensure the correct linkage between the IAM roles and the intended Redshift cluster, supporting secure and controlled access to AWS resources."
+    },
+    {
+      "name": "default_iam_role_arn",
+      "description": "(Optional) The Amazon Resource Name (ARN) for the IAM role that was set as default for the cluster when the cluster was created.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `default_iam_role_arn` argument allows users to specify the Amazon Resource Name (ARN) of the IAM role designated as the default for the Redshift cluster during its creation. Configuring this argument ensures the cluster has a predefined IAM role for accessing AWS services, streamlining permissions management and enabling seamless integration with other resources."
+    },
+    {
+      "name": "iam_role_arns",
+      "description": "(Optional) A list of IAM Role ARNs to associate with the cluster. A Maximum of 10 can be associated to the cluster at any time.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `iam_role_arns` argument allows users to specify a set of IAM role ARNs to associate with an Amazon Redshift cluster, enabling the cluster to assume these roles for accessing AWS services and resources securely. By configuring this argument, users can define up to 10 roles that grant permissions for tasks such as data loading from S3, integration with AWS Glue, or other service interactions, aligning with common goals of managing access control and enhancing operational workflows."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_redshift_cluster_iam_roles` resource specifies the unique identifier of the Redshift cluster IAM role association. It allows users to reference or manage the linkage between a Redshift cluster and its associated IAM roles, enabling fine-grained control over permissions and access policies for the cluster's operations."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_redshift_cluster_iam_roles` resource allows users to specify the maximum duration (in string format) Terraform should wait for the creation of IAM role associations with a Redshift cluster. By configuring this timeout, users can control the provisioning behavior to avoid prolonged or indefinite waits during resource creation, ensuring predictable deployment workflows."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block for the `aws_redshift_cluster_iam_roles` resource allows users to specify the maximum duration (in string format) Terraform will wait for the removal of IAM role associations from a Redshift cluster during a delete operation. Configuring this timeout ensures predictable behavior when managing resource lifecycles, particularly in scenarios where deletion processes may take longer due to dependencies or system delays."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_redshift_cluster_iam_roles` resource allows users to specify the maximum duration (in string format) Terraform should wait for updates to IAM role associations on a Redshift cluster to complete. Configuring this timeout ensures smoother resource management by preventing operations from hanging indefinitely during updates, aligning with user goals of reliable and predictable infrastructure provisioning."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_redshift_cluster_iam_roles` resource defines customizable time limits for operations related to associating or disassociating IAM roles with a Redshift cluster. By configuring this block, users can manage operation durations to prevent timeouts during resource provisioning or updates, ensuring smoother execution and better control over deployment workflows."
+    }
+  ],
+  "attributes": []
+}

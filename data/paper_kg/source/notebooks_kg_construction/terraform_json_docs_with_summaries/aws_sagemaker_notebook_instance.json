@@ -1,0 +1,181 @@
+{
+  "resource": {
+    "name": "aws_sagemaker_notebook_instance",
+    "description": "Provides a SageMaker AI Notebook Instance resource.",
+    "llm_summary": "The `aws_sagemaker_notebook_instance` resource enables the creation and management of fully managed SageMaker notebook instances for developing, training, and deploying machine learning models. It is commonly used to set up interactive Jupyter environments with customizable compute resources, storage configurations, and network settings, supporting workflows like data exploration, model experimentation, and integration with S3 or Git repositories. Users can configure instance types, IAM roles, lifecycle scripts, VPC connectivity, and encryption settings to tailor the notebook environment to their specific ML workloads and security requirements."
+  },
+  "examples": [
+    {
+      "title": "Basic usage",
+      "code": "resource \"aws_sagemaker_notebook_instance\" \"ni\" {\n  name          = \"my-notebook-instance\"\n  role_arn      = aws_iam_role.role.arn\n  instance_type = \"ml.t2.medium\"\n\n  tags = {\n    Name = \"foo\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure a basic AWS SageMaker notebook instance using the `aws_sagemaker_notebook_instance` resource, specifying the `name`, `role_arn`, and `instance_type` arguments. It also includes a simple `tags` block for resource tagging, showcasing foundational setup for machine learning workloads."
+    },
+    {
+      "title": "Code repository usage",
+      "code": "resource \"aws_sagemaker_code_repository\" \"example\" {\n  code_repository_name = \"my-notebook-instance-code-repo\"\n\n  git_config {\n    repository_url = \"https://github.com/hashicorp/terraform-provider-aws.git\"\n  }\n}\n\nresource \"aws_sagemaker_notebook_instance\" \"ni\" {\n  name                    = \"my-notebook-instance\"\n  role_arn                = aws_iam_role.role.arn\n  instance_type           = \"ml.t2.medium\"\n  default_code_repository = aws_sagemaker_code_repository.example.code_repository_name\n\n  tags = {\n    Name = \"foo\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_sagemaker_notebook_instance` to use a default code repository by linking it to an `aws_sagemaker_code_repository` resource. It showcases the use of the `default_code_repository` argument to integrate a Git-based repository and highlights essential configurations such as `instance_type`, `role_arn`, and tagging for the notebook instance."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "accelerator_types",
+      "description": "(Optional, Deprecated) A list of Elastic Inference (EI) instance types to associate with this notebook instance. See Elastic Inference Accelerator for more details. Valid values: `ml.eia1.medium`, `ml.eia1.large`, `ml.eia1.xlarge`, `ml.eia2.medium`, `ml.eia2.large`, `ml.eia2.xlarge`.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `accelerator_types` argument for the `aws_sagemaker_notebook_instance` resource allows users to specify a set of Elastic Inference (EI) accelerator types to enhance the computational performance of machine learning workloads on the notebook instance. By configuring this argument, users can optimize inference tasks by attaching cost-effective hardware accelerators, aligning with goals like improving model efficiency and reducing infrastructure costs. Note: This argument is deprecated."
+    },
+    {
+      "name": "additional_code_repositories",
+      "description": "(Optional) An array of up to three Git repositories to associate with the notebook instance. These can be either the names of Git repositories stored as resources in your account, or the URL of Git repositories in AWS CodeCommit or in any other Git repository. These repositories are cloned at the same level as the default repository of your notebook instance.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `additional_code_repositories` argument for the `aws_sagemaker_notebook_instance` resource allows users to specify up to three Git repositories to be associated with the notebook instance, enabling seamless access to additional codebases during development. By configuring this argument, users can enhance collaboration and streamline workflows by automatically cloning repositories from AWS CodeCommit or other Git sources alongside the default repository, supporting common goals like managing shared code and dependencies."
+    },
+    {
+      "name": "default_code_repository",
+      "description": "(Optional) The Git repository associated with the notebook instance as its default code repository. This can be either the name of a Git repository stored as a resource in your account, or the URL of a Git repository in AWS CodeCommit or in any other Git repository.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `default_code_repository` argument allows users to specify the primary Git repository associated with an AWS SageMaker Notebook Instance, enabling seamless integration with a version-controlled codebase. This can be configured using the name of a repository stored in the user's AWS account or the URL of an external Git repository (e.g., AWS CodeCommit or other Git services), streamlining code access and collaboration for machine learning workflows."
+    },
+    {
+      "name": "direct_internet_access",
+      "description": "(Optional) Set to `Disabled` to disable internet access to notebook. Requires `security_groups` and `subnet_id` to be set. Supported values: `Enabled` (Default) or `Disabled`. If set to `Disabled`, the notebook instance will be able to access resources only in your VPC, and will not be able to connect to Amazon SageMaker AI training and endpoint services unless your configure a NAT Gateway in your VPC.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `direct_internet_access` argument for the `aws_sagemaker_notebook_instance` resource allows users to control whether the notebook instance has internet connectivity. Setting it to `Disabled` restricts the instance to accessing resources within the VPC, enhancing security and requiring additional VPC configurations (e.g., NAT Gateway) for external connectivity to SageMaker services, while `Enabled` (default) permits direct internet access for broader functionality."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_sagemaker_notebook_instance` resource represents the unique identifier of the notebook instance, typically auto-generated by Terraform upon creation. While optional, it can be used to reference or track the specific instance within Terraform configurations, enabling users to manage dependencies, outputs, or integrations with other resources effectively."
+    },
+    {
+      "name": "instance_type",
+      "description": "(Required) The name of ML compute instance type.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `instance_type` argument specifies the machine learning compute instance type for the SageMaker notebook instance, allowing users to define the hardware configuration and performance characteristics of the environment. Setting this argument directly impacts the computational capacity and cost of the notebook instance, enabling users to tailor resources to their workload requirements, such as training models or running data analysis."
+    },
+    {
+      "name": "kms_key_id",
+      "description": "(Optional) The AWS Key Management Service (AWS KMS) key that Amazon SageMaker AI uses to encrypt the model artifacts at rest using Amazon S3 server-side encryption.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `kms_key_id` argument allows users to specify the AWS KMS key used to encrypt data at rest for the SageMaker notebook instance, ensuring enhanced security for model artifacts stored in Amazon S3 through server-side encryption. By configuring this argument, users can align the notebook instance's encryption behavior with organizational compliance requirements or security policies."
+    },
+    {
+      "name": "lifecycle_config_name",
+      "description": "(Optional) The name of a lifecycle configuration to associate with the notebook instance.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `lifecycle_config_name` argument allows users to specify the name of a SageMaker lifecycle configuration to associate with the notebook instance, enabling the automation of custom setup or teardown scripts during the notebook's creation, start, or termination. This helps streamline environment initialization, enforce configuration standards, or execute maintenance tasks, aligning with common goals like defining resource lifecycles and optimizing operational workflows."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name of the notebook instance (must be unique).",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_sagemaker_notebook_instance` resource allows users to define a unique identifier for the notebook instance, ensuring it can be distinctly referenced within the AWS environment. By specifying this argument, users establish the primary naming property for the instance, which is critical for resource management, organization, and integration with other AWS services."
+    },
+    {
+      "name": "platform_identifier",
+      "description": "(Optional) The platform identifier of the notebook instance runtime environment. This value can be either `notebook-al1-v1`, `notebook-al2-v1`, `notebook-al2-v2`, or `notebook-al2-v3`, depending on which version of Amazon Linux you require.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `platform_identifier` argument for the `aws_sagemaker_notebook_instance` resource allows users to specify the runtime environment version of Amazon Linux for the notebook instance, enabling control over the underlying operating system and software compatibility. By setting this argument, users can tailor the instance to meet specific requirements for development, testing, or deployment workflows based on the desired Amazon Linux version."
+    },
+    {
+      "name": "role_arn",
+      "description": "(Required) The ARN of the IAM role to be used by the notebook instance which allows SageMaker AI to call other services on your behalf.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `role_arn` argument specifies the Amazon Resource Name (ARN) of the IAM role that grants the SageMaker notebook instance permissions to interact with other AWS services on behalf of the user. By defining this role, users enable the notebook instance to perform tasks such as accessing S3 buckets, invoking Lambda functions, or utilizing other AWS resources necessary for machine learning workflows."
+    },
+    {
+      "name": "root_access",
+      "description": "(Optional) Whether root access is `Enabled` or `Disabled` for users of the notebook instance. The default value is `Enabled`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `root_access` argument for the `aws_sagemaker_notebook_instance` resource allows users to control whether root-level access is enabled or disabled for individuals using the notebook instance. By setting this argument to `Enabled` or `Disabled`, users can define the security and administrative permissions for the instance, aligning with common goals like restricting elevated privileges to enhance security or enabling full access for advanced configuration and troubleshooting."
+    },
+    {
+      "name": "security_groups",
+      "description": "(Optional) The associated security groups.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `security_groups` argument for the `aws_sagemaker_notebook_instance` resource allows users to specify a set of security group IDs to control network access to the notebook instance. By defining this argument, users can enforce specific inbound and outbound traffic rules, ensuring secure communication and compliance with organizational network policies."
+    },
+    {
+      "name": "subnet_id",
+      "description": "(Optional) The VPC subnet ID.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `subnet_id` argument for the `aws_sagemaker_notebook_instance` resource allows users to specify the VPC subnet in which the notebook instance will be deployed. Configuring this argument enables network-level control, such as defining access to resources, security groups, and routing within the specified subnet, aligning the notebook instance with the user's desired network architecture and security requirements."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_sagemaker_notebook_instance` resource allows users to assign key-value metadata to the notebook instance, enabling organization, categorization, and cost management by tagging resources with identifiers such as environment, project, or owner. When used, it helps streamline resource tracking and governance, and can override provider-level default tags for more granular control."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_sagemaker_notebook_instance` resource allows users to define a comprehensive set of key-value tags that are applied to the notebook instance and any associated resources, consolidating both user-defined and inherited tags. This facilitates resource organization, cost allocation, and governance by enabling consistent tagging across AWS resources for tracking, filtering, and management purposes."
+    },
+    {
+      "name": "volume_size",
+      "description": "(Optional) The size, in GB, of the ML storage volume to attach to the notebook instance. The default value is 5 GB.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `volume_size` argument for the `aws_sagemaker_notebook_instance` resource allows users to specify the storage capacity, in GB, of the machine learning (ML) volume attached to the notebook instance. Configuring this argument impacts the available disk space for data processing, model training, and other notebook operations, enabling users to tailor storage to their workload requirements."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "instance_metadata_service_configuration",
+      "description": "(Optional) Information on the IMDS configuration of the notebook instance. Conflicts with `instance_metadata_service_configuration`. see details below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "minimum_instance_metadata_service_version",
+          "description": "(Optional) Indicates the minimum IMDS version that the notebook instance supports. When passed \"1\" is passed. This means that both IMDSv1 and IMDSv2 are supported. Valid values are `1` and `2`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "Defines the minimum version of the Instance Metadata Service (IMDS) supported by the SageMaker notebook instance, allowing users to control whether the instance supports IMDSv1, IMDSv2, or both. Configuring this argument impacts security and metadata access behavior, with IMDSv2 offering enhanced security features such as session authentication."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `instance_metadata_service_configuration` block in the `aws_sagemaker_notebook_instance` resource manages the configuration of the Instance Metadata Service (IMDS) for the notebook instance, enabling control over metadata access and security settings. This block allows users to define related settings that govern how the notebook instance interacts with IMDS, helping ensure secure and compliant metadata retrieval, particularly in environments requiring strict access controls or enhanced security measures."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) assigned by AWS to this notebook instance.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "network_interface_id",
+      "description": "The network interface ID that Amazon SageMaker AI created at the time of creating the instance. Only available when setting `subnet_id`.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "url",
+      "description": "The URL that you use to connect to the Jupyter notebook that is running in your notebook instance.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

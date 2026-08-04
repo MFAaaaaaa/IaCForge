@@ -1,0 +1,80 @@
+{
+  "resource": {
+    "name": "aws_network_acl",
+    "description": "Provides an network ACL resource. You might set up network ACLs with rules similar to your security groups in order to add an additional layer of security to your VPC. Terraform currently provides both a standalone Network ACL Rule resource and a Network ACL resource with rules defined in-line. At this time you cannot use a Network ACL with in-line rules in conjunction with any Network ACL Rule resources. Doing so will cause a conflict of rule settings and will overwrite rules. Terraform provides both a standalone network ACL association resource and a network ACL resource with a subnet_ids attribute. Do not use the same subnet ID in both a network ACL resource and a network ACL association resource. Doing so will cause a conflict of associations and will overwrite the association.",
+    "llm_summary": "The `aws_network_acl` Terraform resource enables the creation and management of network access control lists (NACLs) to provide an additional layer of security for VPCs by controlling inbound and outbound traffic at the subnet level. Common use cases include defining granular traffic rules similar to security groups, enforcing stateless packet filtering, and associating NACLs with specific subnets for enhanced network segmentation. Users can configure in-line rules or standalone rule resources to specify protocol, port, and CIDR-based access controls, while ensuring proper association management to avoid conflicts between NACLs and subnet configurations."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_network_acl\" \"main\" {\n  vpc_id = aws_vpc.main.id\n\n  egress {\n    protocol   = \"tcp\"\n    rule_no    = 200\n    action     = \"allow\"\n    cidr_block = \"10.3.0.0/18\"\n    from_port  = 443\n    to_port    = 443\n  }\n\n  ingress {\n    protocol   = \"tcp\"\n    rule_no    = 100\n    action     = \"allow\"\n    cidr_block = \"10.3.0.0/18\"\n    from_port  = 80\n    to_port    = 80\n  }\n\n  tags = {\n    Name = \"main\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_network_acl` resource with both ingress and egress rules to control traffic in a VPC. It showcases the use of `protocol`, `rule_no`, `action`, `cidr_block`, `from_port`, and `to_port` arguments to allow HTTP (port 80) and HTTPS (port 443) traffic, along with tagging for resource identification."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "egress",
+      "description": "(Optional) Specifies an egress rule. Parameters defined below. This argument is processed in attribute-as-blocks mode.",
+      "required": false,
+      "type": "set(object({action=string,cidr_block=string,from_port=number,icmp_code=number,icmp_type=number,ipv6_cidr_block=string,protocol=string,rule_no=number,to_port=number}))",
+      "llm_summary": "The `egress` argument in the `aws_network_acl` resource allows users to define outbound traffic rules for a network ACL, specifying parameters such as protocol, port ranges, CIDR blocks, and rule priority. This enables fine-grained control over how traffic is permitted or denied when leaving associated subnets, supporting common goals like securing network boundaries and enforcing compliance policies."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_network_acl` resource represents the unique identifier of the network ACL, typically used to reference an existing ACL rather than creating a new one. By specifying this argument, users can associate or manage configurations for a pre-existing network ACL, enabling workflows that require integration with existing cloud infrastructure."
+    },
+    {
+      "name": "ingress",
+      "description": "(Optional) Specifies an ingress rule. Parameters defined below. This argument is processed in attribute-as-blocks mode.",
+      "required": false,
+      "type": "set(object({action=string,cidr_block=string,from_port=number,icmp_code=number,icmp_type=number,ipv6_cidr_block=string,protocol=string,rule_no=number,to_port=number}))",
+      "llm_summary": "The `ingress` argument for the `aws_network_acl` resource allows users to define inbound traffic rules for a network ACL, specifying conditions such as protocol, port ranges, source CIDR blocks (IPv4/IPv6), and ICMP settings. By configuring this argument, users can control and secure the flow of incoming traffic to their VPC subnets, aligning with specific access and security requirements."
+    },
+    {
+      "name": "subnet_ids",
+      "description": "(Optional) A list of Subnet IDs to apply the ACL to",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `subnet_ids` argument in the `aws_network_acl` resource allows users to associate the network ACL with specific subnets by specifying their IDs. This enables fine-grained control over traffic filtering rules at the subnet level, ensuring that the ACL's access policies are applied to the designated subnets within a VPC."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_network_acl` resource allows users to assign metadata in the form of key-value pairs to the network ACL, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or automation workflows. When configured, it can override provider-level default tags, ensuring granular control over tagging specific to this resource."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_network_acl` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to all resources associated with the network ACL. This facilitates consistent resource organization, management, and identification across environments, supporting common goals like cost allocation, access control, and automated workflows."
+    },
+    {
+      "name": "vpc_id",
+      "description": "(Required) The ID of the associated VPC.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `vpc_id` argument specifies the ID of the VPC to which the `aws_network_acl` resource is associated, enabling users to define the network boundary within which the ACL operates. By setting this required argument, users ensure the network ACL is applied to control inbound and outbound traffic for subnets within the specified VPC, aligning with common goals of securing and managing network traffic in cloud environments."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the network ACL",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "owner_id",
+      "description": "The ID of the AWS account that owns the network ACL.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

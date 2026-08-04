@@ -1,0 +1,279 @@
+{
+    "resource": {
+        "name": "aws_lex_bot",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "child_directed",
+            "description": "",
+            "required": true,
+            "type": "bool"
+        },
+        {
+            "name": "create_version",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "detect_sentiment",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "enable_model_improvements",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "idle_session_ttl_in_seconds",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "locale",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "nlu_intent_confidence_threshold",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "process_behavior",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "voice_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "abort_statement",
+            "description": "",
+            "cardinality": [
+                1,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "response_card",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "message",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        15
+                    ],
+                    "arguments": [
+                        {
+                            "name": "content",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "content_type",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "group_number",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "clarification_prompt",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "max_attempts",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                },
+                {
+                    "name": "response_card",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "message",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        15
+                    ],
+                    "arguments": [
+                        {
+                            "name": "content",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "content_type",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "group_number",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "intent",
+            "description": "",
+            "cardinality": [
+                1,
+                250
+            ],
+            "arguments": [
+                {
+                    "name": "intent_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "intent_version",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "checksum",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "created_date",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "failure_reason",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "last_updated_date",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "status",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "version",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

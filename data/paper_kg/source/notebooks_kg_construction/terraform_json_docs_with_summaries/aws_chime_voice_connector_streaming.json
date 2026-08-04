@@ -1,0 +1,80 @@
+{
+  "resource": {
+    "name": "aws_chime_voice_connector_streaming",
+    "description": "Adds a streaming configuration for the specified Amazon Chime Voice Connector. The streaming configuration specifies whether media streaming is enabled for sending to Amazon Kinesis. It also sets the retention period, in hours, for the Amazon Kinesis data.",
+    "llm_summary": "The `aws_chime_voice_connector_streaming` resource manages the streaming configuration for an Amazon Chime Voice Connector, enabling media streaming to Amazon Kinesis for real-time data processing and analytics. It is commonly used to set up voice data streaming for applications requiring call analytics, transcription, or event monitoring. Key configurations include enabling or disabling media streaming, defining the retention period for Kinesis data (in hours), and integrating Chime Voice Connector with Kinesis for scalable data handling."
+  },
+  "examples": [
+    {
+      "title": "Example Usage With Media Insights",
+      "code": "resource \"aws_chime_voice_connector\" \"default\" {\n  name               = \"vc-name-test\"\n  require_encryption = true\n}\n\nresource \"aws_chime_voice_connector_streaming\" \"default\" {\n  disabled                       = false\n  voice_connector_id             = aws_chime_voice_connector.default.id\n  data_retention                 = 7\n  streaming_notification_targets = [\"SQS\"]\n  media_insights_configuration {\n    disabled          = false\n    configuration_arn = aws_chimesdkmediapipelines_media_insights_pipeline_configuration.example.arn\n  }\n}\n\nresource \"aws_chimesdkmediapipelines_media_insights_pipeline_configuration\" \"example\" {\n  name                     = \"ExampleConfig\"\n  resource_access_role_arn = aws_iam_role.example.arn\n  elements {\n    type = \"AmazonTranscribeCallAnalyticsProcessor\"\n    amazon_transcribe_call_analytics_processor_configuration {\n      language_code = \"en-US\"\n    }\n  }\n\n  elements {\n    type = \"KinesisDataStreamSink\"\n    kinesis_data_stream_sink_configuration {\n      insights_target = aws_kinesis_stream.example.arn\n    }\n  }\n}\n\ndata \"aws_iam_policy_document\" \"assume_role\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"mediapipelines.chime.amazonaws.com\"]\n    }\n\n    actions = [\"sts:AssumeRole\"]\n  }\n}\n\nresource \"aws_iam_role\" \"example\" {\n  name               = \"ExampleResourceAccessRole\"\n  assume_role_policy = data.aws_iam_policy_document.assume_role.json\n}\n\nresource \"aws_kinesis_stream\" \"example\" {\n  name        = \"ExampleStream\"\n  shard_count = 2\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_chime_voice_connector_streaming` resource with media insights integration, enabling streaming notifications to SQS and leveraging a Media Insights Pipeline for advanced analytics. It showcases key configurations such as `media_insights_configuration` with a pipeline ARN, `data_retention` for storage duration, and integration with Amazon Transcribe Call Analytics and Kinesis Data Streams for real-time insights processing."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "data_retention",
+      "description": "- (Required) The retention period, in hours, for the Amazon Kinesis data.",
+      "required": true,
+      "type": "number",
+      "llm_summary": "The `data_retention` argument specifies the retention period, in hours, for Amazon Kinesis data streamed through the Chime Voice Connector, allowing users to control how long streaming data is stored for analysis or processing. This is a required setting that directly impacts data lifecycle management and compliance with retention policies."
+    },
+    {
+      "name": "disabled",
+      "description": "(Optional) When true, media streaming to Amazon Kinesis is turned off. Default: `false`",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `disabled` argument in the `aws_chime_voice_connector_streaming` resource allows users to control whether media streaming to Amazon Kinesis is enabled or disabled. Setting this argument to `true` turns off streaming, which can be useful for scenarios where Kinesis integration is not required or to reduce costs associated with media data processing."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_chime_voice_connector_streaming` resource specifies a unique identifier for the streaming configuration associated with an AWS Chime Voice Connector. While optional, setting this argument can help users reference or manage the resource explicitly, enabling streamlined integration with other Terraform resources or workflows that depend on this identifier for tracking or linking purposes."
+    },
+    {
+      "name": "streaming_notification_targets",
+      "description": "(Optional) The streaming notification targets. Valid Values: `EventBridge | SNS | SQS`",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `streaming_notification_targets` argument in the `aws_chime_voice_connector_streaming` resource allows users to specify the destinations for streaming notifications, enabling integration with AWS services such as EventBridge, SNS, or SQS. By configuring this argument, users can define how and where real-time event data from the Chime Voice Connector is routed, supporting workflows like event processing, message distribution, or automation triggers."
+    },
+    {
+      "name": "voice_connector_id",
+      "description": "(Required) The Amazon Chime Voice Connector ID.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `voice_connector_id` argument specifies the unique identifier of the Amazon Chime Voice Connector to associate with the streaming configuration. By setting this required value, users define which Voice Connector will transmit real-time media data to configured streaming destinations, enabling functionality such as call analytics or media processing workflows."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "media_insights_configuration",
+      "description": "(Optional) The media insights configuration. See `media_insights_configuration`.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "configuration_arn",
+          "description": "(Optional) The media insights configuration that will be invoked by the Voice Connector.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `configuration_arn` argument allows users to specify the Amazon Resource Name (ARN) of a media insights configuration to be invoked by the Chime Voice Connector for streaming operations. By setting this value, users can define the integration with media processing workflows, enabling advanced analytics or insights such as transcription, sentiment analysis, or call categorization for voice data."
+        },
+        {
+          "name": "disabled",
+          "description": "(Optional) When `true`, the media insights configuration is not enabled. Defaults to `false`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `disabled` argument in the `media_insights_configuration` of the `aws_chime_voice_connector_streaming` resource allows users to control whether media insights functionality is enabled or disabled for the voice connector. Setting this argument to `true` disables media insights processing, which may be useful for scenarios where analytics or media processing is not required, while leaving it as `false` (default) ensures media insights remain active for enhanced data analysis and insights."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `media_insights_configuration` block within the `aws_chime_voice_connector_streaming` resource enables the configuration of media insights settings, which are used to analyze and process streaming media data for insights such as transcription, sentiment analysis, or other media-related analytics. This block encapsulates related settings that allow users to customize how media data is processed, providing detailed control over enabling advanced media analysis features for voice connector streaming."
+    }
+  ],
+  "attributes": []
+}

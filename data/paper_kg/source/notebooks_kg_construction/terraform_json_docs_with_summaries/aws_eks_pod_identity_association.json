@@ -1,0 +1,78 @@
+{
+  "resource": {
+    "name": "aws_eks_pod_identity_association",
+    "description": "Terraform resource for managing an AWS EKS (Elastic Kubernetes) Pod Identity Association. Creates an EKS Pod Identity association between a service account in an Amazon EKS cluster and an IAM role with EKS Pod Identity. Use EKS Pod Identity to give temporary IAM credentials to pods and the credentials are rotated automatically. Amazon EKS Pod Identity associations provide the ability to manage credentials for your applications, similar to the way that EC2 instance profiles provide credentials to Amazon EC2 instances. If a pod uses a service account that has an association, Amazon EKS sets environment variables in the containers of the pod. The environment variables configure the Amazon Web Services SDKs, including the Command Line Interface, to use the EKS Pod Identity credentials. Pod Identity is a simpler method than IAM roles for service accounts, as this method doesn\u2019t use OIDC identity providers. Additionally, you can configure a role for Pod Identity once, and reuse it across clusters.",
+    "llm_summary": "The `aws_eks_pod_identity_association` resource enables the seamless integration of AWS IAM roles with Kubernetes pods in an Amazon EKS cluster by managing Pod Identity associations. It simplifies credential management for applications running in pods by automatically providing and rotating temporary IAM credentials, eliminating the need for OIDC identity providers. Common use cases include securely granting pods access to AWS services, configuring service accounts with IAM roles, and reusing IAM roles across multiple EKS clusters for consistent identity management."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "data \"aws_iam_policy_document\" \"assume_role\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"pods.eks.amazonaws.com\"]\n    }\n\n    actions = [\n      \"sts:AssumeRole\",\n      \"sts:TagSession\"\n    ]\n  }\n}\n\nresource \"aws_iam_role\" \"example\" {\n  name               = \"eks-pod-identity-example\"\n  assume_role_policy = data.aws_iam_policy_document.assume_role.json\n}\n\nresource \"aws_iam_role_policy_attachment\" \"example_s3\" {\n  policy_arn = \"arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess\"\n  role       = aws_iam_role.example.name\n}\n\nresource \"aws_eks_pod_identity_association\" \"example\" {\n  cluster_name    = aws_eks_cluster.example.name\n  namespace       = \"example\"\n  service_account = \"example-sa\"\n  role_arn        = aws_iam_role.example.arn\n}",
+      "llm_summary": "This example demonstrates how to configure AWS EKS Pod Identity Association to enable fine-grained IAM role-based access for pods in a specific namespace and service account. It showcases the creation of an IAM role with an assume role policy for EKS pods, attachment of an Amazon S3 read-only policy, and the association of the role with an EKS cluster, namespace, and service account."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "cluster_name",
+      "description": "(Required) The name of the cluster to create the association in.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `cluster_name` argument specifies the Amazon EKS cluster in which the pod identity association will be created, enabling the configuration of IAM roles for service accounts within that cluster. This is a required parameter that ensures the association is tied to the correct Kubernetes environment, aligning with user goals of managing workload-specific permissions and identity access in EKS."
+    },
+    {
+      "name": "namespace",
+      "description": "(Required) The name of the Kubernetes namespace inside the cluster to create the association in. The service account and the pods that use the service account must be in this namespace.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `namespace` argument specifies the Kubernetes namespace within the EKS cluster where the pod identity association is created, ensuring that the service account and its associated pods are scoped to this namespace. By defining this argument, users control the namespace-level isolation and configuration for workload identity mapping, enabling secure and targeted IAM role associations for pods in the specified namespace."
+    },
+    {
+      "name": "role_arn",
+      "description": "(Required) The Amazon Resource Name (ARN) of the IAM role to associate with the service account. The EKS Pod Identity agent manages credentials to assume this role for applications in the containers in the pods that use this service account.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `role_arn` argument specifies the Amazon Resource Name (ARN) of the IAM role to associate with an EKS service account, enabling the EKS Pod Identity agent to manage credentials and allow applications within pods to assume this role. By configuring this argument, users define the IAM permissions and identity that pods can use for secure access to AWS resources, aligning with common goals of managing pod-level access control in Kubernetes environments."
+    },
+    {
+      "name": "service_account",
+      "description": "(Required) The name of the Kubernetes service account inside the cluster to associate the IAM credentials with. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `service_account` argument specifies the name of the Kubernetes service account within the EKS cluster that will be associated with the IAM credentials. By configuring this, users enable fine-grained IAM role-based access control for pods, allowing workloads running under the specified service account to securely assume the associated IAM role for accessing AWS resources."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Key-value map of resource tags. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument allows users to define a key-value map of metadata for the `aws_eks_pod_identity_association` resource, enabling the organization, categorization, and management of the resource through tagging. These tags can be used for cost allocation, access control, or resource tracking, and will override any provider-level default tags with matching keys if configured."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "association_arn",
+      "description": "The Amazon Resource Name (ARN) of the association.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "association_id",
+      "description": "The ID of the association.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "id",
+      "description": "",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "tags_all",
+      "description": "A map of tags assigned to the resource, including those inherited from the provider `default_tags` configuration block.",
+      "optional": false,
+      "type": "map(string)"
+    }
+  ]
+}

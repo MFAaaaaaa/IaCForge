@@ -1,0 +1,120 @@
+{
+    "resource": {
+        "name": "aws_redshift_event_subscription",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "event_categories",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "severity",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "sns_topic_arn",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "source_ids",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "source_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "customer_aws_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "status",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

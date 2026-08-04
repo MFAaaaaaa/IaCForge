@@ -1,0 +1,117 @@
+{
+  "resource": {
+    "name": "aws_opensearchserverless_collection",
+    "description": "Terraform resource for managing an AWS OpenSearch Serverless Collection. An aws_opensearchserverless_collection cannot be created without having an applicable encryption security policy. Use the depends_on meta-argument to define this dependency. An aws_opensearchserverless_collection is not accessible without configuring an applicable network security policy. Data cannot be accessed without configuring an applicable data access policy.",
+    "llm_summary": "The `aws_opensearchserverless_collection` resource enables the creation and management of collections within AWS OpenSearch Serverless, facilitating scalable, serverless search and analytics capabilities. It is commonly used for setting up secure and accessible data indexing and querying environments, requiring encryption, network security, and data access policies for compliance and controlled access. This resource is ideal for configuring security policies, managing data access, and integrating serverless search solutions into cloud-native applications."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_opensearchserverless_security_policy\" \"example\" {\n  name = \"example\"\n  type = \"encryption\"\n  policy = jsonencode({\n    \"Rules\" = [\n      {\n        \"Resource\" = [\n          \"collection/example\"\n        ],\n        \"ResourceType\" = \"collection\"\n      }\n    ],\n    \"AWSOwnedKey\" = true\n  })\n}\n\nresource \"aws_opensearchserverless_collection\" \"example\" {\n  name = \"example\"\n\n  depends_on = [aws_opensearchserverless_security_policy.example]\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS OpenSearch Serverless collection with an encryption security policy using the `aws_opensearchserverless_security_policy` resource. It showcases the use of the `policy` argument to define encryption rules with AWS-owned keys and establishes a dependency between the collection and the security policy for proper resource initialization."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "description",
+      "description": "(Optional) Description of the collection.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_opensearchserverless_collection` resource allows users to define a human-readable summary or contextual information about the collection, aiding in identification and documentation purposes. Setting this argument helps users distinguish between collections, especially in environments with multiple resources, by providing meaningful metadata for organizational clarity."
+    },
+    {
+      "name": "name",
+      "description": "(Required) Name of the collection. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_opensearchserverless_collection` resource specifies the unique identifier for the collection, allowing users to define a meaningful and recognizable name for organizing and managing OpenSearch Serverless data. Setting this argument is essential for creating the collection and serves as a foundational step in configuring search and analytics functionality tailored to specific workloads or environments."
+    },
+    {
+      "name": "standby_replicas",
+      "description": "(Optional) Indicates whether standby replicas should be used for a collection. One of `ENABLED` or `DISABLED`. Defaults to `ENABLED`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `standby_replicas` argument for the `aws_opensearchserverless_collection` resource allows users to control whether standby replicas are enabled or disabled for the collection, impacting its fault tolerance and high availability. By setting this argument to `ENABLED` (default) or `DISABLED`, users can define the collection's replication behavior to ensure data redundancy and resilience against node failures, aligning with common goals of maintaining service reliability and minimizing downtime."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the collection. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_opensearchserverless_collection` resource allows users to assign key-value metadata to the collection, enabling categorization, organization, and identification of resources for purposes such as cost allocation, environment labeling, or automation workflows. When specified, these tags can override provider-level default tags, offering granular control over resource tagging."
+    },
+    {
+      "name": "type",
+      "description": "(Optional) Type of collection. One of `SEARCH`, `TIMESERIES`, or `VECTORSEARCH`. Defaults to `TIMESERIES`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `type` argument in the `aws_opensearchserverless_collection` resource allows users to specify the functional purpose of the collection by defining its data processing and query behavior. By setting this argument to `SEARCH`, `TIMESERIES`, or `VECTORSEARCH`, users can tailor the collection to support full-text search, time-series data analysis, or vector-based similarity search, respectively, aligning the collection's capabilities with specific application requirements."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_opensearchserverless_collection` resource allows users to specify the maximum duration (in string format, e.g., \"10m\") Terraform will wait for the collection creation process to complete. Configuring this timeout ensures predictable behavior during resource provisioning, helping users avoid prolonged or indefinite waits in cases of delays or issues during the creation lifecycle."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_opensearchserverless_collection` resource allows users to specify the maximum duration (as a string, e.g., \"5m\" for 5 minutes) Terraform will wait for the deletion of an OpenSearch Serverless collection to complete. Configuring this timeout helps manage resource lifecycle operations by preventing long-running or stalled deletions from blocking Terraform workflows."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_opensearchserverless_collection` resource allows users to define custom time limits for operations such as creating, updating, or deleting an OpenSearch Serverless collection. This block provides fine-grained control over operation durations, helping users manage resource provisioning and avoid potential timeout errors in environments with varying performance or network conditions."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) of the collection.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "collection_endpoint",
+      "description": "Collection-specific endpoint used to submit index, search, and data upload requests to an OpenSearch Serverless collection.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "dashboard_endpoint",
+      "description": "Collection-specific endpoint used to access OpenSearch Dashboards.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "id",
+      "description": "Unique identifier for the collection.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "kms_key_arn",
+      "description": "The ARN of the Amazon Web Services KMS key used to encrypt the collection.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "optional": false,
+      "type": "map(string)"
+    }
+  ]
+}

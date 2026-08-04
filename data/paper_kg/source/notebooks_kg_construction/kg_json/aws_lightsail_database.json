@@ -1,0 +1,186 @@
+{
+    "resource": {
+        "name": "aws_lightsail_database",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "apply_immediately",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "availability_zone",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "backup_retention_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "blueprint_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "bundle_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "final_snapshot_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "master_database_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "master_password",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "master_username",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "preferred_backup_window",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "preferred_maintenance_window",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "publicly_accessible",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "relational_database_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "skip_final_snapshot",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "ca_certificate_identifier",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "cpu_count",
+            "description": "",
+            "optional": false,
+            "type": "number"
+        },
+        {
+            "name": "created_at",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "disk_size",
+            "description": "",
+            "optional": false,
+            "type": "number"
+        },
+        {
+            "name": "engine",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "engine_version",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "master_endpoint_address",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "master_endpoint_port",
+            "description": "",
+            "optional": false,
+            "type": "number"
+        },
+        {
+            "name": "ram_size",
+            "description": "",
+            "optional": false,
+            "type": "number"
+        },
+        {
+            "name": "secondary_availability_zone",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "support_code",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

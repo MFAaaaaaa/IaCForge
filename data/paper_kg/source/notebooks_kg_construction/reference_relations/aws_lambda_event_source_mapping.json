@@ -1,0 +1,67 @@
+[
+    {
+        "argument_path": "event_source_arn",
+        "references_output": "aws_dynamodb_table.stream_arn",
+        "target_resource_type": "aws_dynamodb_table"
+    },
+    {
+        "argument_path": "event_source_arn",
+        "references_output": "aws_kinesis_stream.arn",
+        "target_resource_type": "aws_kinesis_stream"
+    },
+    {
+        "argument_path": "event_source_arn",
+        "references_output": "aws_msk_cluster.arn",
+        "target_resource_type": "aws_msk_cluster"
+    },
+    {
+        "argument_path": "event_source_arn",
+        "references_output": "aws_sqs_queue.arn",
+        "target_resource_type": "aws_sqs_queue"
+    },
+    {
+        "argument_path": "event_source_arn",
+        "references_output": "aws_mq_broker.arn",
+        "target_resource_type": "aws_mq_broker"
+    },
+    {
+        "argument_path": "function_name",
+        "references_output": "aws_lambda_function.arn",
+        "target_resource_type": "aws_lambda_function"
+    },
+    {
+        "argument_path": "source_access_configuration.uri",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "source_access_configuration.uri",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "source_access_configuration.uri",
+        "references_output": "aws_secretsmanager_secret_version.arn",
+        "target_resource_type": "aws_secretsmanager_secret_version"
+    },
+    {
+        "argument_path": "destination_config.on_failure.destination_arn",
+        "references_output": "aws_sqs_queue.arn",
+        "target_resource_type": "aws_sqs_queue"
+    },
+    {
+        "argument_path": "destination_config.on_failure.destination_arn",
+        "references_output": "aws_sns_topic.arn",
+        "target_resource_type": "aws_sns_topic"
+    },
+    {
+        "argument_path": "destination_config.on_failure.destination_arn",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "kms_key_arn",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    }
+]

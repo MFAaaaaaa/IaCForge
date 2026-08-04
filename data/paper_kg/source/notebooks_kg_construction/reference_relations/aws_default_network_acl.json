@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "default_network_acl_id",
+        "references_output": "aws_vpc.default_network_acl_id",
+        "target_resource_type": "aws_vpc"
+    },
+    {
+        "argument_path": "subnet_ids",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    }
+]

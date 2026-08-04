@@ -1,0 +1,214 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_website_configuration",
+    "description": "Provides an S3 bucket website configuration resource. For more information, see Hosting Websites on S3. This resource cannot be used with S3 directory buckets.",
+    "llm_summary": "\"Manages the configuration of an Amazon S3 bucket for static website hosting, enabling features like custom error pages, index document settings, and redirection rules. Commonly used for hosting static websites, serving web assets, or creating lightweight content delivery solutions without a dedicated web server. Ideal for configuring S3 buckets to function as scalable, cost-effective web hosting platforms with customizable behavior for user requests.\""
+  },
+  "examples": [
+    {
+      "title": "With routing_rule configured",
+      "code": "resource \"aws_s3_bucket_website_configuration\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n\n  index_document {\n    suffix = \"index.html\"\n  }\n\n  error_document {\n    key = \"error.html\"\n  }\n\n  routing_rule {\n    condition {\n      key_prefix_equals = \"docs/\"\n    }\n    redirect {\n      replace_key_prefix_with = \"documents/\"\n    }\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an S3 bucket for website hosting with custom routing rules using the `aws_s3_bucket_website_configuration` resource. Highlights the use of `routing_rule` to redirect requests from a specific key prefix (`docs/`) to a new prefix (`documents/`), alongside `index_document` and `error_document` settings for handling default and error pages.\""
+    },
+    {
+      "title": "With routing_rules configured",
+      "code": "resource \"aws_s3_bucket_website_configuration\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n\n  index_document {\n    suffix = \"index.html\"\n  }\n\n  error_document {\n    key = \"error.html\"\n  }\n\n  routing_rules = <<EOF\n[{\n    \"Condition\": {\n        \"KeyPrefixEquals\": \"docs/\"\n    },\n    \"Redirect\": {\n        \"ReplaceKeyPrefixWith\": \"\"\n    }\n}]\nEOF\n}",
+      "llm_summary": "\"Demonstrates how to configure an S3 bucket for static website hosting with custom routing rules using the `aws_s3_bucket_website_configuration` resource. Highlights the use of `index_document`, `error_document`, and `routing_rules` blocks to define default documents and redirect behavior based on key prefixes.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bucket",
+      "description": "(Required, Forces new resource) Name of the bucket.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket` argument specifies the name of the S3 bucket to be configured for website hosting, serving as the foundational identifier that links the website configuration to the target bucket. Setting this argument ensures the website hosting behavior is applied to the correct bucket, enabling users to define static website hosting properties such as error and index document handling for the specified bucket."
+    },
+    {
+      "name": "expected_bucket_owner",
+      "description": "(Optional, Forces new resource) Account ID of the expected bucket owner.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `expected_bucket_owner` argument allows users to specify the AWS account ID of the expected owner of the S3 bucket associated with the website configuration. This ensures that the resource is created or managed only if the bucket is owned by the specified account, enhancing security and preventing accidental operations on buckets owned by unauthorized accounts."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_s3_bucket_website_configuration` resource allows users to specify a unique identifier for the website configuration associated with an S3 bucket. While optional, setting this argument can help distinguish and reference specific configurations, particularly in scenarios involving multiple website setups or integrations within larger infrastructure workflows."
+    },
+    {
+      "name": "routing_rules",
+      "description": "(Optional, Conflicts with `routing_rule` and `redirect_all_requests_to`) JSON array containing routing rules describing redirect behavior and when redirects are applied. Use this parameter when your routing rules contain empty String values (`\"\"`) as seen in the example above.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `routing_rules` argument in the `aws_s3_bucket_website_configuration` resource allows users to define a JSON array of routing rules that specify custom redirect behaviors and conditions for when these redirects are applied. This enables fine-grained control over website traffic redirection, such as handling specific error codes or path-based routing, and is particularly useful for scenarios requiring empty string values in routing configurations."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "error_document",
+      "description": "(Optional, Conflicts with `redirect_all_requests_to`) Name of the error document for the website. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "key",
+          "description": "(Required) Object key name to use when a 4XX class error occurs.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `key` argument in the `error_document` block of the `aws_s3_bucket_website_configuration` resource specifies the object key name (e.g., file path) to serve as the custom error page when a 4XX class error occurs on the S3-hosted website. By defining this argument, users can control the behavior of error handling and ensure a user-friendly experience by redirecting visitors to a specific error document instead of displaying a default error response."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `error_document` block in the `aws_s3_bucket_website_configuration` resource specifies the name of the custom error page to be displayed when a website hosted on the S3 bucket encounters an error (e.g., 4xx or 5xx HTTP status codes). This configuration enables users to define a tailored user experience for handling errors, ensuring visitors are redirected to a meaningful and branded error page instead of a generic response."
+    },
+    {
+      "name": "index_document",
+      "description": "(Optional, Required if `redirect_all_requests_to` is not specified) Name of the index document for the website. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "suffix",
+          "description": "(Required) Suffix that is appended to a request that is for a directory on the website endpoint. For example, if the suffix is `index.html` and you make a request to `samplebucket/images/`, the data that is returned will be for the object with the key name `images/index.html`. The suffix must not be empty and must not include a slash character.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `suffix` argument in the `index_document` configuration of the `aws_s3_bucket_website_configuration` resource specifies the default file (e.g., `index.html`) to serve when a request is made to a directory path on the S3 website endpoint. This enables users to define the behavior of directory requests, ensuring a seamless browsing experience by automatically appending the specified file to directory URLs."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `index_document` block within the `aws_s3_bucket_website_configuration` resource specifies the name of the default index document to be served when users access the root or subdirectories of an S3 bucket configured as a static website. This setting is essential for defining the entry point of the website and ensures proper navigation and user experience by serving the designated file (e.g., `index.html`) in the absence of a specific file request."
+    },
+    {
+      "name": "redirect_all_requests_to",
+      "description": "(Optional, Required if `index_document` is not specified) Redirect behavior for every request to this bucket's website endpoint. See below. Conflicts with `error_document`, `index_document`, and `routing_rule`.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "host_name",
+          "description": "(Required) Name of the host where requests are redirected.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `host_name` argument in the `redirect_all_requests_to` block of the `aws_s3_bucket_website_configuration` resource specifies the target hostname to which all incoming requests to the S3 bucket's website endpoint are redirected. By defining this required string, users can configure domain-level redirection, ensuring all traffic is forwarded to a specific host, typically to consolidate web traffic or enforce a canonical domain."
+        },
+        {
+          "name": "protocol",
+          "description": "(Optional) Protocol to use when redirecting requests. The default is the protocol that is used in the original request. Valid values: `http`, `https`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `protocol` argument in the `redirect_all_requests_to` block of the `aws_s3_bucket_website_configuration` resource allows users to specify whether redirected requests should use `http` or `https`. By defining this argument, users can enforce a specific protocol for all redirection traffic, ensuring compliance with security requirements or application behavior, while leaving it optional to default to the protocol of the original request."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `redirect_all_requests_to` block in the `aws_s3_bucket_website_configuration` resource defines the behavior for redirecting all incoming requests to a specified target, enabling bucket-wide redirection for website endpoints. This block is used to configure global request redirection, ensuring all traffic is routed to a single destination, and is particularly useful for scenarios like domain migration or consolidating web traffic under a unified endpoint."
+    },
+    {
+      "name": "routing_rule",
+      "description": "(Optional, Conflicts with `redirect_all_requests_to` and `routing_rules`) List of rules that define when a redirect is applied and the redirect behavior. See below.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "condition",
+          "description": "(Optional) Configuration block for describing a condition that must be met for the specified redirect to apply. See below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "http_error_code_returned_equals",
+              "description": "(Optional, Required if `key_prefix_equals` is not specified) HTTP error code when the redirect is applied. If specified with `key_prefix_equals`, then both must be true for the redirect to be applied.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `http_error_code_returned_equals` argument allows users to define a specific HTTP error code that triggers a redirect when configuring conditional website behavior for an S3 bucket. This enables precise control over redirect logic, ensuring the redirect is applied only when the specified error code is encountered, supporting use cases like custom error handling or user-friendly navigation during failures."
+            },
+            {
+              "name": "key_prefix_equals",
+              "description": "(Optional, Required if `http_error_code_returned_equals` is not specified) Object key name prefix when the redirect is applied. If specified with `http_error_code_returned_equals`, then both must be true for the redirect to be applied.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `key_prefix_equals` argument in the `condition` block of the `aws_s3_bucket_website_configuration` resource allows users to define a specific object key name prefix that triggers a redirect when matched. This enables precise control over redirect behavior by applying it only to objects with keys starting with the specified prefix, supporting use cases like targeted URL redirection for specific content paths or resource groups."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The \"condition\" block within the \"routing_rule\" configuration of the `aws_s3_bucket_website_configuration` resource defines criteria that must be met for a redirect rule to apply, enabling conditional routing based on request attributes. It encapsulates settings such as key prefixes, HTTP error codes, or other request-specific conditions, allowing users to implement granular control over website redirection behavior for tailored user experiences."
+        },
+        {
+          "name": "redirect",
+          "description": "(Required) Configuration block for redirect information. See below.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "host_name",
+              "description": "(Optional) Host name to use in the redirect request.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `host_name` argument in the `redirect` configuration of the `aws_s3_bucket_website_configuration` resource allows users to specify the target host name for redirect requests. By setting this argument, users can define the destination domain or subdomain to which incoming traffic is redirected, enabling custom URL redirection behavior for their S3 bucket's website endpoint."
+            },
+            {
+              "name": "http_redirect_code",
+              "description": "(Optional) HTTP redirect code to use on the response.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "Defines the HTTP status code used for redirect responses in the S3 bucket's website configuration, allowing users to control the type of redirect behavior (e.g., 301 for permanent or 302 for temporary redirects) to align with their application's routing or SEO requirements."
+            },
+            {
+              "name": "protocol",
+              "description": "(Optional) Protocol to use when redirecting requests. The default is the protocol that is used in the original request. Valid values: `http`, `https`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `protocol` argument in the `redirect` block of the `aws_s3_bucket_website_configuration` resource allows users to specify whether redirected requests should use `http` or `https`. By defining this, users can enforce a specific protocol for redirection, ensuring consistent behavior for website traffic or meeting security requirements like HTTPS enforcement. If not set, the protocol defaults to that of the original request."
+            },
+            {
+              "name": "replace_key_prefix_with",
+              "description": "(Optional, Conflicts with `replace_key_with`) Object key prefix to use in the redirect request. For example, to redirect requests for all pages with prefix `docs/` (objects in the `docs/` folder) to `documents/`, you can set a `condition` block with `key_prefix_equals` set to `docs/` and in the `redirect` set `replace_key_prefix_with` to `/documents`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `replace_key_prefix_with` argument in the `redirect` block of the `aws_s3_bucket_website_configuration` resource allows users to define a new object key prefix to replace the existing prefix in redirected requests. This enables precise control over URL redirection behavior, such as restructuring paths by substituting one prefix (e.g., `docs/`) with another (e.g., `documents/`), which is useful for reorganizing or standardizing access to resources in an S3 bucket."
+            },
+            {
+              "name": "replace_key_with",
+              "description": "(Optional, Conflicts with `replace_key_prefix_with`) Specific object key to use in the redirect request. For example, redirect request to `error.html`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `replace_key_with` argument in the `redirect` configuration of the `aws_s3_bucket_website_configuration` resource allows users to specify a specific object key to redirect requests to, such as `error.html`. This enables precise control over the destination of redirected traffic, typically used to define custom error pages or targeted content for specific request scenarios, enhancing user experience and website behavior."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The \"redirect\" configuration block within the \"routing_rule\" of the \"aws_s3_bucket_website_configuration\" resource defines settings for redirecting requests to a target location based on specific conditions. It enables users to manage URL redirection rules, such as changing protocols, hostnames, or paths, to optimize website navigation and ensure seamless user experience for S3-hosted websites."
+        }
+      ],
+      "llm_summary": "The `routing_rule` block within the `aws_s3_bucket_website_configuration` resource defines conditional redirect rules for S3 bucket website hosting, enabling fine-grained control over when and how specific requests are redirected. It encapsulates settings for matching request conditions and specifying redirect behavior, allowing users to customize URL redirection logic to optimize user experience or enforce specific routing policies."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "website_domain",
+      "description": "Domain of the website endpoint. This is used to create Route 53 alias records.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "website_endpoint",
+      "description": "Website endpoint.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

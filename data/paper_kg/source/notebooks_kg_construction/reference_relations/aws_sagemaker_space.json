@@ -1,0 +1,112 @@
+[
+    {
+        "argument_path": "domain_id",
+        "references_output": "aws_sagemaker_domain.id",
+        "target_resource_type": "aws_sagemaker_domain"
+    },
+    {
+        "argument_path": "ownership_settings.owner_user_profile_name",
+        "references_output": "aws_sagemaker_user_profile.user_profile_name",
+        "target_resource_type": "aws_sagemaker_user_profile"
+    },
+    {
+        "argument_path": "space_settings.custom_file_system.efs_file_system.file_system_id",
+        "references_output": "aws_efs_file_system.id",
+        "target_resource_type": "aws_efs_file_system"
+    },
+    {
+        "argument_path": "space_settings.jupyter_lab_app_settings.code_repository.repository_url",
+        "references_output": "aws_codecommit_repository.clone_url_http",
+        "target_resource_type": "aws_codecommit_repository"
+    },
+    {
+        "argument_path": "space_settings.jupyter_server_app_settings.code_repository.repository_url",
+        "references_output": "aws_codecommit_repository.clone_url_http",
+        "target_resource_type": "aws_codecommit_repository"
+    },
+    {
+        "argument_path": "space_settings.jupyter_server_app_settings.lifecycle_config_arns",
+        "references_output": "aws_sagemaker_lifecycle_configuration.arn",
+        "target_resource_type": "aws_sagemaker_lifecycle_configuration"
+    },
+    {
+        "argument_path": "space_settings.kernel_gateway_app_settings.lifecycle_config_arns",
+        "references_output": "aws_sagemaker_lifecycle_configuration.arn",
+        "target_resource_type": "aws_sagemaker_lifecycle_configuration"
+    },
+    {
+        "argument_path": "space_settings.kernel_gateway_app_settings.custom_image.app_image_config_name",
+        "references_output": "aws_sagemaker_app_image_config.name",
+        "target_resource_type": "aws_sagemaker_app_image_config"
+    },
+    {
+        "argument_path": "space_settings.kernel_gateway_app_settings.custom_image.image_name",
+        "references_output": "aws_sagemaker_image.name",
+        "target_resource_type": "aws_sagemaker_image"
+    },
+    {
+        "argument_path": "space_settings.kernel_gateway_app_settings.custom_image.image_version_number",
+        "references_output": "aws_sagemaker_image_version.version_number",
+        "target_resource_type": "aws_sagemaker_image_version"
+    },
+    {
+        "argument_path": "space_settings.code_editor_app_settings.default_resource_spec.lifecycle_config_arn",
+        "references_output": "aws_sagemaker_lifecycle_configuration.arn",
+        "target_resource_type": "aws_sagemaker_lifecycle_configuration"
+    },
+    {
+        "argument_path": "space_settings.code_editor_app_settings.default_resource_spec.sagemaker_image_arn",
+        "references_output": "aws_sagemaker_image.arn",
+        "target_resource_type": "aws_sagemaker_image"
+    },
+    {
+        "argument_path": "space_settings.code_editor_app_settings.default_resource_spec.sagemaker_image_version_arn",
+        "references_output": "aws_sagemaker_image_version.arn",
+        "target_resource_type": "aws_sagemaker_image_version"
+    },
+    {
+        "argument_path": "space_settings.jupyter_lab_app_settings.default_resource_spec.lifecycle_config_arn",
+        "references_output": "aws_sagemaker_lifecycle_configuration.arn",
+        "target_resource_type": "aws_sagemaker_lifecycle_configuration"
+    },
+    {
+        "argument_path": "space_settings.jupyter_lab_app_settings.default_resource_spec.sagemaker_image_arn",
+        "references_output": "aws_sagemaker_image.arn",
+        "target_resource_type": "aws_sagemaker_image"
+    },
+    {
+        "argument_path": "space_settings.jupyter_lab_app_settings.default_resource_spec.sagemaker_image_version_arn",
+        "references_output": "aws_sagemaker_image_version.arn",
+        "target_resource_type": "aws_sagemaker_image_version"
+    },
+    {
+        "argument_path": "space_settings.jupyter_server_app_settings.default_resource_spec.lifecycle_config_arn",
+        "references_output": "aws_sagemaker_lifecycle_configuration.arn",
+        "target_resource_type": "aws_sagemaker_lifecycle_configuration"
+    },
+    {
+        "argument_path": "space_settings.jupyter_server_app_settings.default_resource_spec.sagemaker_image_arn",
+        "references_output": "aws_sagemaker_image.arn",
+        "target_resource_type": "aws_sagemaker_image"
+    },
+    {
+        "argument_path": "space_settings.jupyter_server_app_settings.default_resource_spec.sagemaker_image_version_arn",
+        "references_output": "aws_sagemaker_image_version.arn",
+        "target_resource_type": "aws_sagemaker_image_version"
+    },
+    {
+        "argument_path": "space_settings.kernel_gateway_app_settings.default_resource_spec.lifecycle_config_arn",
+        "references_output": "aws_sagemaker_lifecycle_configuration.arn",
+        "target_resource_type": "aws_sagemaker_lifecycle_configuration"
+    },
+    {
+        "argument_path": "space_settings.kernel_gateway_app_settings.default_resource_spec.sagemaker_image_arn",
+        "references_output": "aws_sagemaker_image.arn",
+        "target_resource_type": "aws_sagemaker_image"
+    },
+    {
+        "argument_path": "space_settings.kernel_gateway_app_settings.default_resource_spec.sagemaker_image_version_arn",
+        "references_output": "aws_sagemaker_image_version.arn",
+        "target_resource_type": "aws_sagemaker_image_version"
+    }
+]

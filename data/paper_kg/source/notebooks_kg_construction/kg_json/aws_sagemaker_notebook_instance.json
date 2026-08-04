@@ -1,0 +1,150 @@
+{
+    "resource": {
+        "name": "aws_sagemaker_notebook_instance",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "accelerator_types",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "additional_code_repositories",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "default_code_repository",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "direct_internet_access",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "instance_type",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "kms_key_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "lifecycle_config_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "platform_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "role_arn",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "root_access",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "security_groups",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "subnet_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "volume_size",
+            "description": "",
+            "required": false,
+            "type": "number"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "instance_metadata_service_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "minimum_instance_metadata_service_version",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "network_interface_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "url",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

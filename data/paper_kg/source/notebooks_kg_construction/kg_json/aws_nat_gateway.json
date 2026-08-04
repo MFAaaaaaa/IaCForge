@@ -1,0 +1,120 @@
+{
+    "resource": {
+        "name": "aws_nat_gateway",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "allocation_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "connectivity_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "private_ip",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "secondary_allocation_ids",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "secondary_private_ip_address_count",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "secondary_private_ip_addresses",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "subnet_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "association_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "network_interface_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "public_ip",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

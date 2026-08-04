@@ -1,0 +1,17 @@
+[
+    {
+        "argument_path": "execution_role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "policy_details.schedule.cross_region_copy_rule.cmk_arn",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "policy_details.event_source.parameters.snapshot_owner",
+        "references_output": "data.aws_caller_identity.account_id",
+        "target_resource_type": "data.aws_caller_identity"
+    }
+]

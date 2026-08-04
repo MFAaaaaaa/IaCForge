@@ -1,0 +1,42 @@
+{
+    "resource": {
+        "name": "aws_api_gateway_resource",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "parent_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "path_part",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "rest_api_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "path",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

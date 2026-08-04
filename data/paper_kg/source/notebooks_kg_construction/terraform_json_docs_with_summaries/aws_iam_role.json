@@ -1,0 +1,173 @@
+{
+  "resource": {
+    "name": "aws_iam_role",
+    "description": "Provides an IAM role. If policies are attached to the role via the aws_iam_policy_attachment resource and you are modifying the role name or path, the force_detach_policies argument must be set to true and applied before attempting the operation otherwise you will encounter a DeleteConflict error. The aws_iam_role_policy_attachment resource (recommended) does not have this requirement. If you use this resource's managed_policy_arns argument or inline_policy configuration blocks, this resource will take over exclusive management of the role's respective policy types (e.g., both policy types if both arguments are used). These arguments are incompatible with other ways of managing a role's policies, such as aws_iam_policy_attachment, aws_iam_role_policy_attachment, and aws_iam_role_policy. If you attempt to manage a role's policies by multiple means, you will get resource cycling and/or errors. We suggest using jsonencode() or aws_iam_policy_document when assigning a value to assume_role_policy or inline_policy.*.policy. They seamlessly translate Terraform language into JSON, enabling you to maintain consistency within your configuration without the need for context switches. Also, you can sidestep potential complications arising from formatting discrepancies, whitespace inconsistencies, and other nuances inherent to JSON.",
+    "llm_summary": "The `aws_iam_role` Terraform resource enables the creation and management of AWS IAM roles, which define permissions and trust relationships for AWS services or users to assume specific roles. Common use cases include configuring service roles for AWS resources (e.g., EC2, Lambda) and enabling cross-account access or federated authentication. Users can define trust policies (`assume_role_policy`), attach managed or inline policies, and control lifecycle settings, ensuring secure and consistent role-based access management across their cloud infrastructure."
+  },
+  "examples": [
+    {
+      "title": "Basic Example",
+      "code": "resource \"aws_iam_role\" \"test_role\" {\n  name = \"test_role\"\n\n  # Terraform's \"jsonencode\" function converts a\n  # Terraform expression result to valid JSON syntax.\n  assume_role_policy = jsonencode({\n    Version = \"2012-10-17\"\n    Statement = [\n      {\n        Action = \"sts:AssumeRole\"\n        Effect = \"Allow\"\n        Sid    = \"\"\n        Principal = {\n          Service = \"ec2.amazonaws.com\"\n        }\n      },\n    ]\n  })\n\n  tags = {\n    tag-key = \"tag-value\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to create an AWS IAM role with a basic trust policy using the `assume_role_policy` argument, allowing EC2 instances to assume the role. It also showcases the use of the `jsonencode` function for defining the policy in JSON format and includes a simple `tags` block for resource tagging."
+    },
+    {
+      "title": "Example of Using Data Source for Assume Role Policy",
+      "code": "data \"aws_iam_policy_document\" \"instance_assume_role_policy\" {\n  statement {\n    actions = [\"sts:AssumeRole\"]\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"ec2.amazonaws.com\"]\n    }\n  }\n}\n\nresource \"aws_iam_role\" \"instance\" {\n  name               = \"instance_role\"\n  path               = \"/system/\"\n  assume_role_policy = data.aws_iam_policy_document.instance_assume_role_policy.json\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_iam_role` resource with an assume role policy using the `aws_iam_policy_document` data source. This example showcases the use of the `assume_role_policy` argument to define permissions for EC2 service principals to assume the role.\""
+    },
+    {
+      "title": "Example of Exclusive Inline Policies",
+      "code": "resource \"aws_iam_role\" \"example\" {\n  name               = \"yak_role\"\n  assume_role_policy = data.aws_iam_policy_document.instance_assume_role_policy.json # (not shown)\n\n  inline_policy {\n    name = \"my_inline_policy\"\n\n    policy = jsonencode({\n      Version = \"2012-10-17\"\n      Statement = [\n        {\n          Action   = [\"ec2:Describe*\"]\n          Effect   = \"Allow\"\n          Resource = \"*\"\n        },\n      ]\n    })\n  }\n\n  inline_policy {\n    name   = \"policy-8675309\"\n    policy = data.aws_iam_policy_document.inline_policy.json\n  }\n}\n\ndata \"aws_iam_policy_document\" \"inline_policy\" {\n  statement {\n    actions   = [\"ec2:DescribeAccountAttributes\"]\n    resources = [\"*\"]\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_iam_role` resource with multiple exclusive inline policies using the `inline_policy` block. It showcases defining inline policies directly within the role, including one using `jsonencode` and another referencing a pre-defined `aws_iam_policy_document` data source, enabling granular control over IAM permissions."
+    },
+    {
+      "title": "Example of Removing Inline Policies",
+      "code": "resource \"aws_iam_role\" \"example\" {\n  name               = \"yak_role\"\n  assume_role_policy = data.aws_iam_policy_document.instance_assume_role_policy.json # (not shown)\n\n  inline_policy {}\n}",
+      "llm_summary": "\"Demonstrates how to remove all inline policies from an `aws_iam_role` by using an empty `inline_policy` block, showcasing a minimal configuration for resetting or clearing inline policies associated with the role.\""
+    },
+    {
+      "title": "Example of Exclusive Managed Policies",
+      "code": "resource \"aws_iam_role\" \"example\" {\n  name                = \"yak_role\"\n  assume_role_policy  = data.aws_iam_policy_document.instance_assume_role_policy.json # (not shown)\n  managed_policy_arns = [aws_iam_policy.policy_one.arn, aws_iam_policy.policy_two.arn]\n}\n\nresource \"aws_iam_policy\" \"policy_one\" {\n  name = \"policy-618033\"\n\n  policy = jsonencode({\n    Version = \"2012-10-17\"\n    Statement = [\n      {\n        Action   = [\"ec2:Describe*\"]\n        Effect   = \"Allow\"\n        Resource = \"*\"\n      },\n    ]\n  })\n}\n\nresource \"aws_iam_policy\" \"policy_two\" {\n  name = \"policy-381966\"\n\n  policy = jsonencode({\n    Version = \"2012-10-17\"\n    Statement = [\n      {\n        Action   = [\"s3:ListAllMyBuckets\", \"s3:ListBucket\", \"s3:HeadBucket\"]\n        Effect   = \"Allow\"\n        Resource = \"*\"\n      },\n    ]\n  })\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_iam_role` with exclusive managed policies by specifying multiple `managed_policy_arns` that grant distinct permissions for EC2 and S3 actions. It illustrates the creation of custom `aws_iam_policy` resources and their attachment to the IAM role, enabling fine-grained access control for cloud resources."
+    },
+    {
+      "title": "Example of Removing Managed Policies",
+      "code": "resource \"aws_iam_role\" \"example\" {\n  name                = \"yak_role\"\n  assume_role_policy  = data.aws_iam_policy_document.instance_assume_role_policy.json # (not shown)\n  managed_policy_arns = []\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_iam_role` resource with no attached managed policies by setting the `managed_policy_arns` argument to an empty list. It illustrates how to create a minimal IAM role with a custom assume role policy, ideal for scenarios requiring fine-grained control over permissions."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "assume_role_policy",
+      "description": "(Required) Policy that grants an entity permission to assume the role. The assume_role_policy is very similar to but slightly different than a standard IAM policy and cannot use an aws_iam_policy resource. However, it can use an aws_iam_policy_document data source. See the example above of how this works. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `assume_role_policy` argument in the `aws_iam_role` resource defines the trust relationship policy that specifies which entities (e.g., AWS services, users, or other roles) are allowed to assume the IAM role. By configuring this required policy, users enable secure delegation of permissions and control access to the role, typically to support cross-account access, service roles, or federated identity scenarios."
+    },
+    {
+      "name": "description",
+      "description": "(Optional) Description of the role.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_iam_role` resource allows users to define a human-readable summary or purpose for the IAM role, providing context about its intended use or functionality. Setting this argument helps improve clarity and documentation within the AWS environment, aiding in role management and identification for administrators and teams."
+    },
+    {
+      "name": "force_detach_policies",
+      "description": "(Optional) Whether to force detaching any policies the role has before destroying it. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `force_detach_policies` argument for the `aws_iam_role` resource controls whether attached IAM policies are forcibly detached from the role before the role is destroyed. Setting this to `true` ensures a clean removal of the role by automatically detaching associated policies, which is useful for managing dependencies and avoiding deletion errors during resource lifecycle operations."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_iam_role` resource represents the unique identifier of the IAM role, typically auto-generated by AWS upon creation. While optional, it can be used to reference or retrieve the role's ID for downstream resources or integrations, enabling precise role identification and management within Terraform configurations."
+    },
+    {
+      "name": "managed_policy_arns",
+      "description": "(Optional, Deprecated) Set of exclusive IAM managed policy ARNs to attach to the IAM role. If this attribute is not configured, Terraform will ignore policy attachments to this resource. When configured, Terraform will align the role's managed policy attachments with this set by attaching or detaching managed policies. Configuring an empty set (i.e., `managed_policy_arns = []`) will cause Terraform to remove all managed policy attachments.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `managed_policy_arns` argument for the `aws_iam_role` resource allows users to define a specific set of IAM managed policy ARNs to attach to the role, ensuring precise control over its permissions. When configured, Terraform enforces alignment between the role's managed policy attachments and the specified set, enabling users to manage and standardize role permissions while optionally removing any unmanaged policies."
+    },
+    {
+      "name": "max_session_duration",
+      "description": "(Optional) Maximum session duration (in seconds) that you want to set for the specified role. If you do not specify a value for this setting, the default maximum of one hour is applied. This setting can have a value from 1 hour to 12 hours.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `max_session_duration` argument for the `aws_iam_role` resource allows users to define the maximum duration (in seconds) that a role's session can remain active, ranging from 1 to 12 hours. This setting is useful for controlling session lifetimes to align with security and operational requirements, such as limiting access duration for temporary credentials or extending session times for long-running tasks."
+    },
+    {
+      "name": "name",
+      "description": "(Optional, Forces new resource) Friendly name of the role. If omitted, Terraform will assign a random, unique name. See IAM Identifiers for more information.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument in the `aws_iam_role` resource allows users to define a custom, human-readable identifier for the IAM role, enabling easier recognition and management within AWS. If omitted, Terraform generates a unique name automatically, but specifying this argument is useful for aligning role names with organizational naming conventions or specific project requirements."
+    },
+    {
+      "name": "name_prefix",
+      "description": "(Optional, Forces new resource) Creates a unique friendly name beginning with the specified prefix. Conflicts with `name`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name_prefix` argument for the `aws_iam_role` resource allows users to define a unique, automatically generated friendly name for the IAM role that begins with the specified prefix. This is useful for dynamically creating role names in environments where exact names are not required, enabling flexibility and avoiding naming conflicts, especially in automated workflows or multi-environment setups."
+    },
+    {
+      "name": "path",
+      "description": "(Optional) Path to the role. See IAM Identifiers for more information.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `path` argument in the `aws_iam_role` resource allows users to define a hierarchical namespace for organizing IAM roles, typically used to group roles by purpose, environment, or team. Setting this argument helps structure and manage IAM resources effectively, especially in environments with complex access control requirements."
+    },
+    {
+      "name": "permissions_boundary",
+      "description": "(Optional) ARN of the policy that is used to set the permissions boundary for the role.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `permissions_boundary` argument for the `aws_iam_role` resource allows users to specify the ARN of an IAM policy that acts as a permissions boundary, limiting the maximum permissions the role can assume. This configuration is typically used to enforce security controls by restricting the scope of actions and resources accessible to the role, ensuring compliance with organizational policies."
+    },
+    {
+      "name": "tags",
+      "description": "Key-value mapping of tags for the IAM role. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_iam_role` resource allows users to define a key-value mapping of metadata tags for the IAM role, enabling better organization, identification, and cost allocation of cloud resources. When set, it customizes the role's tags, overriding any matching keys from the provider's `default_tags` configuration, ensuring precise control over tagging for resource management and compliance purposes."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_iam_role` resource allows users to define a comprehensive set of key-value tags that are automatically merged from both user-defined tags and inherited tags from the provider configuration. This enables consistent tagging across resources for purposes like cost allocation, resource organization, and governance, ensuring the IAM role is easily identifiable and integrated into broader tagging strategies."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "inline_policy",
+      "description": "(Optional, Deprecated) Configuration block defining an exclusive set of IAM inline policies associated with the IAM role. See below. If no blocks are configured, Terraform will not manage any inline policies in this resource. Configuring one empty block (i.e., `inline_policy {}`) will cause Terraform to remove all inline policies added out of band on `apply`.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "name",
+          "description": "(Required) Name of the role policy.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `name` argument for the `inline_policy` in the `aws_iam_role` resource allows users to specify a unique identifier for the inline policy attached to the IAM role. By defining this argument, users can organize and reference specific policies within the role, ensuring clarity and manageability when configuring permissions for AWS resources."
+        },
+        {
+          "name": "policy",
+          "description": "(Required) Policy document as a JSON formatted string. For more information about building IAM policy documents with Terraform, see the AWS IAM Policy Document Guide.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `policy` argument within the `inline_policy` block of the `aws_iam_role` resource allows users to define the permissions and access controls for the IAM role by specifying a policy document as a JSON-formatted string. This enables users to configure fine-grained access rules, ensuring the role has the necessary permissions to interact with AWS resources according to the organization's security and operational requirements."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `inline_policy` block in the `aws_iam_role` resource defines a set of IAM inline policies directly associated with the role, enabling fine-grained control over permissions by specifying custom policy documents. Configuring this block allows users to manage the role's inline policies exclusively through Terraform, ensuring consistent enforcement of access rules and the ability to remove unmanaged policies during `apply`."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) specifying the role.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "create_date",
+      "description": "Creation date of the IAM role.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "unique_id",
+      "description": "Stable and unique string identifying the role.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

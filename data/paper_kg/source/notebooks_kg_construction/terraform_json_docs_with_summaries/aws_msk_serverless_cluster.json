@@ -1,0 +1,155 @@
+{
+  "resource": {
+    "name": "aws_msk_serverless_cluster",
+    "description": "Manages an Amazon MSK Serverless cluster. To manage a provisioned Amazon MSK cluster, use the aws_msk_cluster resource.",
+    "llm_summary": "\"Manages the deployment and configuration of Amazon MSK Serverless clusters, enabling users to run Apache Kafka without provisioning or managing servers. Ideal for use cases like building event-driven architectures, real-time data streaming, and decoupled microservices communication. Supports configurations for cluster settings, scaling, and seamless integration with AWS services, simplifying operational overhead and ensuring cost-efficient, on-demand scalability.\""
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_msk_serverless_cluster\" \"example\" {\n  cluster_name = \"Example\"\n\n  vpc_config {\n    subnet_ids         = aws_subnet.example[*].id\n    security_group_ids = [aws_security_group.example.id]\n  }\n\n  client_authentication {\n    sasl {\n      iam {\n        enabled = true\n      }\n    }\n  }\n}",
+      "llm_summary": "\"Demonstrates the basic configuration of an AWS MSK Serverless Cluster, including setting up VPC connectivity with `subnet_ids` and `security_group_ids`, and enabling IAM-based SASL client authentication through the `client_authentication` block.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "cluster_name",
+      "description": "(Required) The name of the serverless cluster.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `cluster_name` argument specifies the unique name of the Amazon MSK Serverless cluster, serving as its identifier within the AWS environment. By defining this required property, users establish the cluster's identity, enabling resource management, integration with other services, and differentiation between multiple clusters in their infrastructure."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_msk_serverless_cluster` resource represents the unique identifier of the cluster, typically used to reference or manage the cluster within Terraform configurations and workflows. While optional, setting this argument can help users explicitly define or retrieve the cluster's ID for integration with other resources or operational tasks, such as monitoring, automation, or lifecycle management."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_msk_serverless_cluster` resource allows users to assign metadata in the form of key-value pairs to the cluster, enabling resource categorization, organization, and cost tracking. By configuring this argument, users can define tags for purposes such as identifying environments (e.g., \"dev\" or \"prod\"), managing access policies, or integrating with billing and governance workflows, with provider-level default tags being overridden if matching keys are specified."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_msk_serverless_cluster` resource allows users to define a comprehensive set of key-value tags that are applied to the cluster and any associated resources. This facilitates resource organization, cost allocation, and governance by enabling tagging for purposes such as environment identification, ownership tracking, or compliance requirements."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "client_authentication",
+      "description": "(Required) Specifies client authentication information for the serverless cluster. See below.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "sasl",
+          "description": "",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "iam",
+              "description": "",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "enabled",
+                  "description": "",
+                  "required": true,
+                  "type": "bool",
+                  "llm_summary": "The `enabled` argument for the `iam` context in the `aws_msk_serverless_cluster` resource is a required boolean that specifies whether IAM access control is activated for the cluster. Setting this argument to `true` ensures that IAM policies govern permissions and access to the serverless MSK cluster, aligning with security best practices and enabling fine-grained access management."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `iam` configuration block within the `sasl` context of the `aws_msk_serverless_cluster` resource enables IAM-based authentication for the serverless MSK cluster. It encapsulates settings required to configure and manage IAM as the SASL mechanism, allowing users to securely authenticate clients using AWS Identity and Access Management, ensuring fine-grained access control and integration with AWS security policies."
+            }
+          ],
+          "llm_summary": "The `sasl` configuration block within the `client_authentication` context of the `aws_msk_serverless_cluster` resource defines settings for enabling SASL (Simple Authentication and Security Layer) as a method of client authentication. It encapsulates related parameters to configure secure communication between clients and the serverless MSK cluster, ensuring proper authentication mechanisms are in place. Configuring this block allows users to enforce SASL-based authentication, enhancing security and compliance for Kafka client connections."
+        }
+      ],
+      "llm_summary": "The `client_authentication` block in the `aws_msk_serverless_cluster` resource configures authentication mechanisms for clients connecting to the serverless MSK cluster, ensuring secure access control. It encapsulates settings related to authentication methods, such as SASL or IAM, enabling users to define how clients authenticate and interact with the cluster, thereby enhancing security and compliance for data streaming workflows."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_msk_serverless_cluster` resource allows users to specify the maximum duration (as a string) Terraform should wait for the creation of the serverless MSK cluster to complete. By configuring this timeout, users can control the lifecycle behavior of the resource, ensuring operations do not hang indefinitely and align with deployment expectations in time-sensitive workflows."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_msk_serverless_cluster` resource allows users to specify the maximum duration (as a string, e.g., \"10m\") Terraform will wait for the deletion of the MSK Serverless cluster to complete. Configuring this timeout helps manage resource lifecycle operations by preventing long-running deletions from stalling Terraform workflows or exceeding user-defined limits."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_msk_serverless_cluster` resource defines customizable time limits for operations such as creating, updating, or deleting the serverless MSK cluster. By configuring this block, users can manage operation durations to prevent long-running tasks or handle specific infrastructure provisioning requirements, ensuring better control over resource lifecycle management."
+    },
+    {
+      "name": "vpc_config",
+      "description": "(Required) VPC configuration information. See below.",
+      "cardinality": [
+        1,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "security_group_ids",
+          "description": "",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `security_group_ids` argument in the `vpc_config` block of the `aws_msk_serverless_cluster` resource allows users to specify a set of security groups to control inbound and outbound network traffic for the cluster within the associated VPC. By defining this argument, users can enforce network-level access restrictions, such as limiting access to specific IP ranges or other resources, ensuring secure communication and compliance with organizational policies."
+        },
+        {
+          "name": "subnet_ids",
+          "description": "",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `subnet_ids` argument in the `vpc_config` block of the `aws_msk_serverless_cluster` resource specifies the set of VPC subnets where the serverless MSK cluster will be deployed. By defining these subnets, users control the network placement of the cluster, ensuring connectivity within their VPC and enabling secure communication with other resources, such as applications or databases, in the specified subnets."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `vpc_config` block in the `aws_msk_serverless_cluster` resource defines the VPC connectivity settings required to integrate the serverless MSK cluster with a specific Virtual Private Cloud (VPC). It encapsulates related configurations such as subnet and security group associations, enabling secure and controlled network access to the cluster. Configuring this block ensures the cluster is properly isolated within the user's VPC, facilitating private communication and compliance with network security requirements."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the serverless cluster.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "cluster_uuid",
+      "description": "UUID of the serverless cluster, for use in IAM policies.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

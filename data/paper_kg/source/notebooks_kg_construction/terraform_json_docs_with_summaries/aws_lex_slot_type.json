@@ -1,0 +1,138 @@
+{
+  "resource": {
+    "name": "aws_lex_slot_type",
+    "description": "Provides an Amazon Lex Slot Type resource. For more information see Amazon Lex: How It Works",
+    "llm_summary": "The `aws_lex_slot_type` Terraform resource enables the creation and management of custom slot types for Amazon Lex, a conversational AI service used to build chatbots and voice interfaces. It is commonly used to define and configure the data types that Lex uses to interpret user input, such as enumerations, synonyms, or patterns for natural language understanding. This resource supports customization of slot value resolution, lifecycle management, and integration with Lex bots, making it essential for tailoring chatbot behavior to specific application needs."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_lex_slot_type\" \"flower_types\" {\n  create_version = true\n  description    = \"Types of flowers to order\"\n\n  enumeration_value {\n    synonyms = [\n      \"Lirium\",\n      \"Martagon\",\n    ]\n\n    value = \"lilies\"\n  }\n\n  enumeration_value {\n    synonyms = [\n      \"Eduardoregelia\",\n      \"Podonix\",\n    ]\n\n    value = \"tulips\"\n  }\n\n  name                     = \"FlowerTypes\"\n  value_selection_strategy = \"ORIGINAL_VALUE\"\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Lex slot type using the `aws_lex_slot_type` resource, including defining enumeration values with synonyms and enabling version creation. It illustrates the use of the `value_selection_strategy` argument and the `enumeration_value` block to specify multiple values and synonyms for natural language understanding in chatbot applications."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "create_version",
+      "description": "(Optional) Determines if a new slot type version is created when the initial resource is created and on each update. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `create_version` argument in the `aws_lex_slot_type` resource controls whether a new version of the slot type is automatically created during the initial resource creation and subsequent updates. Enabling this argument (`true`) helps manage versioning for slot types, which is useful for lifecycle management and ensuring backward compatibility in conversational AI applications built with Amazon Lex."
+    },
+    {
+      "name": "description",
+      "description": "(Optional) A description of the slot type. Must be less than or equal to 200 characters in length.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines a brief, optional description for the slot type in Amazon Lex, allowing users to provide contextual information or metadata about the slot type's purpose or functionality. This helps improve documentation and clarity when managing or referencing slot types within conversational AI workflows."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_lex_slot_type` resource allows users to specify a unique identifier for the slot type, which serves as a reference for managing and interacting with the resource in Terraform. While optional, setting this argument can help ensure consistent tracking and identification of the slot type across deployments, aligning with common goals like resource organization and lifecycle management."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name of the slot type. The name is not case sensitive. Must be less than or equal to 100 characters in length.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies the unique identifier for the Lex slot type, allowing users to define a human-readable name that represents the type of data a bot can capture during interactions. Setting this argument is essential for creating and referencing the slot type within the Lex bot configuration, ensuring proper organization and functionality in natural language processing workflows."
+    },
+    {
+      "name": "value_selection_strategy",
+      "description": "(Optional) Determines the slot resolution strategy that Amazon Lex uses to return slot type values. `ORIGINAL_VALUE` returns the value entered by the user if the user value is similar to the slot value. `TOP_RESOLUTION` returns the first value in the resolution list if there is a resolution list for the slot, otherwise null is returned. Defaults to `ORIGINAL_VALUE`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `value_selection_strategy` argument in the `aws_lex_slot_type` resource allows users to define how Amazon Lex resolves and returns slot type values during user interactions. By specifying either `ORIGINAL_VALUE` or `TOP_RESOLUTION`, users can control whether Lex prioritizes the user-entered value or the top-ranked resolution from its list, impacting the conversational behavior and accuracy of slot value selection."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "enumeration_value",
+      "description": "(Required) A list of EnumerationValue objects that defines the values that the slot type can take. Each value can have a list of synonyms, which are additional values that help train the machine learning model about the values that it resolves for a slot. Attributes are documented under enumeration_value.",
+      "cardinality": [
+        1,
+        10000
+      ],
+      "arguments": [
+        {
+          "name": "synonyms",
+          "description": "(Optional) Additional values related to the slot type value. Each item must be less than or equal to 140 characters in length.",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `synonyms` argument allows users to define a set of alternative phrases or words associated with a specific slot type value in an Amazon Lex bot, enhancing the bot's ability to recognize user input variations. By configuring synonyms, users improve the natural language understanding (NLU) capabilities of the bot, ensuring more flexible and accurate slot value matching during conversations."
+        },
+        {
+          "name": "value",
+          "description": "(Required) The value of the slot type. Must be less than or equal to 140 characters in length.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "Defines the specific string value for an enumeration option within the slot type, enabling users to specify one of the possible predefined inputs that a Lex bot can recognize and process. This argument is essential for configuring the bot's understanding of user-provided data, ensuring accurate intent matching and conversational flow."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `enumeration_value` block in the `aws_lex_slot_type` resource defines the possible values a slot type can accept, along with optional synonyms to enhance machine learning model training for value resolution. This configuration enables precise control over the slot type's value set, improving the accuracy and flexibility of conversational AI interactions in Amazon Lex."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_lex_slot_type` resource allows users to specify the maximum duration (as a string, e.g., \"10m\") Terraform will wait for the creation of a Lex slot type to complete. Configuring this timeout helps manage long-running operations, ensuring predictable behavior during resource provisioning."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block for the `aws_lex_slot_type` resource allows users to specify the maximum duration (as a string) Terraform will wait for the deletion of a Lex slot type to complete. By configuring this timeout, users can control the resource lifecycle behavior, ensuring operations do not hang indefinitely during deletion processes in cases of delays or API responsiveness issues."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_lex_slot_type` resource allows users to define the maximum duration (in string format, e.g., \"30m\") Terraform will wait for updates to the Lex slot type to complete. Configuring this argument ensures control over operation timeouts, helping users manage deployment workflows and avoid prolonged or stalled updates during resource modifications."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_lex_slot_type` resource allows users to define custom timeout durations for specific operations, such as creating, updating, or deleting Lex slot types. By configuring this block, users gain precise control over operation time limits, ensuring smoother management of resource lifecycle processes and preventing disruptions due to extended execution times."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "checksum",
+      "description": "Checksum identifying the version of the slot type that was created. The checksum is not included as an argument because the resource will add it automatically when updating the slot type.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "created_date",
+      "description": "The date when the slot type version was created.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "last_updated_date",
+      "description": "The date when the `$LATEST` version of this slot type was updated.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "version",
+      "description": "The version of the slot type.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

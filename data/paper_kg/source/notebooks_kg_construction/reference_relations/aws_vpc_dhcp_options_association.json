@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "vpc_id",
+        "references_output": "aws_vpc.id",
+        "target_resource_type": "aws_vpc"
+    },
+    {
+        "argument_path": "dhcp_options_id",
+        "references_output": "aws_vpc_dhcp_options.id",
+        "target_resource_type": "aws_vpc_dhcp_options"
+    }
+]

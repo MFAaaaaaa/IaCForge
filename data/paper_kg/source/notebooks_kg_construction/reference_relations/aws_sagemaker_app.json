@@ -1,0 +1,27 @@
+[
+    {
+        "argument_path": "domain_id",
+        "references_output": "aws_sagemaker_domain.id",
+        "target_resource_type": "aws_sagemaker_domain"
+    },
+    {
+        "argument_path": "user_profile_name",
+        "references_output": "aws_sagemaker_user_profile.user_profile_name",
+        "target_resource_type": "aws_sagemaker_user_profile"
+    },
+    {
+        "argument_path": "resource_spec.lifecycle_config_arn",
+        "references_output": "aws_sagemaker_lifecycle_configuration.arn",
+        "target_resource_type": "aws_sagemaker_lifecycle_configuration"
+    },
+    {
+        "argument_path": "resource_spec.sagemaker_image_arn",
+        "references_output": "aws_sagemaker_image.arn",
+        "target_resource_type": "aws_sagemaker_image"
+    },
+    {
+        "argument_path": "resource_spec.sagemaker_image_version_arn",
+        "references_output": "aws_sagemaker_image_version.arn",
+        "target_resource_type": "aws_sagemaker_image_version"
+    }
+]

@@ -1,0 +1,102 @@
+{
+    "resource": {
+        "name": "aws_route53_zone",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "comment",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "delegation_set_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "force_destroy",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "vpc",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "vpc_id",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "vpc_region",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "name_servers",
+            "description": "",
+            "optional": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "primary_name_server",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "zone_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

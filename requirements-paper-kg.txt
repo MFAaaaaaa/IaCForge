@@ -1,0 +1,7 @@
+# Optional dependencies for paper-KG Chroma retrieval and index rebuilding.
+chromadb>=0.5,<2
+langchain-chroma>=0.1,<2
+langchain-core>=0.2,<2
+langchain-huggingface>=0.0.3,<2
+sentence-transformers>=3,<6
+

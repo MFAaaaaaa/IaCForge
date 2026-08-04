@@ -1,0 +1,7 @@
+[
+    {
+        "argument_path": "endpoint_configuration.vpc_endpoint_ids",
+        "references_output": "aws_vpc_endpoint.id",
+        "target_resource_type": "aws_vpc_endpoint"
+    }
+]

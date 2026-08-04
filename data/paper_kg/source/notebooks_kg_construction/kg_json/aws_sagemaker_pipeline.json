@@ -1,0 +1,113 @@
+{
+    "resource": {
+        "name": "aws_sagemaker_pipeline",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "pipeline_definition",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "pipeline_description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "pipeline_display_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "pipeline_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "role_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "parallelism_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "max_parallel_execution_steps",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "pipeline_definition_s3_location",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "bucket",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "object_key",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "version_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

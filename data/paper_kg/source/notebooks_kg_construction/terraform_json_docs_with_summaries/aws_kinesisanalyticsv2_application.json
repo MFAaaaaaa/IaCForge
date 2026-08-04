@@ -1,0 +1,1122 @@
+{
+  "resource": {
+    "name": "aws_kinesisanalyticsv2_application",
+    "description": "Manages a Kinesis Analytics v2 Application. This resource can be used to manage both Kinesis Data Analytics for SQL applications and Kinesis Data Analytics for Apache Flink applications. Kinesis Data Analytics for SQL applications created using this resource cannot currently be viewed in the AWS Console. To manage Kinesis Data Analytics for SQL applications that can also be viewed in the AWS Console, use the aws_kinesis_analytics_application resource.",
+    "llm_summary": "The `aws_kinesisanalyticsv2_application` Terraform resource enables the creation and management of Kinesis Data Analytics v2 applications, supporting both SQL-based and Apache Flink-based stream processing workloads. It is commonly used for building real-time data analytics pipelines, processing and transforming streaming data, and integrating with Kinesis Data Streams or other data sources. Users can configure application runtime environments, input/output data sources, logging, checkpointing, and scaling settings to optimize performance and reliability for complex stream processing use cases."
+  },
+  "examples": [
+    {
+      "title": "Apache Flink Application",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"example-flink-application\"\n}\n\nresource \"aws_s3_object\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n  key    = \"example-flink-application\"\n  source = \"flink-app.jar\"\n}\n\nresource \"aws_kinesisanalyticsv2_application\" \"example\" {\n  name                   = \"example-flink-application\"\n  runtime_environment    = \"FLINK-1_8\"\n  service_execution_role = aws_iam_role.example.arn\n\n  application_configuration {\n    application_code_configuration {\n      code_content {\n        s3_content_location {\n          bucket_arn = aws_s3_bucket.example.arn\n          file_key   = aws_s3_object.example.key\n        }\n      }\n\n      code_content_type = \"ZIPFILE\"\n    }\n\n    environment_properties {\n      property_group {\n        property_group_id = \"PROPERTY-GROUP-1\"\n\n        property_map = {\n          Key1 = \"Value1\"\n        }\n      }\n\n      property_group {\n        property_group_id = \"PROPERTY-GROUP-2\"\n\n        property_map = {\n          KeyA = \"ValueA\"\n          KeyB = \"ValueB\"\n        }\n      }\n    }\n\n    flink_application_configuration {\n      checkpoint_configuration {\n        configuration_type = \"DEFAULT\"\n      }\n\n      monitoring_configuration {\n        configuration_type = \"CUSTOM\"\n        log_level          = \"DEBUG\"\n        metrics_level      = \"TASK\"\n      }\n\n      parallelism_configuration {\n        auto_scaling_enabled = true\n        configuration_type   = \"CUSTOM\"\n        parallelism          = 10\n        parallelism_per_kpu  = 4\n      }\n    }\n  }\n\n  tags = {\n    Environment = \"test\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an Apache Flink application using the `aws_kinesisanalyticsv2_application` resource in Terraform, including integration with an S3 bucket for application code storage, custom environment properties, and advanced Flink-specific configurations such as checkpointing, monitoring, and parallelism settings. It illustrates the use of `application_code_configuration`, `environment_properties`, and `flink_application_configuration` blocks to set up a scalable, debug-enabled Flink runtime environment with auto-scaling and custom metrics."
+    },
+    {
+      "title": "SQL Application",
+      "code": "resource \"aws_cloudwatch_log_group\" \"example\" {\n  name = \"example-sql-application\"\n}\n\nresource \"aws_cloudwatch_log_stream\" \"example\" {\n  name           = \"example-sql-application\"\n  log_group_name = aws_cloudwatch_log_group.example.name\n}\n\nresource \"aws_kinesisanalyticsv2_application\" \"example\" {\n  name                   = \"example-sql-application\"\n  runtime_environment    = \"SQL-1_0\"\n  service_execution_role = aws_iam_role.example.arn\n\n  application_configuration {\n    application_code_configuration {\n      code_content {\n        text_content = \"SELECT 1;\\n\"\n      }\n\n      code_content_type = \"PLAINTEXT\"\n    }\n\n    sql_application_configuration {\n      input {\n        name_prefix = \"PREFIX_1\"\n\n        input_parallelism {\n          count = 3\n        }\n\n        input_schema {\n          record_column {\n            name     = \"COLUMN_1\"\n            sql_type = \"VARCHAR(8)\"\n            mapping  = \"MAPPING-1\"\n          }\n\n          record_column {\n            name     = \"COLUMN_2\"\n            sql_type = \"DOUBLE\"\n          }\n\n          record_encoding = \"UTF-8\"\n\n          record_format {\n            record_format_type = \"CSV\"\n\n            mapping_parameters {\n              csv_mapping_parameters {\n                record_column_delimiter = \",\"\n                record_row_delimiter    = \"\\n\"\n              }\n            }\n          }\n        }\n\n        kinesis_streams_input {\n          resource_arn = aws_kinesis_stream.example.arn\n        }\n      }\n\n      output {\n        name = \"OUTPUT_1\"\n\n        destination_schema {\n          record_format_type = \"JSON\"\n        }\n\n        lambda_output {\n          resource_arn = aws_lambda_function.example.arn\n        }\n      }\n\n      output {\n        name = \"OUTPUT_2\"\n\n        destination_schema {\n          record_format_type = \"CSV\"\n        }\n\n        kinesis_firehose_output {\n          resource_arn = aws_kinesis_firehose_delivery_stream.example.arn\n        }\n      }\n\n      reference_data_source {\n        table_name = \"TABLE-1\"\n\n        reference_schema {\n          record_column {\n            name     = \"COLUMN_1\"\n            sql_type = \"INTEGER\"\n          }\n\n          record_format {\n            record_format_type = \"JSON\"\n\n            mapping_parameters {\n              json_mapping_parameters {\n                record_row_path = \"$\"\n              }\n            }\n          }\n        }\n\n        s3_reference_data_source {\n          bucket_arn = aws_s3_bucket.example.arn\n          file_key   = \"KEY-1\"\n        }\n      }\n    }\n  }\n\n  cloudwatch_logging_options {\n    log_stream_arn = aws_cloudwatch_log_stream.example.arn\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Kinesis Data Analytics SQL application (`aws_kinesisanalyticsv2_application`) with multiple inputs, outputs, and reference data sources. It showcases key configurations such as SQL application code, input schema with CSV mapping, output destinations to Lambda and Firehose, and integration with S3 for reference data, along with CloudWatch logging for monitoring."
+    },
+    {
+      "title": "VPC Configuration",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"example-flink-application\"\n}\n\nresource \"aws_s3_object\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n  key    = \"example-flink-application\"\n  source = \"flink-app.jar\"\n}\n\nresource \"aws_kinesisanalyticsv2_application\" \"example\" {\n  name                   = \"example-flink-application\"\n  runtime_environment    = \"FLINK-1_8\"\n  service_execution_role = aws_iam_role.example.arn\n\n  application_configuration {\n    application_code_configuration {\n      code_content {\n        s3_content_location {\n          bucket_arn = aws_s3_bucket.example.arn\n          file_key   = aws_s3_object.example.key\n        }\n      }\n\n      code_content_type = \"ZIPFILE\"\n    }\n\n    vpc_configuration {\n      security_group_ids = [aws_security_group.example[0].id, aws_security_group.example[1].id]\n      subnet_ids         = [aws_subnet.example.id]\n    }\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS Kinesis Data Analytics v2 application to run a Flink application within a VPC, using the `vpc_configuration` block to specify security group IDs and subnet IDs. Includes integration with an S3 bucket for application code storage and retrieval via the `application_code_configuration` block, showcasing the use of `s3_content_location` for code deployment.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "application_mode",
+      "description": "(Optional) The application's mode. Valid values are `STREAMING`, `INTERACTIVE`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `application_mode` argument for the `aws_kinesisanalyticsv2_application` resource allows users to specify the operational mode of the application, either `STREAMING` for real-time data processing or `INTERACTIVE` for on-demand querying and analysis. Configuring this argument determines the application's behavior and use case, enabling users to tailor the application to either continuous data streams or interactive workloads based on their analytics requirements."
+    },
+    {
+      "name": "description",
+      "description": "(Optional) A summary description of the application.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_kinesisanalyticsv2_application` resource allows users to define a human-readable summary that provides context or metadata about the application. Setting this argument helps document the application's purpose or functionality, aiding in resource organization and identification within the AWS environment."
+    },
+    {
+      "name": "force_stop",
+      "description": "(Optional) Whether to force stop an unresponsive Flink-based application.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `force_stop` argument for the `aws_kinesisanalyticsv2_application` resource allows users to control whether a Flink-based application should be forcibly terminated if it becomes unresponsive. Setting this argument to `true` ensures immediate shutdown of the application, which can be useful for managing stuck processes or recovering from critical failures, aligning with lifecycle management and operational recovery goals."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_kinesisanalyticsv2_application` resource allows users to specify a unique identifier for the application, enabling precise referencing and management within Terraform configurations. While optional, setting this argument can help users track and distinguish the application resource in complex deployments or when integrating with other infrastructure components."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name of the in-application stream.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies the unique identifier for the in-application stream within the `aws_kinesisanalyticsv2_application` resource. By defining this required string, users establish the stream's name, which serves as a reference point for configuring data processing workflows, enabling interaction with other application components, and ensuring proper resource identification within the Kinesis Analytics V2 application."
+    },
+    {
+      "name": "runtime_environment",
+      "description": "(Required) The runtime environment for the application. Valid values: `SQL-1_0`, `FLINK-1_6`, `FLINK-1_8`, `FLINK-1_11`, `FLINK-1_13`, `FLINK-1_15`, `FLINK-1_18`, `FLINK-1_19`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `runtime_environment` argument specifies the execution framework for the `aws_kinesisanalyticsv2_application`, allowing users to define the underlying processing engine (e.g., SQL or Apache Flink versions) that powers the application's data analytics capabilities. Setting this argument determines the application's compatibility with specific runtime features and processing behaviors, enabling users to tailor the environment to their data streaming and analytics requirements."
+    },
+    {
+      "name": "service_execution_role",
+      "description": "(Required) The ARN of the IAM role used by the application to access Kinesis data streams, Kinesis Data Firehose delivery streams, Amazon S3 objects, and other external resources.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `service_execution_role` argument specifies the ARN of the IAM role that grants the Kinesis Data Analytics application permissions to access external resources such as Kinesis data streams, Kinesis Data Firehose delivery streams, and Amazon S3 objects. Setting this required argument ensures the application can securely interact with these services, enabling data processing and integration workflows."
+    },
+    {
+      "name": "start_application",
+      "description": "(Optional) Whether to start or stop the application.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `start_application` argument for the `aws_kinesisanalyticsv2_application` resource allows users to control the application's runtime state by specifying whether the application should be started or stopped upon creation or update. Setting this argument to `true` ensures the application begins processing data streams immediately, aligning with user goals of automating application lifecycle management and operational readiness."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the application. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level. The application_configuration object supports the following:",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_kinesisanalyticsv2_application` resource allows users to assign key-value metadata to the application, enabling organization, categorization, and resource tracking for purposes such as cost allocation, environment identification, or compliance. When configured, these tags can override provider-level default tags, offering granular control over resource labeling."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_kinesisanalyticsv2_application` resource allows users to define a comprehensive set of key-value tags that are automatically merged with resource-specific tags, enabling consistent metadata management across AWS resources. By configuring this argument, users can streamline tagging for purposes like cost allocation, resource organization, and access control policies, ensuring alignment with broader tagging strategies."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "application_configuration",
+      "description": "(Optional) The application's configuration",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "application_code_configuration",
+          "description": "(Required) The code location and type parameters for the application.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "code_content_type",
+              "description": "(Required) Specifies whether the code content is in text or zip format. Valid values: `PLAINTEXT`, `ZIPFILE`.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `code_content_type` argument in the `application_code_configuration` block of the `aws_kinesisanalyticsv2_application` resource specifies the format of the application code, allowing users to define whether the code is provided as plaintext (`PLAINTEXT`) or a compressed archive (`ZIPFILE`). This configuration ensures the application can correctly interpret and process the code during deployment, aligning with user goals of managing code delivery formats for streaming data applications."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "code_content",
+              "description": "(Optional) The location and type of the application code.  The code_content object supports the following:",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "text_content",
+                  "description": "(Optional) The text-format code for the application. The s3_content_location object supports the following:",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `text_content` argument allows users to define the application code directly in plain text format for an AWS Kinesis Data Analytics v2 application. This provides an alternative to specifying code via an S3 location, enabling users to embed and configure the application's logic or processing scripts inline within the Terraform configuration."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "s3_content_location",
+                  "description": "(Optional) Information about the Amazon S3 bucket containing the application code.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "bucket_arn",
+                      "description": "(Required) The ARN of the S3 bucket.",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `bucket_arn` argument specifies the Amazon Resource Name (ARN) of the S3 bucket that serves as the source location for application code or configuration files in the `s3_content_location` block of the `aws_kinesisanalyticsv2_application` resource. By defining this required parameter, users enable the application to access and retrieve content from the designated S3 bucket, ensuring proper initialization and execution of the Kinesis Data Analytics application."
+                    },
+                    {
+                      "name": "file_key",
+                      "description": "(Required) The object key name containing the reference data. The vpc_configuration object supports the following:",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `file_key` argument specifies the exact object key name within an S3 bucket that contains reference data for the Kinesis Analytics application. By defining this required parameter, users ensure the application can access and utilize the specified data source for processing or analytics, enabling functionality such as streaming data enrichment or real-time insights."
+                    },
+                    {
+                      "name": "object_version",
+                      "description": "(Optional) The version of the object containing the application code. The application_snapshot_configuration object supports the following:",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `object_version` argument allows users to specify a specific version of the S3 object containing the application code for the Kinesis Analytics V2 application. By defining this, users can control which version of the code is deployed, enabling precise version management and rollback capabilities for application updates or snapshots."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `s3_content_location` block within the `code_content` configuration of the `aws_kinesisanalyticsv2_application` resource specifies the Amazon S3 bucket and object details that store the application code. This block enables users to define the source location for application artifacts, facilitating seamless integration of code hosted in S3 for deployment and execution in Kinesis Data Analytics applications."
+                }
+              ],
+              "llm_summary": "The `code_content` configuration block within `application_code_configuration` for the `aws_kinesisanalyticsv2_application` resource specifies the location and type of the application code, enabling users to define how and where the application retrieves its executable code. This block encapsulates settings related to code storage, such as inline code or external sources (e.g., S3), allowing users to manage the deployment and execution of streaming analytics applications with precise control over code accessibility and versioning."
+            }
+          ],
+          "llm_summary": "The `application_code_configuration` block within the `application_configuration` of the `aws_kinesisanalyticsv2_application` resource defines the code source and type for the application, enabling users to specify where the application code resides (e.g., S3 or inline) and how it is executed. This configuration is essential for managing the application's runtime behavior and ensuring the correct code is deployed, supporting use cases like real-time data processing and analytics workflows."
+        },
+        {
+          "name": "application_snapshot_configuration",
+          "description": "(Optional) Describes whether snapshots are enabled for a Flink-based application.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "snapshots_enabled",
+              "description": "(Required) Describes whether snapshots are enabled for a Flink-based Kinesis Data Analytics application. The environment_properties object supports the following:",
+              "required": true,
+              "type": "bool",
+              "llm_summary": "The `snapshots_enabled` argument in the `application_snapshot_configuration` of the `aws_kinesisanalyticsv2_application` resource allows users to control whether snapshot functionality is activated for a Flink-based Kinesis Data Analytics application. Enabling this feature ensures the application can periodically save its state, supporting fault tolerance and recovery, which is critical for maintaining data processing continuity in event-driven architectures."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `application_snapshot_configuration` block within the `application_configuration` of the `aws_kinesisanalyticsv2_application` resource enables the management of snapshot functionality for Flink-based applications, allowing users to persist application state for fault tolerance and recovery. By configuring this block, users can define whether snapshots are enabled, ensuring stateful processing continuity and minimizing data loss during application restarts or failures."
+        },
+        {
+          "name": "environment_properties",
+          "description": "(Optional) Describes execution properties for a Flink-based application.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "property_group",
+              "description": "(Required) Describes the execution property groups.  The property_group object supports the following:",
+              "cardinality": [
+                1,
+                50
+              ],
+              "arguments": [
+                {
+                  "name": "property_group_id",
+                  "description": "(Required) The key of the application execution property key-value map.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `property_group_id` argument specifies the unique identifier for a key-value map within the `property_group` of an AWS Kinesis Analytics V2 application, enabling users to define execution properties such as environment variables or configuration settings for the application's runtime behavior. Setting this argument ensures proper organization and retrieval of execution properties critical for customizing application functionality and operational context."
+                },
+                {
+                  "name": "property_map",
+                  "description": "(Required) Application execution property key-value map. The flink_application_configuration object supports the following:",
+                  "required": true,
+                  "type": "map(string)",
+                  "llm_summary": "The `property_map` argument in the `property_group` of the `aws_kinesisanalyticsv2_application` resource allows users to define a key-value map of application execution properties, typically used to configure runtime settings or environment variables for Flink-based applications. By specifying this map, users can control operational parameters such as resource allocation, application behavior, or custom configurations, enabling fine-grained management of the application's execution environment."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `property_group` block within the `environment_properties` of the `aws_kinesisanalyticsv2_application` resource defines execution property groups that organize and manage key-value pairs for runtime configurations. This block enables users to customize and control application behavior by specifying environment-specific settings, facilitating fine-grained adjustments to optimize application performance and functionality in Kinesis Data Analytics."
+            }
+          ],
+          "llm_summary": "\"Defines execution environment settings for a Flink-based application within the `application_configuration` block, enabling users to specify key-value properties that influence runtime behavior and operational parameters. Configuring this block allows for tailored control over the application's execution context, optimizing performance and compatibility with specific workloads or integrations.\""
+        },
+        {
+          "name": "flink_application_configuration",
+          "description": "(Optional) The configuration of a Flink-based application.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "checkpoint_configuration",
+              "description": "(Optional) Describes an application's checkpointing configuration.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "checkpoint_interval",
+                  "description": "(Optional) Describes the interval in milliseconds between checkpoint operations.",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `checkpoint_interval` argument in the `checkpoint_configuration` of the `aws_kinesisanalyticsv2_application` resource allows users to define the time interval, in milliseconds, between checkpoint operations for the application. Configuring this interval impacts the application's fault tolerance and recovery behavior by controlling how frequently state data is saved, which is critical for ensuring data consistency and minimizing loss during failures."
+                },
+                {
+                  "name": "checkpointing_enabled",
+                  "description": "(Optional) Describes whether checkpointing is enabled for a Flink-based Kinesis Data Analytics application.",
+                  "required": false,
+                  "type": "bool",
+                  "llm_summary": "\"Controls whether checkpointing is activated for a Flink-based Kinesis Data Analytics application, enabling state persistence and fault tolerance by periodically saving application state. Useful for configuring reliable data processing workflows and ensuring recovery in case of application failures.\""
+                },
+                {
+                  "name": "configuration_type",
+                  "description": "(Required) Describes whether the application uses the default parallelism for the Kinesis Data Analytics service. Valid values: `CUSTOM`, `DEFAULT`. Set this attribute to `CUSTOM` in order for any specified `auto_scaling_enabled`, `parallelism`, or `parallelism_per_kpu` attribute values to be effective.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `configuration_type` argument in the `checkpoint_configuration` block of the `aws_kinesisanalyticsv2_application` resource specifies whether the application uses default parallelism settings (`DEFAULT`) or custom-defined parallelism (`CUSTOM`). Setting this argument to `CUSTOM` enables users to configure advanced scaling properties such as `auto_scaling_enabled`, `parallelism`, and `parallelism_per_kpu`, allowing fine-grained control over the application's performance and resource allocation."
+                },
+                {
+                  "name": "min_pause_between_checkpoints",
+                  "description": "(Optional) Describes the minimum time in milliseconds after a checkpoint operation completes that a new checkpoint operation can start.",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "\"min_pause_between_checkpoints\" in the \"checkpoint_configuration\" of the \"aws_kinesisanalyticsv2_application\" resource allows users to define the minimum time interval (in milliseconds) between the completion of one checkpoint operation and the start of the next. This argument helps control the frequency of checkpointing, optimizing application performance and resource utilization by preventing overly frequent checkpoint operations."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `checkpoint_configuration` block within the `flink_application_configuration` of the `aws_kinesisanalyticsv2_application` resource defines settings for managing Flink application's checkpointing behavior, which ensures fault tolerance and state consistency during stream processing. By configuring this block, users can control checkpoint intervals, retention policies, and recovery mechanisms, enabling reliable state management and minimizing data loss in event-driven applications."
+            },
+            {
+              "name": "monitoring_configuration",
+              "description": "(Optional) Describes configuration parameters for CloudWatch logging for an application.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "configuration_type",
+                  "description": "(Required) Describes whether the application uses the default parallelism for the Kinesis Data Analytics service. Valid values: `CUSTOM`, `DEFAULT`. Set this attribute to `CUSTOM` in order for any specified `auto_scaling_enabled`, `parallelism`, or `parallelism_per_kpu` attribute values to be effective.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `configuration_type` argument in the `monitoring_configuration` block of the `aws_kinesisanalyticsv2_application` resource specifies whether the application uses the default parallelism settings (`DEFAULT`) or custom-defined parallelism settings (`CUSTOM`). Setting this argument to `CUSTOM` enables users to configure advanced scaling and performance parameters, such as `auto_scaling_enabled`, `parallelism`, and `parallelism_per_kpu`, allowing for tailored resource optimization and application behavior."
+                },
+                {
+                  "name": "log_level",
+                  "description": "(Optional) Describes the verbosity of the CloudWatch Logs for an application. Valid values: `DEBUG`, `ERROR`, `INFO`, `WARN`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `log_level` argument in the `monitoring_configuration` of the `aws_kinesisanalyticsv2_application` resource allows users to define the verbosity of CloudWatch Logs for the application, enabling control over the granularity of log data for monitoring and debugging purposes. By specifying values such as `DEBUG`, `ERROR`, `INFO`, or `WARN`, users can tailor log output to align with their operational needs, such as troubleshooting issues or tracking application performance."
+                },
+                {
+                  "name": "metrics_level",
+                  "description": "(Optional) Describes the granularity of the CloudWatch Logs for an application. Valid values: `APPLICATION`, `OPERATOR`, `PARALLELISM`, `TASK`. The parallelism_configuration object supports the following:",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `metrics_level` argument in the `monitoring_configuration` block of the `aws_kinesisanalyticsv2_application` resource allows users to define the granularity of CloudWatch metrics collected for the application, specifying whether metrics are aggregated at the `APPLICATION`, `OPERATOR`, `PARALLELISM`, or `TASK` level. By configuring this argument, users can tailor the depth of monitoring data to align with their performance analysis and troubleshooting needs, enabling more precise insights into application behavior and resource utilization."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `monitoring_configuration` block within the `flink_application_configuration` of the `aws_kinesisanalyticsv2_application` resource enables the setup of CloudWatch logging for a Flink-based application, facilitating centralized monitoring and observability. It encapsulates settings to define and manage log streams, allowing users to track application performance, debug issues, and ensure operational insights through detailed log data."
+            },
+            {
+              "name": "parallelism_configuration",
+              "description": "(Optional) Describes parameters for how an application executes multiple tasks simultaneously.  The checkpoint_configuration object supports the following:",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "auto_scaling_enabled",
+                  "description": "(Optional) Describes whether the Kinesis Data Analytics service can increase the parallelism of the application in response to increased throughput.",
+                  "required": false,
+                  "type": "bool",
+                  "llm_summary": "The `auto_scaling_enabled` argument in the `parallelism_configuration` of the `aws_kinesisanalyticsv2_application` resource allows users to control whether the Kinesis Data Analytics service can automatically scale the application's parallelism in response to increased data throughput. Enabling this feature optimizes resource utilization and ensures the application adapts dynamically to fluctuating workloads, supporting common goals like performance scaling and cost efficiency."
+                },
+                {
+                  "name": "configuration_type",
+                  "description": "(Required) Describes whether the application uses the default parallelism for the Kinesis Data Analytics service. Valid values: `CUSTOM`, `DEFAULT`. Set this attribute to `CUSTOM` in order for any specified `auto_scaling_enabled`, `parallelism`, or `parallelism_per_kpu` attribute values to be effective.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `configuration_type` argument specifies whether the application uses the default parallelism settings provided by the Kinesis Data Analytics service (`DEFAULT`) or custom parallelism settings (`CUSTOM`). Setting this to `CUSTOM` enables users to define advanced parallelism-related attributes, such as `auto_scaling_enabled`, `parallelism`, and `parallelism_per_kpu`, allowing for tailored scaling and performance optimization to meet specific workload requirements."
+                },
+                {
+                  "name": "parallelism",
+                  "description": "(Optional) Describes the initial number of parallel tasks that a Flink-based Kinesis Data Analytics application can perform.",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `parallelism` argument in the `parallelism_configuration` block of the `aws_kinesisanalyticsv2_application` resource allows users to define the initial number of parallel tasks that a Flink-based Kinesis Data Analytics application can execute. Configuring this parameter impacts the application's ability to process data streams concurrently, enabling users to optimize performance and scalability based on workload demands."
+                },
+                {
+                  "name": "parallelism_per_kpu",
+                  "description": "(Optional) Describes the number of parallel tasks that a Flink-based Kinesis Data Analytics application can perform per Kinesis Processing Unit (KPU) used by the application. The run_configuration object supports the following:",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "\"Configures the number of parallel processing tasks a Flink-based Kinesis Data Analytics application can execute per Kinesis Processing Unit (KPU), enabling users to optimize application performance and resource utilization by scaling task concurrency within the application's parallelism configuration.\""
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `parallelism_configuration` block within the `flink_application_configuration` of the `aws_kinesisanalyticsv2_application` resource defines parameters for optimizing task execution by enabling parallel processing in Apache Flink applications. It encapsulates settings related to task concurrency, such as the degree of parallelism, allowing users to fine-tune application performance and scalability for high-throughput data processing workloads."
+            }
+          ],
+          "llm_summary": "\"Defines the settings for a Flink-based application within the `application_configuration` of an `aws_kinesisanalyticsv2_application`, enabling users to configure runtime properties, parallelism, checkpointing, and other operational parameters essential for stream processing and stateful data analytics. This block provides granular control over Flink-specific features, optimizing application performance and reliability in real-time data processing workflows.\""
+        },
+        {
+          "name": "run_configuration",
+          "description": "(Optional) Describes the starting properties for a Flink-based application.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "application_restore_configuration",
+              "description": "(Optional) The restore behavior of a restarting application.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "application_restore_type",
+                  "description": "(Required) Specifies how the application should be restored. Valid values: `RESTORE_FROM_CUSTOM_SNAPSHOT`, `RESTORE_FROM_LATEST_SNAPSHOT`, `SKIP_RESTORE_FROM_SNAPSHOT`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `application_restore_type` argument in the `application_restore_configuration` of the `aws_kinesisanalyticsv2_application` resource allows users to specify the restoration behavior of the application during startup. It defines whether the application should be restored from a custom snapshot, the latest snapshot, or skip restoration entirely, enabling control over recovery strategies and ensuring alignment with operational or disaster recovery requirements."
+                },
+                {
+                  "name": "snapshot_name",
+                  "description": "(Optional) The identifier of an existing snapshot of application state to use to restart an application. The application uses this value if `RESTORE_FROM_CUSTOM_SNAPSHOT` is specified for `application_restore_type`. The flink_run_configuration object supports the following:",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `snapshot_name` argument in the `application_restore_configuration` of the `aws_kinesisanalyticsv2_application` resource allows users to specify the identifier of a pre-existing snapshot of the application's state to restore from when restarting the application. This enables the application to resume processing from a defined point in time, supporting use cases like disaster recovery, stateful application continuity, or custom initialization workflows."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `application_restore_configuration` block within the `run_configuration` of the `aws_kinesisanalyticsv2_application` resource defines the restore behavior for restarting a Kinesis Data Analytics application. It encapsulates settings that control how the application resumes from a previous state, enabling users to manage state persistence and recovery for fault tolerance or operational continuity during restarts."
+            },
+            {
+              "name": "flink_run_configuration",
+              "description": "(Optional) The starting parameters for a Flink-based Kinesis Data Analytics application.  The application_restore_configuration object supports the following:",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "allow_non_restored_state",
+                  "description": "(Optional) When restoring from a snapshot, specifies whether the runtime is allowed to skip a state that cannot be mapped to the new program. Default is `false`. The sql_application_configuration object supports the following:",
+                  "required": false,
+                  "type": "bool",
+                  "llm_summary": "The `allow_non_restored_state` argument in the `flink_run_configuration` of the `aws_kinesisanalyticsv2_application` resource controls whether the Flink runtime can proceed with application execution when restoring from a snapshot that contains unmapped or incompatible state. Setting this to `true` enables fault-tolerant recovery by allowing the application to skip unresolvable state, which is useful for scenarios where backward compatibility with previous snapshots is not critical."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `flink_run_configuration` block within the `run_configuration` of the `aws_kinesisanalyticsv2_application` resource defines the starting parameters for a Flink-based Kinesis Data Analytics application, enabling users to manage how the application initializes and restores its state. This block encapsulates settings related to application restore behavior, such as specifying whether the application should start from a previously saved state or a fresh configuration, providing control over state management and recovery for stream processing workflows."
+            }
+          ],
+          "llm_summary": "\"Defines the starting parameters for a Flink-based application within the `application_configuration` of `aws_kinesisanalyticsv2_application`, enabling control over runtime behavior and initialization settings. This block allows users to configure how the application starts, ensuring proper execution and alignment with desired operational requirements.\""
+        },
+        {
+          "name": "sql_application_configuration",
+          "description": "(Optional) The configuration of a SQL-based application.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "input",
+              "description": "(Optional) The input stream used by the application.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "in_app_stream_names",
+                  "description": "",
+                  "required": false,
+                  "type": "list(string)",
+                  "llm_summary": "The `in_app_stream_names` argument allows users to specify a list of in-application stream names within the Kinesis Data Analytics application, enabling the application to reference and process data streams defined internally. By configuring this argument, users can control how the application interacts with its internal data flow, supporting advanced stream processing and analytics workflows."
+                },
+                {
+                  "name": "input_id",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `input_id` argument specifies the unique identifier for an input configuration within the Kinesis Data Analytics application, allowing users to reference and manage specific data streams or sources integrated into the application. By setting this argument, users can associate the application with a predefined input source, enabling data ingestion and processing workflows tailored to their analytics use case."
+                },
+                {
+                  "name": "name_prefix",
+                  "description": "(Required) The name prefix to use when creating an in-application stream.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `name_prefix` argument specifies a unique prefix for naming in-application streams within the input configuration of an `aws_kinesisanalyticsv2_application`. By defining this required string, users can control the naming convention for streams, ensuring consistent identification and organization of data sources within the application, which is critical for managing stream-based workflows and analytics pipelines."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "input_parallelism",
+                  "description": "(Optional) Describes the number of in-application streams to create.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "count",
+                      "description": "(Optional) The number of in-application streams to create. The input_processing_configuration object supports the following:",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `count` argument in the `input_parallelism` block of the `aws_kinesisanalyticsv2_application` resource specifies the number of in-application streams to be created for parallel data processing. Configuring this value allows users to optimize the application's ability to handle and process multiple data streams concurrently, supporting scalability and improved throughput for real-time analytics workloads."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "\"Defines the number of in-application streams to create within the input configuration of an AWS Kinesis Analytics V2 application, enabling parallel data processing for improved scalability and performance. This block allows users to optimize stream handling by distributing workloads across multiple parallel streams.\""
+                },
+                {
+                  "name": "input_processing_configuration",
+                  "description": "(Optional) The input processing configuration for the input. An input processor transforms records as they are received from the stream, before the application's SQL code executes.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [],
+                  "blocks": [
+                    {
+                      "name": "input_lambda_processor",
+                      "description": "(Required) Describes the Lambda function that is used to preprocess the records in the stream before being processed by your application code.  The input_lambda_processor object supports the following:",
+                      "cardinality": [
+                        1,
+                        1
+                      ],
+                      "arguments": [
+                        {
+                          "name": "resource_arn",
+                          "description": "(Required) The ARN of the destination Lambda function to write to. The reference_data_source object supports the following:",
+                          "required": true,
+                          "type": "string",
+                          "llm_summary": "The `resource_arn` argument specifies the Amazon Resource Name (ARN) of the destination Lambda function that the `input_lambda_processor` in the `aws_kinesisanalyticsv2_application` resource will invoke to preprocess streaming data. By setting this required argument, users define the Lambda function responsible for transforming or enriching incoming data before it is processed by the Kinesis Analytics application, enabling custom data manipulation workflows tailored to their application's needs."
+                        }
+                      ],
+                      "blocks": [],
+                      "llm_summary": "The `input_lambda_processor` block within the `input_processing_configuration` of the `aws_kinesisanalyticsv2_application` resource defines the Lambda function used to preprocess streaming records before application code execution. This configuration enables users to implement custom data transformation or filtering logic, ensuring that incoming data is optimized for further processing by the Kinesis Analytics application."
+                    }
+                  ],
+                  "llm_summary": "\"Defines preprocessing logic for transforming incoming stream records before SQL execution within the application's input. This block encapsulates settings for configuring an input processor, enabling users to manipulate or filter data in real-time to optimize downstream analytics and application behavior.\""
+                },
+                {
+                  "name": "input_schema",
+                  "description": "(Required) Describes the format of the data in the streaming source, and how each data element maps to corresponding columns in the in-application stream that is being created.",
+                  "cardinality": [
+                    1,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "record_encoding",
+                      "description": "(Optional) Specifies the encoding of the records in the streaming source. For example, `UTF-8`. The s3_reference_data_source object supports the following:",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `record_encoding` argument in the `input_schema` of the `aws_kinesisanalyticsv2_application` resource allows users to specify the character encoding format (e.g., `UTF-8`) for records in the streaming source. Configuring this ensures proper interpretation and processing of data from the source, aligning with the application's schema requirements and supporting seamless integration with reference data sources like S3."
+                    }
+                  ],
+                  "blocks": [
+                    {
+                      "name": "record_column",
+                      "description": "(Required) Describes the mapping of each data element in the streaming source to the corresponding column in the in-application stream.",
+                      "cardinality": [
+                        1,
+                        1000
+                      ],
+                      "arguments": [
+                        {
+                          "name": "mapping",
+                          "description": "(Optional) A reference to the data element in the streaming input or the reference data source. The record_format object supports the following:",
+                          "required": false,
+                          "type": "string",
+                          "llm_summary": "The `mapping` argument in the `record_column` block of the `aws_kinesisanalyticsv2_application` resource allows users to specify a reference to the data element within the streaming input or reference data source. By defining this mapping, users can control how specific data fields are identified and processed within the application's schema, enabling precise data transformation and analysis workflows."
+                        },
+                        {
+                          "name": "name",
+                          "description": "(Required) The name of the in-application stream.",
+                          "required": true,
+                          "type": "string",
+                          "llm_summary": "The `name` argument specifies the unique identifier for a column within the in-application stream of the Kinesis Data Analytics application, enabling users to define and reference individual data fields processed in real-time. By setting this required value, users can structure and organize the schema of the stream for analytics, ensuring accurate mapping and retrieval of data during application execution."
+                        },
+                        {
+                          "name": "sql_type",
+                          "description": "(Required) The type of column created in the in-application input stream or reference table.",
+                          "required": true,
+                          "type": "string",
+                          "llm_summary": "The `sql_type` argument specifies the SQL data type for a column in the in-application input stream or reference table within the `record_column` configuration of the `aws_kinesisanalyticsv2_application` resource. By defining this, users control how data is interpreted and stored in the application's schema, ensuring compatibility with downstream processing and analytics workflows."
+                        }
+                      ],
+                      "blocks": [],
+                      "llm_summary": "The `record_column` block within the `input_schema` of the `aws_kinesisanalyticsv2_application` resource defines the mapping of individual data elements from the streaming source to corresponding columns in the in-application stream. This configuration enables precise schema definition for processing and querying streaming data, ensuring accurate alignment between source data and the application's internal representation."
+                    },
+                    {
+                      "name": "record_format",
+                      "description": "(Required) Specifies the format of the records on the streaming source.",
+                      "cardinality": [
+                        1,
+                        1
+                      ],
+                      "arguments": [
+                        {
+                          "name": "record_format_type",
+                          "description": "(Required) Specifies the format of the records on the output stream. Valid values: `CSV`, `JSON`. The kinesis_firehose_output object supports the following:",
+                          "required": true,
+                          "type": "string",
+                          "llm_summary": "The `record_format_type` argument specifies the data serialization format (`CSV` or `JSON`) for records processed by the Kinesis Analytics application, enabling users to define how output stream data is structured. This configuration is essential for aligning the application's output with downstream systems or data consumers that rely on specific record formats for parsing and processing."
+                        }
+                      ],
+                      "blocks": [
+                        {
+                          "name": "mapping_parameters",
+                          "description": "(Required) Provides additional mapping information specific to the record format (such as JSON, CSV, or record fields delimited by some delimiter) on the streaming source.",
+                          "cardinality": [
+                            1,
+                            1
+                          ],
+                          "arguments": [],
+                          "blocks": [
+                            {
+                              "name": "csv_mapping_parameters",
+                              "description": "(Optional) Provides additional mapping information when the record format uses delimiters (for example, CSV).",
+                              "cardinality": [
+                                0,
+                                1
+                              ],
+                              "arguments": [
+                                {
+                                  "name": "record_column_delimiter",
+                                  "description": "(Required) The column delimiter. For example, in a CSV format, a comma (`,`) is the typical column delimiter.",
+                                  "required": true,
+                                  "type": "string",
+                                  "llm_summary": "The `record_column_delimiter` argument in the `csv_mapping_parameters` block of the `aws_kinesisanalyticsv2_application` resource specifies the character used to separate columns in incoming CSV data streams. By defining this delimiter (e.g., a comma `,`), users ensure accurate parsing and mapping of data records, enabling the application to process and analyze structured CSV input effectively."
+                                },
+                                {
+                                  "name": "record_row_delimiter",
+                                  "description": "(Required) The row delimiter. For example, in a CSV format, `\\n` is the typical row delimiter. The json_mapping_parameters object supports the following:",
+                                  "required": true,
+                                  "type": "string",
+                                  "llm_summary": "The `record_row_delimiter` argument in the `csv_mapping_parameters` block of the `aws_kinesisanalyticsv2_application` resource specifies the character or sequence used to delineate rows in a CSV-formatted data stream. By defining this delimiter (e.g., `\\n` for newline), users ensure accurate parsing and processing of incoming records, enabling the application to correctly interpret and structure the data for analytics workflows."
+                                }
+                              ],
+                              "blocks": [],
+                              "llm_summary": "The `csv_mapping_parameters` block within `mapping_parameters` for the `aws_kinesisanalyticsv2_application` resource defines additional configuration for processing records formatted as CSV, specifying delimiter-based mapping rules. This block enables precise control over how CSV data is parsed and interpreted, ensuring accurate ingestion and transformation of streaming data for analytics applications."
+                            },
+                            {
+                              "name": "json_mapping_parameters",
+                              "description": "(Optional) Provides additional mapping information when JSON is the record format on the streaming source.  The csv_mapping_parameters object supports the following:",
+                              "cardinality": [
+                                0,
+                                1
+                              ],
+                              "arguments": [
+                                {
+                                  "name": "record_row_path",
+                                  "description": "(Required) The path to the top-level parent that contains the records. The input_starting_position_configuration object supports the following: To modify an application's starting position, first stop the application by setting start_application = false, then update starting_position and set start_application = true.",
+                                  "required": true,
+                                  "type": "string",
+                                  "llm_summary": "The `record_row_path` argument in the `json_mapping_parameters` block of the `aws_kinesisanalyticsv2_application` resource specifies the JSON path to the top-level parent element containing the records in the input data stream. By defining this path, users control how the application identifies and extracts rows of data for processing, enabling accurate mapping of incoming JSON data to the application's schema for analytics."
+                                }
+                              ],
+                              "blocks": [],
+                              "llm_summary": "The `json_mapping_parameters` block within the `mapping_parameters` configuration of the `aws_kinesisanalyticsv2_application` resource defines additional mapping details for processing JSON-formatted records from a streaming source. It encapsulates settings that specify how JSON data is interpreted, enabling precise control over data extraction and schema mapping to ensure compatibility with the application's processing logic. Configuring this block helps users tailor their application's handling of JSON streams for accurate and efficient data ingestion."
+                            }
+                          ],
+                          "llm_summary": "\"Defines additional mapping details for interpreting streaming source data formats within the 'record_format' configuration, such as JSON or CSV structures. This block enables precise control over how incoming records are parsed and processed, ensuring compatibility with the application's data schema and analytics workflows.\""
+                        }
+                      ],
+                      "llm_summary": "The `record_format` block within the `input_schema` of the `aws_kinesisanalyticsv2_application` resource defines the structure and encoding of records from the streaming source, enabling the application to interpret and process incoming data correctly. By configuring this block, users can specify the format (e.g., JSON, CSV) and related settings, ensuring seamless integration and accurate schema mapping for real-time analytics workflows."
+                    }
+                  ],
+                  "llm_summary": "The `input_schema` block in the `aws_kinesisanalyticsv2_application` resource defines the structure and format of incoming streaming data, mapping each data element to corresponding columns in the application's in-memory stream. This configuration enables precise data parsing and transformation, ensuring the application can process and analyze streaming data effectively within the defined schema."
+                },
+                {
+                  "name": "input_starting_position_configuration",
+                  "description": "(Optional) The point at which the application starts processing records from the streaming source.",
+                  "cardinality": [
+                    0,
+                    0
+                  ],
+                  "arguments": [
+                    {
+                      "name": "input_starting_position",
+                      "description": "(Required) The starting position on the stream. Valid values: `LAST_STOPPED_POINT`, `NOW`, `TRIM_HORIZON`. The kinesis_firehose_input object supports the following:",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `input_starting_position` argument in the `input_starting_position_configuration` block of the `aws_kinesisanalyticsv2_application` resource allows users to specify the initial point in the Kinesis data stream from which the application begins processing records. By setting this argument to one of the valid values (`LAST_STOPPED_POINT`, `NOW`, or `TRIM_HORIZON`), users can control whether the application resumes from the last checkpoint, starts processing new records immediately, or processes all available records from the beginning of the stream, enabling precise control over data ingestion behavior based on application requirements."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `input_starting_position_configuration` block in the `aws_kinesisanalyticsv2_application` resource defines where the application begins processing records from its streaming source within the `input` context. It enables users to control the starting point for data ingestion, such as the earliest record, latest record, or a specific timestamp, ensuring precise alignment with processing requirements and stream lifecycle management."
+                },
+                {
+                  "name": "kinesis_firehose_input",
+                  "description": "(Optional) If the streaming source is a Kinesis Data Firehose delivery stream, identifies the delivery stream's ARN.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "resource_arn",
+                      "description": "(Required) The ARN of the destination Lambda function to write to. The reference_data_source object supports the following:",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `resource_arn` argument specifies the Amazon Resource Name (ARN) of the destination Lambda function that processes data from the Kinesis Firehose input within the `aws_kinesisanalyticsv2_application` resource. By defining this required parameter, users enable the application to route incoming data streams to a specific Lambda function for transformation, enrichment, or custom processing, aligning with common goals like data pipeline orchestration and real-time analytics."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `kinesis_firehose_input` block within the `input` configuration of the `aws_kinesisanalyticsv2_application` resource specifies the integration of a Kinesis Data Firehose delivery stream as a streaming data source by defining its ARN. This block enables users to configure the application to ingest and process real-time data from Firehose, facilitating seamless data streaming for analytics workflows."
+                },
+                {
+                  "name": "kinesis_streams_input",
+                  "description": "(Optional) If the streaming source is a Kinesis data stream, identifies the stream's Amazon Resource Name (ARN).  The input_parallelism object supports the following:",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "resource_arn",
+                      "description": "(Required) The ARN of the destination Lambda function to write to. The reference_data_source object supports the following:",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `resource_arn` argument specifies the Amazon Resource Name (ARN) of the destination Lambda function that processes input data from the Kinesis stream within the `kinesis_streams_input` configuration of the `aws_kinesisanalyticsv2_application` resource. By setting this required argument, users define the integration point for data transformation or processing, enabling the application to route streaming data to the specified Lambda function for custom handling or downstream workflows."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `kinesis_streams_input` block within the `input` configuration of the `aws_kinesisanalyticsv2_application` resource specifies the Amazon Resource Name (ARN) of a Kinesis data stream as the streaming data source for the application. This block enables integration with Kinesis Data Streams, allowing users to define the input source for real-time data processing and analytics, and supports related settings like input parallelism for optimizing data ingestion performance."
+                }
+              ],
+              "llm_summary": "The `input` configuration block within the `sql_application_configuration` of the `aws_kinesisanalyticsv2_application` resource defines the input stream details that the SQL-based analytics application processes. It encapsulates settings for specifying the source stream, enabling users to connect and ingest real-time data from Kinesis Data Streams or other supported sources, which is essential for performing analytics and transformations on streaming data."
+            },
+            {
+              "name": "output",
+              "description": "(Optional) The destination streams used by the application.",
+              "cardinality": [
+                0,
+                3
+              ],
+              "arguments": [
+                {
+                  "name": "name",
+                  "description": "(Required) The name of the in-application stream.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `name` argument specifies the unique identifier for the in-application stream within the output configuration of an `aws_kinesisanalyticsv2_application`. By defining this required string, users establish the stream's name, enabling downstream data processing, routing, or integration with external systems as part of the application's analytics workflow."
+                },
+                {
+                  "name": "output_id",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `output_id` argument allows users to specify a unique identifier for an output configuration within the Kinesis Data Analytics application. This identifier is used to reference and manage the output, enabling users to define how processed data is delivered to external destinations such as Kinesis streams, Firehose delivery streams, or Lambda functions."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "destination_schema",
+                  "description": "(Required) Describes the data format when records are written to the destination.",
+                  "cardinality": [
+                    1,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "record_format_type",
+                      "description": "(Required) Specifies the format of the records on the output stream. Valid values: `CSV`, `JSON`. The kinesis_firehose_output object supports the following:",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `record_format_type` argument in the `destination_schema` of the `aws_kinesisanalyticsv2_application` resource specifies the format of records in the output stream, allowing users to define whether the data is structured as `CSV` or `JSON`. This configuration ensures compatibility with downstream systems by standardizing the data format, which is critical for processing, storage, or integration workflows."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `destination_schema` block in the `output` configuration of the `aws_kinesisanalyticsv2_application` resource defines the data format for records written to the application's output destination. It enables users to specify the schema structure, ensuring compatibility and proper formatting of data for downstream systems or integrations. Configuring this block is essential for managing how processed data is structured and delivered, facilitating seamless integration with target systems."
+                },
+                {
+                  "name": "kinesis_firehose_output",
+                  "description": "(Optional) Identifies a Kinesis Data Firehose delivery stream as the destination.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "resource_arn",
+                      "description": "(Required) The ARN of the destination Lambda function to write to. The reference_data_source object supports the following:",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `resource_arn` argument specifies the Amazon Resource Name (ARN) of the destination Lambda function that the Kinesis Data Analytics application writes to via the `kinesis_firehose_output`. By defining this required parameter, users enable the application to route processed data to a specific Lambda function for further transformation, integration, or downstream processing, aligning with common goals like event-driven workflows and real-time data handling."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `kinesis_firehose_output` configuration block within the `output` section of the `aws_kinesisanalyticsv2_application` resource defines a Kinesis Data Firehose delivery stream as the destination for processed data. It enables users to route application output to a Firehose stream for further delivery, transformation, or storage, facilitating seamless integration with downstream systems like S3, Redshift, or Elasticsearch for analytics and storage workflows."
+                },
+                {
+                  "name": "kinesis_streams_output",
+                  "description": "(Optional) Identifies a Kinesis data stream as the destination.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "resource_arn",
+                      "description": "(Required) The ARN of the destination Lambda function to write to. The reference_data_source object supports the following:",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `resource_arn` argument specifies the Amazon Resource Name (ARN) of the destination Lambda function where the processed data from the Kinesis Data Analytics application will be written. This required parameter enables users to define the output target for their application, ensuring seamless integration with downstream processing or event-driven workflows."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `kinesis_streams_output` configuration block within the `output` section of the `aws_kinesisanalyticsv2_application` resource defines a Kinesis Data Stream as the destination for processed data from the application. It encapsulates settings related to output stream integration, enabling users to route analytics results to a specified Kinesis stream for downstream processing, storage, or real-time consumption, facilitating seamless data flow and integration with other AWS services."
+                },
+                {
+                  "name": "lambda_output",
+                  "description": "(Optional) Identifies a Lambda function as the destination.  The destination_schema object supports the following:",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "resource_arn",
+                      "description": "(Required) The ARN of the destination Lambda function to write to. The reference_data_source object supports the following:",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `resource_arn` argument specifies the Amazon Resource Name (ARN) of the destination Lambda function that the Kinesis Data Analytics application writes output to. By configuring this required parameter, users define the target Lambda function for processing or further handling of streaming data, enabling seamless integration with serverless workflows and downstream data processing pipelines."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `lambda_output` configuration block within the `output` section of the `aws_kinesisanalyticsv2_application` resource defines a Lambda function as the destination for processed data output. It encapsulates settings related to the destination schema, enabling users to route application results to serverless compute for further processing, integration, or downstream workflows. Configuring this block facilitates seamless integration with AWS Lambda, allowing users to automate actions or transformations based on streaming analytics results."
+                }
+              ],
+              "llm_summary": "The \"output\" configuration block within the \"sql_application_configuration\" of the `aws_kinesisanalyticsv2_application` resource defines the destination streams where processed data from the SQL application is sent. It encapsulates settings for routing application output to specific Kinesis Data Streams or Firehose delivery streams, enabling users to manage data flow and integration with downstream systems. Configuring this block ensures seamless delivery of transformed data to target destinations for further processing or storage."
+            },
+            {
+              "name": "reference_data_source",
+              "description": "(Optional) The reference data source used by the application.  The input object supports the following:",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "reference_id",
+                  "description": "",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `reference_id` argument allows users to specify a unique identifier for the reference data source within the Kinesis Analytics V2 application. This ID is used to distinguish and manage the reference data source, enabling users to define and reference external datasets that the application can use for real-time analytics or processing."
+                },
+                {
+                  "name": "table_name",
+                  "description": "(Required) The name of the in-application table to create. The reference_schema object supports the following:",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `table_name` argument specifies the name of the in-application table to be created within the `reference_data_source` of an `aws_kinesisanalyticsv2_application`. By defining this table, users enable the application to organize and query reference data in a structured format, facilitating data processing and analytics workflows. This is essential for configuring how the application interacts with external reference data sources to support real-time stream processing."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "reference_schema",
+                  "description": "(Required) Describes the format of the data in the streaming source, and how each data element maps to corresponding columns created in the in-application stream.",
+                  "cardinality": [
+                    1,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "record_encoding",
+                      "description": "(Optional) Specifies the encoding of the records in the streaming source. For example, `UTF-8`. The s3_reference_data_source object supports the following:",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "\"Defines the character encoding format (e.g., `UTF-8`) for records in the streaming source within the `reference_schema` of the Kinesis Analytics application. Configuring this argument ensures proper interpretation and processing of data from the source, aligning with user-defined encoding standards for seamless integration and analysis.\""
+                    }
+                  ],
+                  "blocks": [
+                    {
+                      "name": "record_column",
+                      "description": "(Required) Describes the mapping of each data element in the streaming source to the corresponding column in the in-application stream.",
+                      "cardinality": [
+                        1,
+                        1000
+                      ],
+                      "arguments": [
+                        {
+                          "name": "mapping",
+                          "description": "(Optional) A reference to the data element in the streaming input or the reference data source. The record_format object supports the following:",
+                          "required": false,
+                          "type": "string",
+                          "llm_summary": "The `mapping` argument in the `record_column` block of the `aws_kinesisanalyticsv2_application` resource allows users to define a reference to a specific data element within the streaming input or reference data source. By configuring this argument, users can map incoming data fields to the application's schema, enabling precise data transformation and processing within the Kinesis Analytics application."
+                        },
+                        {
+                          "name": "name",
+                          "description": "(Required) The name of the in-application stream.",
+                          "required": true,
+                          "type": "string",
+                          "llm_summary": "The `name` argument specifies the unique identifier for a column within the in-application stream of the Kinesis Analytics V2 application, allowing users to define and reference individual data fields processed in the application's SQL-based queries. Setting this argument ensures proper mapping and organization of data within the stream, supporting user goals like data transformation, aggregation, and real-time analytics."
+                        },
+                        {
+                          "name": "sql_type",
+                          "description": "(Required) The type of column created in the in-application input stream or reference table.",
+                          "required": true,
+                          "type": "string",
+                          "llm_summary": "The `sql_type` argument specifies the data type of a column in the in-application input stream or reference table for an AWS Kinesis Data Analytics application. By defining this, users ensure proper schema alignment and data interpretation for SQL-based processing within the application, enabling accurate transformations, queries, and analytics."
+                        }
+                      ],
+                      "blocks": [],
+                      "llm_summary": "The `record_column` block within the `reference_schema` of the `aws_kinesisanalyticsv2_application` resource defines the mapping of data elements from the streaming source to corresponding columns in the in-application stream. This configuration enables precise schema alignment for processing and querying streaming data, ensuring that each data field is correctly interpreted and utilized within the application's analytics workflows."
+                    },
+                    {
+                      "name": "record_format",
+                      "description": "(Required) Specifies the format of the records on the streaming source.",
+                      "cardinality": [
+                        1,
+                        1
+                      ],
+                      "arguments": [
+                        {
+                          "name": "record_format_type",
+                          "description": "(Required) Specifies the format of the records on the output stream. Valid values: `CSV`, `JSON`. The kinesis_firehose_output object supports the following:",
+                          "required": true,
+                          "type": "string",
+                          "llm_summary": "The `record_format_type` argument specifies the data serialization format (`CSV` or `JSON`) for records processed by the Kinesis Analytics application, enabling users to define how output stream data is structured for downstream consumption. Setting this argument ensures compatibility with the expected data format of connected services, facilitating seamless integration and accurate data processing workflows."
+                        }
+                      ],
+                      "blocks": [
+                        {
+                          "name": "mapping_parameters",
+                          "description": "(Required) Provides additional mapping information specific to the record format (such as JSON, CSV, or record fields delimited by some delimiter) on the streaming source.",
+                          "cardinality": [
+                            1,
+                            1
+                          ],
+                          "arguments": [],
+                          "blocks": [
+                            {
+                              "name": "csv_mapping_parameters",
+                              "description": "(Optional) Provides additional mapping information when the record format uses delimiters (for example, CSV).",
+                              "cardinality": [
+                                0,
+                                1
+                              ],
+                              "arguments": [
+                                {
+                                  "name": "record_column_delimiter",
+                                  "description": "(Required) The column delimiter. For example, in a CSV format, a comma (`,`) is the typical column delimiter.",
+                                  "required": true,
+                                  "type": "string",
+                                  "llm_summary": "The `record_column_delimiter` argument in the `csv_mapping_parameters` block of the `aws_kinesisanalyticsv2_application` resource specifies the character used to separate columns in incoming CSV data streams. By defining this delimiter (e.g., a comma `,`), users ensure accurate parsing and mapping of data records, enabling the application to process and analyze structured data effectively."
+                                },
+                                {
+                                  "name": "record_row_delimiter",
+                                  "description": "(Required) The row delimiter. For example, in a CSV format, `\\n` is the typical row delimiter. The json_mapping_parameters object supports the following:",
+                                  "required": true,
+                                  "type": "string",
+                                  "llm_summary": "The `record_row_delimiter` argument in the `csv_mapping_parameters` block of the `aws_kinesisanalyticsv2_application` resource specifies the character or sequence used to delineate rows in a CSV-formatted data stream. By defining this delimiter (e.g., `\\n` for newline), users ensure accurate parsing and processing of incoming records, enabling the application to correctly interpret and structure data for analytics workflows."
+                                }
+                              ],
+                              "blocks": [],
+                              "llm_summary": "\"Defines additional mapping details for processing CSV-formatted records within the 'mapping_parameters' of an AWS Kinesis Analytics V2 application. This block specifies delimiter-based configurations, enabling precise parsing and transformation of CSV data streams for real-time analytics.\""
+                            },
+                            {
+                              "name": "json_mapping_parameters",
+                              "description": "(Optional) Provides additional mapping information when JSON is the record format on the streaming source.  The csv_mapping_parameters object supports the following:",
+                              "cardinality": [
+                                0,
+                                1
+                              ],
+                              "arguments": [
+                                {
+                                  "name": "record_row_path",
+                                  "description": "(Required) The path to the top-level parent that contains the records. The input_starting_position_configuration object supports the following: To modify an application's starting position, first stop the application by setting start_application = false, then update starting_position and set start_application = true.",
+                                  "required": true,
+                                  "type": "string",
+                                  "llm_summary": "The `record_row_path` argument in the `json_mapping_parameters` block of the `aws_kinesisanalyticsv2_application` resource specifies the JSON path to the top-level parent element containing the records within the incoming data stream. By defining this path, users control how the application maps and processes structured JSON data, ensuring accurate extraction of rows for analytics workflows."
+                                }
+                              ],
+                              "blocks": [],
+                              "llm_summary": "The `json_mapping_parameters` block within the `mapping_parameters` configuration of the `aws_kinesisanalyticsv2_application` resource defines additional mapping details for processing JSON-formatted records from a streaming source. It enables precise control over how JSON data is interpreted and mapped, ensuring compatibility with the application's schema and facilitating accurate data ingestion and transformation workflows."
+                            }
+                          ],
+                          "llm_summary": "\"Defines additional mapping details for interpreting streaming source data formats within the 'record_format' configuration, such as JSON or CSV structures. This block enables precise control over how incoming records are parsed and processed, ensuring compatibility with the application's data schema and analytics workflows.\""
+                        }
+                      ],
+                      "llm_summary": "The `record_format` block within the `reference_schema` configuration of the `aws_kinesisanalyticsv2_application` resource defines the structure and format of incoming records from the streaming source, enabling the application to interpret and process data correctly. By specifying settings such as serialization formats (e.g., JSON or CSV), this block ensures compatibility between the streaming source and the application's schema, facilitating accurate data ingestion and analysis."
+                    }
+                  ],
+                  "llm_summary": "\"Defines the data format and column mapping for streaming source integration within the 'reference_data_source' of an AWS Kinesis Analytics V2 application, enabling precise schema configuration for in-application stream processing and analytics.\""
+                },
+                {
+                  "name": "s3_reference_data_source",
+                  "description": "(Required) Identifies the S3 bucket and object that contains the reference data.",
+                  "cardinality": [
+                    1,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "bucket_arn",
+                      "description": "(Required) The ARN of the S3 bucket.",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `bucket_arn` argument specifies the Amazon Resource Name (ARN) of the S3 bucket that serves as the reference data source for the `s3_reference_data_source` in an `aws_kinesisanalyticsv2_application`. By defining this required parameter, users enable the application to access and utilize data stored in the specified S3 bucket for analytics processing, supporting common goals like integrating external datasets or configuring input streams for real-time analysis."
+                    },
+                    {
+                      "name": "file_key",
+                      "description": "(Required) The object key name containing the reference data. The vpc_configuration object supports the following:",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `file_key` argument specifies the exact object key name in an S3 bucket that contains the reference data for the `s3_reference_data_source` in an `aws_kinesisanalyticsv2_application`. By defining this required string, users ensure the application can access and utilize the specified reference data file for stream processing, enabling accurate data enrichment or transformation workflows."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "\"Defines the S3 bucket and object details for reference data integration in a Kinesis Analytics V2 application, enabling the application to access and process static data stored in S3. This block encapsulates settings for specifying the source location of reference data, ensuring seamless ingestion and utilization of external datasets for stream processing workflows.\""
+                }
+              ],
+              "llm_summary": "The `reference_data_source` block within the `sql_application_configuration` of the `aws_kinesisanalyticsv2_application` resource defines the external reference data source used by the application for SQL-based stream processing. It encapsulates settings to configure the source's schema, location, and format, enabling users to integrate static or dynamic datasets into their analytics workflows for enriched data processing and querying."
+            }
+          ],
+          "llm_summary": "\"Defines the SQL-based application settings within the `application_configuration` block of an AWS Kinesis Data Analytics v2 application, enabling users to configure the processing logic and runtime behavior for streaming data. This block encapsulates related settings for SQL queries, input and output data sources, and application-specific parameters, allowing users to build, manage, and optimize real-time analytics workflows.\""
+        },
+        {
+          "name": "vpc_configuration",
+          "description": "(Optional) The VPC configuration of a Flink-based application.  The application_code_configuration object supports the following:",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "security_group_ids",
+              "description": "(Required) The Security Group IDs used by the VPC configuration.",
+              "required": true,
+              "type": "set(string)",
+              "llm_summary": "Defines the set of Security Group IDs that control inbound and outbound network traffic for the VPC configuration of the Kinesis Analytics application. This argument ensures the application operates within specified network access rules, enabling secure communication and compliance with user-defined access policies."
+            },
+            {
+              "name": "subnet_ids",
+              "description": "(Required) The Subnet IDs used by the VPC configuration. The cloudwatch_logging_options object supports the following:",
+              "required": true,
+              "type": "set(string)",
+              "llm_summary": "The `subnet_ids` argument in the `vpc_configuration` block of the `aws_kinesisanalyticsv2_application` resource specifies the set of Subnet IDs within which the application will operate. This configuration ensures the application is deployed in specific subnets of a VPC, enabling network connectivity, security, and access to resources like databases or other services within those subnets."
+            },
+            {
+              "name": "vpc_configuration_id",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `vpc_configuration_id` argument specifies the unique identifier of a VPC configuration associated with the Kinesis Data Analytics application, enabling the application to securely connect to resources within a specific VPC. By setting this argument, users can control network isolation, access to private subnets, and integration with other VPC-based services, aligning with common goals like enhancing security and ensuring private resource connectivity."
+            },
+            {
+              "name": "vpc_id",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `vpc_id` argument in the `vpc_configuration` block of the `aws_kinesisanalyticsv2_application` resource allows users to specify the ID of the VPC in which the Kinesis Analytics application will operate. By setting this argument, users can enable private network connectivity for the application, ensuring secure communication with resources within the specified VPC, such as databases or other services, while isolating it from public internet access."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `vpc_configuration` block within the `application_configuration` of the `aws_kinesisanalyticsv2_application` resource defines networking settings to enable a Flink-based application to securely connect to resources within a specified VPC. It encapsulates configurations such as subnets and security groups, allowing users to control network isolation, access, and communication for the application, ensuring integration with private cloud resources and compliance with security requirements."
+        }
+      ],
+      "llm_summary": "The `application_configuration` block within the `aws_kinesisanalyticsv2_application` resource defines the core runtime settings and operational parameters for a Kinesis Data Analytics application, enabling users to configure essential components such as input streams, output destinations, and application code execution environments. By setting up this block, users can tailor the application's data processing workflows, integrate with external resources, and optimize its behavior to meet specific analytics requirements."
+    },
+    {
+      "name": "cloudwatch_logging_options",
+      "description": "(Optional) A CloudWatch log stream to monitor application configuration errors.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "cloudwatch_logging_option_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `cloudwatch_logging_option_id` argument specifies the unique identifier for a CloudWatch logging option within the `cloudwatch_logging_options` block of the `aws_kinesisanalyticsv2_application` resource. By setting this argument, users can reference or manage specific logging configurations tied to the application, enabling detailed monitoring and troubleshooting of application events through CloudWatch Logs."
+        },
+        {
+          "name": "log_stream_arn",
+          "description": "(Required) The ARN of the CloudWatch log stream to receive application messages.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `log_stream_arn` argument specifies the Amazon Resource Name (ARN) of the CloudWatch log stream where application messages from the Kinesis Data Analytics application will be sent. This required setting enables users to define the destination for application logs, facilitating centralized monitoring, troubleshooting, and operational insights through CloudWatch."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "\"Configures CloudWatch log streams to monitor and capture application configuration errors for the `aws_kinesisanalyticsv2_application` resource, enabling enhanced observability and troubleshooting of application setup and runtime issues.\""
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_kinesisanalyticsv2_application` resource allows users to specify the maximum duration (in string format, e.g., \"10m\" for 10 minutes) Terraform will wait for the application creation process to complete. Configuring this timeout ensures users can control deployment behavior, particularly for long-running operations, aligning resource provisioning with their workflow requirements and preventing unnecessary delays or failures."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_kinesisanalyticsv2_application` resource allows users to specify the maximum duration (as a string) Terraform will wait for the application to be deleted during a resource lifecycle operation. Configuring this argument helps ensure proper timeout handling for deletion processes, aligning with user goals of managing resource lifecycles and avoiding prolonged or stalled operations."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block of the `aws_kinesisanalyticsv2_application` resource allows users to specify the maximum duration (as a string) Terraform will wait for an application update operation to complete. Configuring this timeout ensures better control over deployment workflows, preventing prolonged or stalled updates during application modifications."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_kinesisanalyticsv2_application` resource defines customizable time limits for operations such as creating, updating, or deleting a Kinesis Analytics V2 application. By configuring this block, users can manage operation durations to prevent timeouts in long-running processes, ensuring smoother lifecycle management and better control over application deployment and updates."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the application.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "create_timestamp",
+      "description": "The current timestamp when the application was created.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "last_update_timestamp",
+      "description": "The current timestamp when the application was last updated.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "description": "The status of the application.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "version_id",
+      "description": "The current application version. Kinesis Data Analytics updates the `version_id` each time the application is updated.",
+      "optional": false,
+      "type": "number"
+    }
+  ]
+}

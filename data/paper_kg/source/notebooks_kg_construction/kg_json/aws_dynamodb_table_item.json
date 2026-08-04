@@ -1,0 +1,41 @@
+{
+    "resource": {
+        "name": "aws_dynamodb_table_item",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "hash_key",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "item",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "range_key",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "table_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": []
+}

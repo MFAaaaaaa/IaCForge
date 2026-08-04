@@ -1,0 +1,73 @@
+{
+  "resource": {
+    "name": "aws_cloudfront_origin_access_control",
+    "description": "Manages an AWS CloudFront Origin Access Control, which is used by CloudFront Distributions with an Amazon S3 bucket as the origin. Read more about Origin Access Control in the CloudFront Developer Guide.",
+    "llm_summary": "\"Manages the configuration of AWS CloudFront Origin Access Control, enabling secure integration between CloudFront distributions and Amazon S3 buckets as origins. Commonly used to enforce restricted access to S3 content, improve security, and streamline permissions management for CloudFront-based delivery. Supports configurations for access control policies, origin authentication, and secure content delivery workflows.\""
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_cloudfront_origin_access_control\" \"example\" {\n  name                              = \"example\"\n  description                       = \"Example Policy\"\n  origin_access_control_origin_type = \"s3\"\n  signing_behavior                  = \"always\"\n  signing_protocol                  = \"sigv4\"\n}",
+      "llm_summary": "\"Demonstrates the basic configuration of the `aws_cloudfront_origin_access_control` resource to enable secure access to an S3 origin using SigV4 signing. Highlights key arguments such as `origin_access_control_origin_type`, `signing_behavior`, and `signing_protocol` for defining access control settings.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "description",
+      "description": "(Optional) The description of the Origin Access Control. Defaults to \"Managed by Terraform\" if omitted.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_cloudfront_origin_access_control` resource allows users to define a human-readable explanation or label for the Origin Access Control, aiding in resource identification and documentation. If omitted, it defaults to \"Managed by Terraform,\" ensuring clarity in environments where explicit descriptions are not provided."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_cloudfront_origin_access_control` resource represents the unique identifier for the origin access control configuration. While optional, it is typically used to reference or manage the resource programmatically, enabling users to track, update, or integrate the access control settings within their broader CloudFront infrastructure."
+    },
+    {
+      "name": "name",
+      "description": "(Required) A name that identifies the Origin Access Control.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies a unique, user-defined identifier for the CloudFront Origin Access Control, enabling users to clearly distinguish and manage this resource within their infrastructure. Setting this argument is essential for organizing and referencing the Origin Access Control in configurations, especially in environments with multiple CloudFront distributions or access controls."
+    },
+    {
+      "name": "origin_access_control_origin_type",
+      "description": "(Required) The type of origin that this Origin Access Control is for. Valid values are `lambda`, `mediapackagev2`, `mediastore`, and `s3`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `origin_access_control_origin_type` argument specifies the type of origin (e.g., `lambda`, `mediapackagev2`, `mediastore`, or `s3`) that the CloudFront Origin Access Control is designed to secure and interact with. By defining this argument, users configure CloudFront to enforce access control policies tailored to the specific origin type, ensuring secure and optimized integration with the designated backend service."
+    },
+    {
+      "name": "signing_behavior",
+      "description": "(Required) Specifies which requests CloudFront signs. Specify `always` for the most common use case. Allowed values: `always`, `never`, and `no-override`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `signing_behavior` argument in the `aws_cloudfront_origin_access_control` resource specifies how CloudFront handles request signing for accessing the origin, allowing users to control whether requests are always signed, never signed, or conditionally signed based on origin settings (`no-override`). This configuration is critical for defining access control behavior, ensuring secure communication with the origin, and aligning with user goals like enforcing authentication or optimizing request handling."
+    },
+    {
+      "name": "signing_protocol",
+      "description": "(Required) Determines how CloudFront signs (authenticates) requests. The only valid value is `sigv4`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `signing_protocol` argument in the `aws_cloudfront_origin_access_control` resource specifies the authentication method CloudFront uses to sign requests to the origin, ensuring secure communication. By setting this required argument to `sigv4`, users enforce AWS Signature Version 4 (SigV4) signing, which is essential for integrating with AWS services that require authenticated API requests, aligning with security and compliance goals."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Origin Access Control ARN.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "etag",
+      "description": "The current version of this Origin Access Control.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

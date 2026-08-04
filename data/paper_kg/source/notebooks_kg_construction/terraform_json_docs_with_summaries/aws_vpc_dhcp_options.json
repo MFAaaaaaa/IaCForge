@@ -1,0 +1,99 @@
+{
+  "resource": {
+    "name": "aws_vpc_dhcp_options",
+    "description": "Provides a VPC DHCP Options resource.",
+    "llm_summary": "The `aws_vpc_dhcp_options` Terraform resource enables the creation and management of custom DHCP options sets for Amazon VPCs, allowing users to define network configuration parameters such as domain name servers, NTP servers, and domain search lists. Common use cases include customizing DNS resolution for instances, integrating private or hybrid DNS systems, and optimizing network settings for specific workloads. This resource is ideal for configuring advanced networking features to ensure consistent and tailored connectivity across VPC environments."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_vpc_dhcp_options\" \"dns_resolver\" {\n  domain_name_servers = [\"8.8.8.8\", \"8.8.4.4\"]\n}",
+      "llm_summary": "\"Demonstrates basic usage of the `aws_vpc_dhcp_options` resource to configure custom DNS resolvers for a VPC by specifying the `domain_name_servers` argument with Google Public DNS IPs (8.8.8.8, 8.8.4.4).\""
+    },
+    {
+      "title": "Example 2",
+      "code": "resource \"aws_vpc_dhcp_options\" \"foo\" {\n  domain_name                       = \"service.consul\"\n  domain_name_servers               = [\"127.0.0.1\", \"10.0.0.2\"]\n  ipv6_address_preferred_lease_time = 1440\n  ntp_servers                       = [\"127.0.0.1\"]\n  netbios_name_servers              = [\"127.0.0.1\"]\n  netbios_node_type                 = 2\n\n  tags = {\n    Name = \"foo-name\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure custom DHCP options for an AWS VPC using the `aws_vpc_dhcp_options` resource, including settings for domain name, domain name servers, IPv6 lease time, NTP servers, NetBIOS configurations, and tagging. This example is ideal for users looking to customize network settings for VPCs with specific DNS and time synchronization requirements.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "domain_name",
+      "description": "(Optional) the suffix domain name to use by default when resolving non Fully Qualified Domain Names. In other words, this is what ends up being the `search` value in the `/etc/resolv.conf` file.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `domain_name` argument in the `aws_vpc_dhcp_options` resource allows users to specify the default domain name suffix for DNS resolution within the VPC. By setting this value, users can control the `search` field in the `/etc/resolv.conf` file of instances, enabling streamlined resolution of non-Fully Qualified Domain Names (FQDNs) and supporting custom DNS configurations for their environment."
+    },
+    {
+      "name": "domain_name_servers",
+      "description": "(Optional) List of name servers to configure in `/etc/resolv.conf`. If you want to use the default AWS nameservers you should set this to `AmazonProvidedDNS`.",
+      "required": false,
+      "type": "list(string)",
+      "llm_summary": "The `domain_name_servers` argument in the `aws_vpc_dhcp_options` resource allows users to specify a list of DNS servers that will be configured in the `/etc/resolv.conf` file for instances within the VPC. By setting this argument, users can define custom DNS resolution behavior or opt for the default AWS-provided DNS service (`AmazonProvidedDNS`), enabling control over network name resolution for their cloud environment."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_vpc_dhcp_options` resource represents the unique identifier of an existing DHCP options set in AWS. It allows users to reference and manage a specific DHCP options set, typically for associating it with a VPC or retrieving its configuration details, enabling precise control over network settings like DNS servers and domain names."
+    },
+    {
+      "name": "ipv6_address_preferred_lease_time",
+      "description": "(Optional) How frequently, in seconds, a running instance with an IPv6 assigned to it goes through DHCPv6 lease renewal. Acceptable values are between 140 and 2147483647 (approximately 68 years). If no value is entered, the default lease time is 140 seconds. If you use long-term addressing for EC2 instances, you can increase the lease time and avoid frequent lease renewal requests. Lease renewal typically occurs when half of the lease time has elapsed.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ipv6_address_preferred_lease_time` argument in the `aws_vpc_dhcp_options` resource allows users to define the duration (in seconds) for DHCPv6 lease renewal for instances with assigned IPv6 addresses. By configuring this value, users can optimize lease renewal frequency to reduce network overhead or accommodate long-term addressing needs, supporting scenarios like stable IPv6 connectivity for EC2 instances."
+    },
+    {
+      "name": "netbios_name_servers",
+      "description": "(Optional) List of NETBIOS name servers.",
+      "required": false,
+      "type": "list(string)",
+      "llm_summary": "The `netbios_name_servers` argument in the `aws_vpc_dhcp_options` resource allows users to specify a list of NetBIOS name server IP addresses for their VPC's DHCP configuration. This enables the resolution of NetBIOS names within the network, typically supporting legacy systems or applications that rely on NetBIOS for name resolution and network communication."
+    },
+    {
+      "name": "netbios_node_type",
+      "description": "(Optional) The NetBIOS node type (1, 2, 4, or 8). AWS recommends to specify 2 since broadcast and multicast are not supported in their network. For more information about these node types, see RFC 2132.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `netbios_node_type` argument in the `aws_vpc_dhcp_options` resource allows users to specify the NetBIOS node type (1, 2, 4, or 8) for DHCP configuration, which determines how NetBIOS name resolution is handled within the VPC. Setting this argument impacts network behavior by defining the resolution method, with AWS recommending type `2` (hybrid mode) to ensure compatibility with their network infrastructure, as broadcast and multicast are unsupported."
+    },
+    {
+      "name": "ntp_servers",
+      "description": "(Optional) List of NTP servers to configure.",
+      "required": false,
+      "type": "list(string)",
+      "llm_summary": "The `ntp_servers` argument in the `aws_vpc_dhcp_options` resource allows users to specify a list of Network Time Protocol (NTP) servers for synchronizing time across instances within the VPC. Configuring this argument ensures accurate timekeeping for applications and services, which is critical for logging, authentication, and distributed system coordination."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_vpc_dhcp_options` resource allows users to assign metadata in the form of key-value pairs to the DHCP options set, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or automation workflows. When configured, it ensures consistent tagging across resources, with the ability to override provider-level default tags for greater customization."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_vpc_dhcp_options` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to all resources associated with the DHCP options set. This facilitates consistent resource organization, management, and identification across environments, supporting common goals like cost allocation, access control, and environment labeling."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the DHCP Options Set.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "owner_id",
+      "description": "The ID of the AWS account that owns the DHCP options set.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

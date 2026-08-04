@@ -1,0 +1,224 @@
+{
+  "resource": {
+    "name": "aws_eip",
+    "description": "Provides an Elastic IP resource. EIP may require IGW to exist prior to association. Use depends_on to set an explicit dependency on the IGW. Do not use network_interface to associate the EIP to aws_lb or aws_nat_gateway resources. Instead use the allocation_id available in those resources to allow AWS to manage the association, otherwise you will see AuthFailure errors.",
+    "llm_summary": "The `aws_eip` Terraform resource enables the creation and management of Elastic IP addresses in AWS, providing static, public IPs for dynamic cloud resources. Common use cases include associating Elastic IPs with EC2 instances, NAT gateways, or load balancers to ensure consistent connectivity and simplify network routing. Users can configure dependencies, such as Internet Gateways (IGWs), and leverage allocation IDs for seamless integration with AWS-managed associations, avoiding manual errors like AuthFailure during resource linking."
+  },
+  "examples": [
+    {
+      "title": "Single EIP associated with an instance",
+      "code": "resource \"aws_eip\" \"lb\" {\n  instance = aws_instance.web.id\n  domain   = \"vpc\"\n}",
+      "llm_summary": "This example demonstrates how to associate a single Elastic IP (EIP) with an EC2 instance using the `aws_eip` resource in a VPC. It highlights the use of the `instance` argument to link the EIP to the `aws_instance` resource and specifies the `domain` as \"vpc\" for VPC-based networking."
+    },
+    {
+      "title": "Multiple EIPs associated with a single network interface",
+      "code": "resource \"aws_network_interface\" \"multi-ip\" {\n  subnet_id   = aws_subnet.main.id\n  private_ips = [\"10.0.0.10\", \"10.0.0.11\"]\n}\n\nresource \"aws_eip\" \"one\" {\n  domain                    = \"vpc\"\n  network_interface         = aws_network_interface.multi-ip.id\n  associate_with_private_ip = \"10.0.0.10\"\n}\n\nresource \"aws_eip\" \"two\" {\n  domain                    = \"vpc\"\n  network_interface         = aws_network_interface.multi-ip.id\n  associate_with_private_ip = \"10.0.0.11\"\n}",
+      "llm_summary": "This example demonstrates how to associate multiple Elastic IPs (EIPs) with a single AWS network interface by specifying the `associate_with_private_ip` argument for each EIP resource. It illustrates the configuration of `aws_eip` resources in a VPC domain, enabling users to map specific private IPs to public IPs for advanced networking setups."
+    },
+    {
+      "title": "Attaching an EIP to an Instance with a pre-assigned private ip (VPC Only)",
+      "code": "resource \"aws_vpc\" \"default\" {\n  cidr_block           = \"10.0.0.0/16\"\n  enable_dns_hostnames = true\n}\n\nresource \"aws_internet_gateway\" \"gw\" {\n  vpc_id = aws_vpc.default.id\n}\n\nresource \"aws_subnet\" \"tf_test_subnet\" {\n  vpc_id                  = aws_vpc.default.id\n  cidr_block              = \"10.0.0.0/24\"\n  map_public_ip_on_launch = true\n\n  depends_on = [aws_internet_gateway.gw]\n}\n\nresource \"aws_instance\" \"foo\" {\n  # us-west-2\n  ami           = \"ami-5189a661\"\n  instance_type = \"t2.micro\"\n\n  private_ip = \"10.0.0.12\"\n  subnet_id  = aws_subnet.tf_test_subnet.id\n}\n\nresource \"aws_eip\" \"bar\" {\n  domain = \"vpc\"\n\n  instance                  = aws_instance.foo.id\n  associate_with_private_ip = \"10.0.0.12\"\n  depends_on                = [aws_internet_gateway.gw]\n}",
+      "llm_summary": "This example demonstrates how to attach an Elastic IP (EIP) to an EC2 instance in a VPC with a pre-assigned private IP using the `aws_eip` resource. It highlights the use of the `associate_with_private_ip` argument to bind the EIP to a specific private IP and includes dependencies on a VPC, subnet, and internet gateway for proper network configuration."
+    },
+    {
+      "title": "Allocating EIP from the BYOIP pool",
+      "code": "resource \"aws_eip\" \"byoip-ip\" {\n  domain           = \"vpc\"\n  public_ipv4_pool = \"ipv4pool-ec2-012345\"\n}",
+      "llm_summary": "\"Demonstrates how to allocate an Elastic IP (EIP) from a Bring Your Own IP (BYOIP) pool in AWS using the `aws_eip` resource. Highlights the use of the `public_ipv4_pool` argument to specify a custom IPv4 pool and the `domain` argument set to `vpc` for VPC-based EIP allocation.\""
+    },
+    {
+      "title": "Allocating EIP from the IPAM Pool",
+      "code": "resource \"aws_eip\" \"ipam-ip\" {\n  domain       = \"vpc\"\n  ipam_pool_id = \"ipam-pool-07ccc86aa41bef7ce\"\n}",
+      "llm_summary": "\"Demonstrates how to allocate an Elastic IP (EIP) from a specific IPAM pool in a VPC using the `aws_eip` resource, highlighting the use of the `ipam_pool_id` argument for IP address management integration.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "address",
+      "description": "(Optional) IP address from an EC2 BYOIP pool. This option is only available for VPC EIPs.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `address` argument in the `aws_eip` resource allows users to specify a custom IP address from an EC2 Bring Your Own IP (BYOIP) pool for a VPC Elastic IP. By setting this argument, users can control the specific IP address assigned to the Elastic IP, enabling advanced network configurations such as using pre-approved, owned IP ranges for compliance or specialized routing needs."
+    },
+    {
+      "name": "associate_with_private_ip",
+      "description": "(Optional) User-specified primary or secondary private IP address to associate with the Elastic IP address. If no private IP address is specified, the Elastic IP address is associated with the primary private IP address.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `associate_with_private_ip` argument in the `aws_eip` resource allows users to specify a particular private IP address (primary or secondary) to associate with the Elastic IP address. This enables precise control over which private IP within a network interface the Elastic IP is bound to, supporting scenarios like multi-IP configurations or targeted network routing."
+    },
+    {
+      "name": "customer_owned_ipv4_pool",
+      "description": "(Optional) ID of a customer-owned address pool. For more on customer owned IP addressed check out Customer-owned IP addresses guide.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `customer_owned_ipv4_pool` argument for the `aws_eip` resource allows users to specify the ID of a customer-owned address pool, enabling the allocation of Elastic IPs from a pool of IP addresses that the user owns and manages within their AWS account. This configuration is typically used to integrate customer-managed IP ranges with AWS resources, providing greater control over IP address ownership and routing."
+    },
+    {
+      "name": "domain",
+      "description": "(Optional) Indicates if this EIP is for use in VPC (`vpc`).",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `domain` argument for the `aws_eip` resource specifies whether the Elastic IP (EIP) is intended for use within a Virtual Private Cloud (VPC) by setting its value to `vpc`. Configuring this argument ensures the EIP is allocated in the appropriate networking context, aligning with the user's infrastructure requirements for VPC-based resources."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument represents the unique identifier of the `aws_eip` resource, which is automatically generated by AWS upon creation. While not configurable, it is commonly used for referencing the Elastic IP in other resources or outputs, enabling users to integrate and manage dependencies within their infrastructure."
+    },
+    {
+      "name": "instance",
+      "description": "(Optional) EC2 instance ID.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `instance` argument in the `aws_eip` resource allows users to associate the Elastic IP (EIP) with a specific EC2 instance by specifying its instance ID. This configuration enables automatic attachment of the EIP to the instance, ensuring consistent public IP access for the instance, which is commonly used for scenarios like maintaining a static IP for external communication or failover setups."
+    },
+    {
+      "name": "ipam_pool_id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ipam_pool_id` argument in the `aws_eip` resource allows users to specify the ID of an IPAM (IP Address Manager) pool from which the Elastic IP address will be allocated. By setting this argument, users can integrate the EIP allocation with AWS IPAM for centralized IP address management, enabling better organization, tracking, and governance of IP resources across their cloud infrastructure."
+    },
+    {
+      "name": "network_border_group",
+      "description": "(Optional) Location from which the IP address is advertised. Use this parameter to limit the address to this location.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `network_border_group` argument for the `aws_eip` resource allows users to specify the geographic location or zone from which the Elastic IP address is advertised, enabling control over the IP's routing and accessibility within a specific AWS region or edge location. This configuration is typically used to optimize network performance, ensure compliance with regional requirements, or align with specific availability zone preferences."
+    },
+    {
+      "name": "network_interface",
+      "description": "(Optional) Network interface ID to associate with.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `network_interface` argument in the `aws_eip` resource allows users to associate the Elastic IP (EIP) with a specific network interface by specifying its ID. This enables precise control over which network interface the EIP is bound to, commonly used to ensure consistent IP addressing for instances or services in dynamic networking environments."
+    },
+    {
+      "name": "public_ipv4_pool",
+      "description": "(Optional) EC2 IPv4 address pool identifier or `amazon`. This option is only available for VPC EIPs.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `public_ipv4_pool` argument for the `aws_eip` resource allows users to specify the EC2 IPv4 address pool from which the Elastic IP (EIP) should be allocated, either by providing a specific pool identifier or using the default `amazon` pool. This enables users to control the source of the public IP address, which is particularly useful for managing address allocation within VPC environments or leveraging custom IP pools for specific networking requirements."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of tags to assign to the resource. Tags can only be applied to EIPs in a VPC. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_eip` resource allows users to assign key-value metadata to Elastic IPs within a VPC, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or compliance tracking. When configured, it overrides provider-level default tags with matching keys, ensuring granular control over tag definitions specific to the EIP resource."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_eip` resource allows users to define a comprehensive set of key-value tags that are applied to the Elastic IP (EIP) for organizational, identification, or cost allocation purposes. By setting this argument, users can ensure consistent tagging across resources, enabling streamlined resource management, tracking, and integration with tagging-based policies or billing reports."
+    },
+    {
+      "name": "vpc",
+      "description": "(Optional Deprecated) Boolean if the EIP is in a VPC or not. Use `domain` instead. Defaults to `true` unless the region supports EC2-Classic. You can specify either the instance ID or the network_interface ID, but not both. Including both will not return an error from the AWS API, but will have undefined behavior. See the relevant AssociateAddress API Call for more information. Specifying both public_ipv4_pool and address won't cause an error but address will be used in the case both options are defined as the api only requires one or the other.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `vpc` argument in the `aws_eip` resource specifies whether the Elastic IP (EIP) is associated with a VPC (`true`) or EC2-Classic (`false`). While deprecated in favor of the `domain` argument, it impacts how the EIP is allocated and associated with network resources, aligning with the user's goal of configuring network environments in AWS."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_eip` resource allows users to specify the maximum duration (as a string, e.g., \"5m\" for 5 minutes) Terraform should wait for the Elastic IP (EIP) to be successfully deleted. Configuring this timeout helps manage resource lifecycle operations by preventing long-running or stalled deletions from blocking infrastructure changes."
+        },
+        {
+          "name": "read",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `read` argument within the `timeouts` block for the `aws_eip` resource allows users to specify the maximum duration Terraform will wait while retrieving or reading the Elastic IP's state during operations like refresh or import. Configuring this timeout ensures smoother workflows by preventing prolonged or stalled operations when querying the resource's status, aligning with user goals of efficient resource management and error handling."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_eip` resource allows users to specify the maximum duration (as a string) Terraform should wait for an Elastic IP update operation to complete. By configuring this timeout, users can control the behavior of long-running updates, ensuring smoother resource management and avoiding potential operation timeouts during infrastructure changes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_eip` resource allows users to define custom time limits for specific operations, such as creating or deleting an Elastic IP. This block provides fine-grained control over operation durations, helping users manage resource provisioning and cleanup processes more effectively in scenarios where default timeouts may not suffice."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "allocation_id",
+      "description": "ID that AWS assigns to represent the allocation of the Elastic IP address for use with instances in a VPC.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "arn",
+      "description": "",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "association_id",
+      "description": "ID representing the association of the address with an instance in a VPC.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "carrier_ip",
+      "description": "Carrier IP address.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "customer_owned_ip",
+      "description": "Customer owned IP.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "private_dns",
+      "description": "The Private DNS associated with the Elastic IP address (if in VPC).",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "private_ip",
+      "description": "Contains the private IP address (if in VPC).",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "ptr_record",
+      "description": "The DNS pointer (PTR) record for the IP address.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "public_dns",
+      "description": "Public DNS associated with the Elastic IP address.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "public_ip",
+      "description": "Contains the public IP address.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

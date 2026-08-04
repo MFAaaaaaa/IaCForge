@@ -1,0 +1,192 @@
+{
+    "resource": {
+        "name": "aws_elastic_beanstalk_environment",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "application",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "cname_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "platform_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "poll_interval",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "solution_stack_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "template_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "version_label",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "wait_for_ready_timeout",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "setting",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "namespace",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "resource",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "all_settings",
+            "description": "",
+            "optional": false,
+            "type": "set(object({name=string,namespace=string,resource=string,value=string}))"
+        },
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "autoscaling_groups",
+            "description": "",
+            "optional": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "cname",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "endpoint_url",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "instances",
+            "description": "",
+            "optional": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "launch_configurations",
+            "description": "",
+            "optional": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "load_balancers",
+            "description": "",
+            "optional": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "queues",
+            "description": "",
+            "optional": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "triggers",
+            "description": "",
+            "optional": false,
+            "type": "list(string)"
+        }
+    ]
+}

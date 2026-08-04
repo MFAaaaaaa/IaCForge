@@ -1,0 +1,66 @@
+{
+  "resource": {
+    "name": "aws_iam_user_ssh_key",
+    "description": "Uploads an SSH public key and associates it with the specified IAM user.",
+    "llm_summary": "The `aws_iam_user_ssh_key` resource enables the management of SSH public keys for IAM users, allowing secure authentication and access to AWS resources via SSH. Common use cases include configuring developer access to EC2 instances, automating key management for remote administration, and integrating SSH-based workflows with IAM user permissions. This resource supports uploading, associating, and lifecycle management of SSH keys, ensuring streamlined access control and enhanced security for cloud infrastructure."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_iam_user\" \"user\" {\n  name = \"test-user\"\n  path = \"/\"\n}\n\nresource \"aws_iam_user_ssh_key\" \"user\" {\n  username   = aws_iam_user.user.name\n  encoding   = \"SSH\"\n  public_key = \"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQD3F6tyPEFEzV0LX3X8BsXdMsQz1x2cEikKDEY0aIj41qgxMCP/iteneqXSIFZBp5vizPvaoIR3Um9xK7PGoW8giupGn+EPuxIA4cDM4vzOqOkiMPhz5XK0whEjkVzTo4+S0puvDZuwIsdiW9mxhJc7tgBNL0cYlWSYVkz4G/fslNfRPW5mYAM49f4fhtxPb5ok4Q2Lg9dPKVHO/Bgeu5woMc7RY0p1ej6D4CKFE6lymSDJpW0YHX/wqE9+cfEauh7xZcG0q9t2ta6F6fmX0agvpFyZo8aFbXeUBr7osSCJNgvavWbM/06niWrOvYX2xwWdhXmXSrbX8ZbabVohBK41 mytest@mydomain.com\"\n}",
+      "llm_summary": "This example demonstrates how to associate an SSH public key with an AWS IAM user using the `aws_iam_user_ssh_key` resource. It showcases key configurations such as specifying the `username` derived from the IAM user resource, setting the `encoding` to \"SSH\", and providing a `public_key` for secure access management."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "encoding",
+      "description": "(Required) Specifies the public key encoding format to use in the response. To retrieve the public key in ssh-rsa format, use `SSH`. To retrieve the public key in PEM format, use `PEM`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `encoding` argument in the `aws_iam_user_ssh_key` resource specifies the format of the public SSH key returned in the response, allowing users to define whether the key is encoded in `SSH` (ssh-rsa format) or `PEM` (Privacy-Enhanced Mail format). This configuration ensures compatibility with the user's intended use case, such as integrating with systems or tools that require a specific key format for authentication or encryption."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_iam_user_ssh_key` resource specifies the unique identifier of the SSH public key associated with an IAM user. This argument allows users to reference or manage a specific SSH key, enabling operations such as retrieval, updates, or deletion of the key within AWS IAM, typically supporting secure access and authentication workflows."
+    },
+    {
+      "name": "public_key",
+      "description": "(Required) The SSH public key. The public key must be encoded in ssh-rsa format or PEM format.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "Defines the SSH public key to associate with an IAM user, enabling secure authentication for accessing AWS resources or systems via SSH. This argument ensures the key is properly formatted (ssh-rsa or PEM) to establish trusted access credentials."
+    },
+    {
+      "name": "status",
+      "description": "(Optional) The status to assign to the SSH public key. Active means the key can be used for authentication with an AWS CodeCommit repository. Inactive means the key cannot be used. Default is `active`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `status` argument in the `aws_iam_user_ssh_key` resource allows users to define whether an SSH public key is active or inactive for authentication purposes. Setting this argument controls the key's usability for AWS CodeCommit repository access, enabling users to manage access permissions and authentication states effectively, with the default behavior being `active`."
+    },
+    {
+      "name": "username",
+      "description": "(Required) The name of the IAM user to associate the SSH public key with.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `username` argument specifies the IAM user to associate with the SSH public key, enabling secure authentication for that user when accessing AWS resources via SSH. This required parameter ensures the key is tied to the correct IAM identity, supporting user-specific access control and management."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "fingerprint",
+      "description": "The MD5 message digest of the SSH public key.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "ssh_public_key_id",
+      "description": "The unique identifier for the SSH public key.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

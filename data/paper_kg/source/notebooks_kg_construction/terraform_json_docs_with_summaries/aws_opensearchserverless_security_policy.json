@@ -1,0 +1,64 @@
+{
+  "resource": {
+    "name": "aws_opensearchserverless_security_policy",
+    "description": "Terraform resource for managing an AWS OpenSearch Serverless Security Policy. See AWS documentation for encryption policies and network policies.",
+    "llm_summary": "The `aws_opensearchserverless_security_policy` Terraform resource enables the management and configuration of security policies for AWS OpenSearch Serverless, ensuring secure access and data protection. Common use cases include defining encryption policies to safeguard sensitive data and configuring network policies to control access and traffic within OpenSearch Serverless environments. This resource is essential for implementing robust security measures, such as fine-grained access control, compliance-driven encryption, and secure network boundaries for serverless search and analytics workloads."
+  },
+  "examples": [
+    {
+      "title": "Encryption Security Policy",
+      "code": "resource \"aws_opensearchserverless_security_policy\" \"example\" {\n  name        = \"example\"\n  type        = \"encryption\"\n  description = \"encryption security policy for example-collection\"\n  policy = jsonencode({\n    Rules = [\n      {\n        Resource = [\n          \"collection/example-collection\"\n        ],\n        ResourceType = \"collection\"\n      }\n    ],\n    AWSOwnedKey = true\n  })\n}",
+      "llm_summary": "\"Demonstrates how to configure an encryption security policy for an Amazon OpenSearch Serverless collection using the `aws_opensearchserverless_security_policy` resource. Highlights the use of the `type` argument set to `encryption`, the `policy` block with `AWSOwnedKey` for key management, and resource-specific rules targeting a specific collection.\""
+    },
+    {
+      "title": "Network Security Policy",
+      "code": "resource \"aws_opensearchserverless_security_policy\" \"example\" {\n  name        = \"example\"\n  type        = \"network\"\n  description = \"Public access\"\n  policy = jsonencode([\n    {\n      Description = \"Public access to collection and Dashboards endpoint for example collection\",\n      Rules = [\n        {\n          ResourceType = \"collection\",\n          Resource = [\n            \"collection/example-collection\"\n          ]\n        },\n        {\n          ResourceType = \"dashboard\"\n          Resource = [\n            \"collection/example-collection\"\n          ]\n        }\n      ],\n      AllowFromPublic = true\n    }\n  ])\n}",
+      "llm_summary": "\"Demonstrates how to configure a network-based security policy for AWS OpenSearch Serverless using the `aws_opensearchserverless_security_policy` resource, enabling public access to a specific collection and its associated Dashboards endpoint. Highlights the use of the `policy` argument with JSON-encoded rules, including `ResourceType`, `Resource`, and `AllowFromPublic` for fine-grained access control.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "description",
+      "description": "(Optional) Description of the policy. Typically used to store information about the permissions defined in the policy.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument allows users to define a human-readable summary or metadata for the security policy in an OpenSearch Serverless environment. This is typically used to document the purpose or permissions of the policy, aiding in policy management and clarity for administrators."
+    },
+    {
+      "name": "name",
+      "description": "(Required) Name of the policy.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies the unique identifier for the security policy within the `aws_opensearchserverless_security_policy` resource, allowing users to define and distinguish the policy for managing access control and permissions in OpenSearch Serverless environments. Setting this argument ensures the policy is easily referenced and organized, aligning with user goals like structuring security configurations and enabling precise policy management."
+    },
+    {
+      "name": "policy",
+      "description": "(Required) JSON policy document to use as the content for the new policy",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `policy` argument in the `aws_opensearchserverless_security_policy` resource allows users to define the access control and permissions for OpenSearch Serverless resources by specifying a required JSON policy document. This configuration governs security behaviors, such as user access, resource restrictions, and operational rules, ensuring compliance with organizational policies and enabling fine-grained control over resource interactions."
+    },
+    {
+      "name": "type",
+      "description": "(Required) Type of security policy. One of `encryption` or `network`. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `type` argument in the `aws_opensearchserverless_security_policy` resource specifies the category of security policy to configure, allowing users to define either `encryption` policies for data protection or `network` policies for access control. By setting this argument, users can tailor the security behavior of their OpenSearch Serverless environment to meet compliance requirements or enforce secure connectivity."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "id",
+      "description": "",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "policy_version",
+      "description": "Version of the policy.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "static_ip_name",
+        "references_output": "aws_lightsail_static_ip.id",
+        "target_resource_type": "aws_lightsail_static_ip"
+    },
+    {
+        "argument_path": "instance_name",
+        "references_output": "aws_lightsail_instance.id",
+        "target_resource_type": "aws_lightsail_instance"
+    }
+]

@@ -1,0 +1,752 @@
+{
+    "resource": {
+        "name": "aws_ec2_fleet",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "context",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "excess_capacity_termination_policy",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "fleet_state",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "fulfilled_capacity",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "fulfilled_on_demand_capacity",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "replace_unhealthy_instances",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "terminate_instances",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "terminate_instances_with_expiration",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "valid_from",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "valid_until",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "fleet_instance_set",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "instance_ids",
+                    "description": "",
+                    "required": false,
+                    "type": "list(string)"
+                },
+                {
+                    "name": "instance_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "lifecycle",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "platform",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "launch_template_config",
+            "description": "",
+            "cardinality": [
+                1,
+                50
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "launch_template_specification",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "launch_template_id",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "launch_template_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "version",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "override",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        300
+                    ],
+                    "arguments": [
+                        {
+                            "name": "availability_zone",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "instance_type",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "max_price",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "priority",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "subnet_id",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "weighted_capacity",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "instance_requirements",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "accelerator_manufacturers",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "set(string)"
+                                },
+                                {
+                                    "name": "accelerator_names",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "set(string)"
+                                },
+                                {
+                                    "name": "accelerator_types",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "set(string)"
+                                },
+                                {
+                                    "name": "allowed_instance_types",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "set(string)"
+                                },
+                                {
+                                    "name": "bare_metal",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "burstable_performance",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "cpu_manufacturers",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "set(string)"
+                                },
+                                {
+                                    "name": "excluded_instance_types",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "set(string)"
+                                },
+                                {
+                                    "name": "instance_generations",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "set(string)"
+                                },
+                                {
+                                    "name": "local_storage",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "local_storage_types",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "set(string)"
+                                },
+                                {
+                                    "name": "max_spot_price_as_percentage_of_optimal_on_demand_price",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "on_demand_max_price_percentage_over_lowest_price",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "require_hibernate_support",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "spot_max_price_percentage_over_lowest_price",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "accelerator_count",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "max",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "min",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "accelerator_total_memory_mib",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "max",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "min",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "baseline_ebs_bandwidth_mbps",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "max",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "min",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "memory_gib_per_vcpu",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "max",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "min",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "memory_mib",
+                                    "description": "",
+                                    "cardinality": [
+                                        1,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "max",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "min",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "network_bandwidth_gbps",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "max",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "min",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "network_interface_count",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "max",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "min",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "total_local_storage_gb",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "max",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "min",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "blocks": []
+                                },
+                                {
+                                    "name": "vcpu_count",
+                                    "description": "",
+                                    "cardinality": [
+                                        1,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "max",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        },
+                                        {
+                                            "name": "min",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "on_demand_options",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "allocation_strategy",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "max_total_price",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "min_target_capacity",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "single_availability_zone",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "single_instance_type",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "capacity_reservation_options",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "usage_strategy",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "spot_options",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "allocation_strategy",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "instance_interruption_behavior",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "instance_pools_to_use_count",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "max_total_price",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "min_target_capacity",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "single_availability_zone",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "single_instance_type",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "maintenance_strategies",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "capacity_rebalance",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "replacement_strategy",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "termination_delay",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "target_capacity_specification",
+            "description": "",
+            "cardinality": [
+                1,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "default_target_capacity_type",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "on_demand_target_capacity",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "spot_target_capacity",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "target_capacity_unit_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "total_target_capacity",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

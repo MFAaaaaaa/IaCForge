@@ -1,0 +1,96 @@
+{
+    "resource": {
+        "name": "aws_vpc_security_group_egress_rule",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "cidr_ipv4",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "cidr_ipv6",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "from_port",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "ip_protocol",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "prefix_list_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "referenced_security_group_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "security_group_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "to_port",
+            "description": "",
+            "required": false,
+            "type": "number"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "security_group_rule_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "optional": false,
+            "type": "map(string)"
+        }
+    ]
+}

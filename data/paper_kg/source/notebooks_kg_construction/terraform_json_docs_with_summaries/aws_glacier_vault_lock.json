@@ -1,0 +1,58 @@
+{
+  "resource": {
+    "name": "aws_glacier_vault_lock",
+    "description": "Manages a Glacier Vault Lock. You can refer to the Glacier Developer Guide for a full explanation of the Glacier Vault Lock functionality. This resource allows you to test Glacier Vault Lock policies by setting the complete_lock argument to false. When testing policies in this manner, the Glacier Vault Lock automatically expires after 24 hours and Terraform will show this resource as needing recreation after that time. To permanently apply the policy, set the complete_lock argument to true. When changing complete_lock to true, it is expected the resource will show as recreating. We suggest using jsonencode() or aws_iam_policy_document when assigning a value to policy. They seamlessly translate Terraform language into JSON, enabling you to maintain consistency within your configuration without the need for context switches. Also, you can sidestep potential complications arising from formatting discrepancies, whitespace inconsistencies, and other nuances inherent to JSON. Once a Glacier Vault Lock is completed, it is immutable. The deletion of the Glacier Vault Lock is not be possible and attempting to remove it from Terraform will return an error. Set the ignore_deletion_error argument to true and apply this configuration before attempting to delete this resource via Terraform or use terraform state rm to remove this resource from Terraform management.",
+    "llm_summary": "The `aws_glacier_vault_lock` Terraform resource manages the configuration and enforcement of immutable access policies for AWS Glacier Vaults, ensuring compliance and data protection. It is commonly used to implement and test Vault Lock policies for secure long-term data storage, with options to temporarily test policies or permanently lock them. Key configurations include policy definition using `jsonencode()` or `aws_iam_policy_document`, lifecycle management with `complete_lock`, and handling deletion errors via `ignore_deletion_error`, enabling robust control over vault access and immutability."
+  },
+  "examples": [
+    {
+      "title": "Testing Glacier Vault Lock Policy",
+      "code": "resource \"aws_glacier_vault\" \"example\" {\n  name = \"example\"\n}\n\ndata \"aws_iam_policy_document\" \"example\" {\n  statement {\n    actions   = [\"glacier:DeleteArchive\"]\n    effect    = \"Deny\"\n    resources = [aws_glacier_vault.example.arn]\n\n    condition {\n      test     = \"NumericLessThanEquals\"\n      variable = \"glacier:ArchiveAgeinDays\"\n      values   = [\"365\"]\n    }\n  }\n}\n\nresource \"aws_glacier_vault_lock\" \"example\" {\n  complete_lock = false\n  policy        = data.aws_iam_policy_document.example.json\n  vault_name    = aws_glacier_vault.example.name\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS Glacier Vault Lock with a custom IAM policy that denies archive deletion for archives less than 365 days old using a `NumericLessThanEquals` condition. Highlights the use of the `complete_lock` argument and integration with `aws_iam_policy_document` for fine-grained access control.\""
+    },
+    {
+      "title": "Permanently Applying Glacier Vault Lock Policy",
+      "code": "resource \"aws_glacier_vault_lock\" \"example\" {\n  complete_lock = true\n  policy        = data.aws_iam_policy_document.example.json\n  vault_name    = aws_glacier_vault.example.name\n}",
+      "llm_summary": "\"Demonstrates how to permanently apply a Glacier Vault Lock policy using the `aws_glacier_vault_lock` resource, with the `complete_lock` argument set to enforce the policy and a referenced IAM policy document for fine-grained access control. This example illustrates secure, immutable configuration of an AWS Glacier vault for compliance and data protection.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "complete_lock",
+      "description": "(Required) Boolean whether to permanently apply this Glacier Lock Policy. Once completed, this cannot be undone. If set to `false`, the Glacier Lock Policy remains in a testing mode for 24 hours. After that time, the Glacier Lock Policy is automatically removed by Glacier and the Terraform resource will show as needing recreation. Changing this from `false` to `true` will show as resource recreation, which is expected. Changing this from `true` to `false` is not possible unless the Glacier Vault is recreated at the same time.",
+      "required": true,
+      "type": "bool",
+      "llm_summary": "The `complete_lock` argument in the `aws_glacier_vault_lock` resource controls whether the Glacier Vault Lock Policy is permanently enforced (`true`) or remains in a temporary testing mode (`false`). Setting this to `true` finalizes the lock policy, making it immutable and ensuring compliance with long-term data retention requirements, while setting it to `false` allows testing the policy for 24 hours before it is automatically removed."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_glacier_vault_lock` resource represents the unique identifier of the Glacier vault lock configuration. While optional, it allows users to reference or manage a specific vault lock instance, enabling precise control over lock policies and ensuring alignment with compliance or data retention requirements."
+    },
+    {
+      "name": "ignore_deletion_error",
+      "description": "(Optional) Allow Terraform to ignore the error returned when attempting to delete the Glacier Lock Policy. This can be used to delete or recreate the Glacier Vault via Terraform, for example, if the Glacier Vault Lock policy permits that action. This should only be used in conjunction with `complete_lock` being set to `true`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `ignore_deletion_error` argument in the `aws_glacier_vault_lock` resource allows users to control whether Terraform should bypass errors when attempting to delete the Glacier Vault Lock policy, enabling smoother deletion or recreation workflows for the vault. This is particularly useful in scenarios where the lock policy permits deletion and is typically paired with `complete_lock` set to `true` to manage lifecycle operations for locked Glacier vaults."
+    },
+    {
+      "name": "policy",
+      "description": "(Required) JSON string containing the IAM policy to apply as the Glacier Vault Lock policy.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `policy` argument for the `aws_glacier_vault_lock` resource specifies the JSON-formatted IAM policy that enforces access control and compliance rules for the Glacier Vault Lock. By setting this required argument, users define immutable access policies, such as retention periods or data deletion restrictions, ensuring regulatory compliance and secure long-term data storage."
+    },
+    {
+      "name": "vault_name",
+      "description": "(Required) The name of the Glacier Vault.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `vault_name` argument specifies the unique name of the Glacier Vault to which the vault lock policy will be applied, enabling users to define the target resource for configuring compliance controls such as data retention rules. By setting this required argument, users ensure the lock policy is associated with the intended vault, supporting secure and immutable storage practices."
+    }
+  ],
+  "blocks": [],
+  "attributes": []
+}

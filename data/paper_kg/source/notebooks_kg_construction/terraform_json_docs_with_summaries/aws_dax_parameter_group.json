@@ -1,0 +1,66 @@
+{
+  "resource": {
+    "name": "aws_dax_parameter_group",
+    "description": "Provides a DAX Parameter Group resource.",
+    "llm_summary": "The `aws_dax_parameter_group` Terraform resource enables the creation and management of custom parameter groups for Amazon DynamoDB Accelerator (DAX) clusters, allowing users to fine-tune cluster performance and behavior. It is commonly used to configure caching settings, memory management, query timeouts, and other operational parameters to optimize DAX for specific workloads. This resource is ideal for scenarios requiring tailored caching solutions for high-throughput, low-latency applications integrated with DynamoDB."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_dax_parameter_group\" \"example\" {\n  name = \"example\"\n\n  parameters {\n    name  = \"query-ttl-millis\"\n    value = \"100000\"\n  }\n\n  parameters {\n    name  = \"record-ttl-millis\"\n    value = \"100000\"\n  }\n}",
+      "llm_summary": "\"Demonstrates the basic configuration of an `aws_dax_parameter_group` resource, showcasing how to define custom DAX cluster parameters using the `parameters` block to set values for `query-ttl-millis` and `record-ttl-millis`. This example helps users learn how to customize TTL settings for DynamoDB Accelerator (DAX) clusters.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "description",
+      "description": "(Optional, ForceNew) A description of the parameter group.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_dax_parameter_group` resource allows users to define a human-readable summary or label for the parameter group, providing context or documentation about its purpose, configuration, or intended use. Setting this argument helps users organize and identify parameter groups, especially in environments with multiple DAX clusters or parameter groups."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_dax_parameter_group` resource specifies a unique identifier for the parameter group, allowing users to define or reference the group within their infrastructure. While optional, setting this argument can help manage and track the parameter group explicitly, supporting workflows that require consistent identification or integration with other resources."
+    },
+    {
+      "name": "name",
+      "description": "\u2013 (Required) The name of the parameter group.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_dax_parameter_group` resource specifies the unique identifier for the parameter group, allowing users to define and manage a distinct configuration set for DAX cluster parameters. By setting this argument, users can organize and reference custom parameter groups to optimize caching behavior and performance for their DynamoDB Accelerator (DAX) clusters."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "parameters",
+      "description": "\u2013 (Optional) The parameters of the parameter group.  name \u2013 (Required) The name of the parameter group.  description - (Optional, ForceNew) A description of the parameter group.  parameters \u2013 (Optional) The parameters of the parameter group.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "name",
+          "description": "\u2013 (Required) The name of the parameter group.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `name` argument specifies the unique identifier for the DAX parameter group, allowing users to define and manage a distinct configuration set for DynamoDB Accelerator (DAX) cluster parameters. By setting this argument, users can organize and apply custom tuning options for caching behavior, performance optimization, or environment-specific settings across DAX clusters."
+        },
+        {
+          "name": "value",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `value` argument in the `aws_dax_parameter_group` resource specifies the configuration setting for a DAX parameter, allowing users to define the operational behavior or performance tuning of their DAX cluster. By setting this argument, users can control aspects such as cache size, timeout durations, or consistency levels, tailoring the cluster's behavior to meet specific application requirements or optimize performance."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `parameters` block within the `aws_dax_parameter_group` resource allows users to define and customize specific configuration parameters for a DAX (DynamoDB Accelerator) parameter group. This block enables fine-grained control over caching behavior, performance tuning, and operational settings by specifying key-value pairs for individual parameters, helping users optimize their DAX clusters for specific workloads or application requirements."
+    }
+  ],
+  "attributes": []
+}

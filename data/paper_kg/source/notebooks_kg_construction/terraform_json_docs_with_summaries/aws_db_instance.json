@@ -1,0 +1,745 @@
+{
+  "resource": {
+    "name": "aws_db_instance",
+    "description": "Provides an RDS instance resource.  A DB instance is an isolated database environment in the cloud.  A DB instance can contain multiple user-created databases. Changes to a DB instance can occur when you manually change a parameter, such as allocated_storage, and are reflected in the next maintenance window. Because of this, Terraform may report a difference in its planning phase because a modification has not yet taken place. You can use the apply_immediately flag to instruct the service to apply the change immediately (see documentation below). When upgrading the major version of an engine, allow_major_version_upgrade must be set to true. using apply_immediately can result in a brief downtime as the server reboots. See the AWS Docs on RDS Instance Maintenance for more information. All arguments including the username and password will be stored in the raw state as plain-text. Read more about sensitive data instate. Write-Only argument password_wo is available to use in place of password. Write-Only arguments are supported in HashiCorp Terraform 1.11.0 and later. Learn more. Hands-on: Try the Manage AWS RDS Instances tutorial on HashiCorp Learn.",
+    "llm_summary": "The `aws_db_instance` Terraform resource enables the creation and management of Amazon RDS database instances, providing an isolated cloud-based environment for hosting multiple user-created databases. It supports configurations for storage allocation, engine version upgrades, maintenance scheduling, and immediate application of changes, making it ideal for scenarios like setting up scalable relational databases, automating lifecycle management, and ensuring high availability. Users can customize parameters such as instance size, database engine, credentials, and apply security best practices, with options for sensitive data handling and write-only password management."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_db_instance\" \"default\" {\n  allocated_storage    = 10\n  db_name              = \"mydb\"\n  engine               = \"mysql\"\n  engine_version       = \"8.0\"\n  instance_class       = \"db.t3.micro\"\n  username             = \"foo\"\n  password             = \"foobarbaz\"\n  parameter_group_name = \"default.mysql8.0\"\n  skip_final_snapshot  = true\n}",
+      "llm_summary": "\"Demonstrates the basic configuration of an `aws_db_instance` resource to provision a MySQL 8.0 database with 10GB of storage, using a `db.t3.micro` instance class. Highlights key arguments such as `db_name`, `username`, `password`, and `parameter_group_name`, while disabling the final snapshot on deletion with `skip_final_snapshot`.\""
+    },
+    {
+      "title": "RDS Custom for Oracle Usage with Replica",
+      "code": "# Lookup the available instance classes for the custom engine for the region being operated in\ndata \"aws_rds_orderable_db_instance\" \"custom-oracle\" {\n  engine                     = \"custom-oracle-ee\" # CEV engine to be used\n  engine_version             = \"19.c.ee.002\"      # CEV engine version to be used\n  license_model              = \"bring-your-own-license\"\n  storage_type               = \"gp3\"\n  preferred_instance_classes = [\"db.r5.xlarge\", \"db.r5.2xlarge\", \"db.r5.4xlarge\"]\n}\n\n# The RDS instance resource requires an ARN. Look up the ARN of the KMS key associated with the CEV.\ndata \"aws_kms_key\" \"by_id\" {\n  key_id = \"example-ef278353ceba4a5a97de6784565b9f78\" # KMS key associated with the CEV\n}\n\nresource \"aws_db_instance\" \"default\" {\n  allocated_storage           = 50\n  auto_minor_version_upgrade  = false                         # Custom for Oracle does not support minor version upgrades\n  custom_iam_instance_profile = \"AWSRDSCustomInstanceProfile\" # Instance profile is required for Custom for Oracle. See: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/custom-setup-orcl.html#custom-setup-orcl.iam-vpc\n  backup_retention_period     = 7\n  db_subnet_group_name        = local.db_subnet_group_name\n  engine                      = data.aws_rds_orderable_db_instance.custom-oracle.engine\n  engine_version              = data.aws_rds_orderable_db_instance.custom-oracle.engine_version\n  identifier                  = \"ee-instance-demo\"\n  instance_class              = data.aws_rds_orderable_db_instance.custom-oracle.instance_class\n  kms_key_id                  = data.aws_kms_key.by_id.arn\n  license_model               = data.aws_rds_orderable_db_instance.custom-oracle.license_model\n  multi_az                    = false # Custom for Oracle does not support multi-az\n  password                    = \"avoid-plaintext-passwords\"\n  username                    = \"test\"\n  storage_encrypted           = true\n\n  timeouts {\n    create = \"3h\"\n    delete = \"3h\"\n    update = \"3h\"\n  }\n}\n\nresource \"aws_db_instance\" \"test-replica\" {\n  replicate_source_db         = aws_db_instance.default.identifier\n  replica_mode                = \"mounted\"\n  auto_minor_version_upgrade  = false\n  custom_iam_instance_profile = \"AWSRDSCustomInstanceProfile\" # Instance profile is required for Custom for Oracle. See: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/custom-setup-orcl.html#custom-setup-orcl.iam-vpc\n  backup_retention_period     = 7\n  identifier                  = \"ee-instance-replica\"\n  instance_class              = data.aws_rds_orderable_db_instance.custom-oracle.instance_class\n  kms_key_id                  = data.aws_kms_key.by_id.arn\n  multi_az                    = false # Custom for Oracle does not support multi-az\n  skip_final_snapshot         = true\n  storage_encrypted           = true\n\n  timeouts {\n    create = \"3h\"\n    delete = \"3h\"\n    update = \"3h\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an Amazon RDS Custom for Oracle instance with a replica, leveraging the `aws_db_instance` resource. It showcases key configurations such as using a custom engine (`custom-oracle-ee`), specifying a custom IAM instance profile, encrypting storage with a KMS key, and setting up a mounted replica using the `replicate_source_db` and `replica_mode` arguments. Users can learn how to set up RDS Custom for Oracle with advanced features like custom engine versions, BYOL licensing, and replica creation."
+    },
+    {
+      "title": "RDS Custom for SQL Server",
+      "code": "# Lookup the available instance classes for the custom engine for the region being operated in\ndata \"aws_rds_orderable_db_instance\" \"custom-sqlserver\" {\n  engine                     = \"custom-sqlserver-se\" # CEV engine to be used\n  engine_version             = \"15.00.4249.2.v1\"     # CEV engine version to be used\n  storage_type               = \"gp3\"\n  preferred_instance_classes = [\"db.r5.xlarge\", \"db.r5.2xlarge\", \"db.r5.4xlarge\"]\n}\n\n# The RDS instance resource requires an ARN. Look up the ARN of the KMS key.\ndata \"aws_kms_key\" \"by_id\" {\n  key_id = \"example-ef278353ceba4a5a97de6784565b9f78\" # KMS key\n}\n\nresource \"aws_db_instance\" \"example\" {\n  allocated_storage           = 500\n  auto_minor_version_upgrade  = false                                  # Custom for SQL Server does not support minor version upgrades\n  custom_iam_instance_profile = \"AWSRDSCustomSQLServerInstanceProfile\" # Instance profile is required for Custom for SQL Server. See: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/custom-setup-sqlserver.html#custom-setup-sqlserver.iam\n  backup_retention_period     = 7\n  db_subnet_group_name        = local.db_subnet_group_name # Copy the subnet group from the RDS Console\n  engine                      = data.aws_rds_orderable_db_instance.custom-sqlserver.engine\n  engine_version              = data.aws_rds_orderable_db_instance.custom-sqlserver.engine_version\n  identifier                  = \"sql-instance-demo\"\n  instance_class              = data.aws_rds_orderable_db_instance.custom-sqlserver.instance_class\n  kms_key_id                  = data.aws_kms_key.by_id.arn\n  multi_az                    = false # Custom for SQL Server does support multi-az\n  password                    = \"avoid-plaintext-passwords\"\n  storage_encrypted           = true\n  username                    = \"test\"\n\n  timeouts {\n    create = \"3h\"\n    delete = \"3h\"\n    update = \"3h\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an Amazon RDS Custom for SQL Server instance using the `aws_db_instance` resource, including specifying a custom engine version (CEV), instance profile, and KMS key for encryption. It illustrates advanced configurations such as using the `aws_rds_orderable_db_instance` data source to dynamically select compatible instance classes and setting up required IAM and subnet group settings for a custom SQL Server deployment."
+    },
+    {
+      "title": "RDS Db2 Usage",
+      "code": "# Lookup the default version for the engine. Db2 Standard Edition is `db2-se`, Db2 Advanced Edition is `db2-ae`.\ndata \"aws_rds_engine_version\" \"default\" {\n  engine = \"db2-se\" #Standard Edition\n}\n\n# Lookup the available instance classes for the engine in the region being operated in\ndata \"aws_rds_orderable_db_instance\" \"example\" {\n  engine                     = data.aws_rds_engine_version.default.engine\n  engine_version             = data.aws_rds_engine_version.default.version\n  license_model              = \"bring-your-own-license\"\n  storage_type               = \"gp3\"\n  preferred_instance_classes = [\"db.t3.small\", \"db.r6i.large\", \"db.m6i.large\"]\n}\n\n# The RDS Db2 instance resource requires licensing information. Create a new parameter group using the default paramater group as a source, and set license information.\nresource \"aws_db_parameter_group\" \"example\" {\n  name   = \"db-db2-params\"\n  family = data.aws_rds_engine_version.default.parameter_group_family\n\n  parameter {\n    apply_method = \"immediate\"\n    name         = \"rds.ibm_customer_id\"\n    value        = 0000000000\n  }\n  parameter {\n    apply_method = \"immediate\"\n    name         = \"rds.ibm_site_id\"\n    value        = 0000000000\n  }\n}\n\n# Create the RDS Db2 instance, use the data sources defined to set attributes\nresource \"aws_db_instance\" \"example\" {\n  allocated_storage       = 100\n  backup_retention_period = 7\n  db_name                 = \"test\"\n  engine                  = data.aws_rds_orderable_db_instance.example.engine\n  engine_version          = data.aws_rds_orderable_db_instance.example.engine_version\n  identifier              = \"db2-instance-demo\"\n  instance_class          = data.aws_rds_orderable_db_instance.example.instance_class\n  parameter_group_name    = aws_db_parameter_group.example.name\n  password                = \"avoid-plaintext-passwords\"\n  username                = \"test\"\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS RDS Db2 instance using the `aws_db_instance` resource, including engine version lookup, instance class selection, and custom parameter group creation for licensing details. It showcases the use of data sources (`aws_rds_engine_version` and `aws_rds_orderable_db_instance`) to dynamically set attributes and highlights advanced configurations like `rds.ibm_customer_id` and `rds.ibm_site_id` parameters for Db2 licensing."
+    },
+    {
+      "title": "Storage Autoscaling",
+      "code": "resource \"aws_db_instance\" \"example\" {\n  # ... other configuration ...\n\n  allocated_storage     = 50\n  max_allocated_storage = 100\n}",
+      "llm_summary": "\"Demonstrates how to configure storage autoscaling for an AWS RDS instance using the `aws_db_instance` resource by setting `allocated_storage` and `max_allocated_storage` to enable dynamic scaling of database storage capacity.\""
+    },
+    {
+      "title": "Managed Master Passwords via Secrets Manager, default KMS Key",
+      "code": "resource \"aws_db_instance\" \"default\" {\n  allocated_storage           = 10\n  db_name                     = \"mydb\"\n  engine                      = \"mysql\"\n  engine_version              = \"8.0\"\n  instance_class              = \"db.t3.micro\"\n  manage_master_user_password = true\n  username                    = \"foo\"\n  parameter_group_name        = \"default.mysql8.0\"\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_db_instance` resource with managed master user password functionality enabled via Secrets Manager (`manage_master_user_password = true`), using the default KMS key for encryption. It illustrates the setup of a MySQL 8.0 database instance with essential parameters such as storage allocation, instance class, and a default parameter group."
+    },
+    {
+      "title": "Managed Master Passwords via Secrets Manager, specific KMS Key",
+      "code": "resource \"aws_kms_key\" \"example\" {\n  description = \"Example KMS Key\"\n}\n\nresource \"aws_db_instance\" \"default\" {\n  allocated_storage             = 10\n  db_name                       = \"mydb\"\n  engine                        = \"mysql\"\n  engine_version                = \"8.0\"\n  instance_class                = \"db.t3.micro\"\n  manage_master_user_password   = true\n  master_user_secret_kms_key_id = aws_kms_key.example.key_id\n  username                      = \"foo\"\n  parameter_group_name          = \"default.mysql8.0\"\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_db_instance` with managed master user passwords stored in AWS Secrets Manager, secured using a specific KMS key. It highlights the use of the `manage_master_user_password` argument and the `master_user_secret_kms_key_id` attribute to integrate password management with encryption via an `aws_kms_key`."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "allocated_storage",
+      "description": "(Required unless a `snapshot_identifier` or `replicate_source_db` is provided) The allocated storage in gibibytes. If `max_allocated_storage` is configured, this argument represents the initial storage allocation and differences from the configuration will be ignored automatically when Storage Autoscaling occurs. If `replicate_source_db` is set, the value is ignored during the creation of the instance.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `allocated_storage` argument for the `aws_db_instance` resource specifies the initial storage capacity of the database instance in gibibytes, allowing users to define the baseline storage allocation for their database. It is particularly relevant for configuring storage requirements, but its value may be automatically adjusted if `max_allocated_storage` is enabled for autoscaling or ignored during creation when replicating from a source database (`replicate_source_db`)."
+    },
+    {
+      "name": "allow_major_version_upgrade",
+      "description": "(Optional) Indicates that major version upgrades are allowed. Changing this parameter does not result in an outage and the change is asynchronously applied as soon as possible.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `allow_major_version_upgrade` argument for the `aws_db_instance` resource controls whether major version upgrades of the database engine are permitted during updates. Enabling this option allows users to define upgrade behavior for long-term database lifecycle management, ensuring compatibility with newer engine versions without manual intervention, while changes are applied asynchronously without causing downtime."
+    },
+    {
+      "name": "apply_immediately",
+      "description": "(Optional) Specifies whether any database modifications are applied immediately, or during the next maintenance window. Default is `false`. See Amazon RDS Documentation for more information.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `apply_immediately` argument for the `aws_db_instance` resource controls whether changes to the database instance configuration are applied immediately or deferred to the next maintenance window. Setting this to `true` allows users to expedite updates, such as scaling or parameter modifications, at the potential cost of temporary downtime, aligning with goals like rapid environment adjustments or urgent fixes."
+    },
+    {
+      "name": "auto_minor_version_upgrade",
+      "description": "(Optional) Indicates that minor engine upgrades will be applied automatically to the DB instance during the maintenance window. Defaults to true.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `auto_minor_version_upgrade` argument for the `aws_db_instance` resource allows users to control whether minor database engine upgrades are automatically applied during the maintenance window. Enabling this setting (default: `true`) ensures the DB instance remains up-to-date with minor version improvements, reducing manual maintenance effort while maintaining compatibility and stability."
+    },
+    {
+      "name": "availability_zone",
+      "description": "(Optional) The AZ for the RDS instance.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `availability_zone` argument for the `aws_db_instance` resource allows users to specify the specific Availability Zone (AZ) within a region where the RDS instance will be deployed. Configuring this argument enables precise control over the instance's geographic placement, which can optimize latency, support high availability architectures, or align with compliance requirements for data locality."
+    },
+    {
+      "name": "backup_retention_period",
+      "description": "(Optional) The days to retain backups for. Must be between `0` and `35`. Default is `0`. Must be greater than `0` if the database is used as a source for a Read Replica, uses low-downtime updates, or will use RDS Blue/Green deployments.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `backup_retention_period` argument for the `aws_db_instance` resource allows users to define the number of days automated backups are retained, enabling backup lifecycle management and disaster recovery planning. Setting this value impacts the database's ability to serve as a source for Read Replicas, support low-downtime updates, or utilize RDS Blue/Green deployments, as it must be greater than `0` in these scenarios."
+    },
+    {
+      "name": "backup_target",
+      "description": "(Optional, Forces new resource) Specifies where automated backups and manual snapshots are stored. Possible values are `region` (default) and `outposts`. See Working with Amazon RDS on AWS Outposts for more information.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `backup_target` argument for the `aws_db_instance` resource allows users to specify the storage location for automated backups and manual snapshots, enabling control over whether these are stored in the default AWS region or on AWS Outposts. Configuring this argument impacts the backup strategy and infrastructure placement, aligning with user goals for data residency, compliance, or hybrid cloud setups."
+    },
+    {
+      "name": "backup_window",
+      "description": "(Optional) The daily time range (in UTC) during which automated backups are created if they are enabled. Example: \"09:46-10:16\". Must not overlap with `maintenance_window`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `backup_window` argument for the `aws_db_instance` resource allows users to define a specific daily time range (in UTC) during which automated backups are created, ensuring control over backup scheduling to avoid conflicts with other operations like maintenance. By configuring this, users can optimize database performance and align backup timing with operational requirements, supporting goals like data protection and system reliability."
+    },
+    {
+      "name": "ca_cert_identifier",
+      "description": "(Optional) The identifier of the CA certificate for the DB instance.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ca_cert_identifier` argument for the `aws_db_instance` resource allows users to specify the identifier of the CA certificate used to validate the database's SSL/TLS connections. Configuring this argument ensures secure communication by enforcing trusted certificate validation, which is critical for compliance and protecting sensitive data in transit."
+    },
+    {
+      "name": "character_set_name",
+      "description": "(Optional) The character set name to use for DB encoding in Oracle and Microsoft SQL instances (collation). This can't be changed. See Oracle Character Sets Supported in Amazon RDS or Server-Level Collation for Microsoft SQL Server for more information. Cannot be set with `replicate_source_db`, `restore_to_point_in_time`, `s3_import`, or `snapshot_identifier`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `character_set_name` argument allows users to specify the character set used for database encoding in Oracle or Microsoft SQL Server instances, ensuring compatibility with specific language or collation requirements. This setting is immutable and critical for defining the database's encoding behavior, but it cannot be used in conjunction with replication, point-in-time recovery, or snapshot-based configurations."
+    },
+    {
+      "name": "copy_tags_to_snapshot",
+      "description": "\u2013 (Optional, boolean) Copy all Instance `tags` to snapshots. Default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `copy_tags_to_snapshot` argument in the `aws_db_instance` resource controls whether all tags applied to the database instance are automatically copied to its snapshots. Enabling this option (`true`) helps maintain consistent metadata across the instance and its backups, supporting tagging strategies for resource organization, cost allocation, or compliance."
+    },
+    {
+      "name": "custom_iam_instance_profile",
+      "description": "(Optional) The instance profile associated with the underlying Amazon EC2 instance of an RDS Custom DB instance.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "\"Defines the IAM instance profile to associate with the underlying EC2 instance of an RDS Custom DB instance, enabling users to specify custom permissions and access policies for managing the database environment and its interactions with other AWS services.\""
+    },
+    {
+      "name": "customer_owned_ip_enabled",
+      "description": "(Optional) Indicates whether to enable a customer-owned IP address (CoIP) for an RDS on Outposts DB instance. See CoIP for RDS on Outposts for more information. - RDS for MariaDB: `general-public-license` - RDS for Microsoft SQL Server: `license-included` - RDS for MySQL: `general-public-license` - RDS for Oracle: `bring-your-own-license | license-included` - RDS for PostgreSQL: `postgresql-license` Removing the replicate_source_db attribute from an existing RDS Replicate database managed by Terraform will promote the database to a fully standalone database.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `customer_owned_ip_enabled` argument for the `aws_db_instance` resource allows users to specify whether to enable a customer-owned IP address (CoIP) for an RDS on Outposts DB instance. Enabling this feature facilitates direct control over IP addressing for the database instance, which is particularly useful for integrating with on-premises networks or custom routing configurations in Outposts environments."
+    },
+    {
+      "name": "db_name",
+      "description": "(Optional) The name of the database to create when the DB instance is created. If this parameter is not specified, no database is created in the DB instance. Note that this does not apply for Oracle or SQL Server engines. See the AWS documentation for more details on what applies for those engines. If you are providing an Oracle db name, it needs to be in all upper case. Cannot be specified for a replica.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `db_name` argument for the `aws_db_instance` resource allows users to specify the name of the initial database to be created within the DB instance during provisioning, enabling streamlined setup for applications requiring a predefined database. This argument is optional, does not apply to Oracle or SQL Server engines, and cannot be used for replicas, making it ideal for configuring primary database instances in supported engines."
+    },
+    {
+      "name": "db_subnet_group_name",
+      "description": "(Optional) Name of DB subnet group. DB instance will be created in the VPC associated with the DB subnet group. If unspecified, will be created in the `default` Subnet Group. When working with read replicas created in the same region, defaults to the Subnet Group Name of the source DB. When working with read replicas created in a different region, defaults to the `default` Subnet Group. See DBSubnetGroupName in API action CreateDBInstanceReadReplica for additional read replica constraints.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `db_subnet_group_name` argument for the `aws_db_instance` resource allows users to specify the name of the DB subnet group in which the database instance will be created, ensuring it is deployed within a specific VPC and associated subnets. This configuration is critical for controlling network isolation, security, and connectivity, particularly in environments requiring custom subnet groups or when managing read replicas across regions."
+    },
+    {
+      "name": "dedicated_log_volume",
+      "description": "(Optional, boolean) Use a dedicated log volume (DLV) for the DB instance. Requires Provisioned IOPS. See the AWS documentation for more details.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "\"Enables the use of a dedicated log volume (DLV) for the database instance, optimizing log storage and performance for workloads requiring high I/O throughput. This configuration is typically used in conjunction with Provisioned IOPS to enhance reliability and efficiency in log management for mission-critical applications.\""
+    },
+    {
+      "name": "delete_automated_backups",
+      "description": "(Optional) Specifies whether to remove automated backups immediately after the DB instance is deleted. Default is `true`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `delete_automated_backups` argument in the `aws_db_instance` resource allows users to control whether automated backups of the database instance are immediately removed upon instance deletion. Setting this argument to `true` (default) ensures backups are deleted alongside the instance, while setting it to `false` retains the backups for potential recovery, supporting lifecycle management and disaster recovery strategies."
+    },
+    {
+      "name": "deletion_protection",
+      "description": "(Optional) If the DB instance should have deletion protection enabled. The database can't be deleted when this value is set to `true`. The default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `deletion_protection` argument for the `aws_db_instance` resource allows users to define whether the database instance is protected from accidental deletion. Enabling this feature (`true`) ensures the instance cannot be deleted, supporting lifecycle management and safeguarding critical environments like production systems."
+    },
+    {
+      "name": "domain",
+      "description": "(Optional) The ID of the Directory Service Active Directory domain to create the instance in. Conflicts with `domain_fqdn`, `domain_ou`, `domain_auth_secret_arn` and a `domain_dns_ips`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `domain` argument for the `aws_db_instance` resource allows users to specify the ID of an AWS Directory Service Active Directory domain in which the database instance will be created. This enables integration with Active Directory for authentication and access management, supporting use cases like centralized user authentication and enhanced security for database access."
+    },
+    {
+      "name": "domain_auth_secret_arn",
+      "description": "(Optional, but required if domain_fqdn is provided) The ARN for the Secrets Manager secret with the self managed Active Directory credentials for the user joining the domain. Conflicts with `domain` and `domain_iam_role_name`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `domain_auth_secret_arn` argument allows users to specify the ARN of a Secrets Manager secret containing credentials for a self-managed Active Directory user, enabling the database instance to join a specified domain. This argument is essential for configuring domain integration when using a custom Active Directory setup and is required if `domain_fqdn` is provided, ensuring secure and seamless authentication."
+    },
+    {
+      "name": "domain_dns_ips",
+      "description": "(Optional, but required if domain_fqdn is provided) The IPv4 DNS IP addresses of your primary and secondary self managed Active Directory domain controllers. Two IP addresses must be provided. If there isn't a secondary domain controller, use the IP address of the primary domain controller for both entries in the list. Conflicts with `domain` and `domain_iam_role_name`.",
+      "required": false,
+      "type": "list(string)",
+      "llm_summary": "The `domain_dns_ips` argument for the `aws_db_instance` resource allows users to specify the IPv4 addresses of primary and secondary self-managed Active Directory domain controllers, enabling integration with a custom Active Directory setup. This configuration is essential for scenarios requiring domain authentication or directory-based access control, ensuring the database instance can resolve and communicate with the specified domain controllers."
+    },
+    {
+      "name": "domain_fqdn",
+      "description": "(Optional) The fully qualified domain name (FQDN) of the self managed Active Directory domain. Conflicts with `domain` and `domain_iam_role_name`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `domain_fqdn` argument for the `aws_db_instance` resource allows users to specify the fully qualified domain name (FQDN) of a self-managed Active Directory domain for database authentication and integration. Configuring this argument enables seamless integration with an external Active Directory environment, supporting use cases like centralized user management and enhanced security, but it conflicts with the `domain` and `domain_iam_role_name` arguments."
+    },
+    {
+      "name": "domain_iam_role_name",
+      "description": "(Optional, but required if domain is provided) The name of the IAM role to be used when making API calls to the Directory Service. Conflicts with `domain_fqdn`, `domain_ou`, `domain_auth_secret_arn` and a `domain_dns_ips`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `domain_iam_role_name` argument allows users to specify the name of the IAM role that facilitates API calls to the AWS Directory Service for an RDS instance integrated with a domain. Setting this argument enables domain-related functionality, such as Active Directory authentication, and is required when configuring domain integration, ensuring secure and seamless communication between the database instance and the directory service."
+    },
+    {
+      "name": "domain_ou",
+      "description": "(Optional, but required if domain_fqdn is provided) The self managed Active Directory organizational unit for your DB instance to join. Conflicts with `domain` and `domain_iam_role_name`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `domain_ou` argument for the `aws_db_instance` resource allows users to specify the organizational unit (OU) within a self-managed Active Directory domain where the database instance will be joined. This configuration is essential for integrating the DB instance into a specific AD structure, enabling domain-level authentication and access control, and is required when `domain_fqdn` is provided."
+    },
+    {
+      "name": "enabled_cloudwatch_logs_exports",
+      "description": "(Optional) Set of log types to enable for exporting to CloudWatch logs. If omitted, no logs will be exported. For supported values, see the EnableCloudwatchLogsExports.member.N parameter in API action CreateDBInstance.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `enabled_cloudwatch_logs_exports` argument for the `aws_db_instance` resource allows users to specify a set of database log types (e.g., error logs, slow query logs) to be exported to CloudWatch Logs for monitoring and analysis. Configuring this argument enhances observability and troubleshooting capabilities by enabling centralized log management for the database instance."
+    },
+    {
+      "name": "engine",
+      "description": "(Required unless a `snapshot_identifier` or `replicate_source_db` is provided) The database engine to use. For supported values, see the Engine parameter in API action CreateDBInstance. Note that for Amazon Aurora instances the engine must match the DB cluster's engine'. For information on the difference between the available Aurora MySQL engines see Comparison between Aurora MySQL 1 and Aurora MySQL 2 in the Amazon RDS User Guide.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `engine` argument for the `aws_db_instance` resource allows users to specify the database engine type (e.g., MySQL, PostgreSQL, or Aurora) that powers the instance, aligning it with application requirements or compatibility needs. Setting this argument defines the core functionality and behavior of the database, ensuring it supports the desired features and matches the engine of related resources like Aurora DB clusters."
+    },
+    {
+      "name": "engine_lifecycle_support",
+      "description": "(Optional) The life cycle type for this DB instance. This setting applies only to RDS for MySQL and RDS for PostgreSQL. Valid values are `open-source-rds-extended-support`, `open-source-rds-extended-support-disabled`. Default value is `open-source-rds-extended-support`. [Using Amazon RDS Extended Support]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/extended-support.html",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `engine_lifecycle_support` argument for the `aws_db_instance` resource allows users to specify the lifecycle type for database engine support, applicable only to RDS for MySQL and PostgreSQL. By setting this argument, users can control whether the instance utilizes Amazon RDS Extended Support (`open-source-rds-extended-support`) or disables it (`open-source-rds-extended-support-disabled`), impacting long-term maintenance and compatibility for open-source database engines."
+    },
+    {
+      "name": "engine_version",
+      "description": "(Optional) The engine version to use. If `auto_minor_version_upgrade` is enabled, you can provide a prefix of the version such as `8.0` (for `8.0.36`). The actual engine version used is returned in the attribute `engine_version_actual`, see Attribute Reference below. For supported values, see the EngineVersion parameter in API action CreateDBInstance. Note that for Amazon Aurora instances the engine version must match the DB cluster's engine version'.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `engine_version` argument in the `aws_db_instance` resource allows users to specify the database engine version for the instance, enabling precise control over compatibility, features, and updates. By setting this value, users can align the instance with application requirements or compliance needs, while optionally leveraging automatic minor version upgrades for simplified maintenance."
+    },
+    {
+      "name": "final_snapshot_identifier",
+      "description": "(Optional) The name of your final DB snapshot when this DB instance is deleted. Must be provided if `skip_final_snapshot` is set to `false`. The value must begin with a letter, only contain alphanumeric characters and hyphens, and not end with a hyphen or contain two consecutive hyphens. Must not be provided when deleting a read replica.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `final_snapshot_identifier` argument allows users to define a custom name for the final database snapshot created when the `aws_db_instance` is deleted, ensuring data retention and recovery options. This is particularly useful for lifecycle management, as it provides control over snapshot naming conventions and is required if `skip_final_snapshot` is set to `false`, except when deleting read replicas."
+    },
+    {
+      "name": "iam_database_authentication_enabled",
+      "description": "(Optional) Specifies whether mappings of AWS Identity and Access Management (IAM) accounts to database accounts is enabled.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "Enables or disables IAM database authentication for the RDS instance, allowing users to map AWS IAM accounts to database accounts for enhanced access control and authentication. This feature is typically used to simplify credential management and integrate database access with AWS IAM policies."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_db_instance` resource represents the unique identifier of the database instance, typically used to reference or manage the instance programmatically within Terraform configurations or external systems. While optional, setting this argument can help users explicitly define or track the instance for integration, state management, or resource identification purposes."
+    },
+    {
+      "name": "identifier",
+      "description": "(Optional) The name of the RDS instance, if omitted, Terraform will assign a random, unique identifier. Required if `restore_to_point_in_time` is specified.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `identifier` argument for the `aws_db_instance` resource allows users to define a custom name for the RDS instance, providing control over its identification within the AWS environment. If omitted, Terraform generates a unique name automatically, but specifying this argument is required when restoring the database to a point in time, ensuring predictable naming for recovery or organizational purposes."
+    },
+    {
+      "name": "identifier_prefix",
+      "description": "(Optional) Creates a unique identifier beginning with the specified prefix. Conflicts with `identifier`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `identifier_prefix` argument for the `aws_db_instance` resource allows users to define a custom prefix for the database instance's unique identifier, enabling automated generation of distinct resource names that share a common prefix. This is particularly useful for organizing resources by environment, project, or naming conventions, and avoids conflicts with manually specified `identifier` values."
+    },
+    {
+      "name": "instance_class",
+      "description": "(Required) The instance type of the RDS instance.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `instance_class` argument specifies the compute and memory capacity of the RDS instance by defining its instance type (e.g., `db.t3.micro` or `db.m5.large`). This required setting directly impacts the performance, scalability, and cost of the database, allowing users to tailor the instance to their workload requirements and budget."
+    },
+    {
+      "name": "iops",
+      "description": "(Optional) The amount of provisioned IOPS. Setting this implies a storage_type of \"io1\" or \"io2\". Can only be set when `storage_type` is `\"io1\"`, `\"io2` or `\"gp3\"`. Cannot be specified for gp3 storage if the `allocated_storage` value is below a per-`engine` threshold. See the RDS User Guide for details.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `iops` argument for the `aws_db_instance` resource allows users to configure the amount of provisioned IOPS (Input/Output Operations Per Second) for the database instance, optimizing storage performance for high-throughput or low-latency workloads. This setting is applicable when using `io1`, `io2`, or `gp3` storage types and is critical for fine-tuning database performance to meet specific application requirements, such as handling intensive read/write operations."
+    },
+    {
+      "name": "kms_key_id",
+      "description": "(Optional) The ARN for the KMS encryption key. If creating an encrypted replica, set this to the destination KMS ARN.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `kms_key_id` argument for the `aws_db_instance` resource allows users to specify the ARN of a KMS encryption key to enable encryption for the database instance or its encrypted replicas. By setting this argument, users can control the encryption behavior of the database, ensuring data security and compliance with encryption policies, particularly when creating encrypted replicas in multi-region or high-security environments."
+    },
+    {
+      "name": "license_model",
+      "description": "(Optional, but required for some DB engines, i.e., Oracle SE1) License model information for this DB instance. Valid values for this field are as follows:RDS for MariaDB: `general-public-license` RDS for Microsoft SQL Server: `license-included` RDS for MySQL: `general-public-license` RDS for Oracle: `bring-your-own-license | license-included` RDS for PostgreSQL: `postgresql-license` - RDS for MariaDB: `general-public-license` - RDS for Microsoft SQL Server: `license-included` - RDS for MySQL: `general-public-license` - RDS for Oracle: `bring-your-own-license | license-included` - RDS for PostgreSQL: `postgresql-license`",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `license_model` argument for the `aws_db_instance` resource allows users to specify the licensing type for the database engine, ensuring compliance with licensing requirements for supported engines like Oracle, SQL Server, MySQL, PostgreSQL, and MariaDB. By setting this argument, users can define whether the database instance uses a \"bring-your-own-license\" model or includes a license, aligning the instance configuration with their licensing strategy and cost management goals."
+    },
+    {
+      "name": "maintenance_window",
+      "description": "(Optional) The window to perform maintenance in. Syntax: \"ddd:hh24:mi-ddd:hh24:mi\". Eg: \"Mon:00:00-Mon:03:00\". See RDS Maintenance Window docs for more information.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `maintenance_window` argument for the `aws_db_instance` resource allows users to define a specific recurring time window for database maintenance operations, such as software updates or patches, ensuring minimal disruption to application workloads. By configuring this argument, users can align maintenance schedules with their operational needs, optimizing database availability and performance during critical periods."
+    },
+    {
+      "name": "manage_master_user_password",
+      "description": "(Optional) Set to true to allow RDS to manage the master user password in Secrets Manager. Cannot be set if `password` or `password_wo` is provided.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "Enables automated management of the master user password for the RDS instance by storing and rotating it in AWS Secrets Manager. This argument simplifies password lifecycle management and enhances security but cannot be used if a custom password is explicitly defined via the `password` or `password_wo` arguments."
+    },
+    {
+      "name": "master_user_secret_kms_key_id",
+      "description": "(Optional) The Amazon Web Services KMS key identifier is the key ARN, key ID, alias ARN, or alias name for the KMS key. To use a KMS key in a different Amazon Web Services account, specify the key ARN or alias ARN. If not specified, the default KMS key for your Amazon Web Services account is used.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `master_user_secret_kms_key_id` argument for the `aws_db_instance` resource allows users to specify the AWS KMS key (via ARN, key ID, alias ARN, or alias name) used to encrypt the master user password stored in AWS Secrets Manager. By setting this argument, users can control the encryption key for enhanced security, including cross-account KMS key usage, or rely on the default KMS key if unspecified."
+    },
+    {
+      "name": "max_allocated_storage",
+      "description": "(Optional) Specifies the maximum storage (in GiB) that Amazon RDS can automatically scale to for this DB instance. By default, Storage Autoscaling is disabled. To enable Storage Autoscaling, set `max_allocated_storage` to greater than or equal to `allocated_storage`. Setting `max_allocated_storage` to 0 explicitly disables Storage Autoscaling. When configured, changes to `allocated_storage` will be automatically ignored as the storage can dynamically scale.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `max_allocated_storage` argument for the `aws_db_instance` resource allows users to define the maximum storage capacity (in GiB) that Amazon RDS can dynamically scale to, enabling Storage Autoscaling for the database instance. By configuring this argument, users can optimize storage management to accommodate fluctuating workloads, ensuring scalability while avoiding manual adjustments to `allocated_storage`."
+    },
+    {
+      "name": "monitoring_interval",
+      "description": "(Optional) The interval, in seconds, between points when Enhanced Monitoring metrics are collected for the DB instance. To disable collecting Enhanced Monitoring metrics, specify 0. The default is 0. Valid Values: 0, 1, 5, 10, 15, 30, 60.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `monitoring_interval` argument for the `aws_db_instance` resource allows users to configure the frequency, in seconds, at which Enhanced Monitoring metrics are collected for the database instance. Setting this value enables detailed performance insights and operational metrics, supporting goals like monitoring resource utilization and troubleshooting, while specifying `0` disables Enhanced Monitoring entirely."
+    },
+    {
+      "name": "monitoring_role_arn",
+      "description": "(Optional) The ARN for the IAM role that permits RDS to send enhanced monitoring metrics to CloudWatch Logs. You can find more information on the AWS Documentation what IAM permissions are needed to allow Enhanced Monitoring for RDS Instances.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `monitoring_role_arn` argument for the `aws_db_instance` resource specifies the IAM role ARN that grants RDS permission to send enhanced monitoring metrics to CloudWatch Logs. Configuring this argument enables detailed performance insights and operational metrics for the database instance, supporting advanced monitoring and troubleshooting goals."
+    },
+    {
+      "name": "multi_az",
+      "description": "(Optional) Specifies if the RDS instance is multi-AZ",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `multi_az` argument for the `aws_db_instance` resource allows users to configure whether the RDS instance is deployed across multiple Availability Zones for enhanced fault tolerance and high availability. Enabling this feature ensures automatic failover in case of infrastructure failure, making it ideal for production environments requiring minimal downtime."
+    },
+    {
+      "name": "nchar_character_set_name",
+      "description": "(Optional, Forces new resource) The national character set is used in the NCHAR, NVARCHAR2, and NCLOB data types for Oracle instances. This can't be changed. See Oracle Character Sets Supported in Amazon RDS.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the national character set for Oracle database instances, impacting the encoding used for NCHAR, NVARCHAR2, and NCLOB data types. Setting this argument ensures compatibility with specific character encoding requirements but requires creating a new resource as it cannot be modified after deployment."
+    },
+    {
+      "name": "network_type",
+      "description": "(Optional) The network type of the DB instance. Valid values: `IPV4`, `DUAL`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `network_type` argument for the `aws_db_instance` resource allows users to specify the type of network connectivity for the database instance, choosing between `IPV4` or `DUAL` (IPv4 and IPv6). Configuring this parameter impacts how the DB instance communicates within the network, enabling compatibility with IPv6 environments or maintaining traditional IPv4-only networking, aligning with infrastructure requirements and connectivity goals."
+    },
+    {
+      "name": "option_group_name",
+      "description": "(Optional) Name of the DB option group to associate.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `option_group_name` argument allows users to specify the name of a DB option group to associate with the `aws_db_instance`, enabling the configuration of additional database features or extensions, such as advanced logging, replication, or custom settings. By setting this argument, users can tailor the behavior and capabilities of the database instance to meet specific application or compliance requirements."
+    },
+    {
+      "name": "parameter_group_name",
+      "description": "(Optional) Name of the DB parameter group to associate.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `parameter_group_name` argument allows users to specify the name of a DB parameter group to associate with the `aws_db_instance`, enabling customization of database engine settings such as memory allocation, query optimization, or logging behavior. By defining this argument, users can tailor the operational parameters of the database instance to meet specific application requirements or performance goals."
+    },
+    {
+      "name": "password",
+      "description": "(Optional required unless `manage_master_user_password` is set to true, `snapshot_identifier`, `replicate_source_db`, or `password_wo` is provided) Password for the master DB user. Note that this may show up in logs, and it will be stored in the state file. Cannot be set if `manage_master_user_password` is set to `true`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `password` argument for the `aws_db_instance` resource allows users to define the master database user's password, enabling authentication and access control for the database instance. It is typically used to configure secure access credentials but cannot be set if `manage_master_user_password` is enabled, as password management is then automated."
+    },
+    {
+      "name": "password_wo",
+      "description": "(Optional, Write-Only required unless `manage_master_user_password` is set to true, `snapshot_identifier`, `replicate_source_db`, or `password` is provided) Password for the master DB user. Note that this may show up in logs, and it will be stored in the state file. Cannot be set if `manage_master_user_password` is set to `true`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `password_wo` argument for the `aws_db_instance` resource allows users to define the master database user's password, enabling authentication and access control for the database instance. As a write-only field, it ensures sensitive credentials are not exposed in logs or Terraform state files, but it cannot be used if `manage_master_user_password` is enabled, providing flexibility for manual or automated password management."
+    },
+    {
+      "name": "password_wo_version",
+      "description": "(Optional) Used together with `password_wo` to trigger an update. Increment this value when an update to `password_wo` is required.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `password_wo_version` argument in the `aws_db_instance` resource is a numeric value used to manage updates to the `password_wo` argument, enabling users to trigger a forced update of the database instance password when necessary. By incrementing this value, users can ensure password changes are applied, supporting lifecycle management and security updates for the database instance."
+    },
+    {
+      "name": "performance_insights_enabled",
+      "description": "(Optional) Specifies whether Performance Insights are enabled. Defaults to false.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `performance_insights_enabled` argument allows users to control whether Performance Insights are activated for the `aws_db_instance`, enabling advanced monitoring and analysis of database performance metrics. By setting this to `true`, users can gain deeper visibility into database performance, which is useful for optimizing workloads and troubleshooting issues; the default behavior is disabled (`false`)."
+    },
+    {
+      "name": "performance_insights_kms_key_id",
+      "description": "(Optional) The ARN for the KMS key to encrypt Performance Insights data. When specifying `performance_insights_kms_key_id`, `performance_insights_enabled` needs to be set to true. Once KMS key is set, it can never be changed.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `performance_insights_kms_key_id` argument allows users to specify the ARN of a KMS key to encrypt Performance Insights data for the `aws_db_instance`, enhancing data security and compliance. This argument requires `performance_insights_enabled` to be set to `true` and ensures that the encryption key is immutable once configured, aligning with goals like securing performance metrics and meeting encryption standards."
+    },
+    {
+      "name": "performance_insights_retention_period",
+      "description": "(Optional) Amount of time in days to retain Performance Insights data. Valid values are `7`, `731` (2 years) or a multiple of `31`. When specifying `performance_insights_retention_period`, `performance_insights_enabled` needs to be set to true. Defaults to '7'.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `performance_insights_retention_period` argument for the `aws_db_instance` resource allows users to define the duration, in days, for retaining Performance Insights data, which is critical for monitoring and optimizing database performance over time. By configuring this argument (valid values: `7`, `731`, or multiples of `31`), users can align data retention with their performance analysis needs, provided `performance_insights_enabled` is set to `true`."
+    },
+    {
+      "name": "port",
+      "description": "(Optional) The port on which the DB accepts connections.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `port` argument for the `aws_db_instance` resource allows users to specify the network port on which the database instance will accept incoming connections, enabling control over the connectivity configuration for the database. Setting this argument is useful for aligning the database's access point with application requirements or adhering to organizational standards for port usage."
+    },
+    {
+      "name": "publicly_accessible",
+      "description": "(Optional) Bool to control if instance is publicly accessible. Default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `publicly_accessible` argument for the `aws_db_instance` resource controls whether the database instance is accessible from outside the VPC via a public IP address. Setting this to `true` enables public access, which is useful for external connectivity but may require additional security considerations, while the default value of `false` restricts access to private networks, aligning with best practices for secure deployments."
+    },
+    {
+      "name": "replica_mode",
+      "description": "(Optional) Specifies whether the replica is in either `mounted` or `open-read-only` mode. This attribute is only supported by Oracle instances. Oracle replicas operate in `open-read-only` mode unless otherwise specified. See Working with Oracle Read Replicas for more information.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `replica_mode` argument for the `aws_db_instance` resource allows users to define the operational mode of an Oracle read replica, specifying whether it operates in `mounted` or `open-read-only` mode. This configuration impacts how the replica handles read operations, enabling users to optimize the replica's behavior for specific workloads or use cases, such as read-only query processing."
+    },
+    {
+      "name": "replicate_source_db",
+      "description": "(Optional) Specifies that this resource is a Replica database, and to use this value as the source database. If replicating an Amazon RDS Database Instance in the same region, use the `identifier` of the source DB, unless also specifying the `db_subnet_group_name`. If specifying the `db_subnet_group_name` in the same region, use the `arn` of the source DB. If replicating an Instance in a different region, use the `arn` of the source DB. Note that if you are creating a cross-region replica of an encrypted database you will also need to specify a `kms_key_id`. See DB Instance Replication and Working with PostgreSQL and MySQL Read Replicas for more information on using Replication.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `replicate_source_db` argument in the `aws_db_instance` resource allows users to configure the database instance as a read replica by specifying the source database to replicate from. This enables replication functionality for Amazon RDS instances, supporting scenarios like scaling read workloads or creating cross-region replicas, with options to use the source DB's identifier or ARN depending on the region and subnet configuration."
+    },
+    {
+      "name": "skip_final_snapshot",
+      "description": "(Optional) Determines whether a final DB snapshot is created before the DB instance is deleted. If true is specified, no DBSnapshot is created. If false is specified, a DB snapshot is created before the DB instance is deleted, using the value from `final_snapshot_identifier`. Default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `skip_final_snapshot` argument for the `aws_db_instance` resource controls whether a final database snapshot is created before the instance is deleted, allowing users to define the lifecycle behavior of the DB instance during deletion. Setting this to `true` skips snapshot creation, which is useful for scenarios where data retention is unnecessary, while leaving it as `false` ensures a backup is created for recovery or archival purposes."
+    },
+    {
+      "name": "snapshot_identifier",
+      "description": "(Optional) Specifies whether or not to create this database from a snapshot. This corresponds to the snapshot ID you'd find in the RDS console, e.g: rds:production-2015-06-26-06-05.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `snapshot_identifier` argument for the `aws_db_instance` resource allows users to specify an existing RDS snapshot ID to create a new database instance from that snapshot. This enables the restoration of database state, configurations, and data from a specific point in time, supporting use cases like disaster recovery, cloning environments, or initializing instances with pre-configured data."
+    },
+    {
+      "name": "storage_encrypted",
+      "description": "(Optional) Specifies whether the DB instance is encrypted. Note that if you are creating a cross-region read replica this field is ignored and you should instead declare `kms_key_id` with a valid ARN. The default is `false` if not specified.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `storage_encrypted` argument for the `aws_db_instance` resource allows users to specify whether the database storage is encrypted at rest, enhancing data security and compliance. Setting this to `true` enables encryption using AWS-managed or customer-managed keys, but it is ignored for cross-region read replicas, where `kms_key_id` should be used instead."
+    },
+    {
+      "name": "storage_throughput",
+      "description": "(Optional) The storage throughput value for the DB instance. Can only be set when `storage_type` is `\"gp3\"`. Cannot be specified if the `allocated_storage` value is below a per-`engine` threshold. See the RDS User Guide for details.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `storage_throughput` argument for the `aws_db_instance` resource allows users to define the I/O performance (measured in MB/s) for database storage when using the `gp3` storage type. Configuring this parameter optimizes data transfer rates for workloads requiring high throughput, but it is subject to engine-specific thresholds and storage size constraints."
+    },
+    {
+      "name": "storage_type",
+      "description": "(Optional) One of \"standard\" (magnetic), \"gp2\" (general purpose SSD), \"gp3\" (general purpose SSD that needs `iops` independently) \"io1\" (provisioned IOPS SSD) or \"io2\" (block express storage provisioned IOPS SSD). The default is \"io1\" if `iops` is specified, \"gp2\" if not.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `storage_type` argument in the `aws_db_instance` resource allows users to specify the type of storage used for the database instance, such as magnetic (`standard`), general-purpose SSD (`gp2` or `gp3`), or provisioned IOPS SSD (`io1` or `io2`). Configuring this argument impacts performance and cost, enabling users to optimize storage for their workload requirements, such as balancing throughput, latency, and scalability."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_db_instance` resource allows users to assign key-value metadata to the database instance, enabling organization, categorization, and resource tracking for purposes such as cost allocation, environment identification, or compliance. When set, it overrides provider-level default tags with matching keys, ensuring granular control over tag definitions specific to the database instance."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_db_instance` resource allows users to define a comprehensive set of key-value tags that are applied to the database instance and any related resources managed by AWS. This facilitates resource organization, cost allocation, and governance by enabling tagging for purposes such as environment identification, ownership tracking, or compliance requirements."
+    },
+    {
+      "name": "timezone",
+      "description": "(Optional) Time zone of the DB instance. `timezone` is currently only supported by Microsoft SQL Server. The `timezone` can only be set on creation. See MSSQL User Guide for more information.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `timezone` argument for the `aws_db_instance` resource allows users to specify the time zone configuration for a Microsoft SQL Server database instance during its creation. This setting impacts how the database handles time-related operations, aligning timestamps and scheduling with the specified time zone, and is particularly useful for applications requiring region-specific time management."
+    },
+    {
+      "name": "upgrade_storage_config",
+      "description": "(Optional) Whether to upgrade the storage file system configuration on the read replica. Can only be set with `replicate_source_db`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `upgrade_storage_config` argument in the `aws_db_instance` resource allows users to control whether the storage file system configuration is upgraded on a read replica. This setting is applicable only when the instance is replicating from a source database (`replicate_source_db`) and enables users to ensure the read replica inherits the latest storage optimizations, aligning with performance or compatibility goals."
+    },
+    {
+      "name": "username",
+      "description": "(Required unless a `snapshot_identifier` or `replicate_source_db` is provided) Username for the master DB user. Cannot be specified for a replica.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `username` argument in the `aws_db_instance` resource specifies the master database user's login name, enabling control over access credentials for the primary database instance. It is typically used to define the administrative user for managing the database, but it cannot be set for replicas or when using snapshots or source replication, aligning with common goals of configuring secure and functional database environments."
+    },
+    {
+      "name": "vpc_security_group_ids",
+      "description": "(Optional) List of VPC security groups to associate.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `vpc_security_group_ids` argument for the `aws_db_instance` resource allows users to specify a set of VPC security groups to control inbound and outbound network traffic to the database instance. By configuring this argument, users can enforce network-level access restrictions, such as limiting access to specific IP ranges or other resources, aligning with common security and compliance goals for database environments."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "blue_green_update",
+      "description": "(Optional) Enables low-downtime updates using RDS Blue/Green deployments. See `blue_green_update` below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enabled",
+          "description": "(Optional) Enables low-downtime updates when `true`. Default is `false`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument for the `blue_green_update` feature in the `aws_db_instance` resource allows users to control whether low-downtime updates are activated during database modifications. Setting this to `true` minimizes service disruption by enabling seamless transitions between environments, aligning with user goals of maintaining high availability and reducing downtime during updates."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `blue_green_update` block in the `aws_db_instance` resource enables low-downtime updates by leveraging RDS Blue/Green deployments, which streamline database version upgrades or configuration changes. It encapsulates settings that manage the transition between production and staging environments, allowing users to minimize service disruption and ensure safer rollouts during updates."
+    },
+    {
+      "name": "restore_to_point_in_time",
+      "description": "(Optional, Forces new resource) A configuration block for restoring a DB instance to an arbitrary point in time. Requires the `identifier` argument to be set with the name of the new DB instance to be created. See Restore To Point In Time below for details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "restore_time",
+          "description": "(Optional) The date and time to restore from. Value must be a time in Universal Coordinated Time (UTC) format and must be before the latest restorable time for the DB instance. Cannot be specified with `use_latest_restorable_time`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `restore_time` argument for the `restore_to_point_in_time` feature of the `aws_db_instance` resource allows users to specify a precise UTC timestamp to restore the database instance to a specific point in time. This enables fine-grained control over recovery operations, helping users achieve targeted data restoration for scenarios like disaster recovery or reverting unintended changes, provided the timestamp is before the latest restorable time and not used alongside `use_latest_restorable_time`."
+        },
+        {
+          "name": "source_db_instance_automated_backups_arn",
+          "description": "(Optional) The ARN of the automated backup from which to restore. Required if `source_db_instance_identifier` or `source_dbi_resource_id` is not specified.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `source_db_instance_automated_backups_arn` argument allows users to specify the Amazon Resource Name (ARN) of an automated backup to restore a database instance to a specific point in time. This enables precise recovery from a predefined backup when other identifiers like `source_db_instance_identifier` or `source_dbi_resource_id` are not provided, supporting disaster recovery and data restoration workflows."
+        },
+        {
+          "name": "source_db_instance_identifier",
+          "description": "(Optional) The identifier of the source DB instance from which to restore. Must match the identifier of an existing DB instance. Required if `source_db_instance_automated_backups_arn` or `source_dbi_resource_id` is not specified.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `source_db_instance_identifier` argument in the `restore_to_point_in_time` context of the `aws_db_instance` resource allows users to specify the identifier of an existing source database instance to restore from. By setting this argument, users can initiate a point-in-time restoration process, enabling the creation of a new database instance based on the state of the specified source instance at a particular time. This is commonly used for disaster recovery, cloning environments, or testing scenarios."
+        },
+        {
+          "name": "source_dbi_resource_id",
+          "description": "(Optional) The resource ID of the source DB instance from which to restore. Required if `source_db_instance_identifier` or `source_db_instance_automated_backups_arn` is not specified.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `source_dbi_resource_id` argument in the `restore_to_point_in_time` context of the `aws_db_instance` resource allows users to specify the unique resource ID of the source database instance to restore from. This enables the creation of a new database instance by cloning or recovering data from the specified source, supporting disaster recovery, point-in-time restoration, or replication workflows."
+        },
+        {
+          "name": "use_latest_restorable_time",
+          "description": "(Optional) A boolean value that indicates whether the DB instance is restored from the latest backup time. Defaults to `false`. Cannot be specified with `restore_time`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `use_latest_restorable_time` argument in the `restore_to_point_in_time` context of the `aws_db_instance` resource allows users to specify whether the database instance should be restored from the most recent backup available. Enabling this option (`true`) simplifies recovery to the latest restorable state, bypassing the need to define a specific `restore_time`, making it ideal for scenarios requiring minimal downtime or the most up-to-date data restoration."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `restore_to_point_in_time` configuration block in the `aws_db_instance` resource enables the restoration of a database instance to a specific point in time, facilitating disaster recovery or rollback scenarios. It encapsulates settings required to create a new DB instance based on a previous state, ensuring precise control over recovery operations and minimizing data loss during critical events."
+    },
+    {
+      "name": "s3_import",
+      "description": "(Optional) Restore from a Percona Xtrabackup in S3.  See Importing Data into an Amazon RDS MySQL DB Instance",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "bucket_name",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `bucket_name` argument specifies the name of the Amazon S3 bucket from which data will be imported into the database instance during the `s3_import` process. By setting this required value, users define the source location for the import operation, enabling seamless integration of external data into the AWS RDS instance to support initialization, migration, or data population workflows."
+        },
+        {
+          "name": "bucket_prefix",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `bucket_prefix` argument for the `s3_import` configuration in the `aws_db_instance` resource allows users to specify a string prefix for objects in the designated S3 bucket that will be imported into the database. By setting this argument, users can control which subset of objects within the bucket are included in the import process, enabling targeted data ingestion and organization based on naming conventions or hierarchical structures."
+        },
+        {
+          "name": "ingestion_role",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `ingestion_role` argument specifies the IAM role that grants permissions for the database instance to access and import data from an S3 bucket during the `s3_import` process. By configuring this required role, users enable secure and controlled ingestion of external data into the database, ensuring proper access management and compliance with AWS security practices."
+        },
+        {
+          "name": "source_engine",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `source_engine` argument specifies the type of database engine (e.g., MySQL, PostgreSQL) from which data will be imported during an S3-based database import operation for the `aws_db_instance` resource. Setting this argument ensures compatibility between the source data format and the target database instance, enabling seamless migration or restoration workflows."
+        },
+        {
+          "name": "source_engine_version",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `source_engine_version` argument specifies the version of the database engine used in the source database for an S3 import operation when creating or restoring an `aws_db_instance`. By defining this value, users ensure compatibility between the source database and the target instance, enabling accurate data migration and replication from the S3 backup."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `s3_import` configuration block in the `aws_db_instance` resource enables the restoration of an Amazon RDS MySQL database from a Percona Xtrabackup stored in an S3 bucket. It encapsulates settings related to specifying the S3 source details, facilitating seamless data import for database recovery or migration purposes. Configuring this block allows users to efficiently initialize an RDS instance with pre-existing data, streamlining workflows for disaster recovery or database replication."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_db_instance` resource allows users to specify the maximum duration (as a string, e.g., \"30m\" for 30 minutes) Terraform will wait for the database instance creation process to complete. Configuring this timeout ensures users can control the operation's lifecycle, preventing indefinite waits and enabling better handling of long-running or stalled provisioning tasks."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block for the `aws_db_instance` resource allows users to specify the maximum duration (in string format, e.g., \"30m\" for 30 minutes) Terraform should wait for the database instance to be deleted during resource destruction. Configuring this timeout ensures control over the deletion process, preventing operations from hanging indefinitely or timing out prematurely, which is critical for managing resource lifecycles in cloud environments."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_db_instance` resource allows users to specify the maximum duration (in string format, e.g., \"30m\" for 30 minutes) Terraform will wait for an update operation on the database instance to complete. Configuring this timeout ensures better control over long-running updates, helping users manage resource lifecycle operations and avoid potential deployment delays or failures due to timeouts."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_db_instance` resource allows users to define custom timeout durations for specific operations, such as creating, updating, or deleting a database instance. By configuring this block, users gain precise control over operation time limits, ensuring smoother management of long-running tasks and avoiding potential disruptions in cloud infrastructure workflows."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "address",
+      "description": "Specifies the DNS address of the DB instance.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "arn",
+      "description": "The ARN of the RDS instance.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "endpoint",
+      "description": "The connection endpoint in `address:port` format.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "engine_version_actual",
+      "description": "The running version of the database.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "hosted_zone_id",
+      "description": "Specifies the ID that Amazon Route 53 assigns when you create a hosted zone.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "latest_restorable_time",
+      "description": "The latest time, in UTC RFC3339 format, to which a database can be restored with point-in-time restore.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "listener_endpoint",
+      "description": "Specifies the listener connection endpoint for SQL Server Always On. See endpoint below.",
+      "optional": false,
+      "type": "list(object({address=string,hosted_zone_id=string,port=number}))"
+    },
+    {
+      "name": "master_user_secret",
+      "description": "A block that specifies the master user secret. Only available when `manage_master_user_password` is set to true. Documented below.",
+      "optional": false,
+      "type": "list(object({kms_key_id=string,secret_arn=string,secret_status=string}))"
+    },
+    {
+      "name": "replicas",
+      "description": "",
+      "optional": false,
+      "type": "list(string)"
+    },
+    {
+      "name": "resource_id",
+      "description": "The RDS Resource ID of this instance.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "description": "The RDS instance status.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

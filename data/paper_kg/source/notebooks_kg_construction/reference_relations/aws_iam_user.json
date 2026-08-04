@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "permissions_boundary",
+        "references_output": "aws_iam_policy.arn",
+        "target_resource_type": "aws_iam_policy"
+    },
+    {
+        "argument_path": "permissions_boundary",
+        "references_output": "aws_iam_policy_attachment.policy_arn",
+        "target_resource_type": "aws_iam_policy_attachment"
+    }
+]

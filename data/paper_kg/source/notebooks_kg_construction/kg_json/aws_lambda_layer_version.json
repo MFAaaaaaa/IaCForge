@@ -1,0 +1,132 @@
+{
+    "resource": {
+        "name": "aws_lambda_layer_version",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "compatible_architectures",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "compatible_runtimes",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "filename",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "layer_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "license_info",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "s3_bucket",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "s3_key",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "s3_object_version",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "skip_destroy",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "source_code_hash",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "code_sha256",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "created_date",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "layer_arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "signing_job_arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "signing_profile_version_arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "source_code_size",
+            "description": "",
+            "optional": false,
+            "type": "number"
+        },
+        {
+            "name": "version",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

@@ -1,0 +1,812 @@
+{
+  "resource": {
+    "name": "aws_kendra_data_source",
+    "description": "Terraform resource for managing an AWS Kendra Data Source.",
+    "llm_summary": "The `aws_kendra_data_source` Terraform resource enables the creation and management of data sources for AWS Kendra, a machine learning-powered enterprise search service. It is commonly used to integrate external content repositories (e.g., S3, databases, SharePoint) with Kendra to index and search organizational data. Users can configure connection settings, access permissions, synchronization schedules, and logging to optimize data ingestion and retrieval for search functionality."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_kendra_data_source\" \"example\" {\n  index_id      = aws_kendra_index.example.id\n  name          = \"example\"\n  description   = \"example\"\n  language_code = \"en\"\n  type          = \"CUSTOM\"\n\n  tags = {\n    \"hello\" = \"world\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Kendra Data Source with a custom type, specifying key attributes such as `index_id`, `name`, `description`, `language_code`, and `tags`. It illustrates the basic setup required to integrate a data source into an existing Kendra index, enabling users to define metadata and language settings for their search data."
+    },
+    {
+      "title": "S3 Connector",
+      "code": "resource \"aws_kendra_data_source\" \"example\" {\n  index_id = aws_kendra_index.example.id\n  name     = \"example\"\n  type     = \"S3\"\n  role_arn = aws_iam_role.example.arn\n  schedule = \"cron(9 10 1 * ? *)\"\n\n  configuration {\n    s3_configuration {\n      bucket_name = aws_s3_bucket.example.id\n    }\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS Kendra data source to index content from an S3 bucket, using the `S3` type, `s3_configuration` block for bucket integration, and a scheduled sync via the `schedule` argument. Highlights the use of an IAM role (`role_arn`) for permissions and the integration of an S3 bucket (`bucket_name`) with a Kendra index.\""
+    },
+    {
+      "title": "Web Crawler Connector",
+      "code": "resource \"aws_kendra_data_source\" \"example\" {\n  index_id = aws_kendra_index.example.id\n  name     = \"example\"\n  type     = \"WEBCRAWLER\"\n  role_arn = aws_iam_role.example.arn\n\n  configuration {\n    web_crawler_configuration {\n      urls {\n        seed_url_configuration {\n          seed_urls = [\n            \"REPLACE_WITH_YOUR_URL\"\n          ]\n        }\n      }\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Kendra data source with a web crawler connector using the `type = \"WEBCRAWLER\"` setting. It showcases the `web_crawler_configuration` block, including the `seed_url_configuration` for specifying seed URLs, enabling users to index web content for search functionality."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "description",
+      "description": "(Optional) A description for the Data Source connector.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_kendra_data_source` resource allows users to define a human-readable summary or contextual information about the data source connector. Setting this argument helps document the purpose or role of the data source within the Amazon Kendra index, aiding in resource organization and clarity for administrators managing multiple connectors."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_kendra_data_source` resource allows users to specify a unique identifier for the data source within Amazon Kendra. While optional, setting this argument can help users reference or manage the data source programmatically, ensuring consistent identification across Terraform configurations and integrations."
+    },
+    {
+      "name": "index_id",
+      "description": "(Required, Forces new resource) The identifier of the index for your Amazon Kendra data source.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `index_id` argument specifies the unique identifier of the Amazon Kendra index that the data source will be associated with, enabling the data source to contribute content to the specified index for search and retrieval functionality. This required parameter ensures the data source is correctly linked to the intended Kendra index, facilitating seamless integration and search optimization within the user's knowledge management system."
+    },
+    {
+      "name": "language_code",
+      "description": "(Optional) The code for a language. This allows you to support a language for all documents when creating the Data Source connector. English is supported by default. For more information on supported languages, including their codes, see Adding documents in languages other than English.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `language_code` argument for the `aws_kendra_data_source` resource allows users to specify the language code for documents processed by the data source connector, enabling support for non-English languages. By setting this argument, users can configure the data source to handle multilingual document indexing, ensuring compatibility with specific language requirements beyond the default English support."
+    },
+    {
+      "name": "name",
+      "description": "(Required) A name for your data source connector.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_kendra_data_source` resource specifies a unique, user-defined identifier for the data source connector, enabling users to distinguish and manage multiple data sources within Amazon Kendra. Setting this argument ensures the data source is easily identifiable for search indexing, configuration, and operational purposes, aligning with common goals like organizing resources and facilitating search functionality."
+    },
+    {
+      "name": "role_arn",
+      "description": "(Required, Optional in one scenario) The Amazon Resource Name (ARN) of a role with permission to access the data source connector. For more information, see IAM roles for Amazon Kendra. You can't specify the `role_arn` parameter when the `type` parameter is set to `CUSTOM`. The `role_arn` parameter is required for all other data sources.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `role_arn` argument in the `aws_kendra_data_source` resource specifies the IAM role that grants permissions for Amazon Kendra to access the data source connector. This argument is essential for enabling Kendra to interact with supported data source types, except when the `type` is set to `CUSTOM`, ensuring secure and authorized data retrieval for indexing purposes."
+    },
+    {
+      "name": "schedule",
+      "description": "(Optional) Sets the frequency for Amazon Kendra to check the documents in your Data Source repository and update the index. If you don't set a schedule Amazon Kendra will not periodically update the index. You can call the `StartDataSourceSyncJob` API to update the index.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `schedule` argument for the `aws_kendra_data_source` resource allows users to define the frequency at which Amazon Kendra automatically syncs and updates the index with changes from the connected data source repository. By configuring this optional string, users can automate periodic updates to ensure their search index remains current, aligning with common goals of maintaining up-to-date search functionality without manual intervention."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Key-value map of resource tags. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_kendra_data_source` resource allows users to define a key-value map of resource tags, enabling the categorization and organization of the data source for purposes such as cost allocation, environment identification, or resource management. When configured, these tags can override provider-level default tags, ensuring granular control over metadata and alignment with specific tagging strategies."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_kendra_data_source` resource allows users to define a comprehensive set of key-value tags that are applied to the data source, including inherited tags from the provider's default configuration. This facilitates resource organization, cost allocation, and metadata management, enabling users to categorize and track the data source effectively across their AWS environment."
+    },
+    {
+      "name": "type",
+      "description": "(Required, Forces new resource) The type of data source repository. For an updated list of values, refer to Valid Values for Type. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `type` argument in the `aws_kendra_data_source` resource specifies the repository type for the data source, such as S3, SharePoint, or Salesforce, that Amazon Kendra will connect to for indexing and search functionality. Setting this required argument determines the integration behavior and enables Kendra to retrieve and process data from the specified source type, aligning with the user's search and knowledge management goals."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "configuration",
+      "description": "(Optional) A block with the configuration information to connect to your Data Source repository. You can't specify the `configuration` block when the `type` parameter is set to `CUSTOM`. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "s3_configuration",
+          "description": "(Deprecated, Required if `type` is set to `S3`) A block that provides the configuration information to connect to an Amazon S3 bucket as your data source. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "bucket_name",
+              "description": "(Required) The name of the bucket that contains the documents.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "Defines the name of the Amazon S3 bucket that serves as the data source for the \"s3_configuration\" in the \"aws_kendra_data_source\" resource, enabling Amazon Kendra to index and retrieve documents stored in the specified bucket. This argument is essential for connecting Kendra to the correct document repository, supporting search functionality and knowledge discovery within the configured bucket."
+            },
+            {
+              "name": "exclusion_patterns",
+              "description": "(Optional) A list of glob patterns for documents that should not be indexed. If a document that matches an inclusion prefix or inclusion pattern also matches an exclusion pattern, the document is not indexed. Refer to Exclusion Patterns for more examples.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `exclusion_patterns` argument in the `s3_configuration` of the `aws_kendra_data_source` resource allows users to define a set of glob patterns to exclude specific documents from being indexed by Amazon Kendra. This enables precise control over the indexing process by filtering out unwanted content, ensuring that only relevant documents matching inclusion criteria are processed while avoiding conflicts with exclusion rules."
+            },
+            {
+              "name": "inclusion_patterns",
+              "description": "(Optional) A list of glob patterns for documents that should be indexed. If a document that matches an inclusion pattern also matches an exclusion pattern, the document is not indexed. Refer to Inclusion Patterns for more examples.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `inclusion_patterns` argument in the `s3_configuration` of the `aws_kendra_data_source` resource allows users to define a set of glob patterns that specify which documents in an S3 bucket should be indexed by Amazon Kendra. By configuring this argument, users can control the scope of indexed content to include only files matching desired patterns, enabling precise content filtering for search functionality while avoiding irrelevant data."
+            },
+            {
+              "name": "inclusion_prefixes",
+              "description": "(Optional) A list of S3 prefixes for the documents that should be included in the index.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `inclusion_prefixes` argument in the `s3_configuration` of the `aws_kendra_data_source` resource allows users to specify a set of S3 key prefixes to define which documents should be included in the Amazon Kendra index. By configuring this argument, users can narrow the scope of indexed content to specific subsets of their S3 bucket, enabling targeted search functionality and optimizing indexing performance for relevant data."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "access_control_list_configuration",
+              "description": "(Optional) A block that provides the path to the S3 bucket that contains the user context filtering files for the data source. For the format of the file, see Access control for S3 data sources. Detailed below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "key_path",
+                  "description": "(Optional) Path to the AWS S3 bucket that contains the ACL files.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `key_path` argument in the `access_control_list_configuration` block of the `aws_kendra_data_source` resource allows users to specify the path to an AWS S3 bucket containing Access Control List (ACL) files. By defining this path, users can configure Kendra to retrieve and apply ACLs for fine-grained access control to indexed data, ensuring search results respect permissions and security policies."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `access_control_list_configuration` block within the `s3_configuration` of the `aws_kendra_data_source` resource specifies the path to an S3 bucket containing user context filtering files, enabling fine-grained access control for indexed data. This configuration helps users implement secure and personalized search experiences by defining access permissions based on user roles or attributes."
+            },
+            {
+              "name": "documents_metadata_configuration",
+              "description": "(Optional) A block that defines the Document metadata files that contain information such as the document access control information, source URI, document author, and custom attributes. Each metadata file contains metadata about a single document. Detailed below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "s3_prefix",
+                  "description": "(Optional) A prefix used to filter metadata configuration files in the AWS S3 bucket. The S3 bucket might contain multiple metadata files. Use `s3_prefix` to include only the desired metadata files.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `s3_prefix` argument in the `documents_metadata_configuration` block of the `aws_kendra_data_source` resource allows users to specify a path prefix to filter metadata configuration files stored in an S3 bucket. By setting this argument, users can control which metadata files are included for processing, enabling targeted ingestion of relevant document metadata and improving the precision of the data source configuration."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `documents_metadata_configuration` block within the `s3_configuration` of the `aws_kendra_data_source` resource defines settings for handling document metadata files, which provide detailed information about individual documents, such as access control, source URI, authorship, and custom attributes. Configuring this block enables precise metadata management, ensuring accurate indexing and retrieval of documents in Amazon Kendra, while supporting advanced search and access control capabilities."
+            }
+          ],
+          "llm_summary": "The `s3_configuration` block in the `aws_kendra_data_source` resource defines the settings required to connect an Amazon S3 bucket as a data source for Amazon Kendra, enabling document indexing and search capabilities. It encapsulates configuration details such as bucket access and data retrieval parameters, allowing users to integrate S3-based content into Kendra for intelligent search and query functionality."
+        },
+        {
+          "name": "web_crawler_configuration",
+          "description": "(Deprecated, Required if `type` is set to `WEBCRAWLER`) A block that provides the configuration information required for Amazon Kendra Web Crawler. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "crawl_depth",
+              "description": "(Optional) Specifies the number of levels in a website that you want to crawl. The first level begins from the website seed or starting point URL. For example, if a website has 3 levels \u2013 index level (i.e. seed in this example), sections level, and subsections level \u2013 and you are only interested in crawling information up to the sections level (i.e. levels 0-1), you can set your depth to 1. The default crawl depth is set to `2`. Minimum value of `0`. Maximum value of `10`.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `crawl_depth` argument in the `web_crawler_configuration` of the `aws_kendra_data_source` resource defines the maximum number of hierarchical levels within a website that the web crawler will traverse, starting from the seed URL. By configuring this value (default: 2, range: 0-10), users can control the depth of content discovery, enabling targeted crawling of specific sections or limiting the scope to reduce indexing time and resource usage."
+            },
+            {
+              "name": "max_content_size_per_page_in_mega_bytes",
+              "description": "(Optional) The maximum size (in MB) of a webpage or attachment to crawl. Files larger than this size (in MB) are skipped/not crawled. The default maximum size of a webpage or attachment is set to `50` MB. Minimum value of `1.0e-06`. Maximum value of `50`.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "\"max_content_size_per_page_in_mega_bytes\" allows users to define the maximum size (in megabytes) of webpages or attachments that the web crawler in the \"aws_kendra_data_source\" will process, enabling control over resource usage and filtering out excessively large files. By configuring this argument, users can optimize crawling efficiency and ensure the data source focuses on manageable content sizes, aligning with performance and storage goals."
+            },
+            {
+              "name": "max_links_per_page",
+              "description": "(Optional) The maximum number of URLs on a webpage to include when crawling a website. This number is per webpage. As a website\u2019s webpages are crawled, any URLs the webpages link to are also crawled. URLs on a webpage are crawled in order of appearance. The default maximum links per page is `100`. Minimum value of `1`. Maximum value of `1000`.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `max_links_per_page` argument in the `web_crawler_configuration` of the `aws_kendra_data_source` resource allows users to control the maximum number of URLs to be crawled per webpage during website indexing. By configuring this value, users can optimize the breadth of link discovery and crawling depth, balancing performance and data coverage to align with their search and indexing goals."
+            },
+            {
+              "name": "max_urls_per_minute_crawl_rate",
+              "description": "(Optional) The maximum number of URLs crawled per website host per minute. The default maximum number of URLs crawled per website host per minute is `300`. Minimum value of `1`. Maximum value of `300`.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "\"max_urls_per_minute_crawl_rate\" in the \"web_crawler_configuration\" of the \"aws_kendra_data_source\" resource allows users to control the crawl rate by specifying the maximum number of URLs a web crawler can process per website host per minute. This argument helps optimize crawling performance and resource usage, enabling users to balance data ingestion speed with host server load constraints, particularly for large-scale or rate-sensitive web data sources."
+            },
+            {
+              "name": "url_exclusion_patterns",
+              "description": "(Optional) A list of regular expression patterns to exclude certain URLs to crawl. URLs that match the patterns are excluded from the index. URLs that don't match the patterns are included in the index. If a URL matches both an inclusion and exclusion pattern, the exclusion pattern takes precedence and the URL file isn't included in the index. Array Members: Minimum number of `0` items. Maximum number of `100` items. Length Constraints: Minimum length of `1`. Maximum length of `150`.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `url_exclusion_patterns` argument in the `web_crawler_configuration` of the `aws_kendra_data_source` resource allows users to define a set of regular expression patterns to exclude specific URLs from being crawled and indexed. By configuring this argument, users can refine the scope of the web crawler to avoid indexing irrelevant or sensitive content, ensuring the search index remains focused on desired data sources and adheres to organizational requirements."
+            },
+            {
+              "name": "url_inclusion_patterns",
+              "description": "(Optional) A list of regular expression patterns to include certain URLs to crawl. URLs that match the patterns are included in the index. URLs that don't match the patterns are excluded from the index. If a URL matches both an inclusion and exclusion pattern, the exclusion pattern takes precedence and the URL file isn't included in the index. Array Members: Minimum number of `0` items. Maximum number of `100` items. Length Constraints: Minimum length of `1`. Maximum length of `150`.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `url_inclusion_patterns` argument in the `web_crawler_configuration` of the `aws_kendra_data_source` resource allows users to define a set of regular expression patterns that specify which URLs should be included in the web crawler's indexing process. By configuring this argument, users can fine-tune the scope of the crawler to focus on relevant content, ensuring that only URLs matching the defined patterns are indexed, while excluding irrelevant or undesired URLs."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "authentication_configuration",
+              "description": "(Optional) A block with the configuration information required to connect to websites using authentication. You can connect to websites using basic authentication of user name and password. You use a secret in AWS Secrets Manager to store your authentication credentials. You must provide the website host name and port number. For example, the host name of `https://a.example.com/page1.html` is `\"a.example.com\"` and the port is `443`, the standard port for HTTPS. Detailed below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [],
+              "blocks": [
+                {
+                  "name": "basic_authentication",
+                  "description": "(Optional) The list of configuration information that's required to connect to and crawl a website host using basic authentication credentials. The list includes the name and port number of the website host. Detailed below.",
+                  "cardinality": [
+                    0,
+                    10
+                  ],
+                  "arguments": [
+                    {
+                      "name": "credentials",
+                      "description": "(Required) Your secret ARN, which you can create in AWS Secrets Manager. You use a secret if basic authentication credentials are required to connect to a website. The secret stores your credentials of user name and password.",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `credentials` argument specifies the ARN of a secret stored in AWS Secrets Manager, containing the username and password required for basic authentication when connecting to a website as part of the `aws_kendra_data_source`. By configuring this argument, users enable secure access to web data sources that require authentication, ensuring proper integration with Amazon Kendra while maintaining credential confidentiality."
+                    },
+                    {
+                      "name": "host",
+                      "description": "(Required) The name of the website host you want to connect to using authentication credentials. For example, the host name of `https://a.example.com/page1.html` is `\"a.example.com\"`.",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `host` argument in the `basic_authentication` context of the `aws_kendra_data_source` resource specifies the website's hostname that the data source will connect to using authentication credentials. By defining this required parameter, users enable secure access to the target web content, ensuring Kendra can index data from the specified host for search functionality."
+                    },
+                    {
+                      "name": "port",
+                      "description": "(Required) The port number of the website host you want to connect to using authentication credentials. For example, the port for `https://a.example.com/page1.html` is `443`, the standard port for HTTPS.",
+                      "required": true,
+                      "type": "number",
+                      "llm_summary": "The `port` argument in the `basic_authentication` configuration for the `aws_kendra_data_source` resource specifies the network port number used to connect to the target website host with authentication credentials. By defining this required parameter, users ensure secure communication with the data source over the appropriate protocol (e.g., HTTPS on port 443), enabling accurate data retrieval for indexing in Amazon Kendra."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `basic_authentication` block within the `authentication_configuration` of the `aws_kendra_data_source` resource enables secure connectivity to a website host by configuring basic authentication credentials. It encapsulates settings such as the host's name and port number, allowing users to crawl and index web content that requires authentication, facilitating targeted and secure data ingestion for Amazon Kendra search applications."
+                }
+              ],
+              "llm_summary": "The `authentication_configuration` block within the `web_crawler_configuration` of the `aws_kendra_data_source` resource enables secure access to websites requiring authentication by configuring credentials stored in AWS Secrets Manager. It encapsulates settings for basic authentication, including the website's host name and port, allowing users to crawl protected web content for indexing in Amazon Kendra."
+            },
+            {
+              "name": "proxy_configuration",
+              "description": "(Optional) Configuration information required to connect to your internal websites via a web proxy. You must provide the website host name and port number. For example, the host name of `https://a.example.com/page1.html` is `\"a.example.com\"` and the port is `443`, the standard port for HTTPS. Web proxy credentials are optional and you can use them to connect to a web proxy server that requires basic authentication. To store web proxy credentials, you use a secret in AWS Secrets Manager. Detailed below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "credentials",
+                  "description": "(Optional) Your secret ARN, which you can create in AWS Secrets Manager. The credentials are optional. You use a secret if web proxy credentials are required to connect to a website host. Amazon Kendra currently support basic authentication to connect to a web proxy server. The secret stores your credentials.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `credentials` argument in the `proxy_configuration` block of the `aws_kendra_data_source` resource allows users to specify the ARN of a secret stored in AWS Secrets Manager that contains web proxy authentication credentials. This enables Amazon Kendra to connect to a web proxy server using basic authentication when required, facilitating secure access to external data sources through the proxy."
+                },
+                {
+                  "name": "host",
+                  "description": "(Required) The name of the website host you want to connect to via a web proxy server. For example, the host name of `https://a.example.com/page1.html` is `\"a.example.com\"`.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `host` argument in the `proxy_configuration` block of the `aws_kendra_data_source` resource specifies the hostname of the website to connect to via a web proxy server. By defining this required parameter, users enable secure and controlled access to external web content for indexing, ensuring the data source can retrieve information from the specified host through the proxy."
+                },
+                {
+                  "name": "port",
+                  "description": "(Required) The port number of the website host you want to connect to via a web proxy server. For example, the port for `https://a.example.com/page1.html` is `443`, the standard port for HTTPS.",
+                  "required": true,
+                  "type": "number",
+                  "llm_summary": "The `port` argument in the `proxy_configuration` block of the `aws_kendra_data_source` resource specifies the port number used to connect to a web proxy server for accessing the target website host. By defining this required value, users ensure secure and proper routing of requests through the proxy, typically aligning with standard protocols like HTTPS (`443`) or HTTP (`80`) to facilitate data source integration."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `proxy_configuration` block within the `web_crawler_configuration` of the `aws_kendra_data_source` resource enables connectivity to internal websites via a web proxy, facilitating secure and authenticated web crawling. It encapsulates settings for specifying the proxy host, port, and optional credentials stored in AWS Secrets Manager, allowing users to configure access to restricted or protected web resources for indexing purposes."
+            },
+            {
+              "name": "urls",
+              "description": "(Required) A block that specifies the seed or starting point URLs of the websites or the sitemap URLs of the websites you want to crawl. You can include website subdomains. You can list up to `100` seed URLs and up to `3` sitemap URLs. You can only crawl websites that use the secure communication protocol, Hypertext Transfer Protocol Secure (HTTPS). If you receive an error when crawling a website, it could be that the website is blocked from crawling. When selecting websites to index, you must adhere to the Amazon Acceptable Use Policy and all other Amazon terms. Remember that you must only use Amazon Kendra Web Crawler to index your own webpages, or webpages that you have authorization to index. Detailed below.",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [],
+              "blocks": [
+                {
+                  "name": "seed_url_configuration",
+                  "description": "(Optional) A block that specifies the configuration of the seed or starting point URLs of the websites you want to crawl. You can choose to crawl only the website host names, or the website host names with subdomains, or the website host names with subdomains and other domains that the webpages link to. You can list up to `100` seed URLs. Detailed below.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "seed_urls",
+                      "description": "(Required) The list of seed or starting point URLs of the websites you want to crawl. The list can include a maximum of `100` seed URLs. Array Members: Minimum number of `0` items. Maximum number of `100` items. Length Constraints: Minimum length of `1`. Maximum length of `2048`.",
+                      "required": true,
+                      "type": "set(string)",
+                      "llm_summary": "The `seed_urls` argument in the `seed_url_configuration` block of the `aws_kendra_data_source` resource allows users to define the initial set of URLs that serve as starting points for web crawling. By specifying up to 100 seed URLs, users configure the scope and entry points for Kendra's web data ingestion, enabling targeted indexing of website content for search functionality."
+                    },
+                    {
+                      "name": "web_crawler_mode",
+                      "description": "(Optional) The default mode is set to `HOST_ONLY`. You can choose one of the following modes:`HOST_ONLY` \u2013 crawl only the website host names. For example, if the seed URL is `\"abc.example.com\"`, then only URLs with host name `\"abc.example.com\"` are crawled. `SUBDOMAINS` \u2013 crawl the website host names with subdomains. For example, if the seed URL is `\"abc.example.com\"`, then `\"a.abc.example.com\"` and `\"b.abc.example.com\"` are also crawled. `EVERYTHING` \u2013 crawl the website host names with subdomains and other domains that the webpages link to.",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `web_crawler_mode` argument in the `seed_url_configuration` of the `aws_kendra_data_source` resource allows users to define the scope of web crawling behavior for seed URLs, specifying whether the crawler should target only the host domain (`HOST_ONLY`), include subdomains (`SUBDOMAINS`), or expand to all linked domains (`EVERYTHING`). This configuration impacts the breadth of data indexed by Amazon Kendra, enabling users to tailor the crawler's reach to align with their search and indexing requirements."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `seed_url_configuration` block in the `aws_kendra_data_source` resource defines the starting point URLs for web crawling, enabling users to specify up to 100 seed URLs and control the scope of the crawl (hostnames, subdomains, or linked domains). This configuration helps users tailor the data source's web indexing behavior to efficiently gather relevant content from targeted websites."
+                },
+                {
+                  "name": "site_maps_configuration",
+                  "description": "(Optional) A block that specifies the configuration of the sitemap URLs of the websites you want to crawl. Only URLs belonging to the same website host names are crawled. You can list up to `3` sitemap URLs. Detailed below.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "site_maps",
+                      "description": "(Required) The list of sitemap URLs of the websites you want to crawl. The list can include a maximum of `3` sitemap URLs.",
+                      "required": true,
+                      "type": "set(string)",
+                      "llm_summary": "The `site_maps` argument in the `site_maps_configuration` block of the `aws_kendra_data_source` resource allows users to specify up to three sitemap URLs for websites they want Amazon Kendra to crawl and index. By defining these URLs, users enable targeted data ingestion from structured website content, aligning with their search and knowledge management goals."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `site_maps_configuration` block in the `aws_kendra_data_source` resource defines the sitemap URLs for websites to be crawled, enabling targeted data extraction from up to three specified sitemaps within the same host domain. This configuration helps users efficiently manage and restrict the scope of web crawling, ensuring precise indexing of relevant content for search functionality."
+                }
+              ],
+              "llm_summary": "The `urls` block within the `web_crawler_configuration` of the `aws_kendra_data_source` resource defines the seed or sitemap URLs that serve as starting points for Amazon Kendra's web crawler to index website content. It enables users to specify up to 100 seed URLs and 3 sitemap URLs, ensuring secure HTTPS-based crawling while adhering to Amazon's Acceptable Use Policy. Configuring this block allows users to target specific web domains for indexing, facilitating precise and authorized content discovery for search functionality."
+            }
+          ],
+          "llm_summary": "The `web_crawler_configuration` block in the `aws_kendra_data_source` resource defines the settings required to configure Amazon Kendra's Web Crawler, enabling automated data ingestion from web sources. It encapsulates parameters for crawling behavior, such as target URLs, authentication, and data extraction rules, allowing users to efficiently index web content for search and knowledge management purposes."
+        }
+      ],
+      "llm_summary": "The `configuration` block in the `aws_kendra_data_source` resource defines the connection details and integration settings required to link Amazon Kendra to a specific data source repository, such as databases, file systems, or cloud storage. This block encapsulates repository-specific configurations, enabling users to tailor how Kendra accesses and indexes their data for search functionality, but it cannot be used when the `type` is set to `CUSTOM`."
+    },
+    {
+      "name": "custom_document_enrichment_configuration",
+      "description": "(Optional) A block with the configuration information for altering document metadata and content during the document ingestion process. For more information on how to create, modify and delete document metadata, or make other content alterations when you ingest documents into Amazon Kendra, see Customizing document metadata during the ingestion process. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "role_arn",
+          "description": "(Optional) The Amazon Resource Name (ARN) of a role with permission to run `pre_extraction_hook_configuration` and `post_extraction_hook_configuration` for altering document metadata and content during the document ingestion process. For more information, see IAM roles for Amazon Kendra.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "Defines the IAM role (via its ARN) that grants permissions to execute pre- and post-extraction hooks within the `custom_document_enrichment_configuration`, enabling users to modify document metadata and content during ingestion. Setting this argument ensures secure and controlled execution of enrichment workflows, aligning with user goals of customizing document processing in Amazon Kendra."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "inline_configurations",
+          "description": "(Optional) Configuration information to alter document attributes or metadata fields and content when ingesting documents into Amazon Kendra. Minimum number of `0` items. Maximum number of `100` items. Detailed below.",
+          "cardinality": [
+            0,
+            100
+          ],
+          "arguments": [
+            {
+              "name": "document_content_deletion",
+              "description": "(Optional) `TRUE` to delete content if the condition used for the target attribute is met.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `document_content_deletion` argument in the `inline_configurations` block of the `aws_kendra_data_source` resource allows users to control whether document content is automatically deleted when a specified condition for the target attribute is met. Setting this to `true` enables automated cleanup of indexed content based on conditional logic, supporting lifecycle management and ensuring data consistency within the Kendra data source."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "condition",
+              "description": "(Optional) Configuration of the condition used for the target document attribute or metadata field when ingesting documents into Amazon Kendra. See condition.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "condition_document_attribute_key",
+                  "description": "(Required) The identifier of the document attribute used for the condition. For example, `_source_uri` could be an identifier for the attribute or metadata field that contains source URIs associated with the documents. Amazon Kendra currently does not support `_document_body` as an attribute key used for the condition.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `condition_document_attribute_key` argument specifies the document attribute or metadata field (e.g., `_source_uri`) used to define conditions for filtering or processing documents in an Amazon Kendra data source. By setting this required key, users can control which attribute is evaluated to apply conditional logic, enabling targeted indexing or search behavior based on document-specific metadata."
+                },
+                {
+                  "name": "operator",
+                  "description": "(Required) The condition operator. For example, you can use `Contains` to partially match a string. Valid Values: `GreaterThan` | `GreaterThanOrEquals` | `LessThan` | `LessThanOrEquals` | `Equals` | `NotEquals` | `Contains` | `NotContains` | `Exists` | `NotExists` | `BeginsWith`.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `operator` argument in the `condition` block of the `aws_kendra_data_source` resource allows users to define the logical comparison method for evaluating conditions against data source attributes. By specifying operators such as `Equals`, `Contains`, or `Exists`, users can control how data is filtered or matched, enabling precise configuration of search criteria and data inclusion rules to tailor the behavior of Amazon Kendra's indexing process."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "condition_on_value",
+                  "description": "(Optional) The value used by the operator. For example, you can specify the value 'financial' for strings in the `_source_uri` field that partially match or contain this value. See condition_on_value.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "date_value",
+                      "description": "(Optional) A date expressed as an ISO 8601 string. It is important for the time zone to be included in the ISO 8601 date-time format. As of this writing only UTC is supported. For example, `2012-03-25T12:30:10+00:00`.",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `date_value` argument in the `condition_on_value` block of the `aws_kendra_data_source` resource allows users to specify a date in ISO 8601 format (with UTC time zone) to define conditional logic for filtering or processing data sources based on a specific timestamp. By setting this argument, users can control the inclusion or exclusion of data based on its date, enabling precise data retrieval or synchronization workflows aligned with time-based criteria."
+                    },
+                    {
+                      "name": "long_value",
+                      "description": "(Optional) A long integer value.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `long_value` argument in the `condition_on_value` block of the `aws_kendra_data_source` resource allows users to specify a numeric condition as a long integer, which can be used to filter or match data source content based on numerical attributes. This enables fine-grained control over data inclusion or exclusion criteria, supporting use cases like customizing search indexing behavior or applying conditional logic to data processing workflows."
+                    },
+                    {
+                      "name": "string_list_value",
+                      "description": "(Optional) A list of strings.",
+                      "required": false,
+                      "type": "set(string)",
+                      "llm_summary": "The `string_list_value` argument in the `condition_on_value` block of the `aws_kendra_data_source` resource allows users to specify a set of string values that define conditions for filtering or matching data during the data source synchronization process. By configuring this argument, users can control how specific criteria are applied to include or exclude data based on string-based attributes, enabling more precise data ingestion and search behavior within Amazon Kendra."
+                    },
+                    {
+                      "name": "string_value",
+                      "description": "",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `string_value` argument within the `condition_on_value` block of the `aws_kendra_data_source` resource allows users to specify a string-based condition that determines whether certain data is included or excluded during data source synchronization. By setting this argument, users can define filtering criteria based on string values, enabling precise control over the data ingested into Amazon Kendra for search indexing."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "\"Defines a specific value used by the operator within the 'condition' block to filter or match data in the `aws_kendra_data_source`. This block enables fine-grained control over data source filtering by specifying criteria, such as matching strings in the `_source_uri` field, to refine search indexing and improve query relevance.\""
+                }
+              ],
+              "llm_summary": "The `condition` block within the `inline_configurations` of the `aws_kendra_data_source` resource defines criteria for filtering target document attributes or metadata fields during document ingestion into Amazon Kendra. This configuration enables precise control over which documents are indexed by specifying conditional rules, ensuring only relevant content is processed and improving search accuracy."
+            },
+            {
+              "name": "target",
+              "description": "(Optional) Configuration of the target document attribute or metadata field when ingesting documents into Amazon Kendra. You can also include a value. Detailed below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "target_document_attribute_key",
+                  "description": "(Optional) The identifier of the target document attribute or metadata field. For example, 'Department' could be an identifier for the target attribute or metadata field that includes the department names associated with the documents.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `target_document_attribute_key` argument allows users to specify the identifier for a document attribute or metadata field in the target data source, such as \"Department\" for categorizing documents by department names. Configuring this key enables precise mapping and filtering of document attributes during data ingestion, supporting enhanced search relevance and metadata organization in Amazon Kendra."
+                },
+                {
+                  "name": "target_document_attribute_value_deletion",
+                  "description": "(Optional) `TRUE` to delete the existing target value for your specified target attribute key. You cannot create a target value and set this to `TRUE`. To create a target value (`TargetDocumentAttributeValue`), set this to `FALSE`.",
+                  "required": false,
+                  "type": "bool",
+                  "llm_summary": "Controls whether the existing value of a specified target document attribute key is deleted in the data source. Setting this to `TRUE` removes the current target value, while setting it to `FALSE` allows defining a new target value, enabling users to manage attribute updates or cleanups in Amazon Kendra data sources."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "target_document_attribute_value",
+                  "description": "(Optional) The target value you want to create for the target attribute. For example, 'Finance' could be the target value for the target attribute key 'Department'. See target_document_attribute_value.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "date_value",
+                      "description": "(Optional) A date expressed as an ISO 8601 string. It is important for the time zone to be included in the ISO 8601 date-time format. As of this writing only UTC is supported. For example, `2012-03-25T12:30:10+00:00`.",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `date_value` argument for the `target_document_attribute_value` in the `aws_kendra_data_source` resource allows users to specify a date in ISO 8601 format (with UTC timezone) as the value for a document attribute. This is typically used to define or filter metadata related to documents, such as creation or modification dates, enabling precise control over document indexing and search behavior in Amazon Kendra."
+                    },
+                    {
+                      "name": "long_value",
+                      "description": "(Optional) A long integer value.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `long_value` argument allows users to specify a numeric long integer value for the `target_document_attribute_value` in the `aws_kendra_data_source` resource, enabling the configuration of a document attribute's value as a number. This is typically used to define metadata or properties for documents, such as numerical identifiers, timestamps, or other integer-based attributes, enhancing search relevance and filtering capabilities within Amazon Kendra."
+                    },
+                    {
+                      "name": "string_list_value",
+                      "description": "(Optional) A list of strings.",
+                      "required": false,
+                      "type": "set(string)",
+                      "llm_summary": "The `string_list_value` argument for the `target_document_attribute_value` in the `aws_kendra_data_source` resource allows users to specify a set of string values that define multiple target attribute values for documents in Amazon Kendra. This configuration is typically used to map or filter documents based on specific attributes, enabling more precise search indexing and retrieval functionality within the Kendra data source."
+                    },
+                    {
+                      "name": "string_value",
+                      "description": "",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `string_value` argument for the `target_document_attribute_value` in the `aws_kendra_data_source` resource allows users to specify a string-based value for a document attribute that Amazon Kendra uses to filter or categorize indexed documents. By setting this argument, users can define a specific attribute value (e.g., a tag, label, or metadata field) that helps tailor search relevance or refine query results based on document attributes."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `target_document_attribute_value` block within the `target` configuration of the `aws_kendra_data_source` resource defines the specific value to assign to a target document attribute, enabling precise categorization or tagging of indexed documents. This block is used to map documents to a desired attribute value (e.g., \"Finance\" for the \"Department\" attribute), facilitating more accurate search and filtering capabilities in Amazon Kendra."
+                }
+              ],
+              "llm_summary": "The \"target\" configuration block within the \"inline_configurations\" of the `aws_kendra_data_source` resource defines the mapping of document attributes or metadata fields to specific target fields in Amazon Kendra during document ingestion. It enables users to customize how document data is structured and enriched, allowing for precise control over metadata alignment and search relevance in Kendra's indexing process."
+            }
+          ],
+          "llm_summary": "The `inline_configurations` block within the `custom_document_enrichment_configuration` of the `aws_kendra_data_source` resource enables fine-grained control over altering document attributes, metadata fields, and content during ingestion into Amazon Kendra. It encapsulates settings for customizing document enrichment workflows, allowing users to dynamically modify or enhance document data to improve search relevance and indexing accuracy."
+        },
+        {
+          "name": "post_extraction_hook_configuration",
+          "description": "(Optional) A block that specifies the configuration information for invoking a Lambda function in AWS Lambda on the structured documents with their metadata and text extracted. You can use a Lambda function to apply advanced logic for creating, modifying, or deleting document metadata and content. For more information, see Advanced data manipulation. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "lambda_arn",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `lambda_arn` argument specifies the Amazon Resource Name (ARN) of an AWS Lambda function to be invoked as part of the `post_extraction_hook_configuration` for the `aws_kendra_data_source` resource. This enables users to define custom post-processing logic for extracted data, such as transforming, filtering, or enriching the content before it is indexed by Amazon Kendra, aligning with specific business requirements or workflows."
+            },
+            {
+              "name": "s3_bucket",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `s3_bucket` argument specifies the Amazon S3 bucket where post-extraction hook data is stored for the `post_extraction_hook_configuration` in the `aws_kendra_data_source` resource. By defining this bucket, users enable the storage and retrieval of processed data or metadata generated by custom post-extraction logic, supporting workflows like data transformation, enrichment, or integration with external systems."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "invocation_condition",
+              "description": "",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "condition_document_attribute_key",
+                  "description": "(Required) The identifier of the document attribute used for the condition. For example, `_source_uri` could be an identifier for the attribute or metadata field that contains source URIs associated with the documents. Amazon Kendra currently does not support `_document_body` as an attribute key used for the condition.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "Defines the document attribute key used to evaluate invocation conditions for filtering or triggering actions in Amazon Kendra data sources. By specifying this key (e.g., `_source_uri`), users can control which metadata field is used to determine whether a document meets the condition criteria, enabling targeted data processing or retrieval workflows."
+                },
+                {
+                  "name": "operator",
+                  "description": "(Required) The condition operator. For example, you can use `Contains` to partially match a string. Valid Values: `GreaterThan` | `GreaterThanOrEquals` | `LessThan` | `LessThanOrEquals` | `Equals` | `NotEquals` | `Contains` | `NotContains` | `Exists` | `NotExists` | `BeginsWith`.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `operator` argument in the `invocation_condition` block of the `aws_kendra_data_source` resource specifies the logical condition used to evaluate data source attributes during query execution or synchronization. By defining this operator (e.g., `Contains`, `Equals`, `Exists`), users control how conditions are matched, enabling precise filtering or validation of data source content to tailor search functionality or data ingestion behavior."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "condition_on_value",
+                  "description": "(Optional) The value used by the operator. For example, you can specify the value 'financial' for strings in the `_source_uri` field that partially match or contain this value. See condition_on_value.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "date_value",
+                      "description": "(Optional) A date expressed as an ISO 8601 string. It is important for the time zone to be included in the ISO 8601 date-time format. As of this writing only UTC is supported. For example, `2012-03-25T12:30:10+00:00`.",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `date_value` argument in the `condition_on_value` block of the `aws_kendra_data_source` resource allows users to specify a date in ISO 8601 format (with UTC time zone) to define conditional logic for filtering or processing data sources based on a specific timestamp. By setting this argument, users can control the inclusion or exclusion of data based on its date, enabling precise data synchronization or query behavior tailored to time-sensitive requirements."
+                    },
+                    {
+                      "name": "long_value",
+                      "description": "(Optional) A long integer value.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `long_value` argument in the `condition_on_value` block of the `aws_kendra_data_source` resource allows users to specify a numeric condition as a long integer, which can be used to filter or match data source content based on numerical criteria. This enables fine-grained control over data inclusion or exclusion, supporting use cases like conditional indexing or dynamic content filtering within Amazon Kendra."
+                    },
+                    {
+                      "name": "string_list_value",
+                      "description": "(Optional) A list of strings.",
+                      "required": false,
+                      "type": "set(string)",
+                      "llm_summary": "The `string_list_value` argument in the `condition_on_value` block of the `aws_kendra_data_source` resource allows users to specify a set of string values that define conditions for filtering or matching data during the ingestion process. By configuring this argument, users can control how specific data sources are processed based on predefined criteria, enabling more precise and targeted indexing within Amazon Kendra."
+                    },
+                    {
+                      "name": "string_value",
+                      "description": "",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `string_value` argument within the `condition_on_value` block of the `aws_kendra_data_source` resource allows users to specify a string-based condition that determines whether certain data is included or excluded during data source synchronization. By setting this argument, users can define filtering criteria based on string values, enabling precise control over the data ingested into Amazon Kendra for search indexing."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `condition_on_value` block within the `invocation_condition` configuration of the `aws_kendra_data_source` resource defines a specific value used by an operator to filter or match data during query execution. It enables precise control over data source filtering by specifying criteria, such as matching strings in fields like `_source_uri`, to refine search results and improve relevance in Amazon Kendra."
+                }
+              ],
+              "llm_summary": "The `invocation_condition` block within the `post_extraction_hook_configuration` of the `aws_kendra_data_source` resource defines the conditions under which the post-extraction Lambda function is triggered. It encapsulates settings for specifying logical rules or criteria (e.g., attribute-based conditions) that determine whether the hook should execute after data is extracted from the source. Configuring this block allows users to implement fine-grained control over the invocation of post-processing logic, optimizing workflows by ensuring the hook runs only when specific conditions are met."
+            }
+          ],
+          "llm_summary": "The `post_extraction_hook_configuration` block within the `custom_document_enrichment_configuration` of the `aws_kendra_data_source` resource enables the invocation of an AWS Lambda function to process structured documents after their metadata and text have been extracted. This block allows users to define advanced logic for dynamically creating, modifying, or deleting document metadata and content, facilitating custom data enrichment workflows tailored to specific business needs."
+        },
+        {
+          "name": "pre_extraction_hook_configuration",
+          "description": "(Optional) Configuration information for invoking a Lambda function in AWS Lambda on the original or raw documents before extracting their metadata and text. You can use a Lambda function to apply advanced logic for creating, modifying, or deleting document metadata and content. For more information, see Advanced data manipulation. Detailed below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "lambda_arn",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `lambda_arn` argument specifies the Amazon Resource Name (ARN) of an AWS Lambda function to be invoked as part of the `pre_extraction_hook_configuration` for the `aws_kendra_data_source` resource. This allows users to define custom preprocessing logic that runs before data extraction, enabling tasks such as data transformation, filtering, or enrichment to tailor the content for indexing in Amazon Kendra."
+            },
+            {
+              "name": "s3_bucket",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `s3_bucket` argument specifies the Amazon S3 bucket that stores the data required for the pre-extraction hook in the `pre_extraction_hook_configuration` of the `aws_kendra_data_source` resource. By defining this bucket, users enable the integration of pre-processing logic or scripts hosted in S3 to transform or prepare data before it is ingested into Amazon Kendra, supporting advanced customization and data handling workflows."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "invocation_condition",
+              "description": "",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "condition_document_attribute_key",
+                  "description": "(Required) The identifier of the document attribute used for the condition. For example, `_source_uri` could be an identifier for the attribute or metadata field that contains source URIs associated with the documents. Amazon Kendra currently does not support `_document_body` as an attribute key used for the condition.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "Defines the document attribute key used to evaluate invocation conditions for filtering or triggering actions in Amazon Kendra data sources. By specifying this key (e.g., `_source_uri`), users can control which metadata field is used to determine whether a document meets the condition criteria, enabling targeted data processing or retrieval workflows."
+                },
+                {
+                  "name": "operator",
+                  "description": "(Required) The condition operator. For example, you can use `Contains` to partially match a string. Valid Values: `GreaterThan` | `GreaterThanOrEquals` | `LessThan` | `LessThanOrEquals` | `Equals` | `NotEquals` | `Contains` | `NotContains` | `Exists` | `NotExists` | `BeginsWith`.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `operator` argument in the `invocation_condition` block of the `aws_kendra_data_source` resource specifies the logical condition used to evaluate whether a data source invocation should proceed, based on the provided criteria. By setting this required argument to values like `Equals`, `Contains`, or `Exists`, users can define precise matching rules to control the triggering of data source operations, enabling fine-grained filtering and conditional execution."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "condition_on_value",
+                  "description": "(Optional) The value used by the operator. For example, you can specify the value 'financial' for strings in the `_source_uri` field that partially match or contain this value. See condition_on_value.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "date_value",
+                      "description": "(Optional) A date expressed as an ISO 8601 string. It is important for the time zone to be included in the ISO 8601 date-time format. As of this writing only UTC is supported. For example, `2012-03-25T12:30:10+00:00`.",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `date_value` argument in the `condition_on_value` block of the `aws_kendra_data_source` resource allows users to specify a date in ISO 8601 format (with UTC time zone) to define conditional logic for filtering or processing data sources based on a specific date. By setting this argument, users can control how data is included or excluded based on time-sensitive criteria, enabling precise configuration of data ingestion or synchronization workflows."
+                    },
+                    {
+                      "name": "long_value",
+                      "description": "(Optional) A long integer value.",
+                      "required": false,
+                      "type": "number",
+                      "llm_summary": "The `long_value` argument in the `condition_on_value` block of the `aws_kendra_data_source` resource allows users to specify a numeric condition as a long integer, which can be used to filter or match data source content based on numerical attributes. This enables fine-grained control over data inclusion or exclusion criteria, supporting use cases like customizing search indexing behavior or applying conditional logic to data processing workflows."
+                    },
+                    {
+                      "name": "string_list_value",
+                      "description": "(Optional) A list of strings.",
+                      "required": false,
+                      "type": "set(string)",
+                      "llm_summary": "The `string_list_value` argument in the `condition_on_value` block of the `aws_kendra_data_source` resource allows users to specify a set of string values that define conditions for filtering or matching data during the ingestion process. By configuring this argument, users can control which data is included or excluded based on specific string-based criteria, enabling more precise and targeted data source behavior for Amazon Kendra."
+                    },
+                    {
+                      "name": "string_value",
+                      "description": "",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `string_value` argument within the `condition_on_value` block of the `aws_kendra_data_source` resource allows users to specify a string-based condition that determines whether certain data is included or excluded during data source synchronization. By setting this argument, users can define filtering criteria based on string values, enabling precise control over the data ingested into Amazon Kendra for search indexing."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `condition_on_value` block within the `invocation_condition` configuration of the `aws_kendra_data_source` resource defines a specific value used by an operator to filter or match data during query execution. This block enables precise control over data source filtering by specifying criteria, such as matching strings in fields like `_source_uri`, to refine search results and improve query relevance."
+                }
+              ],
+              "llm_summary": "The `invocation_condition` block within the `pre_extraction_hook_configuration` of the `aws_kendra_data_source` resource defines the conditions under which the pre-extraction Lambda function is triggered. It encapsulates settings for specifying logical rules (e.g., attribute-based conditions) that determine whether the hook should execute, enabling users to fine-tune the preprocessing of data before it is indexed by Amazon Kendra. Configuring this block allows for precise control over when the pre-extraction logic is applied, optimizing data preparation workflows."
+            }
+          ],
+          "llm_summary": "The `pre_extraction_hook_configuration` block within the `custom_document_enrichment_configuration` of the `aws_kendra_data_source` resource enables advanced preprocessing of raw documents by invoking an AWS Lambda function before metadata and text extraction. It encapsulates settings for integrating custom logic to modify, enrich, or delete document metadata and content, allowing users to tailor document processing workflows for enhanced search relevance and data manipulation."
+        }
+      ],
+      "llm_summary": "The `custom_document_enrichment_configuration` block in the `aws_kendra_data_source` resource enables advanced customization of document metadata and content during the ingestion process into Amazon Kendra. It encapsulates settings for modifying, enhancing, or transforming document attributes, allowing users to tailor metadata and content to improve search relevance and optimize indexing workflows."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_kendra_data_source` resource allows users to specify the maximum duration (as a string) Terraform should wait for the creation of the data source to complete. By configuring this timeout, users can control the behavior of long-running operations, ensuring Terraform does not prematurely fail during the provisioning process of the Kendra data source."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_kendra_data_source` resource allows users to specify the maximum duration (as a string) Terraform will wait for the deletion of the Kendra data source to complete. Configuring this argument helps manage resource lifecycle operations by ensuring that long-running delete processes do not exceed the defined timeout, aligning with user goals for predictable and efficient infrastructure management."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block of the `aws_kendra_data_source` resource allows users to specify the maximum duration (as a string) Terraform will wait for updates to the data source configuration to complete. By setting this argument, users can control the timeout behavior for update operations, ensuring smoother management of long-running changes to the Kendra data source."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_kendra_data_source` resource defines customizable time limits for specific operations, such as creating, updating, or deleting a Kendra data source. By configuring this block, users can manage operation durations to prevent long-running tasks from exceeding acceptable thresholds, ensuring efficient resource lifecycle management and avoiding potential timeout errors during provisioning or updates."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN of the Data Source.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "created_at",
+      "description": "The Unix time stamp of when the Data Source was created.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "data_source_id",
+      "description": "The unique identifiers of the Data Source.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "error_message",
+      "description": "When the Status field value is `FAILED`, contains a description of the error that caused the Data Source to fail.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "description": "The current status of the Data Source. When the status is `ACTIVE` the Data Source is ready to use. When the status is `FAILED`, the `error_message` field contains the reason that the Data Source failed.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "updated_at",
+      "description": "The Unix time stamp of when the Data Source was last updated.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+{
+    "resource": {
+        "name": "aws_api_gateway_integration",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "cache_key_parameters",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "cache_namespace",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "connection_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "connection_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "content_handling",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "credentials",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "http_method",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "integration_http_method",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "passthrough_behavior",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "request_parameters",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "request_templates",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "resource_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "rest_api_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "timeout_milliseconds",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "type",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "uri",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "tls_config",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "insecure_skip_verification",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": []
+}

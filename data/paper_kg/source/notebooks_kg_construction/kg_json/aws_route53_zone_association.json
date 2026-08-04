@@ -1,0 +1,42 @@
+{
+    "resource": {
+        "name": "aws_route53_zone_association",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "vpc_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "vpc_region",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "zone_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "owning_account",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

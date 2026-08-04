@@ -1,0 +1,47 @@
+[
+    {
+        "argument_path": "zone_id",
+        "references_output": "aws_route53_zone.zone_id",
+        "target_resource_type": "aws_route53_zone"
+    },
+    {
+        "argument_path": "records",
+        "references_output": "aws_eip.public_ip",
+        "target_resource_type": "aws_eip"
+    },
+    {
+        "argument_path": "alias.name",
+        "references_output": "aws_elb.dns_name",
+        "target_resource_type": "aws_elb"
+    },
+    {
+        "argument_path": "alias.zone_id",
+        "references_output": "aws_elb.zone_id",
+        "target_resource_type": "aws_elb"
+    },
+    {
+        "argument_path": "alias.name",
+        "references_output": "aws_globalaccelerator_accelerator.dns_name",
+        "target_resource_type": "aws_globalaccelerator_accelerator"
+    },
+    {
+        "argument_path": "alias.zone_id",
+        "references_output": "aws_globalaccelerator_accelerator.hosted_zone_id",
+        "target_resource_type": "aws_globalaccelerator_accelerator"
+    },
+    {
+        "argument_path": "records",
+        "references_output": "aws_route53_zone.name_servers",
+        "target_resource_type": "aws_route53_zone"
+    },
+    {
+        "argument_path": "cidr_routing_policy.collection_id",
+        "references_output": "aws_route53_cidr_collection.id",
+        "target_resource_type": "aws_route53_cidr_collection"
+    },
+    {
+        "argument_path": "cidr_routing_policy.location_name",
+        "references_output": "aws_route53_cidr_location.name",
+        "target_resource_type": "aws_route53_cidr_location"
+    }
+]

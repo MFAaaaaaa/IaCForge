@@ -1,0 +1,22 @@
+[
+    {
+        "argument_path": "subnet_id",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "gateway_id",
+        "references_output": "aws_internet_gateway.id",
+        "target_resource_type": "aws_internet_gateway"
+    },
+    {
+        "argument_path": "gateway_id",
+        "references_output": "aws_vpn_gateway.id",
+        "target_resource_type": "aws_vpn_gateway"
+    },
+    {
+        "argument_path": "route_table_id",
+        "references_output": "aws_route_table.id",
+        "target_resource_type": "aws_route_table"
+    }
+]

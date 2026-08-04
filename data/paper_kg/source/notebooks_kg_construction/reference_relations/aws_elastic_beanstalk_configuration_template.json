@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "application",
+        "references_output": "aws_elastic_beanstalk_application.name",
+        "target_resource_type": "aws_elastic_beanstalk_application"
+    },
+    {
+        "argument_path": "environment_id",
+        "references_output": "aws_elastic_beanstalk_environment.id",
+        "target_resource_type": "aws_elastic_beanstalk_environment"
+    }
+]

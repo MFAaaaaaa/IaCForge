@@ -1,0 +1,7 @@
+[
+    {
+        "argument_path": "stream_arn",
+        "references_output": "aws_kinesis_stream.arn",
+        "target_resource_type": "aws_kinesis_stream"
+    }
+]

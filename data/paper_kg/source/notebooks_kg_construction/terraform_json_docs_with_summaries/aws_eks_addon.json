@@ -1,0 +1,181 @@
+{
+  "resource": {
+    "name": "aws_eks_addon",
+    "description": "Manages an EKS add-on.",
+    "llm_summary": "\"Manages the lifecycle and configuration of Amazon EKS add-ons, enabling seamless integration of operational software into Kubernetes clusters. Common use cases include automating the deployment of essential tools like CoreDNS, kube-proxy, and AWS-managed add-ons for monitoring, networking, and security. Supports version control, dependency management, and customization of add-on settings to optimize cluster functionality and streamline maintenance.\""
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_eks_addon\" \"example\" {\n  cluster_name = aws_eks_cluster.example.name\n  addon_name   = \"vpc-cni\"\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_eks_addon` resource to enable the `vpc-cni` addon for an Amazon EKS cluster using the `cluster_name` and `addon_name` arguments. It provides a basic setup for integrating a core networking addon into an existing EKS cluster."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "addon_name",
+      "description": "\u2013 (Required) Name of the EKS add-on. The name must match one of the names returned by describe-addon-versions.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `addon_name` argument specifies the name of the EKS add-on to be deployed, allowing users to define which managed Kubernetes add-on (e.g., CoreDNS, VPC CNI, kube-proxy) is installed on their Amazon EKS cluster. Setting this argument ensures the desired add-on is provisioned and integrated, enabling specific cluster functionalities or enhancements critical to the user's workload or operational requirements."
+    },
+    {
+      "name": "addon_version",
+      "description": "\u2013 (Optional) The version of the EKS add-on. The version must match one of the versions returned by describe-addon-versions.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `addon_version` argument in the `aws_eks_addon` resource allows users to specify the exact version of an EKS add-on to deploy, ensuring compatibility and control over the add-on's features and updates. By setting this argument, users can align the add-on version with their cluster's requirements or desired functionality, supporting stability and predictable behavior in their Kubernetes environment."
+    },
+    {
+      "name": "cluster_name",
+      "description": "\u2013 (Required) Name of the EKS Cluster. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `cluster_name` argument specifies the name of the Amazon EKS cluster to which the addon will be attached, enabling users to associate the addon with a specific Kubernetes cluster for enhanced functionality or management. By defining this required parameter, users ensure the addon is deployed to the correct cluster, aligning with their infrastructure and application goals."
+    },
+    {
+      "name": "configuration_values",
+      "description": "(Optional) custom configuration values for addons with single JSON string. This JSON string value must match the JSON schema derived from describe-addon-configuration.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `configuration_values` argument allows users to define custom settings for an EKS addon by providing a single JSON string that adheres to the addon-specific schema. This enables precise control over addon behavior, such as configuring runtime parameters, feature toggles, or operational settings, to tailor the addon functionality to specific application or cluster requirements."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_eks_addon` resource allows users to specify a unique identifier for the EKS addon, typically corresponding to the name of the addon being managed (e.g., \"vpc-cni\" or \"kube-proxy\"). Setting this argument defines which addon is being configured or updated within the EKS cluster, enabling users to manage specific Kubernetes extensions that enhance cluster functionality."
+    },
+    {
+      "name": "preserve",
+      "description": "(Optional) Indicates if you want to preserve the created resources when deleting the EKS add-on.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `preserve` argument in the `aws_eks_addon` resource allows users to control the lifecycle behavior of EKS add-on resources during deletion. When set to `true`, it ensures that the associated resources created by the add-on are retained, enabling resource preservation for scenarios like migration or manual cleanup, rather than automatic removal."
+    },
+    {
+      "name": "resolve_conflicts",
+      "description": "(Deprecated use the `resolve_conflicts_on_create` and `resolve_conflicts_on_update` attributes instead) Define how to resolve parameter value conflicts when migrating an existing add-on to an Amazon EKS add-on or when applying version updates to the add-on. Valid values are `NONE`, `OVERWRITE` and `PRESERVE`. Note that `PRESERVE` is only valid on addon update, not for initial addon creation. If you need to set this to `PRESERVE`, use the `resolve_conflicts_on_create` and `resolve_conflicts_on_update` attributes instead. For more details check UpdateAddon API Docs.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `resolve_conflicts` argument in the `aws_eks_addon` resource specifies how to handle parameter value conflicts when migrating an existing add-on to an Amazon EKS-managed add-on or updating its version. By setting this argument, users can control whether conflicting values are preserved (`PRESERVE`), overwritten (`OVERWRITE`), or left unchanged (`NONE`), impacting the behavior of add-on updates and migrations. Note that this argument is deprecated in favor of `resolve_conflicts_on_create` and `resolve_conflicts_on_update`."
+    },
+    {
+      "name": "resolve_conflicts_on_create",
+      "description": "(Optional) How to resolve field value conflicts when migrating a self-managed add-on to an Amazon EKS add-on. Valid values are `NONE` and `OVERWRITE`. For more details see the CreateAddon API Docs.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `resolve_conflicts_on_create` argument in the `aws_eks_addon` resource allows users to define how field value conflicts are handled when migrating a self-managed add-on to an Amazon EKS-managed add-on. By specifying `NONE` or `OVERWRITE`, users can control whether existing configurations are preserved or replaced during the migration process, ensuring seamless integration or customization based on their operational needs."
+    },
+    {
+      "name": "resolve_conflicts_on_update",
+      "description": "(Optional) How to resolve field value conflicts for an Amazon EKS add-on if you've changed a value from the Amazon EKS default value. Valid values are `NONE`, `OVERWRITE`, and `PRESERVE`. For more details see the UpdateAddon API Docs.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `resolve_conflicts_on_update` argument in the `aws_eks_addon` resource allows users to define how field value conflicts are handled when updating an Amazon EKS add-on, particularly when custom values differ from the default settings provided by Amazon EKS. By specifying `NONE`, `OVERWRITE`, or `PRESERVE`, users can control whether to retain their custom configurations, overwrite them with default values, or leave conflicts unresolved, enabling fine-grained management of add-on updates to align with operational or compliance goals."
+    },
+    {
+      "name": "service_account_role_arn",
+      "description": "(Optional) The Amazon Resource Name (ARN) of an existing IAM role to bind to the add-on's service account. The role must be assigned the IAM permissions required by the add-on. If you don't specify an existing IAM role, then the add-on uses the permissions assigned to the node IAM role. For more information, see Amazon EKS node IAM role in the Amazon EKS User Guide. Note:To specify an existing IAM role, you must have an IAM OpenID Connect (OIDC) provider created for your cluster. For more information, see Enabling IAM roles for service accounts on your cluster in the Amazon EKS User Guide. addon_version \u2013 (Optional) The version of the EKS add-on. The version must match one of the versions returned by describe-addon-versions. configuration_values - (Optional) custom configuration values for addons with single JSON string. This JSON string value must match the JSON schema derived from describe-addon-configuration. resolve_conflicts_on_create - (Optional) How to resolve field value conflicts when migrating a self-managed add-on to an Amazon EKS add-on. Valid values are NONE and OVERWRITE. For more details see the CreateAddon API Docs. resolve_conflicts_on_update - (Optional) How to resolve field value conflicts for an Amazon EKS add-on if you've changed a value from the Amazon EKS default value. Valid values are NONE, OVERWRITE, and PRESERVE. For more details see the UpdateAddon API Docs. resolve_conflicts - (Deprecated use the resolve_conflicts_on_create and resolve_conflicts_on_update attributes instead) Define how to resolve parameter value conflicts when migrating an existing add-on to an Amazon EKS add-on or when applying version updates to the add-on. Valid values are NONE, OVERWRITE and PRESERVE. Note that PRESERVE is only valid on addon update, not for initial addon creation. If you need to set this to PRESERVE, use the resolve_conflicts_on_create and resolve_conflicts_on_update attributes instead. For more details check UpdateAddon API Docs. tags - (Optional) Key-value map of resource tags. If configured with a provider default_tags configuration block present, tags with matching keys will overwrite those defined at the provider-level. pod_identity_association - (Optional) Configuration block with EKS Pod Identity association settings. See pod_identity_association below for details. preserve - (Optional) Indicates if you want to preserve the created resources when deleting the EKS add-on. service_account_role_arn - (Optional) The Amazon Resource Name (ARN) of an existing IAM role to bind to the add-on's service account. The role must be assigned the IAM permissions required by the add-on. If you don't specify an existing IAM role, then the add-on uses the permissions assigned to the node IAM role. For more information, see Amazon EKS node IAM role in the Amazon EKS User Guide. To specify an existing IAM role, you must have an IAM OpenID Connect (OIDC) provider created for your cluster. For more information, see Enabling IAM roles for service accounts on your cluster in the Amazon EKS User Guide.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `service_account_role_arn` argument allows users to specify the Amazon Resource Name (ARN) of an existing IAM role to bind to the EKS add-on's service account, enabling fine-grained control over the IAM permissions assigned to the add-on. By setting this argument, users can ensure the add-on operates with a custom IAM role rather than relying on the default node IAM role, which is particularly useful for meeting specific security or compliance requirements in clusters with an IAM OpenID Connect (OIDC) provider configured."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Key-value map of resource tags. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_eks_addon` resource allows users to define a key-value map of custom metadata tags for the EKS add-on, enabling resource organization, cost allocation, and management within AWS. When specified, these tags can override provider-level `default_tags`, giving users granular control over tagging for this specific resource."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument in the `aws_eks_addon` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to all resources associated with the EKS addon. This enables consistent tagging for cost allocation, resource organization, and access management across the addon and its related infrastructure components."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "pod_identity_association",
+      "description": "(Optional) Configuration block with EKS Pod Identity association settings. See `pod_identity_association` below for details.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "role_arn",
+          "description": "(Required) The Amazon Resource Name (ARN) of the IAM role to associate with the service account. The EKS Pod Identity agent manages credentials to assume this role for applications in the containers in the pods that use this service account.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `role_arn` argument specifies the IAM role's Amazon Resource Name (ARN to associate with the service account in the `pod_identity_association` configuration for the `aws_eks_addon` resource. By setting this, users enable the EKS Pod Identity agent to manage credentials and allow applications running in pods to assume the specified role, facilitating secure access to AWS resources."
+        },
+        {
+          "name": "service_account",
+          "description": "(Required) The name of the Kubernetes service account inside the cluster to associate the IAM credentials with.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "Defines the name of the Kubernetes service account within the EKS cluster to associate with IAM credentials, enabling fine-grained access control for pods by linking their identity to specific AWS permissions. This argument is essential for configuring pod-level IAM roles, supporting secure and scalable workload authentication."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `pod_identity_association` configuration block within the `aws_eks_addon` resource defines settings for associating Kubernetes pods with AWS IAM roles, enabling fine-grained access control to AWS services. This block encapsulates identity mapping configurations, allowing users to securely manage pod-level permissions and enhance workload isolation in EKS clusters."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_eks_addon` resource allows users to specify the maximum duration (in string format, e.g., \"10m\") Terraform will wait for the creation of an EKS addon to complete. Configuring this timeout helps users manage deployment workflows by ensuring Terraform does not hang indefinitely during addon provisioning, aligning resource creation with operational expectations and error handling strategies."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_eks_addon` resource allows users to specify the maximum duration (as a string) Terraform will wait for the deletion of an EKS addon to complete. Configuring this argument helps manage resource lifecycle operations by ensuring that long-running delete processes are properly handled, preventing timeout errors during infrastructure changes."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block of the `aws_eks_addon` resource allows users to specify the maximum duration (in string format, e.g., \"30m\") for updating an EKS addon. By configuring this argument, users can control the timeout behavior for addon updates, ensuring operations do not exceed the defined time limit, which is useful for managing deployment lifecycles and preventing stalled updates in their Kubernetes environment."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_eks_addon` resource defines customizable time limits for various operations related to the lifecycle management of EKS add-ons, such as creation, update, and deletion. By configuring this block, users can ensure precise control over operation durations, helping to prevent long-running tasks or timeout errors in environments with specific performance or dependency constraints."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) of the EKS add-on.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "created_at",
+      "description": "Date and time in RFC3339 format that the EKS add-on was created.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "modified_at",
+      "description": "Date and time in RFC3339 format that the EKS add-on was updated.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

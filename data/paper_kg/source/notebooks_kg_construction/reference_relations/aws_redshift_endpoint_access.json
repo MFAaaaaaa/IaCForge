@@ -1,0 +1,17 @@
+[
+    {
+        "argument_path": "clusterIdentifier",
+        "references_output": "aws_redshift_cluster.clusterIdentifier",
+        "target_resource_type": "aws_redshift_cluster"
+    },
+    {
+        "argument_path": "subnetGroupName",
+        "references_output": "aws_redshift_subnet_group.id",
+        "target_resource_type": "aws_redshift_subnet_group"
+    },
+    {
+        "argument_path": "vpcSecurityGroupIds",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    }
+]

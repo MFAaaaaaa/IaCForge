@@ -1,0 +1,640 @@
+{
+  "resource": {
+    "name": "aws_cloudwatch_event_target",
+    "description": "Provides an EventBridge Target resource. EventBridge was formerly known as CloudWatch Events. The functionality is identical.",
+    "llm_summary": "The `aws_cloudwatch_event_target` resource enables the configuration of EventBridge (formerly CloudWatch Events) targets, allowing users to route event data to various AWS services or custom endpoints for automated workflows and integrations. Common use cases include triggering Lambda functions, invoking Step Functions, sending notifications via SNS, or writing data to SQS based on event patterns. Users can define target-specific settings such as input transformations, retry policies, and dead-letter queues to ensure reliable and customized event processing."
+  },
+  "examples": [
+    {
+      "title": "Kinesis Usage",
+      "code": "resource \"aws_cloudwatch_event_target\" \"yada\" {\n  target_id = \"Yada\"\n  rule      = aws_cloudwatch_event_rule.console.name\n  arn       = aws_kinesis_stream.test_stream.arn\n\n  run_command_targets {\n    key    = \"tag:Name\"\n    values = [\"FooBar\"]\n  }\n\n  run_command_targets {\n    key    = \"InstanceIds\"\n    values = [\"i-162058cd308bffec2\"]\n  }\n}\n\nresource \"aws_cloudwatch_event_rule\" \"console\" {\n  name        = \"capture-ec2-scaling-events\"\n  description = \"Capture all EC2 scaling events\"\n\n  event_pattern = jsonencode({\n    source = [\n      \"aws.autoscaling\"\n    ]\n\n    detail-type = [\n      \"EC2 Instance Launch Successful\",\n      \"EC2 Instance Terminate Successful\",\n      \"EC2 Instance Launch Unsuccessful\",\n      \"EC2 Instance Terminate Unsuccessful\"\n    ]\n  })\n}\n\nresource \"aws_kinesis_stream\" \"test_stream\" {\n  name        = \"terraform-kinesis-test\"\n  shard_count = 1\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_cloudwatch_event_target` to route EC2 Auto Scaling events captured by an `aws_cloudwatch_event_rule` to an Amazon Kinesis stream. It highlights the use of `run_command_targets` blocks for filtering targets based on tags and instance IDs, and showcases event pattern configuration for monitoring specific Auto Scaling event types."
+    },
+    {
+      "title": "SSM Document Usage",
+      "code": "data \"aws_iam_policy_document\" \"ssm_lifecycle_trust\" {\n  statement {\n    actions = [\"sts:AssumeRole\"]\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"events.amazonaws.com\"]\n    }\n  }\n}\n\ndata \"aws_iam_policy_document\" \"ssm_lifecycle\" {\n  statement {\n    effect    = \"Allow\"\n    actions   = [\"ssm:SendCommand\"]\n    resources = [\"arn:aws:ec2:eu-west-1:1234567890:instance/*\"]\n\n    condition {\n      test     = \"StringEquals\"\n      variable = \"ec2:ResourceTag/Terminate\"\n      values   = [\"*\"]\n    }\n  }\n\n  statement {\n    effect    = \"Allow\"\n    actions   = [\"ssm:SendCommand\"]\n    resources = [aws_ssm_document.stop_instance.arn]\n  }\n}\n\nresource \"aws_iam_role\" \"ssm_lifecycle\" {\n  name               = \"SSMLifecycle\"\n  assume_role_policy = data.aws_iam_policy_document.ssm_lifecycle_trust.json\n}\n\nresource \"aws_iam_policy\" \"ssm_lifecycle\" {\n  name   = \"SSMLifecycle\"\n  policy = data.aws_iam_policy_document.ssm_lifecycle.json\n}\n\nresource \"aws_iam_role_policy_attachment\" \"ssm_lifecycle\" {\n  policy_arn = aws_iam_policy.ssm_lifecycle.arn\n  role       = aws_iam_role.ssm_lifecycle.name\n}\n\nresource \"aws_ssm_document\" \"stop_instance\" {\n  name          = \"stop_instance\"\n  document_type = \"Command\"\n\n  content = jsonencode({\n    schemaVersion = \"1.2\"\n    description   = \"Stop an instance\"\n    parameters    = {}\n    runtimeConfig = {\n      \"aws:runShellScript\" = {\n        properties = [\n          {\n            id         = \"0.aws:runShellScript\"\n            runCommand = [\"halt\"]\n          }\n        ]\n      }\n    }\n  })\n}\n\nresource \"aws_cloudwatch_event_rule\" \"stop_instances\" {\n  name                = \"StopInstance\"\n  description         = \"Stop instances nightly\"\n  schedule_expression = \"cron(0 0 * * ? *)\"\n}\n\nresource \"aws_cloudwatch_event_target\" \"stop_instances\" {\n  target_id = \"StopInstance\"\n  arn       = aws_ssm_document.stop_instance.arn\n  rule      = aws_cloudwatch_event_rule.stop_instances.name\n  role_arn  = aws_iam_role.ssm_lifecycle.arn\n\n  run_command_targets {\n    key    = \"tag:Terminate\"\n    values = [\"midnight\"]\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_cloudwatch_event_target` to trigger an SSM Document (`aws_ssm_document`) for stopping EC2 instances based on a scheduled CloudWatch Event Rule. It highlights the use of `run_command_targets` for targeting instances with specific tags, along with IAM role and policy configurations to enable secure execution of SSM commands."
+    },
+    {
+      "title": "RunCommand Usage",
+      "code": "resource \"aws_cloudwatch_event_rule\" \"stop_instances\" {\n  name                = \"StopInstance\"\n  description         = \"Stop instances nightly\"\n  schedule_expression = \"cron(0 0 * * ? *)\"\n}\n\nresource \"aws_cloudwatch_event_target\" \"stop_instances\" {\n  target_id = \"StopInstance\"\n  arn       = \"arn:aws:ssm:${var.aws_region}::document/AWS-RunShellScript\"\n  input     = \"{\\\"commands\\\":[\\\"halt\\\"]}\"\n  rule      = aws_cloudwatch_event_rule.stop_instances.name\n  role_arn  = aws_iam_role.ssm_lifecycle.arn\n\n  run_command_targets {\n    key    = \"tag:Terminate\"\n    values = [\"midnight\"]\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_cloudwatch_event_target` to trigger an AWS Systems Manager Run Command document (`AWS-RunShellScript`) based on a scheduled CloudWatch Event Rule. It highlights the use of the `run_command_targets` block to target EC2 instances with specific tags and the `input` argument to pass custom command parameters, showcasing an automated instance management workflow."
+    },
+    {
+      "title": "ECS Run Task with Role and Task Override Usage",
+      "code": "data \"aws_iam_policy_document\" \"assume_role\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"events.amazonaws.com\"]\n    }\n\n    actions = [\"sts:AssumeRole\"]\n  }\n}\n\nresource \"aws_iam_role\" \"ecs_events\" {\n  name               = \"ecs_events\"\n  assume_role_policy = data.aws_iam_policy_document.assume_role.json\n}\n\ndata \"aws_iam_policy_document\" \"ecs_events_run_task_with_any_role\" {\n  statement {\n    effect    = \"Allow\"\n    actions   = [\"iam:PassRole\"]\n    resources = [\"*\"]\n  }\n\n  statement {\n    effect    = \"Allow\"\n    actions   = [\"ecs:RunTask\"]\n    resources = [replace(aws_ecs_task_definition.task_name.arn, \"/:\\\\d+$/\", \":*\")]\n  }\n}\nresource \"aws_iam_role_policy\" \"ecs_events_run_task_with_any_role\" {\n  name   = \"ecs_events_run_task_with_any_role\"\n  role   = aws_iam_role.ecs_events.id\n  policy = data.aws_iam_policy_document.ecs_events_run_task_with_any_role.json\n}\n\nresource \"aws_cloudwatch_event_target\" \"ecs_scheduled_task\" {\n  target_id = \"run-scheduled-task-every-hour\"\n  arn       = aws_ecs_cluster.cluster_name.arn\n  rule      = aws_cloudwatch_event_rule.every_hour.name\n  role_arn  = aws_iam_role.ecs_events.arn\n\n  ecs_target {\n    task_count          = 1\n    task_definition_arn = aws_ecs_task_definition.task_name.arn\n  }\n\n  input = jsonencode({\n    containerOverrides = [\n      {\n        name = \"name-of-container-to-override\",\n        command = [\n          \"bin/console\",\n          \"scheduled-task\"\n        ]\n      }\n    ]\n  })\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_cloudwatch_event_target` resource to trigger an ECS task using a CloudWatch Event Rule, with role-based permissions and task overrides. It showcases the use of the `ecs_target` block for specifying `task_definition_arn`, `task_count`, and container overrides, along with IAM role and policy configurations to enable `ecs:RunTask` and `iam:PassRole` actions."
+    },
+    {
+      "title": "API Gateway target",
+      "code": "resource \"aws_cloudwatch_event_target\" \"example\" {\n  arn  = \"${aws_api_gateway_stage.example.execution_arn}/GET\"\n  rule = aws_cloudwatch_event_rule.example.id\n\n  http_target {\n    query_string_parameters = {\n      Body = \"$.detail.body\"\n    }\n    header_parameters = {\n      Env = \"Test\"\n    }\n  }\n}\n\nresource \"aws_cloudwatch_event_rule\" \"example\" {\n  # ...\n}\n\nresource \"aws_api_gateway_deployment\" \"example\" {\n  rest_api_id = aws_api_gateway_rest_api.example.id\n  # ...\n}\n\nresource \"aws_api_gateway_stage\" \"example\" {\n  rest_api_id   = aws_api_gateway_rest_api.example.id\n  deployment_id = aws_api_gateway_deployment.example.id\n  # ...\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_cloudwatch_event_target` to route events to an API Gateway stage using the `http_target` block, including custom `query_string_parameters` and `header_parameters` for dynamic event data handling. This example showcases integration between CloudWatch Events and API Gateway for event-driven architectures.\""
+    },
+    {
+      "title": "Cross-Account Event Bus target",
+      "code": "data \"aws_iam_policy_document\" \"assume_role\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"events.amazonaws.com\"]\n    }\n\n    actions = [\"sts:AssumeRole\"]\n  }\n}\n\nresource \"aws_iam_role\" \"event_bus_invoke_remote_event_bus\" {\n  name               = \"event-bus-invoke-remote-event-bus\"\n  assume_role_policy = data.aws_iam_policy_document.assume_role.json\n}\n\ndata \"aws_iam_policy_document\" \"event_bus_invoke_remote_event_bus\" {\n  statement {\n    effect    = \"Allow\"\n    actions   = [\"events:PutEvents\"]\n    resources = [\"arn:aws:events:eu-west-1:1234567890:event-bus/My-Event-Bus\"]\n  }\n}\n\nresource \"aws_iam_policy\" \"event_bus_invoke_remote_event_bus\" {\n  name   = \"event_bus_invoke_remote_event_bus\"\n  policy = data.aws_iam_policy_document.event_bus_invoke_remote_event_bus.json\n}\n\nresource \"aws_iam_role_policy_attachment\" \"event_bus_invoke_remote_event_bus\" {\n  role       = aws_iam_role.event_bus_invoke_remote_event_bus.name\n  policy_arn = aws_iam_policy.event_bus_invoke_remote_event_bus.arn\n}\n\nresource \"aws_cloudwatch_event_rule\" \"stop_instances\" {\n  name                = \"StopInstance\"\n  description         = \"Stop instances nightly\"\n  schedule_expression = \"cron(0 0 * * ? *)\"\n}\n\nresource \"aws_cloudwatch_event_target\" \"stop_instances\" {\n  target_id = \"StopInstance\"\n  arn       = \"arn:aws:events:eu-west-1:1234567890:event-bus/My-Event-Bus\"\n  rule      = aws_cloudwatch_event_rule.stop_instances.name\n  role_arn  = aws_iam_role.event_bus_invoke_remote_event_bus.arn\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_cloudwatch_event_target` resource to send events to a cross-account Event Bus, using an IAM role with the necessary permissions (`events:PutEvents`) and trust policy for `events.amazonaws.com`. It illustrates the setup of an event rule with a cron schedule and the use of `role_arn` to enable secure cross-account event delivery."
+    },
+    {
+      "title": "Input Transformer Usage - JSON Object",
+      "code": "resource \"aws_cloudwatch_event_target\" \"example\" {\n  arn  = aws_lambda_function.example.arn\n  rule = aws_cloudwatch_event_rule.example.id\n\n  input_transformer {\n    input_paths = {\n      instance = \"$.detail.instance\",\n      status   = \"$.detail.status\",\n    }\n    input_template = <<EOF\n{\n  \"instance_id\": <instance>,\n  \"instance_status\": <status>\n}\nEOF\n  }\n}\n\nresource \"aws_cloudwatch_event_rule\" \"example\" {\n  # ...\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_cloudwatch_event_target` resource with an `input_transformer` block to transform incoming event data into a custom JSON object using `input_paths` and `input_template`. This example illustrates mapping specific event details and formatting them for downstream processing, such as invoking an AWS Lambda function.\""
+    },
+    {
+      "title": "Input Transformer Usage - Simple String",
+      "code": "resource \"aws_cloudwatch_event_target\" \"example\" {\n  arn  = aws_lambda_function.example.arn\n  rule = aws_cloudwatch_event_rule.example.id\n\n  input_transformer {\n    input_paths = {\n      instance = \"$.detail.instance\",\n      status   = \"$.detail.status\",\n    }\n    input_template = \"\\\"<instance> is in state <status>\\\"\"\n  }\n}\n\nresource \"aws_cloudwatch_event_rule\" \"example\" {\n  # ...\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_cloudwatch_event_target` resource with an `input_transformer` block to transform event data using `input_paths` and an `input_template`. It illustrates how to map specific JSON fields from the event (`instance` and `status`) and format them into a custom string for downstream processing, such as invoking an AWS Lambda function."
+    },
+    {
+      "title": "Cloudwatch Log Group Usage",
+      "code": "resource \"aws_cloudwatch_log_group\" \"example\" {\n  name              = \"/aws/events/guardduty/logs\"\n  retention_in_days = 1\n}\n\ndata \"aws_iam_policy_document\" \"example_log_policy\" {\n  statement {\n    effect = \"Allow\"\n    actions = [\n      \"logs:CreateLogStream\"\n    ]\n\n    resources = [\n      \"${aws_cloudwatch_log_group.example.arn}:*\"\n    ]\n\n    principals {\n      type = \"Service\"\n      identifiers = [\n        \"events.amazonaws.com\",\n        \"delivery.logs.amazonaws.com\"\n      ]\n    }\n  }\n  statement {\n    effect = \"Allow\"\n    actions = [\n      \"logs:PutLogEvents\"\n    ]\n\n    resources = [\n      \"${aws_cloudwatch_log_group.example.arn}:*:*\"\n    ]\n\n    principals {\n      type = \"Service\"\n      identifiers = [\n        \"events.amazonaws.com\",\n        \"delivery.logs.amazonaws.com\"\n      ]\n    }\n\n    condition {\n      test     = \"ArnEquals\"\n      values   = [aws_cloudwatch_event_rule.example.arn]\n      variable = \"aws:SourceArn\"\n    }\n  }\n}\n\nresource \"aws_cloudwatch_log_resource_policy\" \"example\" {\n  policy_document = data.aws_iam_policy_document.example_log_policy.json\n  policy_name     = \"guardduty-log-publishing-policy\"\n}\n\nresource \"aws_cloudwatch_event_rule\" \"example\" {\n  name        = \"guard-duty_event_rule\"\n  description = \"GuardDuty Findings\"\n\n  event_pattern = jsonencode(\n    {\n      \"source\" : [\n        \"aws.guardduty\"\n      ]\n    }\n  )\n\n  tags = {\n    Environment = \"example\"\n  }\n}\n\nresource \"aws_cloudwatch_event_target\" \"example\" {\n  rule = aws_cloudwatch_event_rule.example.name\n  arn  = aws_cloudwatch_log_group.example.arn\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_cloudwatch_event_target` to route GuardDuty findings to a CloudWatch Log Group for centralized logging. It includes setting up an `aws_cloudwatch_event_rule` with an event pattern for GuardDuty, defining IAM permissions via a policy document for log publishing, and configuring retention settings for the log group."
+    },
+    {
+      "title": "AppSync Usage",
+      "code": "resource \"aws_cloudwatch_event_rule\" \"invoke_appsync_mutation\" {\n  name                = \"invoke-appsync-mutation\"\n  description         = \"schedule_batch_test\"\n  schedule_expression = \"rate(5 minutes)\"\n}\n\nresource \"aws_cloudwatch_event_target\" \"invoke_appsync_mutation\" {\n  arn      = replace(aws_appsync_graphql_api.graphql-api.arn, \"apis\", \"endpoints/graphql-api\")\n  rule     = aws_cloudwatch_event_rule.invoke_appsync_mutation.id\n  role_arn = aws_iam_role.appsync_mutation_role.arn\n\n  input_transformer {\n    input_paths = {\n      input = \"$.detail.input\"\n    }\n\n    input_template = <<EOF\n      {\n        \"input\": <input>\n      }\n    EOF\n  }\n\n  appsync_target {\n    graphql_operation = \"mutation TestMutation($input:MutationInput!){testMutation(input: $input) {test}}\"\n  }\n}\n\nresource \"aws_iam_role\" \"appsync_mutation_role\" {\n  name               = \"appsync-mutation-role\"\n  assume_role_policy = data.aws_iam_policy_document.appsync_mutation_role_trust.json\n}\n\ndata \"aws_iam_policy_document\" \"appsync_mutation_role_trust\" {\n  statement {\n    actions = [\"sts:AssumeRole\"]\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"events.amazonaws.com\"]\n    }\n  }\n}\n\ndata \"aws_iam_policy_document\" \"appsync_mutation_role_policy_document\" {\n  statement {\n    actions = [\"appsync:GraphQL\"]\n    effect  = \"Allow\"\n    resources = [\n      aws_appsync_graphql_api.graphql-api.arn\n    ]\n  }\n}\n\nresource \"aws_iam_policy\" \"appsync_mutation_role_policy\" {\n  name   = \"appsync-mutation-role-policy\"\n  policy = data.aws_iam_policy_document.appsync_mutation_role_policy_document.json\n}\n\nresource \"aws_iam_role_policy_attachment\" \"appsync_mutation_role_attachment\" {\n  policy_arn = aws_iam_policy.appsync_mutation_role_policy.arn\n  role       = aws_iam_role.appsync_mutation_role.name\n}\n\nresource \"aws_appsync_graphql_api\" \"graphql-api\" {\n  name                = \"api\"\n  authentication_type = \"AWS_IAM\"\n  schema              = <<EOF\n    schema {\n      mutation: Mutation\n      query: Query\n    }\n\n    type Query {\n      testQuery: String\n    }\n\n    type Mutation {\n      testMutation(input: MutationInput!): TestMutationResult\n    }\n\n    type TestMutationResult {\n      test: String\n    }\n\n    input MutationInput {\n      testInput: String\n    }\n  EOF\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_cloudwatch_event_target` to invoke an AWS AppSync GraphQL mutation on a scheduled basis using a CloudWatch Event Rule. It showcases the use of the `appsync_target` block for specifying the GraphQL operation, `input_transformer` for customizing event input, and IAM roles and policies to grant necessary permissions for AppSync and CloudWatch integration."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "arn",
+      "description": "(Required) The Amazon Resource Name (ARN) of the target.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `arn` argument in the `aws_cloudwatch_event_target` resource specifies the Amazon Resource Name (ARN) of the target resource that will receive events from the associated CloudWatch Event Rule. By defining this required argument, users configure the destination for event-driven workflows, enabling integration with services like Lambda, SQS, SNS, or other AWS resources to trigger actions based on events."
+    },
+    {
+      "name": "event_bus_name",
+      "description": "(Optional) The name or ARN of the event bus to associate with the rule. If you omit this, the `default` event bus is used.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `event_bus_name` argument in the `aws_cloudwatch_event_target` resource allows users to specify the name or ARN of the event bus to associate with the rule, enabling targeted event routing across custom or organizational event buses. By setting this argument, users can control which event bus processes the rule's events, supporting use cases like multi-account event management or isolating event workflows within specific environments. If omitted, the default event bus is used."
+    },
+    {
+      "name": "force_destroy",
+      "description": "(Optional) Used to delete managed rules created by AWS. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `force_destroy` argument in the `aws_cloudwatch_event_target` resource controls whether managed rules created by AWS associated with the event target are forcibly deleted during resource destruction. Setting this to `true` ensures automatic cleanup of these rules, aligning with lifecycle management goals and preventing orphaned resources, while the default value of `false` preserves them for manual handling."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_cloudwatch_event_target` resource allows users to define a unique identifier for the target within the associated CloudWatch Event rule. This identifier helps distinguish multiple targets linked to the same rule, enabling precise management and referencing of individual targets in event-driven workflows."
+    },
+    {
+      "name": "input",
+      "description": "(Optional) Valid JSON text passed to the target. Conflicts with `input_path` and `input_transformer`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `input` argument for the `aws_cloudwatch_event_target` resource allows users to specify a static JSON payload that is sent to the target when the event rule is triggered. This enables precise control over the data delivered to the target, such as configuring input parameters or environment-specific values, and cannot be used in conjunction with `input_path` or `input_transformer`."
+    },
+    {
+      "name": "input_path",
+      "description": "(Optional) The value of the JSONPath that is used for extracting part of the matched event when passing it to the target. Conflicts with `input` and `input_transformer`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `input_path` argument in the `aws_cloudwatch_event_target` resource allows users to define a JSONPath expression for extracting specific portions of the matched event data before passing it to the target. This enables precise control over the event payload, supporting use cases like filtering or customizing the data sent to downstream services, and it cannot be used alongside `input` or `input_transformer`."
+    },
+    {
+      "name": "role_arn",
+      "description": "(Optional) The Amazon Resource Name (ARN) of the IAM role to be used for this target when the rule is triggered. Required if `ecs_target` is used or target in `arn` is EC2 instance, Kinesis data stream, Step Functions state machine, or Event Bus in different account or region.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `role_arn` argument in the `aws_cloudwatch_event_target` resource specifies the IAM role to be assumed by the target when the CloudWatch rule is triggered. This enables secure access and permissions for targets such as ECS tasks, EC2 instances, Kinesis streams, Step Functions state machines, or Event Buses across accounts or regions, ensuring proper execution of the event-driven workflow."
+    },
+    {
+      "name": "rule",
+      "description": "(Required) The name of the rule you want to add targets to. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `rule` argument specifies the name of the CloudWatch Event Rule to which the target will be attached, enabling the user to define the event source that triggers the target's execution. By setting this required argument, users establish the connection between the rule and its associated target, facilitating event-driven workflows such as invoking Lambda functions, sending notifications, or triggering other AWS services based on specific events."
+    },
+    {
+      "name": "target_id",
+      "description": "(Optional) The unique target assignment ID. If missing, will generate a random, unique id.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `target_id` argument in the `aws_cloudwatch_event_target` resource allows users to define a unique identifier for the target assignment within a CloudWatch Event rule. By specifying this ID, users can manage and distinguish individual targets, facilitating organization and tracking, while omitting it generates a random, unique ID automatically."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "appsync_target",
+      "description": "(Optional) Parameters used when you are using the rule to invoke an AppSync GraphQL API mutation. Documented below. A maximum of 1 are allowed.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "graphql_operation",
+          "description": "(Optional) Contains the GraphQL mutation to be parsed and executed.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `graphql_operation` argument allows users to specify the GraphQL mutation to be executed when the AppSync target is triggered by an Amazon CloudWatch Event. By configuring this, users can define the specific operation to invoke within their AppSync API, enabling automated execution of GraphQL mutations in response to event patterns."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `appsync_target` configuration block within the `aws_cloudwatch_event_target` resource enables the invocation of an AppSync GraphQL API mutation as a target for a CloudWatch Event rule. It encapsulates parameters required to define and manage the integration with AppSync, allowing users to automate GraphQL API operations in response to event triggers, facilitating seamless event-driven workflows and API interactions."
+    },
+    {
+      "name": "batch_target",
+      "description": "(Optional) Parameters used when you are using the rule to invoke an Amazon Batch Job. Documented below. A maximum of 1 are allowed.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "array_size",
+          "description": "(Optional) The size of the array, if this is an array batch job. Valid values are integers between 2 and 10,000.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `array_size` argument for the `batch_target` in the `aws_cloudwatch_event_target` resource allows users to define the number of array job iterations when triggering an AWS Batch job. By specifying an integer between 2 and 10,000, this argument configures the scale of parallel job executions, enabling efficient processing of large workloads or batch tasks in a distributed manner."
+        },
+        {
+          "name": "job_attempts",
+          "description": "(Optional) The number of times to attempt to retry, if the job fails. Valid values are 1 to 10.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `job_attempts` argument for the `batch_target` in the `aws_cloudwatch_event_target` resource allows users to define the maximum number of retry attempts (1 to 10) for a failed AWS Batch job triggered by a CloudWatch event. Configuring this parameter helps ensure fault tolerance by enabling automatic retries, aligning with user goals of improving job reliability and handling transient failures in batch processing workflows."
+        },
+        {
+          "name": "job_definition",
+          "description": "(Required) The ARN or name of the job definition to use if the event target is an AWS Batch job. This job definition must already exist.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `job_definition` argument specifies the ARN or name of the AWS Batch job definition to be executed when the CloudWatch event triggers the `batch_target`. By defining this, users control the specific job configuration, including its environment, resource requirements, and execution parameters, ensuring the event target initiates the desired Batch processing workflow."
+        },
+        {
+          "name": "job_name",
+          "description": "(Required) The name to use for this execution of the job, if the target is an AWS Batch job.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `job_name` argument specifies the unique name for the execution of an AWS Batch job triggered by the CloudWatch Event Target. By defining this required string, users can control the identification and tracking of individual job runs, ensuring proper execution and monitoring within batch workflows."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `batch_target` configuration block within the `aws_cloudwatch_event_target` resource defines parameters for invoking Amazon Batch jobs as part of an event rule. It encapsulates settings related to job submission, such as specifying the job queue and job definition, enabling users to automate and schedule Batch job execution in response to CloudWatch Events for streamlined workflow orchestration."
+    },
+    {
+      "name": "dead_letter_config",
+      "description": "(Optional)  Parameters used when you are providing a dead letter config. Documented below. A maximum of 1 are allowed.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "arn",
+          "description": "(Optional) - ARN of the SQS queue specified as the target for the dead-letter queue.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `arn` argument in the `dead_letter_config` block of the `aws_cloudwatch_event_target` resource allows users to specify the Amazon Resource Name (ARN) of an SQS queue to act as the dead-letter queue for the event target. By setting this argument, users can configure a fallback mechanism to capture and store failed event deliveries, ensuring reliability and enabling debugging or further processing of undelivered events."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `dead_letter_config` block in the `aws_cloudwatch_event_target` resource enables the configuration of a dead-letter queue, which captures failed event deliveries for further analysis or retry. This block encapsulates settings related to error handling and ensures reliable event processing by providing a mechanism to manage undeliverable events, helping users improve fault tolerance and debugging capabilities in their CloudWatch Event Target workflows."
+    },
+    {
+      "name": "ecs_target",
+      "description": "(Optional) Parameters used when you are using the rule to invoke Amazon ECS Task. Documented below. A maximum of 1 are allowed.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enable_ecs_managed_tags",
+          "description": "(Optional) Specifies whether to enable Amazon ECS managed tags for the task.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enable_ecs_managed_tags` argument for the `ecs_target` in the `aws_cloudwatch_event_target` resource allows users to control whether Amazon ECS automatically assigns managed tags to tasks triggered by the CloudWatch event. Enabling this feature simplifies tag management by ensuring consistent tagging for resource tracking, cost allocation, and organizational policies."
+        },
+        {
+          "name": "enable_execute_command",
+          "description": "(Optional) Whether or not to enable the execute command functionality for the containers in this task. If true, this enables execute command functionality on all containers in the task.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enable_execute_command` argument allows users to control whether the ECS task containers associated with the `aws_cloudwatch_event_target` resource support the AWS ECS Execute Command functionality. Enabling this feature facilitates direct command execution within containerized tasks, commonly used for debugging, troubleshooting, or managing container environments interactively."
+        },
+        {
+          "name": "group",
+          "description": "(Optional) Specifies an ECS task group for the task. The maximum length is 255 characters.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `group` argument for the `ecs_target` in the `aws_cloudwatch_event_target` resource allows users to define an ECS task group name, enabling logical grouping of tasks within the ECS service. This helps organize and manage tasks for specific workflows or environments, supporting use cases like workload segmentation or targeted execution within CloudWatch Event rules."
+        },
+        {
+          "name": "launch_type",
+          "description": "(Optional) Specifies the launch type on which your task is running. The launch type that you specify here must match one of the launch type (compatibilities) of the target task. Valid values include: `EC2`, `EXTERNAL`, or `FARGATE`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `launch_type` argument for the `ecs_target` in the `aws_cloudwatch_event_target` resource allows users to specify the deployment environment for the ECS task triggered by the CloudWatch event. By setting this argument to `EC2`, `FARGATE`, or `EXTERNAL`, users define the underlying infrastructure on which the task will run, enabling control over resource allocation and compatibility with the task's configured launch type."
+        },
+        {
+          "name": "platform_version",
+          "description": "(Optional) Specifies the platform version for the task. Specify only the numeric portion of the platform version, such as `1.1.0`. This is used only if LaunchType is FARGATE. For more information about valid platform versions, see AWS Fargate Platform Versions.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `platform_version` argument allows users to specify the Fargate platform version for the ECS task associated with the CloudWatch Event Target. This controls the runtime environment for the task, enabling users to define compatibility with specific Fargate features or updates, such as resource configurations or runtime capabilities, when the `launch_type` is set to `FARGATE`."
+        },
+        {
+          "name": "propagate_tags",
+          "description": "(Optional) Specifies whether to propagate the tags from the task definition to the task. If no value is specified, the tags are not propagated. Tags can only be propagated to the task during task creation. The only valid value is: `TASK_DEFINITION`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `propagate_tags` argument in the `ecs_target` block of the `aws_cloudwatch_event_target` resource allows users to control whether tags from the ECS task definition are automatically propagated to tasks during their creation. This enables consistent tag management for resource tracking, cost allocation, or organizational policies, with the only valid value being `TASK_DEFINITION`."
+        },
+        {
+          "name": "tags",
+          "description": "(Optional) A map of tags to assign to ecs resources.",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `tags` argument for the `ecs_target` in the `aws_cloudwatch_event_target` resource allows users to assign metadata in the form of key-value pairs to ECS resources associated with the event target. This enables users to organize, categorize, and manage resources effectively for purposes such as cost allocation, environment identification, or compliance tracking."
+        },
+        {
+          "name": "task_count",
+          "description": "(Optional) The number of tasks to create based on the TaskDefinition. Defaults to `1`.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `task_count` argument specifies the number of ECS tasks to launch from the defined TaskDefinition when the CloudWatch Event Rule triggers the target. This allows users to control the scale of task execution, enabling event-driven task deployment tailored to workload requirements."
+        },
+        {
+          "name": "task_definition_arn",
+          "description": "(Required) The ARN of the task definition to use if the event target is an Amazon ECS cluster.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `task_definition_arn` argument specifies the Amazon Resource Name (ARN) of the ECS task definition to be executed as part of the `ecs_target` configuration in the `aws_cloudwatch_event_target` resource. By defining this required parameter, users ensure that the CloudWatch event triggers the correct ECS task, enabling automated workflows such as containerized job execution or service orchestration in response to scheduled or event-driven rules."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "capacity_provider_strategy",
+          "description": "(Optional) The capacity provider strategy to use for the task. If a `capacity_provider_strategy` specified, the `launch_type` parameter must be omitted. If no `capacity_provider_strategy` or `launch_type` is specified, the default capacity provider strategy for the cluster is used. Can be one or more. See below.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "base",
+              "description": "(Optional) The base value designates how many tasks, at a minimum, to run on the specified capacity provider. Only one capacity provider in a capacity provider strategy can have a base defined. Defaults to `0`.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `base` argument in the `capacity_provider_strategy` for the `aws_cloudwatch_event_target` resource allows users to specify the minimum number of tasks to run on a designated capacity provider, ensuring baseline resource allocation for task execution. This configuration is useful for defining guaranteed capacity in environments with multiple capacity providers, supporting predictable workload distribution and resource prioritization."
+            },
+            {
+              "name": "capacity_provider",
+              "description": "(Required) Short name of the capacity provider.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `capacity_provider` argument specifies the short name of the capacity provider to be used in the `capacity_provider_strategy` for an AWS CloudWatch Event Target. This allows users to define the compute resource (e.g., Fargate or EC2) that will handle tasks triggered by the event, ensuring the appropriate infrastructure is utilized for task execution based on their workload requirements."
+            },
+            {
+              "name": "weight",
+              "description": "(Required) The weight value designates the relative percentage of the total number of tasks launched that should use the specified capacity provider. The weight value is taken into consideration after the base value, if defined, is satisfied.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `weight` argument in the `capacity_provider_strategy` for the `aws_cloudwatch_event_target` resource allows users to define the relative distribution of tasks across specified capacity providers by assigning a proportional value. This configuration helps control task placement strategy, ensuring a balanced or prioritized allocation of resources based on the specified weights after satisfying any base requirements."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `capacity_provider_strategy` block within the `ecs_target` configuration of the `aws_cloudwatch_event_target` resource defines the strategy for selecting ECS capacity providers to manage task placement. It enables fine-grained control over resource allocation by specifying one or more capacity providers and their weight-based prioritization, ensuring optimal task scheduling and cluster utilization while omitting the `launch_type` parameter."
+        },
+        {
+          "name": "network_configuration",
+          "description": "(Optional) Use this if the ECS task uses the awsvpc network mode. This specifies the VPC subnets and security groups associated with the task, and whether a public IP address is to be used. Required if `launch_type` is `FARGATE` because the awsvpc mode is required for Fargate tasks.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "assign_public_ip",
+              "description": "(Optional) Assign a public IP address to the ENI (Fargate launch type only). Valid values are `true` or `false`. Defaults to `false`. For more information, see Task Networking",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `assign_public_ip` argument in the `network_configuration` block of the `aws_cloudwatch_event_target` resource controls whether a public IP address is assigned to the Elastic Network Interface (ENI) for tasks using the Fargate launch type. Setting this to `true` enables public internet access for the task, which is typically required for scenarios like accessing external APIs or services, while leaving it as `false` ensures the task remains private within the VPC."
+            },
+            {
+              "name": "security_groups",
+              "description": "(Optional) The security groups associated with the task or service. If you do not specify a security group, the default security group for the VPC is used.",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "Defines the security groups to associate with the task or service launched by the event target, allowing users to control network-level access and enforce specific inbound and outbound traffic rules. If not specified, the default security group for the VPC is used, ensuring basic connectivity but limiting custom network configurations."
+            },
+            {
+              "name": "subnets",
+              "description": "(Required) The subnets associated with the task or service.",
+              "required": true,
+              "type": "set(string)",
+              "llm_summary": "The `subnets` argument in the `network_configuration` block of the `aws_cloudwatch_event_target` resource allows users to specify the set of subnet IDs where the associated ECS task or service will run. By defining this, users control the network placement of the task within their VPC, ensuring connectivity, security, and compliance with specific subnet configurations, such as private or public access."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "Defines VPC-specific networking settings for ECS tasks using the `awsvpc` network mode, including subnets, security groups, and public IP assignment. Essential for Fargate tasks, this block ensures proper network isolation and connectivity, enabling secure and scalable execution of containerized workloads."
+        },
+        {
+          "name": "ordered_placement_strategy",
+          "description": "(Optional) An array of placement strategy objects to use for the task. You can specify a maximum of five strategy rules per task.",
+          "cardinality": [
+            0,
+            5
+          ],
+          "arguments": [
+            {
+              "name": "field",
+              "description": "(Optional) The field to apply the placement strategy against. For the `spread` placement strategy, valid values are `instanceId` (or `host`, which has the same effect), or any platform or custom attribute that is applied to a container instance, such as `attribute:ecs.availability-zone`. For the `binpack` placement strategy, valid values are `cpu` and `memory`. For the `random` placement strategy, this field is not used. For more information, see Amazon ECS task placement strategies.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `field` argument in the `ordered_placement_strategy` block of the `aws_cloudwatch_event_target` resource allows users to specify the attribute or property against which the placement strategy is applied, such as `instanceId`, `cpu`, or `memory`. By defining this field, users can control how tasks are distributed across container instances based on specific criteria, optimizing resource utilization or availability in alignment with their ECS task placement goals."
+            },
+            {
+              "name": "type",
+              "description": "(Required) Type of placement strategy. The only valid values at this time are `binpack`, `random` and `spread`.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `type` argument in the `ordered_placement_strategy` block of the `aws_cloudwatch_event_target` resource specifies the placement strategy to control how tasks are distributed across available resources. By setting this required argument to one of the valid values (`binpack`, `random`, or `spread`), users can define the allocation behavior to optimize resource utilization (e.g., packing tasks tightly with `binpack`), ensure randomness, or evenly distribute tasks across resources (`spread`), aligning with workload balancing or efficiency goals."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `ordered_placement_strategy` block within the `ecs_target` configuration of the `aws_cloudwatch_event_target` resource defines an array of placement strategy rules to optimize task placement in ECS clusters. By specifying up to five strategy rules, users can control how tasks are distributed across instances based on criteria like bin packing or spreading, enabling efficient resource utilization and workload balancing."
+        },
+        {
+          "name": "placement_constraint",
+          "description": "(Optional) An array of placement constraint objects to use for the task. You can specify up to 10 constraints per task (including constraints in the task definition and those specified at runtime). See Below.",
+          "cardinality": [
+            0,
+            10
+          ],
+          "arguments": [
+            {
+              "name": "expression",
+              "description": "(Optional) Cluster Query Language expression to apply to the constraint. Does not need to be specified for the `distinctInstance` type. For more information, see Cluster Query Language in the Amazon EC2 Container Service Developer Guide.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `expression` argument in the `placement_constraint` block of the `aws_cloudwatch_event_target` resource allows users to define a Cluster Query Language expression that specifies advanced placement rules for ECS tasks within a cluster. By setting this argument, users can control task placement behavior based on custom constraints, enabling fine-grained orchestration of workloads to meet specific operational or resource allocation requirements."
+            },
+            {
+              "name": "type",
+              "description": "(Required) Type of constraint. The only valid values at this time are `memberOf` and `distinctInstance`.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `type` argument in the `placement_constraint` block of the `aws_cloudwatch_event_target` resource specifies the constraint type that governs how event targets are placed within a cluster. By setting this argument to either `memberOf` or `distinctInstance`, users can control target placement behavior, such as ensuring targets belong to a specific group (`memberOf`) or are distributed across distinct instances (`distinctInstance`), enabling optimized resource allocation and fault tolerance."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `placement_constraint` block within the `ecs_target` configuration of the `aws_cloudwatch_event_target` resource defines task placement rules to control how ECS tasks are scheduled across cluster instances. It encapsulates constraints such as instance attributes or task groupings, enabling users to enforce specific deployment requirements for tasks, such as ensuring tasks run on instances with particular characteristics or avoiding co-location of tasks."
+        }
+      ],
+      "llm_summary": "The `ecs_target` configuration block within the `aws_cloudwatch_event_target` resource defines parameters for invoking Amazon ECS tasks in response to CloudWatch Events. It encapsulates settings related to task execution, such as specifying the ECS cluster, task definition, and optional overrides for container configurations. Configuring this block enables users to automate ECS task execution based on event-driven workflows, providing granular control over task behavior and integration with event rules."
+    },
+    {
+      "name": "http_target",
+      "description": "(Optional) Parameters used when you are using the rule to invoke an API Gateway REST endpoint. Documented below. A maximum of 1 is allowed.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "header_parameters",
+          "description": "(Optional) Enables you to specify HTTP headers to add to the request.",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `header_parameters` argument for the `http_target` in the `aws_cloudwatch_event_target` resource allows users to define custom HTTP headers as key-value pairs to include in requests sent to the specified endpoint. This enables precise control over request metadata, such as authentication tokens, content types, or custom headers, to meet specific integration or API requirements."
+        },
+        {
+          "name": "path_parameter_values",
+          "description": "(Optional) The list of values that correspond sequentially to any path variables in your endpoint ARN (for example `arn:aws:execute-api:us-east-1:123456:myapi/*/POST/pets/*`).",
+          "required": false,
+          "type": "list(string)",
+          "llm_summary": "The `path_parameter_values` argument for the `http_target` in the `aws_cloudwatch_event_target` resource allows users to define a sequential list of values that dynamically populate path variables in the endpoint ARN of an HTTP target (e.g., API Gateway). By configuring this argument, users can specify variable segments in the API path, enabling precise routing and execution of API requests based on event-driven triggers."
+        },
+        {
+          "name": "query_string_parameters",
+          "description": "(Optional) Represents keys/values of query string parameters that are appended to the invoked endpoint.",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `query_string_parameters` argument for the `http_target` in the `aws_cloudwatch_event_target` resource allows users to define key-value pairs that are appended as query string parameters to the URL of the invoked HTTP endpoint. This enables customization of the request by passing dynamic or static data, such as filtering criteria, configuration settings, or contextual information, to the target endpoint, supporting use cases like API integration or event-specific data transmission."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `http_target` configuration block in the `aws_cloudwatch_event_target` resource defines parameters for invoking an API Gateway REST endpoint as part of an event rule's target. It encapsulates settings required to integrate CloudWatch Events with API Gateway, enabling users to trigger API calls in response to specific events, facilitating automated workflows and event-driven architectures."
+    },
+    {
+      "name": "input_transformer",
+      "description": "(Optional) Parameters used when you are providing a custom input to a target based on certain event data. Conflicts with `input` and `input_path`.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "input_paths",
+          "description": "(Optional) Key value pairs specified in the form of JSONPath (for example, time = $.time)You can have as many as 100 key-value pairs. You must use JSON dot notation, not bracket notation. The keys can't start with \"AWS\". - You can have as many as 100 key-value pairs. - You must use JSON dot notation, not bracket notation. - The keys can't start with \"AWS\". - You can have as many as 100 key-value pairs. - You must use JSON dot notation, not bracket notation. - The keys can't start with \"AWS\".",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `input_paths` argument in the `input_transformer` block of the `aws_cloudwatch_event_target` resource allows users to define a mapping of JSONPath expressions to extract specific data fields from the incoming event payload. This enables precise customization of the event input structure, facilitating dynamic transformation and routing of event data to downstream targets based on user-defined key-value pairs."
+        },
+        {
+          "name": "input_template",
+          "description": "(Required) Template to customize data sent to the target. Must be valid JSON. To send a string value, the string value must include double quotes. Values must be escaped for both JSON and Terraform, e.g., `\"\\\"Your string goes here.\\\\nA new line.\\\"\"`",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `input_template` argument in the `input_transformer` block of the `aws_cloudwatch_event_target` resource allows users to define a JSON-based template for customizing the structure and content of event data sent to the target. By specifying this required argument, users can control how event data is transformed, enabling precise formatting to meet integration requirements or downstream processing needs, such as embedding specific values or creating structured payloads for external systems."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `input_transformer` block in the `aws_cloudwatch_event_target` resource enables customization of the input sent to a target by transforming event data into a specific format or structure. It encapsulates settings for defining key-value mappings and templates to dynamically construct the input, allowing users to tailor event data to meet the target's requirements, especially when `input` or `input_path` are not suitable."
+    },
+    {
+      "name": "kinesis_target",
+      "description": "(Optional) Parameters used when you are using the rule to invoke an Amazon Kinesis Stream. Documented below. A maximum of 1 are allowed.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "partition_key_path",
+          "description": "(Optional) The JSON path to be extracted from the event and used as the partition key.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `partition_key_path` argument allows users to specify a JSON path within the incoming event to dynamically extract a value that will be used as the partition key for the Kinesis stream. This enables fine-grained control over how events are distributed across shards, supporting use cases like load balancing, data organization, and ensuring related events are processed together."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `kinesis_target` configuration block within the `aws_cloudwatch_event_target` resource enables integration with an Amazon Kinesis Stream, allowing CloudWatch Events to invoke the stream as a target. It encapsulates parameters required for this invocation, facilitating event-driven data processing and real-time analytics by routing events to Kinesis for further handling or transformation."
+    },
+    {
+      "name": "redshift_target",
+      "description": "(Optional) Parameters used when you are using the rule to invoke an Amazon Redshift Statement. Documented below. A maximum of 1 are allowed.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "database",
+          "description": "(Required) The name of the database.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `database` argument specifies the name of the Amazon Redshift database that the CloudWatch Event Target interacts with, enabling the user to define the specific database where event-driven actions, such as SQL queries or data processing tasks, will be executed. This is a required parameter that ensures precise targeting within the Redshift cluster, aligning with common user goals of automating workflows and integrating event-driven architectures with database operations."
+        },
+        {
+          "name": "db_user",
+          "description": "(Optional) The database user name.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `db_user` argument allows users to specify the database username for the Redshift cluster when configuring a CloudWatch Event Target. By setting this value, users can define the credentials used to interact with the Redshift database, enabling precise control over access and execution of SQL commands triggered by the event."
+        },
+        {
+          "name": "secrets_manager_arn",
+          "description": "(Optional) The name or ARN of the secret that enables access to the database.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `secrets_manager_arn` argument allows users to specify the name or ARN of an AWS Secrets Manager secret that provides credentials for accessing a Redshift database when the CloudWatch Event Target triggers the `redshift_target`. By configuring this argument, users can securely manage database authentication, enabling automated event-driven workflows to interact with Redshift without hardcoding sensitive information."
+        },
+        {
+          "name": "sql",
+          "description": "(Optional) The SQL statement text to run.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `sql` argument allows users to define the SQL statement that will be executed on the Redshift cluster when the CloudWatch Event Target is triggered. By specifying this argument, users can configure custom queries or operations, enabling automated data processing, transformations, or administrative tasks in response to scheduled or event-driven workflows."
+        },
+        {
+          "name": "statement_name",
+          "description": "(Optional) The name of the SQL statement.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `statement_name` argument allows users to specify the name of the SQL statement executed on the Redshift cluster when the CloudWatch Event Target triggers the `redshift_target`. By defining this name, users can organize and reference specific SQL operations, enabling better management and tracking of database actions tied to event-driven workflows."
+        },
+        {
+          "name": "with_event",
+          "description": "(Optional) Indicates whether to send an event back to EventBridge after the SQL statement runs.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `with_event` argument for the `redshift_target` in the `aws_cloudwatch_event_target` resource allows users to control whether an event is sent back to EventBridge after the execution of a SQL statement in Amazon Redshift. Enabling this functionality (`true`) facilitates event-driven workflows by providing feedback to EventBridge, which can be used to trigger downstream actions or monitor SQL execution outcomes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `redshift_target` configuration block within the `aws_cloudwatch_event_target` resource enables the invocation of Amazon Redshift statements as part of a CloudWatch Event rule. It encapsulates parameters required to execute Redshift queries, allowing users to automate database operations or analytics workflows triggered by specific events, thereby integrating Redshift seamlessly into event-driven architectures."
+    },
+    {
+      "name": "retry_policy",
+      "description": "(Optional)  Parameters used when you are providing retry policies. Documented below. A maximum of 1 are allowed.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "maximum_event_age_in_seconds",
+          "description": "(Optional) The age in seconds to continue to make retry attempts.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `maximum_event_age_in_seconds` argument allows users to define the maximum duration, in seconds, that an event remains eligible for retry attempts within the `retry_policy` of an `aws_cloudwatch_event_target`. By configuring this value, users can control the retry lifecycle of failed event deliveries, ensuring events are either retried or discarded based on their age, which is critical for managing event processing reliability and time-sensitive workflows."
+        },
+        {
+          "name": "maximum_retry_attempts",
+          "description": "(Optional) maximum number of retry attempts to make before the request fails",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `maximum_retry_attempts` argument in the `retry_policy` of the `aws_cloudwatch_event_target` resource allows users to define the maximum number of retry attempts for failed event delivery before marking the request as failed. Configuring this parameter helps control the resilience and fault tolerance of event processing, ensuring predictable behavior in handling delivery failures."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `retry_policy` block within the `aws_cloudwatch_event_target` resource defines parameters for controlling retry behavior when an event target fails to process an invocation. It encapsulates settings related to retry attempts and intervals, enabling users to implement fault-tolerant event handling by customizing how failed invocations are retried, ensuring reliable delivery and execution of events."
+    },
+    {
+      "name": "run_command_targets",
+      "description": "(Optional) Parameters used when you are using the rule to invoke Amazon EC2 Run Command. Documented below. A maximum of 5 are allowed.",
+      "cardinality": [
+        0,
+        5
+      ],
+      "arguments": [
+        {
+          "name": "key",
+          "description": "(Required) Can be either `tag:tag-key` or `InstanceIds`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `key` argument in the `run_command_targets` block of the `aws_cloudwatch_event_target` resource specifies the targeting criteria for Run Command operations, allowing users to define whether instances are selected by a specific tag key (`tag:tag-key`) or explicitly by `InstanceIds`. This enables precise control over which EC2 instances are targeted when the CloudWatch Event rule triggers, aligning with common goals like automating instance management or executing commands on specific subsets of infrastructure."
+        },
+        {
+          "name": "values",
+          "description": "(Required) If Key is `tag:tag-key`, Values is a list of tag values. If Key is `InstanceIds`, Values is a list of Amazon EC2 instance IDs.",
+          "required": true,
+          "type": "list(string)",
+          "llm_summary": "The `values` argument in the `run_command_targets` block of the `aws_cloudwatch_event_target` resource specifies a list of identifiers, either Amazon EC2 instance IDs or tag values, to define the target instances for AWS Systems Manager Run Command operations triggered by the CloudWatch event. By configuring this argument, users can precisely control which instances receive the command execution, enabling targeted automation and management of specific EC2 resources based on tags or explicit instance IDs."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `run_command_targets` configuration block within the `aws_cloudwatch_event_target` resource defines parameters for invoking Amazon EC2 Run Command as part of an event rule, enabling automated execution of remote commands on EC2 instances. This block encapsulates settings that specify target instances or groups for command execution, allowing users to streamline operational tasks such as patching, configuration updates, or script execution triggered by CloudWatch Events."
+    },
+    {
+      "name": "sagemaker_pipeline_target",
+      "description": "(Optional) Parameters used when you are using the rule to invoke an Amazon SageMaker AI Pipeline. Documented below. A maximum of 1 are allowed.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "pipeline_parameter_list",
+          "description": "(Optional) List of Parameter names and values for SageMaker AI Model Building Pipeline execution.",
+          "cardinality": [
+            0,
+            200
+          ],
+          "arguments": [
+            {
+              "name": "name",
+              "description": "(Required) Name of parameter to start execution of a SageMaker AI Model Building Pipeline.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `name` argument specifies the unique identifier for a pipeline parameter within the `pipeline_parameter_list` of the `aws_cloudwatch_event_target` resource. By defining this parameter name, users enable the execution of a SageMaker AI Model Building Pipeline with specific input configurations, aligning the event target's behavior with the desired pipeline execution goals."
+            },
+            {
+              "name": "value",
+              "description": "(Required) Value of parameter to start execution of a SageMaker AI Model Building Pipeline.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `value` argument in the `pipeline_parameter_list` for the `aws_cloudwatch_event_target` resource specifies the exact parameter value required to initiate the execution of a SageMaker AI Model Building Pipeline. By defining this string, users control the input configuration for the pipeline, enabling tailored execution based on specific runtime parameters, such as environment variables or model training settings."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "\"Defines a list of parameter names and values to customize SageMaker AI Model Building Pipeline executions triggered by the 'aws_cloudwatch_event_target' resource. This block enables dynamic configuration of pipeline behavior, allowing users to pass specific runtime parameters for tailored pipeline execution workflows.\""
+        }
+      ],
+      "llm_summary": "The `sagemaker_pipeline_target` configuration block within the `aws_cloudwatch_event_target` resource enables the invocation of an Amazon SageMaker AI Pipeline as a target for CloudWatch Events. It encapsulates parameters required to define and manage the integration with SageMaker pipelines, allowing users to automate machine learning workflows or trigger pipeline executions based on event rules, facilitating seamless orchestration of AI/ML processes."
+    },
+    {
+      "name": "sqs_target",
+      "description": "(Optional) Parameters used when you are using the rule to invoke an Amazon SQS Queue. Documented below. A maximum of 1 are allowed.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "message_group_id",
+          "description": "(Optional) The FIFO message group ID to use as the target.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `message_group_id` argument allows users to specify the FIFO message group ID for an Amazon SQS queue target in an AWS CloudWatch Event rule. By setting this argument, users can ensure ordered message delivery within a specific group when targeting a FIFO queue, enabling precise control over message sequencing for workflows or event-driven architectures."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `sqs_target` configuration block within the `aws_cloudwatch_event_target` resource defines parameters for invoking an Amazon SQS Queue as a target for CloudWatch Events. It encapsulates settings required to route event data to an SQS queue, enabling users to reliably process and store event-driven messages for downstream workflows or decoupled systems. Configuring this block allows precise integration of CloudWatch Events with SQS, facilitating scalable and asynchronous event handling."
+    }
+  ],
+  "attributes": []
+}

@@ -1,0 +1,621 @@
+{
+    "resource": {
+        "name": "aws_db_instance",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "allocated_storage",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "allow_major_version_upgrade",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "apply_immediately",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "auto_minor_version_upgrade",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "availability_zone",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "backup_retention_period",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "backup_target",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "backup_window",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ca_cert_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "character_set_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "copy_tags_to_snapshot",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "custom_iam_instance_profile",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "customer_owned_ip_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "db_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "db_subnet_group_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "dedicated_log_volume",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "delete_automated_backups",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "deletion_protection",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "domain",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "domain_auth_secret_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "domain_dns_ips",
+            "description": "",
+            "required": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "domain_fqdn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "domain_iam_role_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "domain_ou",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "enabled_cloudwatch_logs_exports",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "engine",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "engine_lifecycle_support",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "engine_version",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "final_snapshot_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "iam_database_authentication_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "identifier_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "instance_class",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "iops",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "kms_key_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "license_model",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "maintenance_window",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "manage_master_user_password",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "master_user_secret_kms_key_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "max_allocated_storage",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "monitoring_interval",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "monitoring_role_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "multi_az",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "nchar_character_set_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "network_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "option_group_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "parameter_group_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "password",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "password_wo",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "password_wo_version",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "performance_insights_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "performance_insights_kms_key_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "performance_insights_retention_period",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "port",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "publicly_accessible",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "replica_mode",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "replicate_source_db",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "skip_final_snapshot",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "snapshot_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "storage_encrypted",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "storage_throughput",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "storage_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "timezone",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "upgrade_storage_config",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "username",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "vpc_security_group_ids",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "blue_green_update",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "enabled",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "restore_to_point_in_time",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "restore_time",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "source_db_instance_automated_backups_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "source_db_instance_identifier",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "source_dbi_resource_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "use_latest_restorable_time",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "s3_import",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "bucket_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "bucket_prefix",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "ingestion_role",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "source_engine",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "source_engine_version",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "address",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "endpoint",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "engine_version_actual",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "hosted_zone_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "latest_restorable_time",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "listener_endpoint",
+            "description": "",
+            "optional": false,
+            "type": "list(object({address=string,hosted_zone_id=string,port=number}))"
+        },
+        {
+            "name": "master_user_secret",
+            "description": "",
+            "optional": false,
+            "type": "list(object({kms_key_id=string,secret_arn=string,secret_status=string}))"
+        },
+        {
+            "name": "replicas",
+            "description": "",
+            "optional": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "resource_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "status",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

@@ -1,0 +1,129 @@
+{
+  "resource": {
+    "name": "aws_cloudwatch_composite_alarm",
+    "description": "Provides a CloudWatch Composite Alarm resource. An alarm (composite or metric) cannot be destroyed when there are other composite alarms depending on it. This can lead to a cyclical dependency on update, as Terraform will unsuccessfully attempt to destroy alarms before updating the rule. Consider using depends_on, references to alarm names, and two-stage updates.",
+    "llm_summary": "The `aws_cloudwatch_composite_alarm` resource enables the creation and management of CloudWatch Composite Alarms, which combine multiple metric or composite alarms into a single evaluation logic. This is ideal for scenarios requiring advanced monitoring setups, such as triggering actions based on complex conditions across multiple metrics or alarms. Users can configure dependencies, alarm names, and lifecycle management strategies to handle cyclical dependencies and ensure seamless updates in multi-alarm environments."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_cloudwatch_composite_alarm\" \"example\" {\n  alarm_description = \"This is a composite alarm!\"\n  alarm_name        = \"example-composite-alarm\"\n\n  alarm_actions = aws_sns_topic.example.arn\n  ok_actions    = aws_sns_topic.example.arn\n\n  alarm_rule = <<EOF\nALARM(${aws_cloudwatch_metric_alarm.alpha.alarm_name}) OR\nALARM(${aws_cloudwatch_metric_alarm.bravo.alarm_name})\nEOF\n\n  actions_suppressor {\n    alarm            = \"suppressor-alarm\"\n    extension_period = 10\n    wait_period      = 20\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_cloudwatch_composite_alarm` with a custom alarm rule combining multiple metric alarms using logical operators, and includes an `actions_suppressor` block to manage suppression behavior with wait and extension periods. It illustrates key configurations such as `alarm_actions`, `ok_actions`, and advanced suppression settings for precise alarm management."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "actions_enabled",
+      "description": "(Optional, Forces new resource) Indicates whether actions should be executed during any changes to the alarm state of the composite alarm. Defaults to `true`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `actions_enabled` argument for the `aws_cloudwatch_composite_alarm` resource controls whether alarm actions (e.g., notifications or automated responses) are triggered when the composite alarm changes state. Setting this argument to `true` enables the execution of these actions, aligning with typical user goals of automating responses to alarm conditions, while disabling it prevents actions from being executed during state changes."
+    },
+    {
+      "name": "alarm_actions",
+      "description": "(Optional) The set of actions to execute when this alarm transitions to the `ALARM` state from any other state. Each action is specified as an ARN. Up to 5 actions are allowed.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `alarm_actions` argument for the `aws_cloudwatch_composite_alarm` resource allows users to specify a set of up to five action ARNs that are triggered when the alarm transitions to the `ALARM` state. This enables automated responses, such as notifying stakeholders, invoking Lambda functions, or performing remediation tasks, aligning with common user goals of managing incident response workflows and ensuring system reliability."
+    },
+    {
+      "name": "alarm_description",
+      "description": "(Optional) The description for the composite alarm.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `alarm_description` argument for the `aws_cloudwatch_composite_alarm` resource allows users to define a human-readable description that provides context or details about the purpose and functionality of the composite alarm. Setting this argument helps improve clarity and documentation within the CloudWatch dashboard, aiding in the identification and management of alarms in complex monitoring setups."
+    },
+    {
+      "name": "alarm_name",
+      "description": "(Required) The name for the composite alarm. This name must be unique within the region.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `alarm_name` argument specifies a unique identifier for the composite alarm within the AWS region, allowing users to define a distinct name that facilitates tracking, management, and integration with other CloudWatch resources. Setting this argument ensures the alarm can be referenced programmatically and visually, supporting common user goals like monitoring complex conditions across multiple alarms."
+    },
+    {
+      "name": "alarm_rule",
+      "description": "(Required) An expression that specifies which other alarms are to be evaluated to determine this composite alarm's state. For syntax, see Creating a Composite Alarm. The maximum length is 10240 characters.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `alarm_rule` argument in the `aws_cloudwatch_composite_alarm` resource allows users to define the logical expression that evaluates the states of other CloudWatch alarms to determine the composite alarm's state. By configuring this rule, users can create advanced monitoring workflows that aggregate multiple alarm conditions, enabling centralized and conditional alerting based on complex dependencies."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_cloudwatch_composite_alarm` resource represents the unique identifier of the composite alarm, typically auto-generated by Terraform upon resource creation. While optional, it can be used to reference the alarm programmatically within Terraform configurations or external systems, enabling precise tracking and integration with other resources or workflows."
+    },
+    {
+      "name": "insufficient_data_actions",
+      "description": "(Optional) The set of actions to execute when this alarm transitions to the `INSUFFICIENT_DATA` state from any other state. Each action is specified as an ARN. Up to 5 actions are allowed.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `insufficient_data_actions` argument for the `aws_cloudwatch_composite_alarm` resource allows users to define a set of up to five actions (specified as ARNs) that are triggered when the alarm transitions to the `INSUFFICIENT_DATA` state. This enables users to automate responses, such as notifications or remediation workflows, for scenarios where the alarm cannot determine its state due to missing or incomplete data, supporting proactive management of cloud infrastructure."
+    },
+    {
+      "name": "ok_actions",
+      "description": "(Optional) The set of actions to execute when this alarm transitions to an `OK` state from any other state. Each action is specified as an ARN. Up to 5 actions are allowed.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `ok_actions` argument for the `aws_cloudwatch_composite_alarm` resource allows users to define a set of actions, specified as ARNs, that are triggered when the alarm transitions to an `OK` state from any other state. This enables users to automate responses, such as notifications or system updates, upon resolution of the monitored condition, supporting workflows for recovery or status acknowledgment."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to associate with the alarm. Up to 50 tags are allowed. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_cloudwatch_composite_alarm` resource allows users to define a map of key-value pairs to associate metadata with the alarm, enabling categorization, organization, and identification of resources for purposes such as cost allocation, environment labeling, or automation workflows. Configuring this argument ensures the alarm is integrated into tagging strategies, with up to 50 tags supported, and provider-level default tags can be overridden for precise control."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_cloudwatch_composite_alarm` resource allows users to define a comprehensive set of key-value tags that are applied to the alarm, including inherited tags from the provider's default configuration. This facilitates resource organization, cost allocation, and searchability by enabling consistent tagging across AWS resources, aligning with common user goals like environment labeling and governance."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "actions_suppressor",
+      "description": "(Optional) Actions will be suppressed if the suppressor alarm is in the ALARM state.`alarm` - (Required) Can be an AlarmName or an Amazon Resource Name (ARN) from an existing alarm. `extension_period` - (Required) The maximum time in seconds that the composite alarm waits after suppressor alarm goes out of the `ALARM` state. After this time, the composite alarm performs its actions. `wait_period` - (Required) The maximum time in seconds that the composite alarm waits for the suppressor alarm to go into the `ALARM` state. After this time, the composite alarm performs its actions.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "alarm",
+          "description": "(Required) Can be an AlarmName or an Amazon Resource Name (ARN) from an existing alarm.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `alarm` argument in the `actions_suppressor` block of the `aws_cloudwatch_composite_alarm` resource specifies the target CloudWatch alarm, identified by its AlarmName or Amazon Resource Name (ARN), whose actions will be suppressed when the composite alarm enters the ALARM state. By configuring this argument, users can control which individual alarm's automated responses (e.g., notifications or scaling actions) are temporarily disabled, aligning with scenarios like reducing noise or preventing redundant actions during composite alarm evaluations."
+        },
+        {
+          "name": "extension_period",
+          "description": "(Required) The maximum time in seconds that the composite alarm waits after suppressor alarm goes out of the `ALARM` state. After this time, the composite alarm performs its actions.",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `extension_period` argument for the `actions_suppressor` in the `aws_cloudwatch_composite_alarm` resource defines the maximum duration (in seconds) the composite alarm delays executing its configured actions after the suppressor alarm transitions out of the `ALARM` state. This allows users to control the grace period for suppressor recovery, ensuring composite alarm actions are not triggered prematurely, aligning with scenarios requiring delayed response or stabilization time."
+        },
+        {
+          "name": "wait_period",
+          "description": "(Required) The maximum time in seconds that the composite alarm waits for the suppressor alarm to go into the `ALARM` state. After this time, the composite alarm performs its actions.",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `wait_period` argument for the `actions_suppressor` in the `aws_cloudwatch_composite_alarm` resource defines the maximum time (in seconds) the composite alarm will wait for the suppressor alarm to transition into the `ALARM` state before executing its configured actions. This allows users to control the suppression behavior and ensure composite alarms account for transient conditions or delays in the suppressor alarm, aligning with common goals like fine-tuning alerting workflows and minimizing false positives."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `actions_suppressor` block in the `aws_cloudwatch_composite_alarm` resource enables conditional suppression of alarm actions based on the state of a specified suppressor alarm. It encapsulates settings to define the suppressor alarm (`alarm`), along with configurable wait and extension periods (`wait_period` and `extension_period`) that control the timing of action execution. This block allows users to implement advanced alarm dependencies and delay mechanisms, ensuring precise control over composite alarm behavior in complex monitoring scenarios."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the composite alarm.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

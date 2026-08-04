@@ -1,0 +1,88 @@
+{
+  "resource": {
+    "name": "aws_cognito_user_pool_domain",
+    "description": "Provides a Cognito User Pool Domain resource.",
+    "llm_summary": "The `aws_cognito_user_pool_domain` resource enables the creation and management of a custom domain for an Amazon Cognito User Pool, facilitating secure user authentication and seamless integration with hosted UI flows. Common use cases include setting up custom authentication endpoints, branding login and registration pages, and supporting OAuth 2.0 flows for web and mobile applications. Users can configure domain-specific settings, such as custom SSL certificates and domain prefixes, to align with organizational branding and security requirements."
+  },
+  "examples": [
+    {
+      "title": "Amazon Cognito domain",
+      "code": "resource \"aws_cognito_user_pool_domain\" \"main\" {\n  domain       = \"example-domain\"\n  user_pool_id = aws_cognito_user_pool.example.id\n}\n\nresource \"aws_cognito_user_pool\" \"example\" {\n  name = \"example-pool\"\n}",
+      "llm_summary": "This example demonstrates how to configure a custom domain for an Amazon Cognito User Pool using the `aws_cognito_user_pool_domain` resource. It shows how to associate a domain (`domain` argument) with a user pool (`user_pool_id` argument) created via the `aws_cognito_user_pool` resource, enabling custom branding and authentication endpoints."
+    },
+    {
+      "title": "Custom Cognito domain",
+      "code": "resource \"aws_cognito_user_pool_domain\" \"main\" {\n  domain          = \"auth.example.com\"\n  certificate_arn = aws_acm_certificate.cert.arn\n  user_pool_id    = aws_cognito_user_pool.example.id\n}\n\nresource \"aws_cognito_user_pool\" \"example\" {\n  name = \"example-pool\"\n}\n\ndata \"aws_route53_zone\" \"example\" {\n  name = \"example.com\"\n}\n\nresource \"aws_route53_record\" \"auth-cognito-A\" {\n  name    = aws_cognito_user_pool_domain.main.domain\n  type    = \"A\"\n  zone_id = data.aws_route53_zone.example.zone_id\n  alias {\n    evaluate_target_health = false\n\n    name    = aws_cognito_user_pool_domain.main.cloudfront_distribution\n    zone_id = aws_cognito_user_pool_domain.main.cloudfront_distribution_zone_id\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure a custom domain for an AWS Cognito User Pool using the `aws_cognito_user_pool_domain` resource, with an associated ACM certificate for SSL and Route 53 DNS records for domain aliasing. It illustrates key configurations such as specifying the `domain` and `certificate_arn` arguments, linking the domain to a CloudFront distribution, and setting up an `A` record in Route 53 for seamless integration with a custom domain."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "certificate_arn",
+      "description": "(Optional) The ARN of an ISSUED ACM certificate in us-east-1 for a custom domain.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `certificate_arn` argument allows users to specify the Amazon Resource Name (ARN) of an issued ACM certificate in the `us-east-1` region to configure a custom domain for the Cognito user pool. By setting this argument, users can enable secure HTTPS communication for their custom domain, aligning with common goals of enhancing security and branding for user authentication endpoints."
+    },
+    {
+      "name": "domain",
+      "description": "(Required) For custom domains, this is the fully-qualified domain name, such as auth.example.com. For Amazon Cognito prefix domains, this is the prefix alone, such as auth.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `domain` argument in the `aws_cognito_user_pool_domain` resource specifies the unique domain name for the Cognito user pool's hosted authentication pages, allowing users to define either a custom fully-qualified domain (e.g., `auth.example.com`) or an Amazon Cognito-provided prefix (e.g., `auth`). Setting this argument enables the configuration of the user pool's public-facing authentication endpoint, which is essential for integrating user sign-in and sign-up flows with external applications."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_cognito_user_pool_domain` resource allows users to specify a unique identifier for the custom domain associated with a Cognito User Pool. While optional, setting this argument can help users reference or manage the domain explicitly within their Terraform configuration, enabling better organization and integration with other resources or workflows."
+    },
+    {
+      "name": "user_pool_id",
+      "description": "(Required) The user pool ID.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `user_pool_id` argument specifies the unique identifier of the Cognito User Pool to which the custom domain will be associated, enabling the configuration of a branded domain for user authentication workflows. By setting this required argument, users link the domain to a specific user pool, ensuring seamless integration with the pool's authentication and user management features."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "aws_account_id",
+      "description": "The AWS account ID for the user pool owner.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "cloudfront_distribution",
+      "description": "The Amazon CloudFront endpoint (e.g. `dpp0gtxikpq3y.cloudfront.net`) that you use as the target of the alias that you set up with your Domain Name Service (DNS) provider.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "cloudfront_distribution_arn",
+      "description": "The URL of the CloudFront distribution. This is required to generate the ALIAS `aws_route53_record`",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "cloudfront_distribution_zone_id",
+      "description": "The Route 53 hosted zone ID of the CloudFront distribution.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "s3_bucket",
+      "description": "The S3 bucket where the static files for this domain are stored.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "version",
+      "description": "The app version.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

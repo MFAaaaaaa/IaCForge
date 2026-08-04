@@ -1,0 +1,27 @@
+[
+    {
+        "argument_path": "iam_role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "notification_topic_arn",
+        "references_output": "aws_sns_topic.arn",
+        "target_resource_type": "aws_sns_topic"
+    },
+    {
+        "argument_path": "security_group_ids",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "subnet_group_name",
+        "references_output": "aws_dax_subnet_group.name",
+        "target_resource_type": "aws_dax_subnet_group"
+    },
+    {
+        "argument_path": "parameter_group_name",
+        "references_output": "aws_dax_parameter_group.name",
+        "target_resource_type": "aws_dax_parameter_group"
+    }
+]

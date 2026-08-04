@@ -1,0 +1,134 @@
+{
+  "resource": {
+    "name": "aws_sagemaker_pipeline",
+    "description": "Provides a SageMaker AI Pipeline resource.",
+    "llm_summary": "\"Enables the creation and management of SageMaker AI pipelines for orchestrating machine learning workflows in AWS. Common use cases include automating model training, deployment, and data preprocessing tasks, as well as integrating with versioned data sources and CI/CD workflows. Supports configurations for pipeline steps, execution triggers, artifact tracking, and lifecycle management to streamline reproducibility and scalability in ML operations.\""
+  },
+  "examples": [
+    {
+      "title": "Basic usage",
+      "code": "resource \"aws_sagemaker_pipeline\" \"example\" {\n  pipeline_name         = \"example\"\n  pipeline_display_name = \"example\"\n  role_arn              = aws_iam_role.example.arn\n\n  pipeline_definition = jsonencode({\n    Version = \"2020-12-01\"\n    Steps = [{\n      Name = \"Test\"\n      Type = \"Fail\"\n      Arguments = {\n        ErrorMessage = \"test\"\n      }\n    }]\n  })\n}",
+      "llm_summary": "This example demonstrates the basic configuration of the `aws_sagemaker_pipeline` resource, showcasing how to define a pipeline with a custom name, display name, and IAM role association. It includes a simple pipeline definition using the `jsonencode` function, featuring a single \"Fail\" step with an error message, illustrating how to structure pipeline steps and arguments."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_sagemaker_pipeline` resource allows users to specify a unique identifier for the pipeline, enabling precise referencing and management of the pipeline within AWS SageMaker. While optional, setting this argument can help ensure consistent identification of the resource across Terraform configurations and integrations, supporting workflows like tracking, updates, or automation."
+    },
+    {
+      "name": "pipeline_definition",
+      "description": "(Optional) The JSON pipeline definition of the pipeline.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `pipeline_definition` argument for the `aws_sagemaker_pipeline` resource allows users to specify the JSON-formatted definition of the SageMaker pipeline, including its steps, data flow, and execution logic. By configuring this argument, users can define the pipeline's structure and behavior, enabling automated machine learning workflows and ensuring reproducibility of model training, evaluation, and deployment processes."
+    },
+    {
+      "name": "pipeline_description",
+      "description": "(Optional) A description of the pipeline.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `pipeline_description` argument for the `aws_sagemaker_pipeline` resource allows users to define a human-readable description of the pipeline, providing context or metadata about its purpose, functionality, or intended use. Setting this argument helps improve documentation and clarity for managing machine learning workflows, aiding in pipeline identification and collaboration within teams."
+    },
+    {
+      "name": "pipeline_display_name",
+      "description": "(Required) The display name of the pipeline.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `pipeline_display_name` argument specifies a user-friendly, descriptive name for the SageMaker pipeline, making it easier to identify and manage within the AWS Management Console and other interfaces. Setting this required property ensures the pipeline is clearly labeled for organizational and operational purposes, aligning with common user goals of improving resource discoverability and clarity."
+    },
+    {
+      "name": "pipeline_name",
+      "description": "(Required) The name of the pipeline.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `pipeline_name` argument specifies the unique name of the SageMaker pipeline, serving as its identifier within AWS. By defining this required property, users establish the pipeline's identity for orchestration, management, and integration with machine learning workflows, ensuring clear differentiation and accessibility in their cloud environment."
+    },
+    {
+      "name": "role_arn",
+      "description": "(Required) The ARN of the IAM role the pipeline will execute as.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `role_arn` argument specifies the Amazon Resource Name (ARN) of the IAM role that the SageMaker pipeline will use to execute its operations, enabling the pipeline to access AWS resources securely and perform tasks such as model training, data processing, or deployment. By configuring this argument, users define the permissions and security context under which the pipeline operates, aligning with common goals like enforcing access control and ensuring compliance with IAM policies."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_sagemaker_pipeline` resource allows users to assign metadata in the form of key-value pairs to the pipeline, enabling better organization, categorization, and identification of resources for purposes such as cost allocation, environment labeling, or compliance tracking. When configured, it ensures the pipeline is tagged consistently, with the ability to override provider-level default tags for more granular control."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_sagemaker_pipeline` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to all resources associated with the pipeline. This facilitates consistent metadata management, enabling users to organize, track, and categorize resources for purposes such as cost allocation, environment identification, or compliance requirements."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "parallelism_configuration",
+      "description": "(Optional) This is the configuration that controls the parallelism of the pipeline. If specified, it applies to all runs of this pipeline by default. see Parallelism Configuration details below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "max_parallel_execution_steps",
+          "description": "(Required) The max number of steps that can be executed in parallel.",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `max_parallel_execution_steps` argument specifies the maximum number of steps that can run concurrently within the `parallelism_configuration` of an `aws_sagemaker_pipeline`, enabling users to optimize pipeline execution by controlling parallel processing. This setting is crucial for managing resource utilization and reducing overall pipeline runtime, aligning with user goals of improving efficiency and scalability in machine learning workflows."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `parallelism_configuration` block in the `aws_sagemaker_pipeline` resource defines settings to control the level of parallelism for pipeline executions, ensuring efficient resource utilization and faster processing by managing the number of concurrent steps or tasks. Configuring this block allows users to optimize pipeline performance by setting default parallelism limits for all pipeline runs."
+    },
+    {
+      "name": "pipeline_definition_s3_location",
+      "description": "(Optional) The location of the pipeline definition stored in Amazon S3. If specified, SageMaker AI will retrieve the pipeline definition from this location. see Pipeline Definition S3 Location details below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "bucket",
+          "description": "(Required) Name of the S3 bucket.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `bucket` argument specifies the name of the Amazon S3 bucket where the pipeline definition for the SageMaker pipeline is stored. By configuring this required parameter, users define the storage location for the pipeline's source file, enabling SageMaker to retrieve and execute the pipeline definition during deployment or updates."
+        },
+        {
+          "name": "object_key",
+          "description": "(Required) The object key (or key name) uniquely identifies the object in an S3 bucket.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `object_key` argument specifies the unique identifier for the pipeline definition file stored in an S3 bucket, enabling users to define the exact location of the pipeline's configuration within the bucket. By setting this required value, users ensure SageMaker can retrieve and execute the pipeline definition, a critical step in orchestrating machine learning workflows."
+        },
+        {
+          "name": "version_id",
+          "description": "(Optional) Version Id of the pipeline definition file. If not specified, Amazon SageMaker AI will retrieve the latest version.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `version_id` argument allows users to specify a particular version of the pipeline definition file stored in S3 for the `pipeline_definition_s3_location` in the `aws_sagemaker_pipeline` resource. By setting this argument, users can control which version of the pipeline definition SageMaker retrieves, enabling precise version management and ensuring reproducibility in pipeline execution. If omitted, SageMaker defaults to using the latest version."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "\"Defines the Amazon S3 location for storing the pipeline definition, enabling SageMaker to retrieve and execute the pipeline configuration directly from S3. This block encapsulates source details for the pipeline definition, allowing users to manage versioned artifacts and streamline pipeline deployment workflows.\""
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) assigned by AWS to this Pipeline.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

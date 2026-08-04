@@ -1,0 +1,95 @@
+{
+  "resource": {
+    "name": "aws_elastic_beanstalk_application_version",
+    "description": "Provides an Elastic Beanstalk Application Version Resource. Elastic Beanstalk allows you to deploy and manage applications in the AWS cloud without worrying about the infrastructure that runs those applications. This resource creates a Beanstalk Application Version that can be deployed to a Beanstalk Environment. When using the Application Version resource with multiple Elastic Beanstalk Environments it is possible that an error may be returned when attempting to delete an Application Version while it is still in use by a different environment. To work around this you can either create each environment in a separate AWS account or create your aws_elastic_beanstalk_application_version resources with a unique names in your Elastic Beanstalk Application. For example <revision>-<environment>.",
+    "llm_summary": "The `aws_elastic_beanstalk_application_version` Terraform resource enables the creation and management of specific application versions for AWS Elastic Beanstalk, facilitating seamless deployment and version control for applications in the cloud. Common use cases include deploying updates to Elastic Beanstalk environments, managing application lifecycle across multiple environments, and ensuring version isolation to prevent conflicts during deletion or updates. Users can configure unique version identifiers, integrate source code artifacts, and manage versioning strategies to support multi-environment deployments and rollback scenarios."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_s3_bucket\" \"default\" {\n  bucket = \"tftest.applicationversion.bucket\"\n}\n\nresource \"aws_s3_object\" \"default\" {\n  bucket = aws_s3_bucket.default.id\n  key    = \"beanstalk/go-v1.zip\"\n  source = \"go-v1.zip\"\n}\n\nresource \"aws_elastic_beanstalk_application\" \"default\" {\n  name        = \"tf-test-name\"\n  description = \"tf-test-desc\"\n}\n\nresource \"aws_elastic_beanstalk_application_version\" \"default\" {\n  name        = \"tf-test-version-label\"\n  application = \"tf-test-name\"\n  description = \"application version created by terraform\"\n  bucket      = aws_s3_bucket.default.id\n  key         = aws_s3_object.default.id\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_elastic_beanstalk_application_version` resource by creating an Elastic Beanstalk application version linked to an S3 bucket and object containing the application source bundle. It showcases key configurations such as specifying the `application`, `bucket`, and `key` arguments, while also illustrating the setup of supporting resources like `aws_s3_bucket`, `aws_s3_object`, and `aws_elastic_beanstalk_application`."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "application",
+      "description": "(Required) Name of the Beanstalk Application the version is associated with.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `application` argument specifies the name of the Elastic Beanstalk application to which the application version belongs, enabling users to associate the version with a specific application for deployment and lifecycle management. By setting this required property, users define the target application context for the version, ensuring it is correctly linked to the intended Elastic Beanstalk environment."
+    },
+    {
+      "name": "bucket",
+      "description": "(Required) S3 bucket that contains the Application Version source bundle.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket` argument specifies the Amazon S3 bucket that hosts the source bundle for the Elastic Beanstalk application version, enabling users to define the storage location for their application code and assets. By setting this required property, users ensure the application version can retrieve its deployment package, supporting the goal of managing application lifecycle and versioning in Elastic Beanstalk environments."
+    },
+    {
+      "name": "description",
+      "description": "(Optional) Short description of the Application Version.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_elastic_beanstalk_application_version` resource allows users to define a short, human-readable summary of the application version, providing contextual information about its purpose, changes, or usage. Setting this argument helps document the version for easier identification and management, supporting common user goals like version tracking and collaboration."
+    },
+    {
+      "name": "force_delete",
+      "description": "(Optional) On delete, force an Application Version to be deleted when it may be in use by multiple Elastic Beanstalk Environments.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `force_delete` argument in the `aws_elastic_beanstalk_application_version` resource allows users to control whether an application version is forcibly deleted, even if it is actively referenced by multiple Elastic Beanstalk environments. Enabling this option ensures cleanup of application versions without dependency checks, supporting scenarios like resource lifecycle management or environment decommissioning."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_elastic_beanstalk_application_version` resource allows users to specify a unique identifier for the application version, typically used to reference or manage the resource programmatically within Terraform. While optional, setting this argument can help ensure consistent tracking and retrieval of the application version, aligning with common goals like resource organization and automation workflows."
+    },
+    {
+      "name": "key",
+      "description": "(Required) S3 object that is the Application Version source bundle.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `key` argument specifies the S3 object key that identifies the source bundle for the Elastic Beanstalk application version. By defining this, users control the exact location of the application code or assets in S3, enabling deployment of a specific version of their application to Elastic Beanstalk environments."
+    },
+    {
+      "name": "name",
+      "description": "(Required) Unique name for the this Application Version. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_elastic_beanstalk_application_version` resource specifies a unique identifier for the application version, allowing users to define and distinguish individual versions within an Elastic Beanstalk application. Setting this argument ensures proper version tracking and management, supporting deployment workflows and enabling users to reference specific versions for updates or rollbacks."
+    },
+    {
+      "name": "process",
+      "description": "(Optional) Pre-processes and validates the environment manifest (env.yaml ) and configuration files (*.config files in the .ebextensions folder) in the source bundle. Validating configuration files can identify issues prior to deploying the application version to an environment. You must turn processing on for application versions that you create using AWS CodeBuild or AWS CodeCommit. For application versions built from a source bundle in Amazon S3, processing is optional. It validates Elastic Beanstalk configuration files. It doesn\u2019t validate your application\u2019s configuration files, like proxy server or Docker configuration.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `process` argument in the `aws_elastic_beanstalk_application_version` resource controls whether Elastic Beanstalk pre-processes and validates environment manifest files (`env.yaml`) and configuration files (`.ebextensions/*.config`) within the source bundle. Enabling this functionality helps identify configuration issues before deployment, ensuring smoother application version launches, especially for versions created using AWS CodeBuild or AWS CodeCommit."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Key-value map of tags for the Elastic Beanstalk Application Version. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_elastic_beanstalk_application_version` resource allows users to define a key-value map of metadata tags to organize, categorize, and manage the Elastic Beanstalk Application Version. By setting this argument, users can enable resource tracking, cost allocation, and governance practices, while also overriding provider-level default tags for enhanced customization."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_elastic_beanstalk_application_version` resource allows users to define a comprehensive set of key-value tags that are applied to the application version and inherited from the parent resource, enabling consistent metadata management across AWS resources. By configuring this argument, users can streamline resource organization, cost allocation, and access control policies based on tags."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN assigned by AWS for this Elastic Beanstalk Application.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

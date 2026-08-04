@@ -1,0 +1,22 @@
+[
+    {
+        "argument_path": "bucket",
+        "references_output": "aws_s3_bucket.id",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "lambda_function.lambda_function_arn",
+        "references_output": "aws_lambda_function.arn",
+        "target_resource_type": "aws_lambda_function"
+    },
+    {
+        "argument_path": "queue.queue_arn",
+        "references_output": "aws_sqs_queue.arn",
+        "target_resource_type": "aws_sqs_queue"
+    },
+    {
+        "argument_path": "topic.topic_arn",
+        "references_output": "aws_sns_topic.arn",
+        "target_resource_type": "aws_sns_topic"
+    }
+]

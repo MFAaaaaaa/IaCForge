@@ -1,0 +1,52 @@
+[
+    {
+        "argument_path": "role",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "layers",
+        "references_output": "aws_lambda_layer_version.arn",
+        "target_resource_type": "aws_lambda_layer_version"
+    },
+    {
+        "argument_path": "file_system_config.arn",
+        "references_output": "aws_efs_access_point.arn",
+        "target_resource_type": "aws_efs_access_point"
+    },
+    {
+        "argument_path": "vpc_config.subnet_ids",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "vpc_config.security_group_ids",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "dead_letter_config.target_arn",
+        "references_output": "aws_sns_topic.arn",
+        "target_resource_type": "aws_sns_topic"
+    },
+    {
+        "argument_path": "dead_letter_config.target_arn",
+        "references_output": "aws_sqs_queue.arn",
+        "target_resource_type": "aws_sqs_queue"
+    },
+    {
+        "argument_path": "kms_key_arn",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "logging_config.log_group",
+        "references_output": "aws_cloudwatch_log_group.name",
+        "target_resource_type": "aws_cloudwatch_log_group"
+    },
+    {
+        "argument_path": "s3_bucket",
+        "references_output": "aws_s3_bucket.bucket",
+        "target_resource_type": "aws_s3_bucket"
+    }
+]

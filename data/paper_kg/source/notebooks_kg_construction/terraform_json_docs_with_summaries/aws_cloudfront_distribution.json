@@ -1,0 +1,1157 @@
+{
+  "resource": {
+    "name": "aws_cloudfront_distribution",
+    "description": "Creates an Amazon CloudFront web distribution. For information about CloudFront distributions, see the Amazon CloudFront Developer Guide. For specific information about creating CloudFront web distributions, see the POST Distribution page in the Amazon CloudFront API Reference. CloudFront distributions take about 15 minutes to reach a deployed state after creation or modification. During this time, deletes to resources will be blocked. If you need to delete a distribution that is enabled and you do not want to wait, you need to use the retain_on_delete flag.",
+    "llm_summary": "The `aws_cloudfront_distribution` resource enables the creation and management of Amazon CloudFront web distributions, which are used to deliver content securely and efficiently via a global CDN. Common use cases include optimizing website performance, enabling secure delivery of APIs or static assets, and configuring caching, origin settings, and custom domain support. It supports advanced configurations such as lifecycle management, logging, cache behaviors, SSL/TLS settings, and fine-grained control over content delivery policies, making it ideal for scalable and high-performance web applications."
+  },
+  "examples": [
+    {
+      "title": "S3 Origin",
+      "code": "resource \"aws_s3_bucket\" \"b\" {\n  bucket = \"mybucket\"\n\n  tags = {\n    Name = \"My bucket\"\n  }\n}\n\nresource \"aws_s3_bucket_acl\" \"b_acl\" {\n  bucket = aws_s3_bucket.b.id\n  acl    = \"private\"\n}\n\nlocals {\n  s3_origin_id = \"myS3Origin\"\n}\n\nresource \"aws_cloudfront_distribution\" \"s3_distribution\" {\n  origin {\n    domain_name              = aws_s3_bucket.b.bucket_regional_domain_name\n    origin_access_control_id = aws_cloudfront_origin_access_control.default.id\n    origin_id                = local.s3_origin_id\n  }\n\n  enabled             = true\n  is_ipv6_enabled     = true\n  comment             = \"Some comment\"\n  default_root_object = \"index.html\"\n\n  logging_config {\n    include_cookies = false\n    bucket          = \"mylogs.s3.amazonaws.com\"\n    prefix          = \"myprefix\"\n  }\n\n  aliases = [\"mysite.example.com\", \"yoursite.example.com\"]\n\n  default_cache_behavior {\n    allowed_methods  = [\"DELETE\", \"GET\", \"HEAD\", \"OPTIONS\", \"PATCH\", \"POST\", \"PUT\"]\n    cached_methods   = [\"GET\", \"HEAD\"]\n    target_origin_id = local.s3_origin_id\n\n    forwarded_values {\n      query_string = false\n\n      cookies {\n        forward = \"none\"\n      }\n    }\n\n    viewer_protocol_policy = \"allow-all\"\n    min_ttl                = 0\n    default_ttl            = 3600\n    max_ttl                = 86400\n  }\n\n  # Cache behavior with precedence 0\n  ordered_cache_behavior {\n    path_pattern     = \"/content/immutable/*\"\n    allowed_methods  = [\"GET\", \"HEAD\", \"OPTIONS\"]\n    cached_methods   = [\"GET\", \"HEAD\", \"OPTIONS\"]\n    target_origin_id = local.s3_origin_id\n\n    forwarded_values {\n      query_string = false\n      headers      = [\"Origin\"]\n\n      cookies {\n        forward = \"none\"\n      }\n    }\n\n    min_ttl                = 0\n    default_ttl            = 86400\n    max_ttl                = 31536000\n    compress               = true\n    viewer_protocol_policy = \"redirect-to-https\"\n  }\n\n  # Cache behavior with precedence 1\n  ordered_cache_behavior {\n    path_pattern     = \"/content/*\"\n    allowed_methods  = [\"GET\", \"HEAD\", \"OPTIONS\"]\n    cached_methods   = [\"GET\", \"HEAD\"]\n    target_origin_id = local.s3_origin_id\n\n    forwarded_values {\n      query_string = false\n\n      cookies {\n        forward = \"none\"\n      }\n    }\n\n    min_ttl                = 0\n    default_ttl            = 3600\n    max_ttl                = 86400\n    compress               = true\n    viewer_protocol_policy = \"redirect-to-https\"\n  }\n\n  price_class = \"PriceClass_200\"\n\n  restrictions {\n    geo_restriction {\n      restriction_type = \"whitelist\"\n      locations        = [\"US\", \"CA\", \"GB\", \"DE\"]\n    }\n  }\n\n  tags = {\n    Environment = \"production\"\n  }\n\n  viewer_certificate {\n    cloudfront_default_certificate = true\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_cloudfront_distribution` with an S3 bucket as the origin, using custom cache behaviors, logging, and geo-restrictions. It showcases key configurations such as `default_cache_behavior`, `ordered_cache_behavior` for path-based caching, `viewer_certificate` for HTTPS, and `origin_access_control_id` for secure S3 access."
+    },
+    {
+      "title": "With Failover Routing",
+      "code": "resource \"aws_cloudfront_distribution\" \"s3_distribution\" {\n  origin_group {\n    origin_id = \"groupS3\"\n\n    failover_criteria {\n      status_codes = [403, 404, 500, 502]\n    }\n\n    member {\n      origin_id = \"primaryS3\"\n    }\n\n    member {\n      origin_id = \"failoverS3\"\n    }\n  }\n\n  origin {\n    domain_name = aws_s3_bucket.primary.bucket_regional_domain_name\n    origin_id   = \"primaryS3\"\n\n    s3_origin_config {\n      origin_access_identity = aws_cloudfront_origin_access_identity.default.cloudfront_access_identity_path\n    }\n  }\n\n  origin {\n    domain_name = aws_s3_bucket.failover.bucket_regional_domain_name\n    origin_id   = \"failoverS3\"\n\n    s3_origin_config {\n      origin_access_identity = aws_cloudfront_origin_access_identity.default.cloudfront_access_identity_path\n    }\n  }\n\n  default_cache_behavior {\n    # ... other configuration ...\n    target_origin_id = \"groupS3\"\n  }\n\n  # ... other configuration ...\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_cloudfront_distribution` with failover routing using the `origin_group` block, enabling automatic fallback to a secondary S3 origin when specific HTTP status codes (e.g., 403, 404, 500, 502) are encountered. This example highlights the use of `failover_criteria` and `member` blocks to define primary and failover origins, ensuring high availability for content delivery.\""
+    },
+    {
+      "title": "With Managed Caching Policy",
+      "code": "locals {\n  s3_origin_id = \"myS3Origin\"\n}\n\nresource \"aws_cloudfront_distribution\" \"s3_distribution\" {\n  origin {\n    domain_name = aws_s3_bucket.primary.bucket_regional_domain_name\n    origin_id   = \"myS3Origin\"\n\n    s3_origin_config {\n      origin_access_identity = aws_cloudfront_origin_access_identity.default.cloudfront_access_identity_path\n    }\n  }\n  enabled             = true\n  is_ipv6_enabled     = true\n  comment             = \"Some comment\"\n  default_root_object = \"index.html\"\n\n  # AWS Managed Caching Policy (CachingDisabled)\n  default_cache_behavior {\n    # Using the CachingDisabled managed policy ID:\n    cache_policy_id  = \"4135ea2d-6df8-44a3-9df3-4b5a84be39ad\"\n    allowed_methods  = [\"GET\", \"HEAD\", \"OPTIONS\"]\n    target_origin_id = local.s3_origin_id\n  }\n\n  restrictions {\n    geo_restriction {\n      restriction_type = \"whitelist\"\n      locations        = [\"US\", \"CA\", \"GB\", \"DE\"]\n    }\n  }\n\n  viewer_certificate {\n    cloudfront_default_certificate = true\n  }\n\n  # ... other configuration ...\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_cloudfront_distribution` with an S3 origin, using the AWS-managed caching policy `CachingDisabled` for fine-grained cache control. It highlights key configurations such as `default_cache_behavior` with a managed `cache_policy_id`, origin access identity for secure S3 access, geo-restrictions, and a default CloudFront certificate for HTTPS."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "aliases",
+      "description": "",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `aliases` argument in the `aws_cloudfront_distribution` resource allows users to specify alternate domain names (CNAMEs) for the CloudFront distribution, enabling the distribution to be accessed via custom domain names instead of the default CloudFront domain. This is commonly used to configure custom branding or integrate with existing DNS setups for web applications."
+    },
+    {
+      "name": "comment",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `comment` argument for the `aws_cloudfront_distribution` resource allows users to specify a descriptive string to annotate the CloudFront distribution. This is typically used to provide context or metadata for organizational purposes, aiding in the identification and management of distributions within complex infrastructure setups."
+    },
+    {
+      "name": "continuous_deployment_policy_id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `continuous_deployment_policy_id` argument in the `aws_cloudfront_distribution` resource allows users to specify the ID of a continuous deployment policy associated with the CloudFront distribution. This enables the configuration of deployment strategies, such as traffic splitting or phased rollouts, to facilitate safe and controlled updates to the distribution's content or behavior."
+    },
+    {
+      "name": "default_root_object",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `default_root_object` argument in the `aws_cloudfront_distribution` resource allows users to specify the default file (e.g., `index.html`) that CloudFront serves when a request is made to the root URL of the distribution without a specific object path. Configuring this argument ensures a seamless user experience by defining a fallback object for root-level requests, commonly used to serve landing pages or default application entry points."
+    },
+    {
+      "name": "enabled",
+      "description": "",
+      "required": true,
+      "type": "bool",
+      "llm_summary": "The `enabled` argument for the `aws_cloudfront_distribution` resource specifies whether the CloudFront distribution is active and operational. Setting this required boolean to `true` enables the distribution to serve content, while setting it to `false` disables it, allowing users to control the lifecycle and availability of the distribution for content delivery."
+    },
+    {
+      "name": "http_version",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `http_version` argument in the `aws_cloudfront_distribution` resource allows users to specify the HTTP protocol version (`http1.1` or `http2`) that CloudFront should use when communicating with viewers. Configuring this argument impacts performance and efficiency, as HTTP/2 enables multiplexing and faster data transfer, making it ideal for optimizing user experience in modern web applications."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_cloudfront_distribution` resource represents the unique identifier automatically assigned to the CloudFront distribution upon creation. While not explicitly configurable by the user, it is useful for referencing the distribution in other resources or outputs, enabling workflows that depend on the distribution's identity for integration or management purposes."
+    },
+    {
+      "name": "is_ipv6_enabled",
+      "description": "",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `is_ipv6_enabled` argument for the `aws_cloudfront_distribution` resource allows users to enable or disable IPv6 support for the CloudFront distribution. Setting this to `true` ensures the distribution can serve content over both IPv4 and IPv6, enhancing accessibility and compatibility for clients using modern networking protocols."
+    },
+    {
+      "name": "price_class",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `price_class` argument in the `aws_cloudfront_distribution` resource allows users to specify the pricing tier for their CloudFront distribution, which determines the geographic regions where content will be served. By setting this argument, users can optimize costs by restricting content delivery to specific edge locations (e.g., `PriceClass_100` for fewer regions or `PriceClass_All` for global delivery), aligning distribution performance with budget and audience needs."
+    },
+    {
+      "name": "retain_on_delete",
+      "description": "",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `retain_on_delete` argument in the `aws_cloudfront_distribution` resource controls whether the CloudFront distribution is preserved when the resource is deleted from the Terraform configuration. Setting this to `true` ensures the distribution remains active and is not automatically deleted, enabling users to manage lifecycle retention for critical distributions without accidental removal."
+    },
+    {
+      "name": "staging",
+      "description": "",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `staging` argument in the `aws_cloudfront_distribution` resource is a boolean flag that allows users to specify whether the CloudFront distribution is intended for staging purposes, typically used for testing or pre-production environments. Setting this argument can help differentiate staging distributions from production ones, enabling workflows that align with environment-specific configurations or deployment strategies."
+    },
+    {
+      "name": "tags",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument in the `aws_cloudfront_distribution` resource allows users to assign key-value metadata to the CloudFront distribution for organizational, tracking, or automation purposes. By setting this argument, users can categorize and manage resources effectively, enabling workflows such as cost allocation, environment identification (e.g., \"production\" or \"staging\"), and integration with tagging-based policies or tools."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_cloudfront_distribution` resource allows users to define a comprehensive set of key-value tags that are applied to the CloudFront distribution and any associated resources. This facilitates resource organization, cost allocation, and governance by enabling tagging for purposes such as environment identification, ownership tracking, or compliance requirements."
+    },
+    {
+      "name": "wait_for_deployment",
+      "description": "",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `wait_for_deployment` argument in the `aws_cloudfront_distribution` resource controls whether Terraform waits for the CloudFront distribution to be fully deployed before completing the apply operation. Setting this to `true` ensures that the resource creation or update process accounts for the distribution's deployment status, which is useful for workflows requiring confirmation of readiness before proceeding with dependent resources or actions."
+    },
+    {
+      "name": "web_acl_id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `web_acl_id` argument allows users to associate an AWS Web Application Firewall (WAF) Web ACL with the CloudFront distribution, enabling the configuration of security rules to filter and protect incoming HTTP/HTTPS requests. By specifying this ID, users can enforce access control policies, mitigate common web vulnerabilities, and enhance the security posture of their content delivery network."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "custom_error_response",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "error_caching_min_ttl",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `error_caching_min_ttl` argument in the `custom_error_response` block of the `aws_cloudfront_distribution` resource allows users to define the minimum time (in seconds) that CloudFront caches an error response for a specified HTTP status code. By configuring this value, users can control the duration of error caching to optimize performance and reduce the frequency of requests to the origin during error conditions, aligning with caching strategies and user experience goals."
+        },
+        {
+          "name": "error_code",
+          "description": "",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `error_code` argument in the `custom_error_response` block of the `aws_cloudfront_distribution` resource specifies the HTTP status code (e.g., 404, 500) for which CloudFront should apply a custom error response. By defining this argument, users can control how specific error conditions are handled, enabling tailored responses or redirects to improve user experience and error management."
+        },
+        {
+          "name": "response_code",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `response_code` argument in the `custom_error_response` block of the `aws_cloudfront_distribution` resource allows users to specify the HTTP status code that CloudFront returns to the viewer when a custom error response is triggered. This enables users to control the behavior of error handling by defining the specific response code sent for error scenarios, aligning with custom application requirements or user experience goals."
+        },
+        {
+          "name": "response_page_path",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `response_page_path` argument in the `custom_error_response` block of the `aws_cloudfront_distribution` resource allows users to specify the path to a custom error page that CloudFront serves when a specific error status code is returned. By setting this argument, users can define a user-friendly or branded error page to enhance the end-user experience and maintain consistent application behavior during error scenarios."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `custom_error_response` block in the `aws_cloudfront_distribution` resource allows users to define custom handling for specific HTTP error codes returned by CloudFront, enabling tailored responses or redirects for improved user experience and error management. It encapsulates settings such as error code mapping, response page customization, and caching behavior, providing granular control over how errors are presented and managed in a CloudFront distribution."
+    },
+    {
+      "name": "default_cache_behavior",
+      "description": "",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "allowed_methods",
+          "description": "",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `allowed_methods` argument in the `default_cache_behavior` of the `aws_cloudfront_distribution` resource specifies the HTTP methods (e.g., GET, POST, PUT) that CloudFront permits for requests to the origin. By configuring this argument, users control the interaction patterns between clients and the origin, enabling fine-grained access to cacheable and non-cacheable operations based on their application's requirements."
+        },
+        {
+          "name": "cache_policy_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `cache_policy_id` argument in the `default_cache_behavior` of the `aws_cloudfront_distribution` resource allows users to specify the ID of a cache policy that defines how CloudFront caches content for requests matching the default behavior. By setting this argument, users can control caching parameters such as TTLs, cache keys, and header/query string inclusion, enabling fine-grained customization of content delivery and performance optimization."
+        },
+        {
+          "name": "cached_methods",
+          "description": "",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `cached_methods` argument in the `default_cache_behavior` of the `aws_cloudfront_distribution` resource specifies the HTTP methods (e.g., GET, HEAD) that CloudFront caches responses for, allowing users to control which request types are stored and served from the cache. Configuring this argument optimizes cache behavior to improve performance and reduce origin server load by tailoring caching to specific application needs."
+        },
+        {
+          "name": "compress",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `compress` argument in the `default_cache_behavior` of the `aws_cloudfront_distribution` resource controls whether CloudFront automatically compresses certain file types (e.g., text-based assets like HTML, CSS, and JavaScript) before serving them to viewers. Enabling this option (`true`) improves performance by reducing bandwidth usage and speeding up content delivery, aligning with common user goals of optimizing cache behavior and enhancing end-user experience."
+        },
+        {
+          "name": "default_ttl",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `default_ttl` argument in the `default_cache_behavior` block of the `aws_cloudfront_distribution` resource specifies the default time-to-live (TTL) for cached objects in seconds, controlling how long CloudFront caches content before revalidating it with the origin. Configuring this value helps optimize cache performance and reduce origin requests, aligning with user goals of improving content delivery efficiency and minimizing latency."
+        },
+        {
+          "name": "field_level_encryption_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `field_level_encryption_id` argument in the `default_cache_behavior` of the `aws_cloudfront_distribution` resource allows users to specify the ID of a field-level encryption configuration to apply to requests handled by the default cache behavior. By setting this argument, users can enable encryption of sensitive data (e.g., PII) at the field level during transit, aligning with security and compliance requirements for protecting specific data fields in HTTP requests."
+        },
+        {
+          "name": "max_ttl",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `max_ttl` argument in the `default_cache_behavior` of the `aws_cloudfront_distribution` resource specifies the maximum time-to-live (TTL) for cached objects in CloudFront, defining the longest duration objects can remain in the edge cache before being revalidated with the origin. Configuring this value helps users optimize cache retention for frequently accessed content, balancing performance improvements and origin request frequency."
+        },
+        {
+          "name": "min_ttl",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `min_ttl` argument in the `default_cache_behavior` of the `aws_cloudfront_distribution` resource specifies the minimum time-to-live (TTL) in seconds for cached objects, controlling the shortest duration CloudFront will serve cached content before revalidating it with the origin. This allows users to fine-tune caching behavior to balance performance and content freshness, aligning with use cases like frequently updated assets or dynamic content delivery."
+        },
+        {
+          "name": "origin_request_policy_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `origin_request_policy_id` argument in the `default_cache_behavior` of the `aws_cloudfront_distribution` resource specifies the ID of an Origin Request Policy to control which HTTP headers, cookies, and query strings are forwarded from CloudFront to the origin. By setting this argument, users can customize the data passed to the origin, optimizing cache behavior and improving request handling based on specific application requirements."
+        },
+        {
+          "name": "realtime_log_config_arn",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `realtime_log_config_arn` argument in the `default_cache_behavior` of the `aws_cloudfront_distribution` resource specifies the Amazon Resource Name (ARN) of a real-time log configuration to enable detailed, near-real-time logging for cache behavior requests. By setting this argument, users can monitor and analyze CloudFront request data in real time, supporting goals like performance optimization, debugging, and compliance tracking."
+        },
+        {
+          "name": "response_headers_policy_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `response_headers_policy_id` argument in the `default_cache_behavior` of the `aws_cloudfront_distribution` resource allows users to specify the ID of a response headers policy to control the HTTP response headers returned by CloudFront for cached content. By setting this argument, users can define security, caching, or custom headers to enhance content delivery, improve browser behavior, or meet compliance requirements."
+        },
+        {
+          "name": "smooth_streaming",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `smooth_streaming` argument in the `default_cache_behavior` of the `aws_cloudfront_distribution` resource is a boolean that enables support for Microsoft Smooth Streaming, a protocol for adaptive bitrate streaming of media content. Setting this argument to `true` allows users to optimize the distribution of video content for seamless playback across varying network conditions, aligning with common goals of configuring cache behavior for media delivery."
+        },
+        {
+          "name": "target_origin_id",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `target_origin_id` argument in the `default_cache_behavior` block of the `aws_cloudfront_distribution` resource specifies the unique identifier of the origin that CloudFront should route requests to for this cache behavior. By defining this value, users establish the connection between the cache behavior and the designated origin, enabling precise control over content delivery and request routing within the distribution."
+        },
+        {
+          "name": "trusted_key_groups",
+          "description": "",
+          "required": false,
+          "type": "list(string)",
+          "llm_summary": "The `trusted_key_groups` argument in the `default_cache_behavior` of the `aws_cloudfront_distribution` resource allows users to specify a list of key group IDs that CloudFront trusts for signed URL or signed cookie authentication. By configuring this argument, users can control access to cached content by associating it with specific key groups, enabling secure content delivery and fine-grained access management."
+        },
+        {
+          "name": "trusted_signers",
+          "description": "",
+          "required": false,
+          "type": "list(string)",
+          "llm_summary": "The `trusted_signers` argument in the `default_cache_behavior` of the `aws_cloudfront_distribution` resource specifies a list of AWS account IDs authorized to sign URLs or cookies for private content access. Configuring this argument enables the user to control access to cached content by defining which accounts can generate signed requests, supporting secure delivery of restricted resources."
+        },
+        {
+          "name": "viewer_protocol_policy",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `viewer_protocol_policy` argument in the `default_cache_behavior` of the `aws_cloudfront_distribution` resource specifies the protocol that viewers must use to access cached content, allowing users to enforce HTTPS-only connections (`redirect-to-https` or `https-only`) or permit both HTTP and HTTPS (`allow-all`). This configuration is critical for controlling security and compliance requirements, ensuring secure communication or accommodating legacy systems as needed."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "forwarded_values",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "headers",
+              "description": "",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `headers` argument in the `forwarded_values` block of the `aws_cloudfront_distribution` resource allows users to specify a set of HTTP headers that CloudFront should forward to the origin. Configuring this argument enables fine-grained control over cache behavior and origin request customization, as forwarding specific headers can influence cache key generation and ensure the origin receives necessary request metadata for dynamic content delivery."
+            },
+            {
+              "name": "query_string",
+              "description": "",
+              "required": true,
+              "type": "bool",
+              "llm_summary": "The `query_string` argument in the `forwarded_values` block of the `aws_cloudfront_distribution` resource controls whether CloudFront includes query string parameters from viewer requests when forwarding them to the origin. Setting this to `true` enables caching behavior that accounts for variations in query strings, allowing users to configure more granular cache keys based on request parameters, which is essential for applications relying on dynamic content or personalized responses."
+            },
+            {
+              "name": "query_string_cache_keys",
+              "description": "",
+              "required": false,
+              "type": "list(string)",
+              "llm_summary": "The `query_string_cache_keys` argument in the `forwarded_values` block of the `aws_cloudfront_distribution` resource allows users to specify a list of query string parameters that CloudFront should include in the cache key when caching responses. By defining these keys, users can control how variations in query string parameters affect caching behavior, enabling fine-grained cache customization to optimize performance and ensure accurate content delivery based on specific request attributes."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "cookies",
+              "description": "",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "forward",
+                  "description": "",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `forward` argument in the `cookies` context of the `aws_cloudfront_distribution` resource specifies how CloudFront handles cookies when forwarding requests to the origin. By setting this required string, users can control whether all cookies, no cookies, or only specific cookies are forwarded, impacting cache behavior and enabling fine-grained control over origin request customization and caching efficiency."
+                },
+                {
+                  "name": "whitelisted_names",
+                  "description": "",
+                  "required": false,
+                  "type": "set(string)",
+                  "llm_summary": "The `whitelisted_names` argument in the `aws_cloudfront_distribution` resource allows users to specify a set of cookie names that CloudFront will forward to the origin. By defining this list, users can control which cookies are included in cache key calculations, enabling more granular caching behavior and ensuring that only relevant cookies are used to personalize or optimize content delivery."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `cookies` configuration block within the `forwarded_values` context of the `aws_cloudfront_distribution` resource defines how cookies are handled when forwarding requests to the origin. It encapsulates settings to specify whether cookies should be forwarded, and if so, which cookies to include, enabling granular control over caching behavior and optimizing content delivery by tailoring responses based on user-specific data."
+            }
+          ],
+          "llm_summary": "The `forwarded_values` block within the `default_cache_behavior` of the `aws_cloudfront_distribution` resource configures how query strings, cookies, and headers are forwarded to the origin, as well as whether to include object-level data via the `body` field. This block enables fine-grained control over caching behavior and origin request customization, allowing users to optimize content delivery and tailor cache invalidation based on dynamic request attributes."
+        },
+        {
+          "name": "function_association",
+          "description": "",
+          "cardinality": [
+            0,
+            2
+          ],
+          "arguments": [
+            {
+              "name": "event_type",
+              "description": "(Required) - Specific event to trigger this function. Valid values: `viewer-request` or `viewer-response`.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `event_type` argument in the `function_association` block of the `aws_cloudfront_distribution` resource specifies the CloudFront event that triggers the associated Lambda@Edge function, allowing users to define whether the function executes during the `viewer-request` (before the request reaches the origin) or `viewer-response` (after the response is returned from the origin). By setting this argument, users can control the timing and context of function execution to customize request handling, security, or response modification based on their distribution's behavior."
+            },
+            {
+              "name": "function_arn",
+              "description": "(Required) - ARN of the CloudFront function.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `function_arn` argument specifies the Amazon Resource Name (ARN) of the CloudFront function to associate with a specific behavior in the CloudFront distribution. By setting this value, users enable the execution of custom lightweight JavaScript logic at specific CloudFront request or response stages, such as viewer request or origin response, to modify or enhance content delivery workflows."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `function_association` block within the `default_cache_behavior` of the `aws_cloudfront_distribution` resource enables the integration of AWS CloudFront Functions with specific cache behaviors, allowing users to execute lightweight, event-driven logic at the edge. It encapsulates settings to define the function ARN, event type (e.g., viewer request or response), and invocation behavior, providing fine-grained control over how custom logic is applied to HTTP requests and responses for enhanced performance, security, or personalization."
+        },
+        {
+          "name": "grpc_config",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "enabled",
+              "description": "",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `enabled` argument in the `grpc_config` block of the `aws_cloudfront_distribution` resource allows users to control whether gRPC support is activated for the CloudFront distribution. Setting this to `true` enables the distribution to handle gRPC traffic, which is essential for applications requiring low-latency, high-performance communication over HTTP/2."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `grpc_config` block within the `default_cache_behavior` of the `aws_cloudfront_distribution` resource configures settings specific to handling gRPC traffic, enabling optimized delivery of gRPC-based APIs or services through CloudFront. This block encapsulates related settings to manage protocol-specific behaviors, ensuring efficient and secure communication for applications leveraging gRPC, and helps users fine-tune caching and request handling for gRPC workloads."
+        },
+        {
+          "name": "lambda_function_association",
+          "description": "",
+          "cardinality": [
+            0,
+            4
+          ],
+          "arguments": [
+            {
+              "name": "event_type",
+              "description": "(Required) - Specific event to trigger this function. Valid values: `viewer-request`, `origin-request`, `viewer-response`, `origin-response`.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `event_type` argument in the `lambda_function_association` block of the `aws_cloudfront_distribution` resource specifies the CloudFront event that triggers the associated Lambda function, enabling users to customize request and response processing at specific stages of the content delivery lifecycle. By defining this argument, users can control behaviors such as modifying viewer requests (`viewer-request`), altering origin requests (`origin-request`), customizing viewer responses (`viewer-response`), or transforming origin responses (`origin-response`) to optimize caching, security, or dynamic content delivery."
+            },
+            {
+              "name": "include_body",
+              "description": "(Optional) - When set to true it exposes the request body to the lambda function. Defaults to false. Valid values: `true`, `false`.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `include_body` argument in the `lambda_function_association` block of the `aws_cloudfront_distribution` resource controls whether the HTTP request body is passed to the associated Lambda function. Setting this to `true` enables the Lambda function to access and process the request body, which is useful for advanced use cases like custom authentication, request validation, or payload transformation. By default, it is `false` to optimize performance and reduce data transfer overhead."
+            },
+            {
+              "name": "lambda_arn",
+              "description": "(Required) - ARN of the Lambda function.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `lambda_arn` argument specifies the Amazon Resource Name (ARN) of the Lambda function to be associated with a CloudFront distribution, enabling users to define custom request or response processing logic at specific CloudFront event triggers (e.g., viewer request, origin response). By setting this argument, users can achieve advanced functionality such as modifying HTTP headers, implementing authentication, or transforming content dynamically during the distribution lifecycle."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `lambda_function_association` block within the `default_cache_behavior` of the `aws_cloudfront_distribution` resource enables the integration of AWS Lambda functions to customize CloudFront request and response processing. It encapsulates settings for associating Lambda functions with specific CloudFront event types (e.g., viewer request, origin request, viewer response, origin response), allowing users to implement advanced behaviors such as header manipulation, request validation, or dynamic content generation at various stages of the caching lifecycle. Configuring this block provides granular control over how CloudFront handles and transforms HTTP traffic, enhancing flexibility and functionality for content delivery."
+        }
+      ],
+      "llm_summary": "The `default_cache_behavior` block in the `aws_cloudfront_distribution` resource defines the primary caching and request handling behavior for CloudFront distributions, including settings for origin communication, viewer protocol policies, caching policies, and access controls. Configuring this block allows users to establish default rules for how CloudFront handles requests and serves content, enabling fine-grained control over caching, security, and performance optimization for web applications or content delivery."
+    },
+    {
+      "name": "logging_config",
+      "description": "",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "bucket",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `bucket` argument in the `logging_config` block of the `aws_cloudfront_distribution` resource specifies the Amazon S3 bucket where CloudFront access logs will be stored. By setting this required argument, users enable logging functionality to capture detailed request data for their distribution, supporting use cases like traffic analysis, debugging, and compliance auditing."
+        },
+        {
+          "name": "include_cookies",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `include_cookies` argument in the `logging_config` block of the `aws_cloudfront_distribution` resource allows users to specify whether HTTP cookies should be included in CloudFront access logs. Enabling this option provides detailed insights into user-specific requests, which can be useful for advanced analytics or debugging, but may increase log size and complexity."
+        },
+        {
+          "name": "prefix",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `prefix` argument in the `logging_config` block of the `aws_cloudfront_distribution` resource allows users to specify a string that is prepended to the names of log files generated by CloudFront. This enables users to organize and differentiate logs by environment, application, or other custom categories, facilitating easier log management and retrieval in the configured S3 bucket."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `logging_config` block in the `aws_cloudfront_distribution` resource enables and configures logging for CloudFront distributions, allowing users to capture detailed access logs for requests made to the distribution. It encapsulates settings such as the S3 bucket destination for logs, log file prefix, and logging permissions, helping users monitor, analyze, and audit distribution activity for operational insights and compliance purposes."
+    },
+    {
+      "name": "ordered_cache_behavior",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "allowed_methods",
+          "description": "",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `allowed_methods` argument in the `ordered_cache_behavior` block of the `aws_cloudfront_distribution` resource specifies the HTTP methods (e.g., GET, POST, DELETE) that CloudFront permits for requests to the origin within the defined cache behavior. By configuring this argument, users control the interaction patterns between clients and the origin, enabling tailored access for specific use cases such as read-only or full CRUD operations."
+        },
+        {
+          "name": "cache_policy_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `cache_policy_id` argument in the `ordered_cache_behavior` block of the `aws_cloudfront_distribution` resource specifies the ID of a cache policy to control how CloudFront caches content for the associated cache behavior. By setting this argument, users can define caching rules such as TTLs, header inclusion, query string handling, and cookie behavior, enabling fine-grained control over content delivery and optimization for specific application requirements."
+        },
+        {
+          "name": "cached_methods",
+          "description": "",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `cached_methods` argument in the `ordered_cache_behavior` block of the `aws_cloudfront_distribution` resource specifies the HTTP methods (e.g., GET, HEAD) that CloudFront caches responses for, allowing users to control which request types are stored in the cache. Configuring this argument optimizes cache behavior to improve performance and reduce origin server load by tailoring caching to specific application needs."
+        },
+        {
+          "name": "compress",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `compress` argument in the `ordered_cache_behavior` block of the `aws_cloudfront_distribution` resource allows users to enable automatic compression of certain file types (e.g., text and binary formats) when serving cached content. Setting this to `true` reduces bandwidth usage and improves performance for end users by delivering smaller, optimized assets, aligning with common goals of enhancing content delivery efficiency."
+        },
+        {
+          "name": "default_ttl",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `default_ttl` argument in the `ordered_cache_behavior` block of the `aws_cloudfront_distribution` resource specifies the default time-to-live (TTL) in seconds for cached objects when no specific caching directives are provided by the origin or client. Configuring this value helps control how long CloudFront caches content by default, optimizing performance and reducing origin requests while balancing content freshness."
+        },
+        {
+          "name": "field_level_encryption_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `field_level_encryption_id` argument in the `ordered_cache_behavior` block of the `aws_cloudfront_distribution` resource specifies the unique identifier for a Field-Level Encryption configuration to apply to requests matching this cache behavior. By setting this argument, users can enforce encryption of sensitive data (e.g., PII) at the field level during transit, aligning with security and compliance requirements for specific cache paths."
+        },
+        {
+          "name": "max_ttl",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `max_ttl` argument in the `ordered_cache_behavior` block of the `aws_cloudfront_distribution` resource specifies the maximum time-to-live (TTL) for cached objects in CloudFront, defining the upper limit on how long objects can remain in the edge cache before being revalidated with the origin. Configuring this argument allows users to optimize cache retention for specific behaviors, balancing performance improvements through caching with the need for up-to-date content delivery."
+        },
+        {
+          "name": "min_ttl",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `min_ttl` argument in the `ordered_cache_behavior` block of the `aws_cloudfront_distribution` resource specifies the minimum time-to-live (TTL) in seconds for cached objects in the CloudFront distribution. It allows users to control the minimum duration that objects are retained in edge caches before revalidation, optimizing cache behavior for performance and ensuring a balance between content freshness and reduced origin requests."
+        },
+        {
+          "name": "origin_request_policy_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `origin_request_policy_id` argument in the `ordered_cache_behavior` block of the `aws_cloudfront_distribution` resource specifies the ID of an origin request policy to control which HTTP headers, cookies, and query strings are included in requests sent to the origin. By setting this argument, users can customize the data passed to the origin, optimizing cache behavior and improving request efficiency based on specific application requirements."
+        },
+        {
+          "name": "path_pattern",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `path_pattern` argument in the `ordered_cache_behavior` block of the `aws_cloudfront_distribution` resource specifies the URL path pattern (e.g., `/images/*`) that CloudFront uses to match incoming requests to this cache behavior. By defining this argument, users can control how specific requests are routed and cached, enabling fine-grained customization of content delivery and optimizing performance for targeted resources."
+        },
+        {
+          "name": "realtime_log_config_arn",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `realtime_log_config_arn` argument in the `ordered_cache_behavior` block of the `aws_cloudfront_distribution` resource allows users to specify the Amazon Resource Name (ARN) of a real-time log configuration for the associated cache behavior. By setting this argument, users can enable detailed, near real-time logging of requests processed by CloudFront, which is useful for monitoring, debugging, and analytics purposes."
+        },
+        {
+          "name": "response_headers_policy_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `response_headers_policy_id` argument in the `ordered_cache_behavior` block of the `aws_cloudfront_distribution` resource allows users to specify the ID of a response headers policy to apply to HTTP responses for a specific cache behavior. By setting this argument, users can control headers such as security, caching, or custom metadata in the responses delivered to viewers, enabling fine-grained management of HTTP response behavior to meet compliance, performance, or customization goals."
+        },
+        {
+          "name": "smooth_streaming",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `smooth_streaming` argument in the `ordered_cache_behavior` block of the `aws_cloudfront_distribution` resource enables or disables support for Microsoft Smooth Streaming, a feature designed to optimize the delivery of media content by dynamically adjusting video quality based on the viewer's bandwidth. Setting this to `true` allows users to configure CloudFront to handle Smooth Streaming requests, which is particularly useful for delivering adaptive bitrate streaming media to improve user experience."
+        },
+        {
+          "name": "target_origin_id",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `target_origin_id` argument in the `ordered_cache_behavior` block of the `aws_cloudfront_distribution` resource specifies the unique identifier of the origin that the cache behavior should route requests to. By defining this value, users can control which backend origin (e.g., S3 bucket, HTTP server) serves content for a specific cache behavior, enabling precise routing and content delivery customization within the CloudFront distribution."
+        },
+        {
+          "name": "trusted_key_groups",
+          "description": "",
+          "required": false,
+          "type": "list(string)",
+          "llm_summary": "The `trusted_key_groups` argument in the `ordered_cache_behavior` block of the `aws_cloudfront_distribution` resource allows users to specify a list of key group IDs that CloudFront trusts for signed URL or signed cookie authentication. By configuring this argument, users can control access to cached content by associating it with specific key groups, enabling secure content delivery and fine-grained access management."
+        },
+        {
+          "name": "trusted_signers",
+          "description": "",
+          "required": false,
+          "type": "list(string)",
+          "llm_summary": "The `trusted_signers` argument in the `ordered_cache_behavior` block of the `aws_cloudfront_distribution` resource allows users to specify a list of AWS account IDs authorized to sign URLs or cookies for private content access. By configuring this argument, users can control which accounts are permitted to securely distribute private content through CloudFront, enabling fine-grained access control for restricted resources."
+        },
+        {
+          "name": "viewer_protocol_policy",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `viewer_protocol_policy` argument in the `ordered_cache_behavior` block of the `aws_cloudfront_distribution` resource specifies the protocol that viewers must use to access cached content, allowing users to enforce HTTPS-only access (`redirect-to-https` or `https-only`) or permit both HTTP and HTTPS (`allow-all`). This configuration is critical for defining security and compliance requirements for content delivery, ensuring secure communication or accommodating legacy systems as needed."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "forwarded_values",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "headers",
+              "description": "",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `headers` argument in the `forwarded_values` block of the `aws_cloudfront_distribution` resource allows users to specify a set of HTTP headers that CloudFront should forward to the origin. Configuring this argument enables fine-grained control over cache behavior and origin request customization, as forwarded headers can influence cache key generation and origin responses, supporting use cases like dynamic content delivery or personalized user experiences."
+            },
+            {
+              "name": "query_string",
+              "description": "",
+              "required": true,
+              "type": "bool",
+              "llm_summary": "The `query_string` argument in the `forwarded_values` block of the `aws_cloudfront_distribution` resource controls whether CloudFront includes query string parameters from viewer requests when forwarding requests to the origin. Enabling this setting allows users to configure cache behavior based on query string values, which is essential for applications where query parameters influence the content served (e.g., dynamic pages or API responses)."
+            },
+            {
+              "name": "query_string_cache_keys",
+              "description": "",
+              "required": false,
+              "type": "list(string)",
+              "llm_summary": "The `query_string_cache_keys` argument in the `forwarded_values` block of the `aws_cloudfront_distribution` resource allows users to specify a list of query string parameters that CloudFront should include when caching responses. By defining these keys, users can control how variations in query strings impact cache behavior, enabling fine-grained caching strategies to optimize performance and ensure accurate content delivery based on specific query parameters."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "cookies",
+              "description": "",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "forward",
+                  "description": "",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `forward` argument in the `cookies` context of the `aws_cloudfront_distribution` resource specifies how CloudFront handles cookies when forwarding requests to the origin. By setting this required string, users can control whether all cookies, no cookies, or only specific cookies are forwarded, impacting cache behavior and enabling fine-grained control over origin request customization and caching efficiency."
+                },
+                {
+                  "name": "whitelisted_names",
+                  "description": "",
+                  "required": false,
+                  "type": "set(string)",
+                  "llm_summary": "The `whitelisted_names` argument in the `aws_cloudfront_distribution` resource allows users to specify a set of cookie names that CloudFront will forward to the origin when caching is configured to whitelist specific cookies. By defining these names, users can control which cookies are included in cache key calculations, enabling more granular cache behavior and ensuring dynamic content is served based on selected cookie values."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `cookies` configuration block within the `forwarded_values` context of the `aws_cloudfront_distribution` resource defines how cookies are handled when forwarding requests to the origin. It encapsulates settings to specify whether cookies should be forwarded, and if so, which cookies to include, enabling users to control caching behavior and optimize content delivery by tailoring responses based on client-specific data."
+            }
+          ],
+          "llm_summary": "The `forwarded_values` block in the `ordered_cache_behavior` of the `aws_cloudfront_distribution` resource configures how query strings, cookies, and headers are forwarded to the origin, enabling fine-grained control over cache key behavior and origin request customization. This block is essential for optimizing caching strategies and ensuring dynamic content is served correctly based on user-specific data or request parameters."
+        },
+        {
+          "name": "function_association",
+          "description": "",
+          "cardinality": [
+            0,
+            2
+          ],
+          "arguments": [
+            {
+              "name": "event_type",
+              "description": "(Required) - Specific event to trigger this function. Valid values: `viewer-request` or `viewer-response`.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `event_type` argument in the `function_association` block of the `aws_cloudfront_distribution` resource specifies the CloudFront event that triggers the associated function, allowing users to define whether the function executes during the `viewer-request` or `viewer-response` phase. This configuration enables precise control over when custom logic is applied in the request/response lifecycle, such as modifying requests before they reach the origin or altering responses before they are sent to the viewer."
+            },
+            {
+              "name": "function_arn",
+              "description": "(Required) - ARN of the CloudFront function.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `function_arn` argument specifies the Amazon Resource Name (ARN) of the CloudFront function to associate with a CloudFront distribution, enabling users to define custom logic for request or response processing at specific stages of the distribution lifecycle (e.g., viewer request or origin response). By setting this argument, users can integrate serverless functions to modify HTTP headers, implement redirects, or customize caching behavior, aligning the distribution's behavior with application-specific requirements."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `function_association` block within the `ordered_cache_behavior` configuration of the `aws_cloudfront_distribution` resource defines the association of AWS CloudFront Functions with specific cache behaviors, enabling custom logic to be executed at key request processing stages (viewer request or response). This block allows users to specify the function ARN, invocation stage, and priority, providing fine-grained control over request handling and enhancing the distribution's functionality for tasks like header manipulation, URL rewrites, or custom authentication workflows."
+        },
+        {
+          "name": "grpc_config",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "enabled",
+              "description": "",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `enabled` argument in the `grpc_config` block of the `aws_cloudfront_distribution` resource allows users to control whether gRPC support is activated for the CloudFront distribution. Setting this argument to `true` enables gRPC protocol functionality, facilitating low-latency communication for applications using gRPC over HTTP/2, which is commonly used for microservices and real-time APIs."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `grpc_config` block within the `ordered_cache_behavior` of the `aws_cloudfront_distribution` resource is used to configure settings specific to handling gRPC traffic in CloudFront. It encapsulates parameters that optimize and enable gRPC protocol support, allowing users to efficiently route and cache gRPC requests for improved performance and scalability in distributed applications. Configuring this block helps users achieve seamless integration of gRPC workloads with CloudFront, ensuring low-latency communication and enhanced delivery for real-time services."
+        },
+        {
+          "name": "lambda_function_association",
+          "description": "",
+          "cardinality": [
+            0,
+            4
+          ],
+          "arguments": [
+            {
+              "name": "event_type",
+              "description": "(Required) - Specific event to trigger this function. Valid values: `viewer-request`, `origin-request`, `viewer-response`, `origin-response`.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `event_type` argument in the `lambda_function_association` block of the `aws_cloudfront_distribution` resource specifies the CloudFront event that triggers the associated Lambda function, enabling users to customize request or response processing at specific stages of the content delivery lifecycle. By setting this required argument to one of the valid values (`viewer-request`, `origin-request`, `viewer-response`, or `origin-response`), users can define when their Lambda function executes, such as modifying requests before reaching the origin or altering responses before delivery to viewers, to achieve advanced caching, security, or personalization goals."
+            },
+            {
+              "name": "include_body",
+              "description": "(Optional) - When set to true it exposes the request body to the lambda function. Defaults to false. Valid values: `true`, `false`.",
+              "required": false,
+              "type": "bool",
+              "llm_summary": "The `include_body` argument in the `lambda_function_association` block of the `aws_cloudfront_distribution` resource controls whether the HTTP request body is passed to the associated Lambda function. Setting this to `true` enables the Lambda function to access and process the request body, which is useful for advanced use cases like custom authentication, request validation, or payload transformation. By default, it is `false` to optimize performance and reduce data transfer overhead."
+            },
+            {
+              "name": "lambda_arn",
+              "description": "(Required) - ARN of the Lambda function.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `lambda_arn` argument specifies the Amazon Resource Name (ARN) of the Lambda function to be associated with a CloudFront distribution, enabling users to define custom request or response processing logic at specific CloudFront event triggers (e.g., viewer request, origin response). By setting this argument, users can achieve advanced functionality such as modifying HTTP headers, implementing authentication, or transforming content dynamically during the distribution lifecycle."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `lambda_function_association` block within the `ordered_cache_behavior` of the `aws_cloudfront_distribution` resource enables the integration of AWS Lambda functions with specific cache behaviors in a CloudFront distribution. It encapsulates settings for associating Lambda functions to execute at predefined CloudFront lifecycle events (e.g., `viewer-request`, `origin-request`, `viewer-response`, `origin-response`), allowing users to customize request/response processing, implement advanced logic, or modify content dynamically at the edge. Configuring this block provides granular control over edge computing workflows, enhancing performance, security, and personalization for content delivery."
+        }
+      ],
+      "llm_summary": "The `ordered_cache_behavior` block in the `aws_cloudfront_distribution` resource defines granular caching and request handling rules for specific URL patterns, enabling precise control over how CloudFront serves content. It encapsulates settings such as path patterns, cache policies, origin request policies, and viewer protocols, allowing users to optimize performance, security, and customization for different segments of their application or website traffic."
+    },
+    {
+      "name": "origin",
+      "description": "",
+      "cardinality": [
+        1,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "connection_attempts",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `connection_attempts` argument for the `origin` block in the `aws_cloudfront_distribution` resource specifies the maximum number of retry attempts CloudFront will make when trying to establish a connection with the origin server. Configuring this parameter allows users to control the resilience of their distribution in handling transient network issues, ensuring improved reliability for content delivery."
+        },
+        {
+          "name": "connection_timeout",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `connection_timeout` argument for the `origin` block in the `aws_cloudfront_distribution` resource specifies the amount of time (in seconds) CloudFront waits when establishing a connection to the origin server. Configuring this value allows users to control timeout behavior for origin connections, optimizing performance and reliability for content delivery by preventing excessive delays."
+        },
+        {
+          "name": "domain_name",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `domain_name` argument specifies the DNS hostname of the origin server that CloudFront will fetch content from, enabling users to define the source of their distribution's cached assets. By setting this required value, users ensure CloudFront knows where to retrieve content, supporting common goals like delivering web assets, APIs, or media files from a custom backend or third-party service."
+        },
+        {
+          "name": "origin_access_control_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `origin_access_control_id` argument allows users to specify the ID of an Origin Access Control associated with the CloudFront distribution's origin, enabling fine-grained access management between CloudFront and the origin. By setting this argument, users can enforce secure access policies, such as restricting origin requests to CloudFront, which is critical for enhancing security and preventing unauthorized access to backend resources."
+        },
+        {
+          "name": "origin_id",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `origin_id` argument specifies a unique identifier for an origin within the CloudFront distribution, allowing users to define and reference individual origins when configuring behaviors, cache settings, or routing rules. By setting this required string value, users ensure precise association between the distribution and its content source, enabling tailored delivery and caching strategies for specific origins."
+        },
+        {
+          "name": "origin_path",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `origin_path` argument for the `aws_cloudfront_distribution` resource allows users to specify a subdirectory or path within the origin that CloudFront should prepend to all requests sent to the origin. This enables fine-grained control over content delivery by targeting a specific folder or subset of resources within the origin, commonly used to serve assets from a specific directory without modifying the origin's base URL."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "custom_header",
+          "description": "",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "name",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `name` argument in the `custom_header` block of the `aws_cloudfront_distribution` resource specifies the name of the HTTP header to be included in requests forwarded to the origin. By defining this argument, users can customize request behavior to meet specific application requirements, such as passing environment-specific metadata or enabling origin-based routing logic."
+            },
+            {
+              "name": "value",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `value` argument for the `custom_header` block in the `aws_cloudfront_distribution` resource specifies the string content of the custom HTTP header to be sent with requests to the origin. By defining this argument, users can control the exact header value used to customize origin behavior, such as enabling specific configurations, passing environment-specific metadata, or influencing caching and request handling at the origin."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `custom_header` configuration block within the `origin` context of the `aws_cloudfront_distribution` resource allows users to define custom HTTP headers that are sent to the origin server with each request. This block encapsulates settings for specifying header names and values, enabling users to pass additional metadata or control information to the origin, such as authentication tokens or application-specific directives, to optimize request handling and enhance integration with backend systems."
+        },
+        {
+          "name": "custom_origin_config",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "http_port",
+              "description": "",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `http_port` argument in the `custom_origin_config` block of the `aws_cloudfront_distribution` resource specifies the HTTP port number on the origin server that CloudFront should use when communicating over HTTP. Configuring this argument allows users to define the port for HTTP traffic, ensuring proper routing and connectivity to the custom origin, which is critical for delivering content through CloudFront."
+            },
+            {
+              "name": "https_port",
+              "description": "",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `https_port` argument in the `custom_origin_config` block of the `aws_cloudfront_distribution` resource specifies the HTTPS port number that CloudFront uses to connect to the custom origin server. By defining this required parameter, users ensure secure communication between CloudFront and the origin over HTTPS, enabling the configuration of custom origin behavior for secure content delivery."
+            },
+            {
+              "name": "origin_keepalive_timeout",
+              "description": "",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `origin_keepalive_timeout` argument in the `custom_origin_config` block of the `aws_cloudfront_distribution` resource specifies the duration (in seconds) that CloudFront maintains an open TCP connection with the custom origin after receiving a response. Configuring this value helps optimize performance for persistent connections, reducing latency for subsequent requests and improving efficiency in high-traffic scenarios."
+            },
+            {
+              "name": "origin_protocol_policy",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `origin_protocol_policy` argument in the `custom_origin_config` block of the `aws_cloudfront_distribution` resource specifies the protocol CloudFront uses to communicate with the origin server, allowing users to enforce either HTTP-only (`http-only`), HTTPS-only (`https-only`), or dynamic protocol selection (`match-viewer`). This configuration directly impacts the security and behavior of the distribution by controlling how requests are transmitted between CloudFront and the origin, aligning with user goals like securing data in transit or optimizing compatibility with the origin server's protocol settings."
+            },
+            {
+              "name": "origin_read_timeout",
+              "description": "",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `origin_read_timeout` argument in the `custom_origin_config` of the `aws_cloudfront_distribution` resource allows users to define the maximum time, in seconds, that CloudFront waits for a response from the origin after establishing a connection. Configuring this value helps optimize request handling by preventing prolonged delays from slow or unresponsive origins, ensuring better performance and reliability for content delivery."
+            },
+            {
+              "name": "origin_ssl_protocols",
+              "description": "",
+              "required": true,
+              "type": "set(string)",
+              "llm_summary": "The `origin_ssl_protocols` argument in the `custom_origin_config` block of the `aws_cloudfront_distribution` resource specifies the set of SSL/TLS protocols that CloudFront can use when establishing a secure connection with the custom origin. By defining this argument, users control the security standards for communication between CloudFront and the origin, ensuring compatibility with the origin's supported protocols while enforcing compliance with security best practices."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `custom_origin_config` block within the `origin` configuration of the `aws_cloudfront_distribution` resource defines advanced settings for integrating non-Amazon S3 origins, such as custom web servers or third-party endpoints. It encapsulates parameters like origin protocol policies, HTTP port, HTTPS port, and origin SSL settings, enabling users to control how CloudFront communicates with the custom origin, ensuring secure and optimized content delivery."
+        },
+        {
+          "name": "origin_shield",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "enabled",
+              "description": "",
+              "required": true,
+              "type": "bool",
+              "llm_summary": "The `enabled` argument for the `origin_shield` block in the `aws_cloudfront_distribution` resource is a required boolean that specifies whether Origin Shield functionality is activated. Enabling Origin Shield optimizes cache performance and reduces origin load by designating a centralized caching layer, which is particularly useful for improving content delivery efficiency and minimizing origin server requests."
+            },
+            {
+              "name": "origin_shield_region",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `origin_shield_region` argument specifies the AWS region to be used for Origin Shield, a feature that adds an additional caching layer to reduce the load on the origin server and improve cache hit ratios. By configuring this argument, users can optimize data transfer efficiency and latency by selecting a region closest to their origin or end users, aligning with performance and cost optimization goals."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `origin_shield` block within the `origin` configuration of the `aws_cloudfront_distribution` resource enables the setup of Origin Shield, an additional caching layer in CloudFront that improves cache hit rates and reduces the load on the origin server. This block encapsulates settings such as the Origin Shield region, allowing users to optimize content delivery performance and reduce latency by specifying a centralized region for origin requests."
+        },
+        {
+          "name": "s3_origin_config",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "origin_access_identity",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `origin_access_identity` argument in the `s3_origin_config` block of the `aws_cloudfront_distribution` resource specifies the CloudFront Origin Access Identity (OAI) associated with the S3 bucket origin. This ensures secure access by restricting direct public access to the S3 bucket and allowing CloudFront to retrieve objects on behalf of viewers, aligning with common user goals of enhancing security and controlling access to S3 content."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `s3_origin_config` block within the `origin` configuration of the `aws_cloudfront_distribution` resource defines settings specific to integrating an Amazon S3 bucket as the origin for a CloudFront distribution. It encapsulates parameters such as the origin access identity and optional custom headers, enabling secure and controlled access to S3 content while optimizing delivery through CloudFront. Configuring this block allows users to establish a seamless connection between CloudFront and S3, ensuring secure content delivery and fine-grained access control."
+        },
+        {
+          "name": "vpc_origin_config",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "origin_keepalive_timeout",
+              "description": "",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `origin_keepalive_timeout` argument in the `vpc_origin_config` block of the `aws_cloudfront_distribution` resource allows users to define the duration (in seconds) that CloudFront maintains an open keep-alive connection with the origin server. Configuring this timeout can optimize performance by reducing connection overhead for repeated requests, particularly in scenarios with high traffic or frequent origin interactions."
+            },
+            {
+              "name": "origin_read_timeout",
+              "description": "",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `origin_read_timeout` argument in the `vpc_origin_config` block of the `aws_cloudfront_distribution` resource allows users to define the maximum duration (in seconds) CloudFront waits for a response from the origin after establishing a connection. Configuring this timeout helps optimize request handling and ensures reliable delivery by preventing prolonged waits for unresponsive origins, aligning with user goals of improving performance and fault tolerance in content delivery."
+            },
+            {
+              "name": "vpc_origin_id",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `vpc_origin_id` argument specifies a unique identifier for the origin within a VPC that CloudFront will use to fetch content, enabling integration with private resources in a Virtual Private Cloud. By setting this required value, users define the origin's identity, ensuring secure and controlled access to VPC-hosted content through the CloudFront distribution."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `vpc_origin_config` block within the `origin` configuration of the `aws_cloudfront_distribution` resource defines settings for connecting CloudFront to an origin hosted within an Amazon VPC. It encapsulates parameters that enable secure access to private resources, such as specifying an origin access identity (OAI) to control permissions and ensure restricted access. Configuring this block allows users to securely serve content from VPC-based origins through CloudFront, enabling private resource delivery with fine-grained access control."
+        }
+      ],
+      "llm_summary": "The `origin` configuration block in the `aws_cloudfront_distribution` resource defines the source content locations (e.g., S3 buckets, custom HTTP servers) that CloudFront retrieves and serves to end users. It encapsulates settings such as origin domain name, origin ID, connection behaviors, and optional custom headers, enabling users to specify and customize the backend sources for their distribution. Configuring this block is essential for establishing the content delivery pipeline, allowing precise control over how and where CloudFront fetches content to optimize performance and availability."
+    },
+    {
+      "name": "origin_group",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "origin_id",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `origin_id` argument specifies the unique identifier for an origin within an `origin_group` in an `aws_cloudfront_distribution`. It is required to define which origin is part of the group, enabling failover and redundancy by associating the group with specific backend resources for content delivery."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "failover_criteria",
+          "description": "",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "status_codes",
+              "description": "",
+              "required": true,
+              "type": "set(number)",
+              "llm_summary": "The `status_codes` argument in the `failover_criteria` block of the `aws_cloudfront_distribution` resource allows users to define a set of HTTP status codes that trigger failover to the secondary origin in an origin group. By specifying these codes, users can control the conditions under which CloudFront switches to the backup origin, ensuring high availability and resilience in response to specific error scenarios like server failures or unavailability."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `failover_criteria` block within the `origin_group` configuration of the `aws_cloudfront_distribution` resource defines the conditions under which CloudFront will fail over from the primary origin to a secondary origin. It encapsulates settings such as HTTP status codes that trigger failover, enabling users to ensure high availability and resilience by specifying precise failure conditions for origin group routing."
+        },
+        {
+          "name": "member",
+          "description": "",
+          "cardinality": [
+            2,
+            2
+          ],
+          "arguments": [
+            {
+              "name": "origin_id",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `origin_id` argument specifies a unique identifier for an origin within the CloudFront distribution, allowing users to define and reference the source of content (e.g., an S3 bucket, HTTP server, or other resource) that CloudFront will cache and deliver. Setting this argument ensures proper association and differentiation of multiple origins in the distribution, enabling precise configuration of caching and delivery behaviors."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `member` configuration block within the `origin_group` of the `aws_cloudfront_distribution` resource defines individual origins that are part of the origin group, enabling failover and redundancy for content delivery. By specifying multiple origins as `member` entries, users can ensure high availability and resilience in their CloudFront distribution by configuring fallback mechanisms in case the primary origin becomes unavailable."
+        }
+      ],
+      "llm_summary": "The `origin_group` configuration block in the `aws_cloudfront_distribution` resource enables failover and redundancy for CloudFront origins by grouping multiple origins together and defining a primary and secondary origin for high availability. It encapsulates settings related to origin failover criteria, such as health checks, ensuring uninterrupted content delivery by automatically switching to a backup origin if the primary origin becomes unavailable."
+    },
+    {
+      "name": "restrictions",
+      "description": "",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "geo_restriction",
+          "description": "",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "locations",
+              "description": "",
+              "required": false,
+              "type": "set(string)",
+              "llm_summary": "The `locations` argument in the `geo_restriction` block of the `aws_cloudfront_distribution` resource allows users to specify a set of country codes to control access to their CloudFront distribution based on geographic regions. By defining this argument, users can restrict or allow content delivery to specific countries, enabling compliance with regional regulations or tailoring content availability to target audiences."
+            },
+            {
+              "name": "restriction_type",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `restriction_type` argument in the `geo_restriction` block of the `aws_cloudfront_distribution` resource specifies the method used to control access to the distribution based on geographic location. It defines whether to allow or deny requests from specific countries, enabling users to enforce regional access policies for their content delivery."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `geo_restriction` block within the `restrictions` context of the `aws_cloudfront_distribution` resource enables control over geographic access to a CloudFront distribution. It encapsulates settings to define whether content delivery is allowed or denied for specific countries, helping users enforce compliance, regional licensing, or content access policies by restricting or permitting access based on geographic location."
+        }
+      ],
+      "llm_summary": "The \"restrictions\" configuration block in the \"aws_cloudfront_distribution\" resource defines geographic and content access controls for the CloudFront distribution, enabling users to restrict viewer access based on location or other criteria. This block encapsulates settings like geo-restriction policies, allowing users to enforce compliance, optimize content delivery, or limit access to specific regions for security or licensing purposes."
+    },
+    {
+      "name": "viewer_certificate",
+      "description": "",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "acm_certificate_arn",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `acm_certificate_arn` argument in the `viewer_certificate` block of the `aws_cloudfront_distribution` resource allows users to specify the Amazon Resource Name (ARN) of an AWS Certificate Manager (ACM) SSL/TLS certificate to enable HTTPS for the CloudFront distribution. By setting this argument, users can configure secure communication between viewers and the distribution, aligning with common goals like enhancing security and ensuring encrypted data transmission."
+        },
+        {
+          "name": "cloudfront_default_certificate",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `cloudfront_default_certificate` argument in the `viewer_certificate` block of the `aws_cloudfront_distribution` resource specifies whether to use the default CloudFront SSL/TLS certificate for HTTPS communication. Setting this to `true` enables the use of the default certificate, simplifying configuration for users who do not require custom domain certificates, while setting it to `false` allows the use of a custom certificate for enhanced control over domain-specific security."
+        },
+        {
+          "name": "iam_certificate_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `iam_certificate_id` argument in the `viewer_certificate` block of the `aws_cloudfront_distribution` resource allows users to specify the ID of an IAM server certificate to configure SSL/TLS for the CloudFront distribution. By setting this argument, users can enable HTTPS connections using a custom certificate stored in IAM, ensuring secure communication and aligning with specific security or compliance requirements."
+        },
+        {
+          "name": "minimum_protocol_version",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `minimum_protocol_version` argument within the `viewer_certificate` block of the `aws_cloudfront_distribution` resource allows users to specify the lowest SSL/TLS protocol version that CloudFront will support for HTTPS connections with viewers. Configuring this argument helps enforce stricter security standards by ensuring that only connections using the specified or higher protocol versions are allowed, aligning with compliance requirements or security best practices."
+        },
+        {
+          "name": "ssl_support_method",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `ssl_support_method` argument in the `viewer_certificate` block of the `aws_cloudfront_distribution` resource specifies the SSL/TLS negotiation method CloudFront uses when communicating with viewers. It allows users to control whether CloudFront supports only SNI-based SSL (Server Name Indication) or both SNI and dedicated IP-based SSL, impacting compatibility with older clients and cost optimization for SSL certificates."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `viewer_certificate` block in the `aws_cloudfront_distribution` resource configures SSL/TLS settings for securing communication between CloudFront and viewers. It encapsulates settings such as the SSL certificate to use (ACM, IAM, or default), minimum protocol versions, and support for SNI, enabling users to enforce HTTPS, enhance security, and customize certificate management for their distribution."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN for the distribution. For example: `arn:aws:cloudfront::123456789012:distribution/EDFDVBD632BHDS5`, where `123456789012` is your AWS account ID.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "caller_reference",
+      "description": "Internal value used by CloudFront to allow future updates to the distribution configuration.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "domain_name",
+      "description": "Domain name corresponding to the distribution. For example: `d604721fxaaqy9.cloudfront.net`.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "etag",
+      "description": "Current version of the distribution's information. For example: `E2QWRUHAPOMQZL`.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "hosted_zone_id",
+      "description": "CloudFront Route 53 zone ID that can be used to route an Alias Resource Record Set to. This attribute is simply an alias for the zone ID `Z2FDTNDATAQYW2`.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "in_progress_validation_batches",
+      "description": "Number of invalidation batches currently in progress.",
+      "optional": false,
+      "type": "number"
+    },
+    {
+      "name": "last_modified_time",
+      "description": "Date and time the distribution was last modified.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "description": "Current status of the distribution. `Deployed` if the distribution's information is fully propagated throughout the Amazon CloudFront system.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "trusted_key_groups",
+      "description": "List of nested attributes for active trusted key groups, if the distribution is set up to serve private content with signed URLs.`enabled` - `true` if any of the key groups have public keys that CloudFront can use to verify the signatures of signed URLs and signed cookies. `items` - List of nested attributes for each key group.`key_group_id` - ID of the key group that contains the public keys. `key_pair_ids` - Set of CloudFront key pair IDs.",
+      "optional": false,
+      "type": "list(object({enabled=bool,items=list(object({key_group_id=string,key_pair_ids=set(string)}))}))"
+    },
+    {
+      "name": "trusted_signers",
+      "description": "List of nested attributes for active trusted signers, if the distribution is set up to serve private content with signed URLs.`enabled` - `true` if any of the AWS accounts listed as trusted signers have active CloudFront key pairs `items` - List of nested attributes for each trusted signer`aws_account_number` - AWS account ID or `self` `key_pair_ids` - Set of active CloudFront key pairs associated with the signer account",
+      "optional": false,
+      "type": "list(object({enabled=bool,items=list(object({aws_account_number=string,key_pair_ids=set(string)}))}))"
+    }
+  ]
+}

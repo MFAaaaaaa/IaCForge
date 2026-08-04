@@ -1,0 +1,116 @@
+{
+  "resource": {
+    "name": "aws_cloudwatch_event_rule",
+    "description": "Provides an EventBridge Rule resource. EventBridge was formerly known as CloudWatch Events. The functionality is identical.",
+    "llm_summary": "The `aws_cloudwatch_event_rule` resource enables the creation and management of EventBridge rules, allowing users to define event-driven workflows by matching specific patterns in AWS service events or custom events. Common use cases include automating responses to changes in infrastructure, integrating services like Lambda, SQS, or SNS for event processing, and scheduling recurring tasks. Users can configure event patterns, schedule expressions, and targets to build robust, scalable event-driven architectures."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_cloudwatch_event_rule\" \"console\" {\n  name        = \"capture-aws-sign-in\"\n  description = \"Capture each AWS Console Sign In\"\n\n  event_pattern = jsonencode({\n    detail-type = [\n      \"AWS Console Sign In via CloudTrail\"\n    ]\n  })\n}\n\nresource \"aws_cloudwatch_event_target\" \"sns\" {\n  rule      = aws_cloudwatch_event_rule.console.name\n  target_id = \"SendToSNS\"\n  arn       = aws_sns_topic.aws_logins.arn\n}\n\nresource \"aws_sns_topic\" \"aws_logins\" {\n  name = \"aws-console-logins\"\n}\n\nresource \"aws_sns_topic_policy\" \"default\" {\n  arn    = aws_sns_topic.aws_logins.arn\n  policy = data.aws_iam_policy_document.sns_topic_policy.json\n}\n\ndata \"aws_iam_policy_document\" \"sns_topic_policy\" {\n  statement {\n    effect  = \"Allow\"\n    actions = [\"SNS:Publish\"]\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"events.amazonaws.com\"]\n    }\n\n    resources = [aws_sns_topic.aws_logins.arn]\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_cloudwatch_event_rule` to capture AWS Console Sign-In events via CloudTrail and route them to an SNS topic for notification. It showcases the use of the `event_pattern` argument to filter specific event types, integration with `aws_cloudwatch_event_target` for event delivery, and the setup of an `aws_sns_topic` with a policy allowing publishing from CloudWatch Events."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "description",
+      "description": "(Optional) The description of the rule.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_cloudwatch_event_rule` resource allows users to define a human-readable summary or purpose for the event rule, aiding in resource identification and documentation. While optional, setting this argument improves clarity and maintainability by providing context about the rule's intent or functionality within the infrastructure."
+    },
+    {
+      "name": "event_bus_name",
+      "description": "(Optional) The name or ARN of the event bus to associate with this rule. If you omit this, the `default` event bus is used.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `event_bus_name` argument in the `aws_cloudwatch_event_rule` resource allows users to specify the name or ARN of the event bus to associate with the rule, enabling targeted event routing across custom or organizational event buses. By setting this argument, users can control which event bus the rule listens to, supporting use cases like multi-environment event segregation or integration with cross-account event buses. If omitted, the rule defaults to the `default` event bus."
+    },
+    {
+      "name": "event_pattern",
+      "description": "(Optional) The event pattern described a JSON object. At least one of `schedule_expression` or `event_pattern` is required. See full documentation of Events and Event Patterns in EventBridge for details. Note: The event pattern size is 2048 by default but it is adjustable up to 4096 characters by submitting a service quota increase request. See Amazon EventBridge quotas for details.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `event_pattern` argument in the `aws_cloudwatch_event_rule` resource allows users to define a JSON-based filtering rule that specifies the event structure and conditions for triggering the rule in Amazon EventBridge. By configuring this argument, users can precisely control which events from various AWS services or custom applications are captured and processed, enabling targeted automation workflows or integrations based on specific event attributes."
+    },
+    {
+      "name": "force_destroy",
+      "description": "(Optional) Used to delete managed rules created by AWS. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `force_destroy` argument in the `aws_cloudwatch_event_rule` resource controls whether managed rules created by AWS can be forcibly deleted during resource destruction. Setting this to `true` ensures the removal of associated rules without manual intervention, supporting lifecycle management and cleanup of dependent resources."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_cloudwatch_event_rule` resource specifies a unique identifier for the event rule, allowing users to reference and manage the rule programmatically within Terraform configurations. While optional, setting this argument can help ensure consistent identification of the rule across deployments, supporting workflows that require explicit resource tracking or integration with other resources."
+    },
+    {
+      "name": "is_enabled",
+      "description": "(Optional, Deprecated Use `state` instead) Whether the rule should be enabled. Defaults to `true`. Conflicts with `state`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `is_enabled` argument for the `aws_cloudwatch_event_rule` resource allows users to control whether the event rule is active and capable of triggering its associated targets. Setting this argument to `true` enables the rule, while disabling it prevents the rule from executing, helping users manage rule lifecycle and operational states. Note: This argument is deprecated in favor of `state`."
+    },
+    {
+      "name": "name",
+      "description": "(Optional) The name of the rule. If omitted, Terraform will assign a random, unique name. Conflicts with `name_prefix`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_cloudwatch_event_rule` resource allows users to define a custom, unique identifier for the event rule, enabling precise naming for organizational or operational purposes. If not specified, Terraform generates a random name, making this argument useful for users who need consistent, human-readable names for integration, tracking, or compliance requirements."
+    },
+    {
+      "name": "name_prefix",
+      "description": "(Optional) Creates a unique name beginning with the specified prefix. Conflicts with `name`. Note: Due to the length of the generated suffix, must be 38 characters or less.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name_prefix` argument for the `aws_cloudwatch_event_rule` resource allows users to define a custom prefix for the rule's name, ensuring uniqueness by appending a generated suffix. This is useful for dynamically creating event rule names in environments where explicit naming is not required, supporting workflows like automated resource provisioning or multi-environment deployments."
+    },
+    {
+      "name": "role_arn",
+      "description": "(Optional) The Amazon Resource Name (ARN) associated with the role that is used for target invocation.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `role_arn` argument in the `aws_cloudwatch_event_rule` resource allows users to specify the Amazon Resource Name (ARN) of an IAM role that grants permissions for invoking targets associated with the event rule. By setting this argument, users can control the security context under which the event rule operates, ensuring proper authorization for target actions such as triggering AWS services or custom applications."
+    },
+    {
+      "name": "schedule_expression",
+      "description": "(Optional) The scheduling expression. For example, `cron(0 20 * * ? *)` or `rate(5 minutes)`. At least one of `schedule_expression` or `event_pattern` is required. Can only be used on the default event bus. For more information, refer to the AWS documentation Schedule Expressions for Rules.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `schedule_expression` argument in the `aws_cloudwatch_event_rule` resource allows users to define the timing and frequency of event rule triggers using either a `cron` or `rate` expression. By configuring this argument, users can automate the invocation of targets (e.g., Lambda functions or EC2 actions) on a recurring schedule, enabling time-based workflows and event-driven automation within the default event bus."
+    },
+    {
+      "name": "state",
+      "description": "(Optional) State of the rule. Valid values are `DISABLED`, `ENABLED`, and `ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS`. When state is `ENABLED`, the rule is enabled for all events except those delivered by CloudTrail. To also enable the rule for events delivered by CloudTrail, set `state` to `ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS`. Defaults to `ENABLED`. Conflicts with `is_enabled`. NOTE: The rule state `ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS` cannot be used in conjunction with the `schedule_expression` argument.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `state` argument in the `aws_cloudwatch_event_rule` resource allows users to control whether the event rule is active and the scope of events it processes. By setting this argument, users can enable or disable the rule, or configure it to include all CloudTrail management events, aligning the rule's behavior with specific monitoring or automation goals."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level. name - (Optional) The name of the rule. If omitted, Terraform will assign a random, unique name. Conflicts with name_prefix. name_prefix - (Optional) Creates a unique name beginning with the specified prefix. Conflicts with name. Note: Due to the length of the generated suffix, must be 38 characters or less. schedule_expression - (Optional) The scheduling expression. For example, cron(0 20 * * ? *) or rate(5 minutes). At least one of schedule_expression or event_pattern is required. Can only be used on the default event bus. For more information, refer to the AWS documentation Schedule Expressions for Rules. event_bus_name - (Optional) The name or ARN of the event bus to associate with this rule. If you omit this, the default event bus is used. event_pattern - (Optional) The event pattern described a JSON object. At least one of schedule_expression or event_pattern is required. See full documentation of Events and Event Patterns in EventBridge for details. Note: The event pattern size is 2048 by default but it is adjustable up to 4096 characters by submitting a service quota increase request. See Amazon EventBridge quotas for details. force_destroy - (Optional) Used to delete managed rules created by AWS. Defaults to false. description - (Optional) The description of the rule. role_arn - (Optional) The Amazon Resource Name (ARN) associated with the role that is used for target invocation. is_enabled - (Optional, Deprecated Use state instead) Whether the rule should be enabled. Defaults to true. Conflicts with state. state - (Optional) State of the rule. Valid values are DISABLED, ENABLED, and ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS. When state is ENABLED, the rule is enabled for all events except those delivered by CloudTrail. To also enable the rule for events delivered by CloudTrail, set state to ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS. Defaults to ENABLED. Conflicts with is_enabled. NOTE: The rule state ENABLED_WITH_ALL_CLOUDTRAIL_MANAGEMENT_EVENTS cannot be used in conjunction with the schedule_expression argument. tags - (Optional) A map of tags to assign to the resource. If configured with a provider default_tags configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_cloudwatch_event_rule` resource allows users to assign metadata in the form of key-value pairs to the event rule, enabling resource categorization, organization, and cost allocation. By defining tags, users can streamline resource management, support governance policies, and integrate with AWS tagging strategies for tracking usage across environments or projects."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_cloudwatch_event_rule` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to the resource, including inherited tags from the provider-level configuration. This enables streamlined resource organization, cost allocation, and metadata management across AWS services, aligning with common goals like tagging for governance, billing, and operational insights."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) of the rule.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

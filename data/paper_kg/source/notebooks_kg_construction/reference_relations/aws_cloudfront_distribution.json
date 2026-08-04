@@ -1,0 +1,87 @@
+[
+    {
+        "argument_path": "origin.domain_name",
+        "references_output": "aws_s3_bucket.bucket_regional_domain_name",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "origin.origin_access_control_id",
+        "references_output": "aws_cloudfront_origin_access_control.id",
+        "target_resource_type": "aws_cloudfront_origin_access_control"
+    },
+    {
+        "argument_path": "origin.s3_origin_config.origin_access_identity",
+        "references_output": "aws_cloudfront_origin_access_identity.cloudfront_access_identity_path",
+        "target_resource_type": "aws_cloudfront_origin_access_identity"
+    },
+    {
+        "argument_path": "viewer_certificate.acm_certificate_arn",
+        "references_output": "aws_acm_certificate.arn",
+        "target_resource_type": "aws_acm_certificate"
+    },
+    {
+        "argument_path": "viewer_certificate.iam_certificate_id",
+        "references_output": "aws_iam_server_certificate.id",
+        "target_resource_type": "aws_iam_server_certificate"
+    },
+    {
+        "argument_path": "web_acl_id",
+        "references_output": "aws_wafv2_web_acl.arn",
+        "target_resource_type": "aws_wafv2_web_acl"
+    },
+    {
+        "argument_path": "web_acl_id",
+        "references_output": "aws_waf_web_acl.id",
+        "target_resource_type": "aws_waf_web_acl"
+    },
+    {
+        "argument_path": "lambda_function_association.lambda_arn",
+        "references_output": "aws_lambda_function.qualified_arn",
+        "target_resource_type": "aws_lambda_function"
+    },
+    {
+        "argument_path": "function_association.function_arn",
+        "references_output": "aws_cloudfront_function.arn",
+        "target_resource_type": "aws_cloudfront_function"
+    },
+    {
+        "argument_path": "default_cache_behavior.cache_policy_id",
+        "references_output": "aws_cloudfront_cache_policy.id",
+        "target_resource_type": "aws_cloudfront_cache_policy"
+    },
+    {
+        "argument_path": "default_cache_behavior.origin_request_policy_id",
+        "references_output": "aws_cloudfront_origin_request_policy.id",
+        "target_resource_type": "aws_cloudfront_origin_request_policy"
+    },
+    {
+        "argument_path": "default_cache_behavior.realtime_log_config_arn",
+        "references_output": "aws_cloudfront_realtime_log_config.arn",
+        "target_resource_type": "aws_cloudfront_realtime_log_config"
+    },
+    {
+        "argument_path": "default_cache_behavior.response_headers_policy_id",
+        "references_output": "aws_cloudfront_response_headers_policy.id",
+        "target_resource_type": "aws_cloudfront_response_headers_policy"
+    },
+    {
+        "argument_path": "ordered_cache_behavior.cache_policy_id",
+        "references_output": "aws_cloudfront_cache_policy.id",
+        "target_resource_type": "aws_cloudfront_cache_policy"
+    },
+    {
+        "argument_path": "ordered_cache_behavior.origin_request_policy_id",
+        "references_output": "aws_cloudfront_origin_request_policy.id",
+        "target_resource_type": "aws_cloudfront_origin_request_policy"
+    },
+    {
+        "argument_path": "ordered_cache_behavior.realtime_log_config_arn",
+        "references_output": "aws_cloudfront_realtime_log_config.arn",
+        "target_resource_type": "aws_cloudfront_realtime_log_config"
+    },
+    {
+        "argument_path": "ordered_cache_behavior.response_headers_policy_id",
+        "references_output": "aws_cloudfront_response_headers_policy.id",
+        "target_resource_type": "aws_cloudfront_response_headers_policy"
+    }
+]

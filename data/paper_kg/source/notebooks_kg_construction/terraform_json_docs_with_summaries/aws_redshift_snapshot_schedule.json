@@ -1,0 +1,81 @@
+{
+  "resource": {
+    "name": "aws_redshift_snapshot_schedule",
+    "description": "",
+    "llm_summary": "The `aws_redshift_snapshot_schedule` Terraform resource enables the creation and management of automated snapshot schedules for Amazon Redshift clusters, ensuring consistent backup and recovery processes. It is commonly used to implement lifecycle management for Redshift snapshots, supporting compliance, disaster recovery, and data retention policies. Users can configure schedule frequency, retention periods, and associations with specific Redshift clusters, making it ideal for maintaining data durability and optimizing backup workflows in analytics-driven environments."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_redshift_snapshot_schedule\" \"default\" {\n  identifier = \"tf-redshift-snapshot-schedule\"\n  definitions = [\n    \"rate(12 hours)\",\n  ]\n}",
+      "llm_summary": "\"Demonstrates the basic configuration of the `aws_redshift_snapshot_schedule` resource to create a Redshift snapshot schedule with a custom interval, using the `identifier` and `definitions` arguments to define a schedule that triggers every 12 hours.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "definitions",
+      "description": "(Optional) The definition of the snapshot schedule. The definition is made up of schedule expressions, for example `cron(30 12 *)` or `rate(12 hours)`.",
+      "required": true,
+      "type": "set(string)",
+      "llm_summary": "The `definitions` argument in the `aws_redshift_snapshot_schedule` resource allows users to define the schedule expressions that control when automated snapshots of a Redshift cluster are created. By specifying cron or rate-based expressions (e.g., `cron(30 12 *)` or `rate(12 hours)`), users can configure the timing and frequency of snapshot creation, enabling precise management of backup schedules to meet data retention and recovery requirements."
+    },
+    {
+      "name": "description",
+      "description": "(Optional) The description of the snapshot schedule.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument allows users to define a human-readable summary or purpose for the Redshift snapshot schedule, providing context or metadata for easier identification and management. While optional, setting this argument helps improve clarity and organization, especially in environments with multiple snapshot schedules."
+    },
+    {
+      "name": "force_destroy",
+      "description": "(Optional) Whether to destroy all associated clusters with this snapshot schedule on deletion. Must be enabled and applied before attempting deletion.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `force_destroy` argument in the `aws_redshift_snapshot_schedule` resource controls whether all associated Redshift clusters linked to the snapshot schedule are automatically deleted when the schedule itself is removed. Enabling this argument facilitates lifecycle management by ensuring dependent resources are forcefully cleaned up during deletion, aligning with scenarios where users need to prevent orphaned infrastructure or enforce complete teardown."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_redshift_snapshot_schedule` resource represents the unique identifier of the snapshot schedule. While optional, it allows users to reference or specify an existing snapshot schedule, enabling integration with other resources or workflows that depend on this schedule for managing automated Redshift cluster backups."
+    },
+    {
+      "name": "identifier",
+      "description": "(Optional, Forces new resource) The snapshot schedule identifier. If omitted, Terraform will assign a random, unique identifier.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `identifier` argument for the `aws_redshift_snapshot_schedule` resource allows users to define a unique snapshot schedule identifier, enabling precise control and reference to the schedule within their Redshift environment. If omitted, Terraform generates a random identifier, making this argument useful for users who need predictable or meaningful naming for integration, organization, or lifecycle management purposes."
+    },
+    {
+      "name": "identifier_prefix",
+      "description": "(Optional, Forces new resource) Creates a unique identifier beginning with the specified prefix. Conflicts with `identifier`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `identifier_prefix` argument for the `aws_redshift_snapshot_schedule` resource allows users to define a custom prefix for the unique identifier of the snapshot schedule, enabling better organization and naming conventions for resources. Setting this argument helps users manage environments or workflows by ensuring predictable and meaningful naming, especially in cases where automated resource creation requires distinct identifiers."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_redshift_snapshot_schedule` resource allows users to assign metadata in the form of key-value pairs to the snapshot schedule, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or automation workflows. When configured, it can override provider-level default tags, ensuring granular control over tagging specific to this resource."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_redshift_snapshot_schedule` resource allows users to define a comprehensive set of key-value tags that are applied to the snapshot schedule, including inherited tags from the provider's default configuration. This enables users to organize, categorize, and manage the resource effectively for purposes such as cost allocation, environment identification, or compliance tracking."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) of the Redshift Snapshot Schedule.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

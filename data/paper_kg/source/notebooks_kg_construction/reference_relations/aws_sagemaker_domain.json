@@ -1,0 +1,67 @@
+[
+    {
+        "argument_path": "vpc_id",
+        "references_output": "aws_vpc.id",
+        "target_resource_type": "aws_vpc"
+    },
+    {
+        "argument_path": "subnet_ids",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "default_user_settings.execution_role",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "default_user_settings.kernel_gateway_app_settings.custom_image.app_image_config_name",
+        "references_output": "aws_sagemaker_app_image_config.app_image_config_name",
+        "target_resource_type": "aws_sagemaker_app_image_config"
+    },
+    {
+        "argument_path": "default_user_settings.kernel_gateway_app_settings.custom_image.image_name",
+        "references_output": "aws_sagemaker_image_version.image_name",
+        "target_resource_type": "aws_sagemaker_image_version"
+    },
+    {
+        "argument_path": "domain_settings.r_studio_server_pro_domain_settings.domain_execution_role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "canvas_app_settings.time_series_forecasting_settings.amazon_forecast_role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "canvas_app_settings.identity_provider_oauth_settings.secret_arn",
+        "references_output": "aws_secretsmanager_secret.arn",
+        "target_resource_type": "aws_secretsmanager_secret"
+    },
+    {
+        "argument_path": "emr_serverless_settings.execution_role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "emr_settings.assumable_role_arns",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "emr_settings.execution_role_arns",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "custom_file_system_config.efs_file_system_config.file_system_id",
+        "references_output": "aws_efs_file_system.id",
+        "target_resource_type": "aws_efs_file_system"
+    },
+    {
+        "argument_path": "custom_file_system_config.efs_file_system_config.file_system_path",
+        "references_output": "aws_efs_file_system.path",
+        "target_resource_type": "aws_efs_file_system"
+    }
+]

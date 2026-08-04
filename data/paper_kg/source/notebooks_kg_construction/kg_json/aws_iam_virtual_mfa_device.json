@@ -1,0 +1,72 @@
+{
+    "resource": {
+        "name": "aws_iam_virtual_mfa_device",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "path",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "virtual_mfa_device_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "base_32_string_seed",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "enable_date",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "qr_code_png",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "user_name",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

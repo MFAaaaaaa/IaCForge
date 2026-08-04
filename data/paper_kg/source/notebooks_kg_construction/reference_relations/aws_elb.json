@@ -1,0 +1,22 @@
+[
+    {
+        "argument_path": "instances",
+        "references_output": "aws_instance.id",
+        "target_resource_type": "aws_instance"
+    },
+    {
+        "argument_path": "security_groups",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "subnets",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "listener.ssl_certificate_id",
+        "references_output": "aws_iam_server_certificate.arn",
+        "target_resource_type": "aws_iam_server_certificate"
+    }
+]

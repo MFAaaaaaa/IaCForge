@@ -1,0 +1,32 @@
+[
+    {
+        "argument_path": "replica.kms_key_arn",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "server_side_encryption.kms_key_arn",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "restore_source_table_arn",
+        "references_output": "aws_dynamodb_table.arn",
+        "target_resource_type": "aws_dynamodb_table"
+    },
+    {
+        "argument_path": "replica.region_name",
+        "references_output": "data.aws_region.name",
+        "target_resource_type": "data.aws_region"
+    },
+    {
+        "argument_path": "s3_bucket_source.bucket",
+        "references_output": "aws_s3_bucket.bucket",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "s3_bucket_source.bucket_owner",
+        "references_output": "aws_s3_bucket.owner",
+        "target_resource_type": "aws_s3_bucket"
+    }
+]

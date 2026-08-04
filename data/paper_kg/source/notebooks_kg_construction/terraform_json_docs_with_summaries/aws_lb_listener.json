@@ -1,0 +1,667 @@
+{
+  "resource": {
+    "name": "aws_lb_listener",
+    "description": "Provides a Load Balancer Listener resource. aws_alb_listener is known as aws_lb_listener. The functionality is identical.",
+    "llm_summary": "The `aws_lb_listener` resource enables the creation and management of listener configurations for AWS Elastic Load Balancers (ALB or NLB), facilitating traffic routing based on protocols, ports, and rules. Common use cases include setting up HTTP/HTTPS listeners for web applications, defining advanced routing rules (e.g., path-based or host-based), and integrating SSL/TLS certificates for secure communication. Users can configure key settings such as default actions, target group associations, protocol selection, and advanced rule-based traffic management to optimize load balancing and application performance."
+  },
+  "examples": [
+    {
+      "title": "Forward Action",
+      "code": "resource \"aws_lb\" \"front_end\" {\n  # ...\n}\n\nresource \"aws_lb_target_group\" \"front_end\" {\n  # ...\n}\n\nresource \"aws_lb_listener\" \"front_end\" {\n  load_balancer_arn = aws_lb.front_end.arn\n  port              = \"443\"\n  protocol          = \"HTTPS\"\n  ssl_policy        = \"ELBSecurityPolicy-2016-08\"\n  certificate_arn   = \"arn:aws:iam::187416307283:server-certificate/test_cert_rab3wuqwgja25ct3n4jdj2tzu4\"\n\n  default_action {\n    type             = \"forward\"\n    target_group_arn = aws_lb_target_group.front_end.arn\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_lb_listener` resource to handle HTTPS traffic on port 443 with a specified SSL policy and certificate. It showcases the use of the `default_action` block to forward requests to an associated target group, illustrating secure load balancer listener setup with forwarding functionality."
+    },
+    {
+      "title": "Redirect Action",
+      "code": "resource \"aws_lb\" \"front_end\" {\n  # ...\n}\n\nresource \"aws_lb_listener\" \"front_end\" {\n  load_balancer_arn = aws_lb.front_end.arn\n  port              = \"80\"\n  protocol          = \"HTTP\"\n\n  default_action {\n    type = \"redirect\"\n\n    redirect {\n      port        = \"443\"\n      protocol    = \"HTTPS\"\n      status_code = \"HTTP_301\"\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_lb_listener` resource to redirect HTTP traffic on port 80 to HTTPS on port 443 using a `default_action` block with a `redirect` configuration. It illustrates the use of key arguments such as `type`, `port`, `protocol`, and `status_code` to enforce secure communication via an HTTP 301 redirect."
+    },
+    {
+      "title": "Fixed-response Action",
+      "code": "resource \"aws_lb\" \"front_end\" {\n  # ...\n}\n\nresource \"aws_lb_listener\" \"front_end\" {\n  load_balancer_arn = aws_lb.front_end.arn\n  port              = \"80\"\n  protocol          = \"HTTP\"\n\n  default_action {\n    type = \"fixed-response\"\n\n    fixed_response {\n      content_type = \"text/plain\"\n      message_body = \"Fixed response content\"\n      status_code  = \"200\"\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_lb_listener` resource with a `fixed-response` action, which returns a custom HTTP response to client requests. It showcases the use of the `fixed_response` block to define the `content_type`, `message_body`, and `status_code` for the response, enabling users to implement static responses for specific listener rules."
+    },
+    {
+      "title": "Authenticate-cognito Action",
+      "code": "resource \"aws_lb\" \"front_end\" {\n  # ...\n}\n\nresource \"aws_lb_target_group\" \"front_end\" {\n  # ...\n}\n\nresource \"aws_cognito_user_pool\" \"pool\" {\n  # ...\n}\n\nresource \"aws_cognito_user_pool_client\" \"client\" {\n  # ...\n}\n\nresource \"aws_cognito_user_pool_domain\" \"domain\" {\n  # ...\n}\n\nresource \"aws_lb_listener\" \"front_end\" {\n  load_balancer_arn = aws_lb.front_end.arn\n  port              = \"80\"\n  protocol          = \"HTTP\"\n\n  default_action {\n    type = \"authenticate-cognito\"\n\n    authenticate_cognito {\n      user_pool_arn       = aws_cognito_user_pool.pool.arn\n      user_pool_client_id = aws_cognito_user_pool_client.client.id\n      user_pool_domain    = aws_cognito_user_pool_domain.domain.domain\n    }\n  }\n\n  default_action {\n    type             = \"forward\"\n    target_group_arn = aws_lb_target_group.front_end.arn\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_lb_listener` resource to authenticate users via Amazon Cognito before forwarding traffic to a target group. It showcases the use of the `authenticate-cognito` action block with key arguments like `user_pool_arn`, `user_pool_client_id`, and `user_pool_domain`, enabling secure user authentication for HTTP traffic on an Application Load Balancer."
+    },
+    {
+      "title": "Authenticate-OIDC Action",
+      "code": "resource \"aws_lb\" \"front_end\" {\n  # ...\n}\n\nresource \"aws_lb_target_group\" \"front_end\" {\n  # ...\n}\n\nresource \"aws_lb_listener\" \"front_end\" {\n  load_balancer_arn = aws_lb.front_end.arn\n  port              = \"80\"\n  protocol          = \"HTTP\"\n\n  default_action {\n    type = \"authenticate-oidc\"\n\n    authenticate_oidc {\n      authorization_endpoint = \"https://example.com/authorization_endpoint\"\n      client_id              = \"client_id\"\n      client_secret          = \"client_secret\"\n      issuer                 = \"https://example.com\"\n      token_endpoint         = \"https://example.com/token_endpoint\"\n      user_info_endpoint     = \"https://example.com/user_info_endpoint\"\n    }\n  }\n\n  default_action {\n    type             = \"forward\"\n    target_group_arn = aws_lb_target_group.front_end.arn\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_lb_listener` with an `authenticate-oidc` action for OpenID Connect (OIDC) authentication, followed by a `forward` action to route traffic to a target group. It illustrates key configurations such as specifying OIDC endpoints (`authorization_endpoint`, `token_endpoint`, `user_info_endpoint`), client credentials (`client_id`, `client_secret`), and integrating authentication with load balancer traffic forwarding."
+    },
+    {
+      "title": "Gateway Load Balancer Listener",
+      "code": "resource \"aws_lb\" \"example\" {\n  load_balancer_type = \"gateway\"\n  name               = \"example\"\n\n  subnet_mapping {\n    subnet_id = aws_subnet.example.id\n  }\n}\n\nresource \"aws_lb_target_group\" \"example\" {\n  name     = \"example\"\n  port     = 6081\n  protocol = \"GENEVE\"\n  vpc_id   = aws_vpc.example.id\n\n  health_check {\n    port     = 80\n    protocol = \"HTTP\"\n  }\n}\n\nresource \"aws_lb_listener\" \"example\" {\n  load_balancer_arn = aws_lb.example.id\n\n  default_action {\n    target_group_arn = aws_lb_target_group.example.id\n    type             = \"forward\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Gateway Load Balancer listener (`aws_lb_listener`) to forward traffic to a target group using the GENEVE protocol. It showcases key configurations, including the `default_action` block for forwarding traffic and the integration of a health check within the target group to ensure service reliability."
+    },
+    {
+      "title": "Mutual TLS Authentication",
+      "code": "resource \"aws_lb\" \"example\" {\n  load_balancer_type = \"application\"\n\n  # ...\n}\n\nresource \"aws_lb_target_group\" \"example\" {\n  # ...\n}\n\nresource \"aws_lb_listener\" \"example\" {\n  load_balancer_arn = aws_lb.example.id\n\n  default_action {\n    target_group_arn = aws_lb_target_group.example.id\n    type             = \"forward\"\n  }\n\n  mutual_authentication {\n    mode            = \"verify\"\n    trust_store_arn = \"...\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure mutual TLS authentication for an AWS Application Load Balancer listener using the `mutual_authentication` block, including setting the `mode` to `verify` and specifying a `trust_store_arn` for client certificate validation. This example illustrates secure communication between the load balancer and clients with advanced authentication settings.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "alpn_policy",
+      "description": "(Optional) Name of the Application-Layer Protocol Negotiation (ALPN) policy. Can be set if `protocol` is `TLS`. Valid values are `HTTP1Only`, `HTTP2Only`, `HTTP2Optional`, `HTTP2Preferred`, and `None`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `alpn_policy` argument for the `aws_lb_listener` resource allows users to specify the Application-Layer Protocol Negotiation (ALPN) policy when the listener's protocol is set to `TLS`. This controls how the load balancer negotiates application protocols (e.g., HTTP/1.1 or HTTP/2) with clients, enabling users to optimize protocol compatibility and performance based on their application's requirements."
+    },
+    {
+      "name": "certificate_arn",
+      "description": "(Optional) ARN of the default SSL server certificate. Exactly one certificate is required if the protocol is HTTPS. For adding additional SSL certificates, see the `aws_lb_listener_certificate` resource.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `certificate_arn` argument in the `aws_lb_listener` resource allows users to specify the ARN of the default SSL server certificate for HTTPS listeners, enabling secure communication between clients and the load balancer. By setting this argument, users define the primary certificate used for encrypting traffic, a critical step in configuring HTTPS protocols and ensuring secure data transmission."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_lb_listener` resource represents the unique identifier of the load balancer listener. While optional, it is typically used to reference or retrieve the listener for operations such as updates, dependencies, or integrations with other resources, enabling precise control and management of the listener within the infrastructure."
+    },
+    {
+      "name": "load_balancer_arn",
+      "description": "(Required, Forces New Resource) ARN of the load balancer. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `load_balancer_arn` argument specifies the Amazon Resource Name (ARN) of the load balancer to which the listener will be attached, serving as a critical link between the listener and the load balancer. By setting this required argument, users define the target load balancer for handling incoming traffic, enabling the listener to manage routing and protocol-specific behavior for requests."
+    },
+    {
+      "name": "port",
+      "description": "(Optional) Port on which the load balancer is listening. Not valid for Gateway Load Balancers.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `port` argument for the `aws_lb_listener` resource specifies the port on which the load balancer will listen for incoming traffic, allowing users to define the entry point for client connections. This configuration is essential for directing traffic to the appropriate listener, but it is not applicable for Gateway Load Balancers."
+    },
+    {
+      "name": "protocol",
+      "description": "(Optional) Protocol for connections from clients to the load balancer. For Application Load Balancers, valid values are `HTTP` and `HTTPS`, with a default of `HTTP`. For Network Load Balancers, valid values are `TCP`, `TLS`, `UDP`, and `TCP_UDP`. Not valid to use `UDP` or `TCP_UDP` if dual-stack mode is enabled. Not valid for Gateway Load Balancers.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `protocol` argument in the `aws_lb_listener` resource allows users to define the communication protocol used by the load balancer to handle client connections, such as `HTTP`, `HTTPS`, `TCP`, or `TLS`. Configuring this argument determines the type of traffic the listener can process, enabling users to tailor the load balancer's behavior to match application requirements, such as secure HTTPS connections for web applications or TCP for low-level network communication."
+    },
+    {
+      "name": "routing_http_request_x_amzn_mtls_clientcert_header_name",
+      "description": "(Optional) Enables you to modify the header name of the `X-Amzn-Mtls-Clientcert` HTTP request header. Can only be set if protocol is `HTTPS` for Application Load Balancers.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Allows users to customize the name of the `X-Amzn-Mtls-Clientcert` HTTP request header for Application Load Balancers when using HTTPS protocol. This enables precise control over header naming for mutual TLS (mTLS) client certificate identification, supporting advanced routing or integration requirements in secure environments."
+    },
+    {
+      "name": "routing_http_request_x_amzn_mtls_clientcert_issuer_header_name",
+      "description": "(Optional) Enables you to modify the header name of the `X-Amzn-Mtls-Clientcert-Issuer` HTTP request header. Can only be set if protocol is `HTTPS` for Application Load Balancers.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Allows users to customize the name of the `X-Amzn-Mtls-Clientcert-Issuer` HTTP request header for Application Load Balancers when the protocol is set to `HTTPS`. This enables precise control over header naming for mutual TLS (mTLS) client certificate issuer information, supporting advanced routing or integration requirements."
+    },
+    {
+      "name": "routing_http_request_x_amzn_mtls_clientcert_leaf_header_name",
+      "description": "(Optional) Enables you to modify the header name of the `X-Amzn-Mtls-Clientcert-Leaf` HTTP request header. Can only be set if protocol is `HTTPS` for Application Load Balancers.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Allows users to customize the name of the `X-Amzn-Mtls-Clientcert-Leaf` HTTP request header for Application Load Balancers operating with the `HTTPS` protocol. This argument is typically used to control how mutual TLS (mTLS) client certificate information is passed to backend services, enabling tailored header configurations for security or integration purposes."
+    },
+    {
+      "name": "routing_http_request_x_amzn_mtls_clientcert_serial_number_header_name",
+      "description": "(Optional) Enables you to modify the header name of the `X-Amzn-Mtls-Clientcert-Serial-Number` HTTP request header. Can only be set if protocol is `HTTPS` for Application Load Balancers.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Allows users to customize the header name for the `X-Amzn-Mtls-Clientcert-Serial-Number` HTTP request header in HTTPS-based Application Load Balancers, enabling control over how client certificate serial numbers are passed to backend services for mutual TLS authentication or logging purposes. This argument supports advanced routing and security configurations by tailoring header behavior to specific application requirements."
+    },
+    {
+      "name": "routing_http_request_x_amzn_mtls_clientcert_subject_header_name",
+      "description": "(Optional) Enables you to modify the header name of the `X-Amzn-Mtls-Clientcert-Subject` HTTP request header. Can only be set if protocol is `HTTPS` for Application Load Balancers.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Allows users to customize the header name for the `X-Amzn-Mtls-Clientcert-Subject` HTTP request header in an Application Load Balancer when using HTTPS protocol. This enables precise control over how mutual TLS client certificate subject information is passed to backend services, supporting advanced security and routing configurations."
+    },
+    {
+      "name": "routing_http_request_x_amzn_mtls_clientcert_validity_header_name",
+      "description": "(Optional) Enables you to modify the header name of the `X-Amzn-Mtls-Clientcert-Validity` HTTP request header. Can only be set if protocol is `HTTPS` for Application Load Balancers.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Allows users to customize the HTTP header name for the `X-Amzn-Mtls-Clientcert-Validity` field when using HTTPS protocol with an Application Load Balancer. This argument enables control over the header used to convey client certificate validity information, supporting advanced routing or integration scenarios that depend on mTLS authentication."
+    },
+    {
+      "name": "routing_http_request_x_amzn_tls_cipher_suite_header_name",
+      "description": "(Optional) Enables you to modify the header name of the `X-Amzn-Tls-Cipher-Suite` HTTP request header. Can only be set if protocol is `HTTPS` for Application Load Balancers.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Allows users to customize the name of the `X-Amzn-Tls-Cipher-Suite` HTTP request header for Application Load Balancers when using the `HTTPS` protocol. This enables control over header naming conventions to align with specific application or compliance requirements."
+    },
+    {
+      "name": "routing_http_request_x_amzn_tls_version_header_name",
+      "description": "(Optional) Enables you to modify the header name of the `X-Amzn-Tls-Version` HTTP request header. Can only be set if protocol is `HTTPS` for Application Load Balancers.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Allows users to customize the name of the `X-Amzn-Tls-Version` HTTP request header for Application Load Balancers when using the `HTTPS` protocol. This argument enables precise control over header naming conventions, which can be useful for compatibility, monitoring, or debugging purposes in environments requiring specific header configurations."
+    },
+    {
+      "name": "routing_http_response_access_control_allow_credentials_header_value",
+      "description": "(Optional) Specifies which headers the browser can expose to the requesting client. Can only be set if protocol is `HTTP` or `HTTPS` for Application Load Balancers. Not supported for Network Load Balancer, or with a Gateway Load Balancer. The only valid value is `true`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines whether the `Access-Control-Allow-Credentials` HTTP response header is set to `true` for Application Load Balancers using the `HTTP` or `HTTPS` protocol, enabling client browsers to expose credentials in cross-origin requests. This argument supports configuring CORS behavior to allow secure sharing of credentials between origins, aligning with common user goals of managing access control for web applications."
+    },
+    {
+      "name": "routing_http_response_access_control_allow_headers_header_value",
+      "description": "(Optional) Specifies which headers can be used during the request. Can only be set if protocol is `HTTP` or `HTTPS` for Application Load Balancers. Not supported for Network Load Balancer, or with a Gateway Load Balancer. Valid values are `*`, `Accept`, `Accept-Language`, `Cache-Control`, `Content-Language`, `Content-Length`, `Content-Type`, `Expires`, `Last-Modified`, `Pragma`. Dependent on your use-case other headers can be exposed and then set as a value consult the Access-Control-Allow-Headers documentation.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `routing_http_response_access_control_allow_headers_header_value` argument in the `aws_lb_listener` resource allows users to specify which HTTP headers are permitted in cross-origin requests for Application Load Balancers using the `HTTP` or `HTTPS` protocol. By configuring this argument, users can control the `Access-Control-Allow-Headers` response header to enable fine-grained access control for client applications interacting with the load balancer, supporting use cases like API security and compliance with CORS policies."
+    },
+    {
+      "name": "routing_http_response_access_control_allow_methods_header_value",
+      "description": "(Optional) Set which HTTP methods are allowed when accessing the server from a different origin. Can only be set if protocol is `HTTP` or `HTTPS` for Application Load Balancers. Not supported for Network Load Balancer, or with a Gateway Load Balancer. Valid values are `GET`, `HEAD`, `POST`, `DELETE`, `CONNECT`, `OPTIONS`, `TRACE` or `PATCH`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the HTTP methods allowed in the `Access-Control-Allow-Methods` header for cross-origin requests when using an Application Load Balancer with the `HTTP` or `HTTPS` protocol. This argument enables users to control CORS behavior by specifying permitted methods (e.g., `GET`, `POST`), ensuring compliance with cross-origin access policies."
+    },
+    {
+      "name": "routing_http_response_access_control_allow_origin_header_value",
+      "description": "(Optional) Specifies which origins are allowed to access the server. Can only be set if protocol is `HTTP` or `HTTPS` for Application Load Balancers. Not supported for Network Load Balancer, or with a Gateway Load Balancer. A valid value is a URI, eg: `https://example.com`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the `Access-Control-Allow-Origin` header value for HTTP/HTTPS responses in Application Load Balancers, enabling cross-origin resource sharing (CORS) by specifying which origins are permitted to access the server. This argument is typically used to control client-side access from specific domains, supporting secure and compliant web application behavior."
+    },
+    {
+      "name": "routing_http_response_access_control_expose_headers_header_value",
+      "description": "(Optional) Specifies whether the browser should include credentials such as cookies or authentication when making requests. Can only be set if protocol is `HTTP` or `HTTPS` for Application Load Balancers. Not supported for Network Load Balancer, or with a Gateway Load Balancer. Valid values are `*`, `Cache-Control`, `Content-Language`, `Content-Length`, `Content-Type`, `Expires`, `Last-Modified`, or `Pragma`. Dependent on your use-case other headers can be exposed, consult the Access-Control-Expose-Headers documentation.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the HTTP response headers that the browser is allowed to expose to client-side scripts when handling CORS requests for an Application Load Balancer using the `Access-Control-Expose-Headers` directive. This argument enables fine-grained control over which headers are accessible in cross-origin scenarios, supporting use cases like customizing client-side behavior or enabling secure data sharing."
+    },
+    {
+      "name": "routing_http_response_access_control_max_age_header_value",
+      "description": "(Optional) Specifies how long the results of a preflight request can be cached, in seconds. Can only be set if protocol is `HTTP` or `HTTPS` for Application Load Balancers. Not supported for Network Load Balancer, or with a Gateway Load Balancer. Valid values are between `0` and `86400`. This value is browser specific, consult the Access-Control-Max-Age documentation.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the `Access-Control-Max-Age` HTTP response header for preflight requests, allowing users to control how long browsers cache CORS preflight results (in seconds) for Application Load Balancers using `HTTP` or `HTTPS` protocols. This argument helps optimize cross-origin resource sharing (CORS) behavior by reducing redundant preflight requests, improving performance and user experience."
+    },
+    {
+      "name": "routing_http_response_content_security_policy_header_value",
+      "description": "(Optional) Specifies restrictions enforced by the browser to help minimize the risk of certain types of security threats. Can only be set if protocol is `HTTP` or `HTTPS` for Application Load Balancers. Not supported for Network Load Balancer, or with a Gateway Load Balancer. Values for this are extensive, and can be impactful when set, consult Content-Security-Policy documentation.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the Content-Security-Policy (CSP) header value for HTTP/HTTPS responses in Application Load Balancers, enabling users to enforce browser-based security restrictions that mitigate risks like cross-site scripting (XSS) and data injection attacks. This argument allows precise control over CSP behavior, supporting security-focused configurations for web applications while being incompatible with Network or Gateway Load Balancers."
+    },
+    {
+      "name": "routing_http_response_server_enabled",
+      "description": "(Optional) Enables you to allow or remove the HTTP response server header. Can only be set if protocol is `HTTP` or `HTTPS` for Application Load Balancers. Not supported for Network Load Balancer, or with a Gateway Load Balancer. Valid values are `true` or `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `routing_http_response_server_enabled` argument allows users to control whether the HTTP response server header is included or removed in responses from an Application Load Balancer when using the `HTTP` or `HTTPS` protocol. This configuration is useful for customizing server header behavior to align with security or compliance requirements, and it is not applicable to Network or Gateway Load Balancers."
+    },
+    {
+      "name": "routing_http_response_strict_transport_security_header_value",
+      "description": "(Optional) Informs browsers that the site should only be accessed using HTTPS, and that any future attempts to access it using HTTP should automatically be converted to HTTPS. Default values are `max-age=31536000; includeSubDomains; preload` consult the Strict-Transport-Security documentation for further details.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `routing_http_response_strict_transport_security_header_value` argument allows users to configure the Strict-Transport-Security (HSTS) header for HTTP responses in an `aws_lb_listener`, ensuring that browsers enforce HTTPS connections and automatically redirect future HTTP requests to HTTPS. By setting this value, users can enhance security by defining HSTS policies, such as `max-age`, `includeSubDomains`, and `preload`, to protect against protocol downgrade attacks and secure subdomain traffic."
+    },
+    {
+      "name": "routing_http_response_x_content_type_options_header_value",
+      "description": "(Optional) Indicates whether the MIME types advertised in the Content-Type headers should be followed and not be changed. Can only be set if protocol is `HTTP` or `HTTPS` for Application Load Balancers. Not supported for Network Load Balancer, or with a Gateway Load Balancer. The only valid value is `nosniff`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `routing_http_response_x_content_type_options_header_value` argument allows users to configure the `X-Content-Type-Options` HTTP response header for an Application Load Balancer listener, ensuring MIME types in `Content-Type` headers are strictly followed and not altered. Setting this argument to `nosniff` enhances security by preventing browsers from interpreting files as a different MIME type, which is particularly useful for mitigating certain types of attacks like MIME type sniffing."
+    },
+    {
+      "name": "routing_http_response_x_frame_options_header_value",
+      "description": "(Optional) Indicates whether the browser is allowed to render a page in a frame, iframe, embed or object. Can only be set if protocol is `HTTP` or `HTTPS` for Application Load Balancers. Not supported for Network Load Balancer, or with a Gateway Load Balancer. The only valid values are `DENY`, `SAMEORIGIN`, or `ALLOW-FROM https://example.com`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the `X-Frame-Options` HTTP response header for an Application Load Balancer listener, controlling whether the browser can embed the page in a frame, iframe, embed, or object. This argument enhances security by mitigating clickjacking attacks, allowing users to specify values like `DENY`, `SAMEORIGIN`, or `ALLOW-FROM` with a specific URL, applicable only for `HTTP` or `HTTPS` protocols."
+    },
+    {
+      "name": "ssl_policy",
+      "description": "(Optional) Name of the SSL Policy for the listener. Required if `protocol` is `HTTPS` or `TLS`. Default is `ELBSecurityPolicy-2016-08`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ssl_policy` argument allows users to specify the SSL/TLS security policy for an `aws_lb_listener`, defining the protocols and ciphers used for secure communication. This is essential when the listener's `protocol` is `HTTPS` or `TLS`, enabling users to enforce compliance, enhance security, or meet specific application requirements by selecting a predefined policy, with a default of `ELBSecurityPolicy-2016-08` if not explicitly set."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level. When a Name key is specified in the map, the AWS Console maps the value to the Name Tag column value inside the Listener Rules table within a specific load balancer listener page. Otherwise, the value resolves to Default.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_lb_listener` resource allows users to assign metadata in the form of key-value pairs to the load balancer listener, enabling resource categorization, organization, and identification within AWS. By specifying tags, users can define attributes such as environment, ownership, or purpose, and when a `Name` key is included, it directly maps to the Name Tag column in the AWS Console for enhanced visibility in the Listener Rules table."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_lb_listener` resource allows users to define a comprehensive set of key-value tags inherited from both user-defined and provider-level default tags. This enables consistent tagging for resource organization, cost allocation, and management across AWS services, aligning with common practices for tagging strategies in cloud infrastructure."
+    },
+    {
+      "name": "tcp_idle_timeout_seconds",
+      "description": "(Optional) TCP idle timeout value in seconds. Can only be set if protocol is `TCP` on Network Load Balancer, or with a Gateway Load Balancer. Not supported for Application Load Balancers. Valid values are between `60` and `6000` inclusive. Default: `350`.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `tcp_idle_timeout_seconds` argument allows users to configure the duration, in seconds, that a TCP connection can remain idle before being terminated by the Network Load Balancer or Gateway Load Balancer. This setting helps optimize resource usage and manage connection lifecycles for applications relying on TCP protocols, with valid values ranging from 60 to 6000 seconds and a default of 350 seconds."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "default_action",
+      "description": "(Required) Configuration block for default actions. See below.",
+      "cardinality": [
+        1,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "order",
+          "description": "(Optional) Order for the action. The action with the lowest value for order is performed first. Valid values are between `1` and `50000`. Defaults to the position in the list of actions.",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `order` argument in the `default_action` block of the `aws_lb_listener` resource allows users to define the execution priority of actions within a listener, where the action with the lowest numerical value is executed first. This enables precise control over the sequence of actions, ensuring predictable behavior for routing, authentication, or other listener functionalities based on user-defined priorities."
+        },
+        {
+          "name": "target_group_arn",
+          "description": "(Optional) ARN of the Target Group to which to route traffic. Specify only if `type` is `forward` and you want to route to a single target group. To route to one or more target groups, use a `forward` block instead. Can be specified with `forward` but ARNs must match.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `target_group_arn` argument in the `default_action` block of the `aws_lb_listener` resource allows users to specify the ARN of a single target group to route traffic when the action type is `forward`. This configuration enables precise traffic forwarding to a specific backend target group, supporting common user goals like load balancing and directing requests to defined compute resources."
+        },
+        {
+          "name": "type",
+          "description": "(Required) Type of routing action. Valid values are `forward`, `redirect`, `fixed-response`, `authenticate-cognito` and `authenticate-oidc`. The following arguments are optional:",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument in the `default_action` block of the `aws_lb_listener` resource specifies the routing behavior for incoming traffic, defining how the load balancer should handle requests. By setting this required argument to values like `forward`, `redirect`, `fixed-response`, `authenticate-cognito`, or `authenticate-oidc`, users can configure key functionalities such as forwarding traffic to target groups, redirecting requests, returning fixed responses, or enabling user authentication workflows, aligning the listener's behavior with application requirements and security goals."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "authenticate_cognito",
+          "description": "(Optional) Configuration block for using Amazon Cognito to authenticate users. Specify only when `type` is `authenticate-cognito`. See below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "authentication_request_extra_params",
+              "description": "(Optional) Query parameters to include in the redirect request to the authorization endpoint. Max: 10. See below.",
+              "required": false,
+              "type": "map(string)",
+              "llm_summary": "\"authentication_request_extra_params\" allows users to define additional query parameters as key-value pairs to include in the redirect request sent to the Cognito authorization endpoint during user authentication. This enables customization of the authentication flow, such as passing environment-specific or application-specific parameters, enhancing flexibility in integrating Cognito with the load balancer listener."
+            },
+            {
+              "name": "on_unauthenticated_request",
+              "description": "(Optional) Behavior if the user is not authenticated. Valid values are `deny`, `allow` and `authenticate`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `on_unauthenticated_request` argument in the `authenticate_cognito` block of the `aws_lb_listener` resource allows users to define the behavior of the load balancer when a request is made by an unauthenticated user. By specifying one of the valid values (`deny`, `allow`, or `authenticate`), users can control whether the request is rejected, permitted without authentication, or redirected to the Cognito authentication flow, enabling fine-grained access control and user authentication workflows."
+            },
+            {
+              "name": "scope",
+              "description": "(Optional) Set of user claims to be requested from the IdP.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `scope` argument in the `authenticate_cognito` block of the `aws_lb_listener` resource allows users to specify the set of user claims (e.g., permissions or attributes) to request from the identity provider (IdP) during authentication. By configuring this argument, users can control the breadth of user information retrieved, enabling tailored access control or personalized application behavior based on the claims provided."
+            },
+            {
+              "name": "session_cookie_name",
+              "description": "(Optional) Name of the cookie used to maintain session information.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `session_cookie_name` argument allows users to specify the name of the cookie used by the Cognito authentication process to maintain session state for clients. Configuring this enables control over session management behavior, aligning it with application-specific requirements or naming conventions for improved integration and user experience."
+            },
+            {
+              "name": "session_timeout",
+              "description": "(Optional) Maximum duration of the authentication session, in seconds.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `session_timeout` argument for the `authenticate_cognito` block in the `aws_lb_listener` resource allows users to define the maximum duration (in seconds) of an authentication session for Cognito-based user access. By configuring this, users can control session expiration behavior to enhance security and manage user access lifecycles, aligning with common goals like enforcing session limits for web applications or APIs."
+            },
+            {
+              "name": "user_pool_arn",
+              "description": "(Required) ARN of the Cognito user pool.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `user_pool_arn` argument specifies the Amazon Resource Name (ARN) of the Cognito user pool to be used for authenticating users via the `authenticate_cognito` action in an AWS Application Load Balancer listener. By setting this required value, users enable secure user authentication and session management through Cognito, aligning with common goals like implementing identity and access control for web applications."
+            },
+            {
+              "name": "user_pool_client_id",
+              "description": "(Required) ID of the Cognito user pool client.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `user_pool_client_id` argument specifies the unique identifier of the Cognito user pool client to be used for authentication in the `authenticate_cognito` configuration of an `aws_lb_listener`. By setting this required value, users enable the listener to integrate with the specified Cognito user pool client, facilitating secure user authentication and authorization for applications behind the load balancer."
+            },
+            {
+              "name": "user_pool_domain",
+              "description": "(Required) Domain prefix or fully-qualified domain name of the Cognito user pool. The following arguments are optional:",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `user_pool_domain` argument specifies the domain prefix or fully-qualified domain name of the Cognito user pool used for authentication in the `authenticate_cognito` configuration of an `aws_lb_listener`. By setting this required string, users enable integration with Amazon Cognito for user authentication, allowing the load balancer listener to redirect and validate requests against the specified Cognito user pool domain."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `authenticate_cognito` block within the `default_action` of the `aws_lb_listener` resource configures Amazon Cognito authentication for user access, enabling secure user sign-in and session management. It encapsulates settings related to integrating an Application Load Balancer with Cognito, such as user pool details and authentication parameters, allowing users to enforce authentication and authorization seamlessly for their applications."
+        },
+        {
+          "name": "authenticate_oidc",
+          "description": "(Optional) Configuration block for an identity provider that is compliant with OpenID Connect (OIDC). Specify only when `type` is `authenticate-oidc`. See below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "authentication_request_extra_params",
+              "description": "(Optional) Query parameters to include in the redirect request to the authorization endpoint. Max: 10.",
+              "required": false,
+              "type": "map(string)",
+              "llm_summary": "\"Allows users to define additional query parameters to include in the redirect request sent to the OIDC authorization endpoint, enabling customization of authentication flows to meet specific application or identity provider requirements. This argument supports up to 10 key-value pairs, providing flexibility for passing extra context or configuration during the authentication process.\""
+            },
+            {
+              "name": "authorization_endpoint",
+              "description": "(Required) Authorization endpoint of the IdP.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `authorization_endpoint` argument specifies the URL of the Identity Provider's (IdP) authorization endpoint, enabling the listener to initiate the OAuth 2.0 authorization code flow for user authentication. By configuring this required parameter, users define the entry point for obtaining authorization codes, which is essential for integrating OpenID Connect (OIDC) authentication with the load balancer."
+            },
+            {
+              "name": "client_id",
+              "description": "(Required) OAuth 2.0 client identifier.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `client_id` argument specifies the unique OAuth 2.0 client identifier used to authenticate requests via OpenID Connect (OIDC) in the `authenticate_oidc` configuration of an `aws_lb_listener`. By defining this required parameter, users enable the listener to identify and interact with the OIDC provider, facilitating secure user authentication and authorization workflows for applications behind the load balancer."
+            },
+            {
+              "name": "client_secret",
+              "description": "(Required) OAuth 2.0 client secret.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `client_secret` argument specifies the OAuth 2.0 client secret used to authenticate requests in the `authenticate_oidc` configuration of an `aws_lb_listener`. By defining this required credential, users enable secure communication between the load balancer and the OIDC identity provider, facilitating user authentication and access control for applications integrated with OIDC."
+            },
+            {
+              "name": "issuer",
+              "description": "(Required) OIDC issuer identifier of the IdP.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `issuer` argument specifies the OIDC issuer URL, which serves as the unique identifier for the identity provider (IdP) in the `authenticate_oidc` configuration of an `aws_lb_listener`. By defining this required parameter, users establish the trusted authority for authentication, enabling secure OIDC-based user verification and access control for their application traffic."
+            },
+            {
+              "name": "on_unauthenticated_request",
+              "description": "(Optional) Behavior if the user is not authenticated. Valid values: `deny`, `allow` and `authenticate`",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `on_unauthenticated_request` argument in the `authenticate_oidc` block of the `aws_lb_listener` resource allows users to define the behavior of the load balancer when a request is received from an unauthenticated user. By specifying one of the valid values (`deny`, `allow`, or `authenticate`), users can control whether the request is rejected, permitted without authentication, or redirected to the OIDC provider for authentication, enabling fine-grained access control and user authentication workflows."
+            },
+            {
+              "name": "scope",
+              "description": "(Optional) Set of user claims to be requested from the IdP.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `scope` argument in the `authenticate_oidc` block of the `aws_lb_listener` resource allows users to specify the set of user claims (permissions or attributes) to request from the Identity Provider (IdP) during authentication. By defining this argument, users can control the scope of access and the information retrieved from the IdP, enabling tailored authentication workflows that align with specific application requirements or security policies."
+            },
+            {
+              "name": "session_cookie_name",
+              "description": "(Optional) Name of the cookie used to maintain session information.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `session_cookie_name` argument in the `authenticate_oidc` block of the `aws_lb_listener` resource allows users to specify the name of the cookie used to maintain session information for OIDC authentication. By defining this argument, users can customize the session management behavior, ensuring consistent identification of user sessions and aligning with application-specific requirements for cookie naming conventions."
+            },
+            {
+              "name": "session_timeout",
+              "description": "(Optional) Maximum duration of the authentication session, in seconds.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "\"Configures the maximum duration (in seconds) for an authentication session when using OIDC with the `aws_lb_listener` resource, allowing users to control session longevity and ensure secure, time-bound access for authenticated clients. This is useful for managing session expiration policies to align with security and user experience requirements.\""
+            },
+            {
+              "name": "token_endpoint",
+              "description": "(Required) Token endpoint of the IdP.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `token_endpoint` argument specifies the URL of the Identity Provider's (IdP) token endpoint, which is a critical component for enabling OpenID Connect (OIDC) authentication in the `authenticate_oidc` configuration of an `aws_lb_listener`. By defining this endpoint, users ensure the application can securely exchange authorization codes for access tokens, facilitating user authentication and access control in OIDC workflows."
+            },
+            {
+              "name": "user_info_endpoint",
+              "description": "(Required) User info endpoint of the IdP. The following arguments are optional:",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `user_info_endpoint` argument specifies the URL of the Identity Provider's (IdP) user information endpoint, enabling the `authenticate_oidc` configuration in the `aws_lb_listener` resource to retrieve user profile data during authentication. By defining this required endpoint, users ensure proper integration with the IdP for validating and accessing user attributes, a critical step in implementing OIDC-based authentication workflows."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `authenticate_oidc` configuration block within the `default_action` of the `aws_lb_listener` resource enables OpenID Connect (OIDC)-compliant identity provider authentication for incoming traffic. It encapsulates settings required to integrate OIDC-based authentication, such as client credentials, authorization endpoints, and token validation, allowing users to enforce secure access control and user identity verification for applications behind the load balancer."
+        },
+        {
+          "name": "fixed_response",
+          "description": "(Optional) Information for creating an action that returns a custom HTTP response. Required if `type` is `fixed-response`.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "content_type",
+              "description": "(Required) Content type. Valid values are `text/plain`, `text/css`, `text/html`, `application/javascript` and `application/json`. The following arguments are optional:",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `content_type` argument in the `fixed_response` block of the `aws_lb_listener` resource specifies the MIME type of the HTTP response returned by the load balancer when a fixed response action is triggered. By defining this argument, users control the format of the response content (e.g., `text/html` or `application/json`), ensuring compatibility with client applications and enabling tailored responses for specific use cases like error handling or informational messages."
+            },
+            {
+              "name": "message_body",
+              "description": "(Optional) Message body.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `message_body` argument in the `fixed_response` block of the `aws_lb_listener` resource allows users to define the custom response message content returned to clients when the listener triggers a fixed response action. By setting this argument, users can configure the body of the HTTP response to align with specific application requirements, such as displaying error messages, informational text, or custom notifications."
+            },
+            {
+              "name": "status_code",
+              "description": "(Optional) HTTP response code. Valid values are `2XX`, `4XX`, or `5XX`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `status_code` argument in the `fixed_response` block of the `aws_lb_listener` resource allows users to define the HTTP response code returned to clients when the listener triggers a fixed response action. By specifying valid values such as `2XX`, `4XX`, or `5XX`, users can control the type of response (e.g., success, client error, or server error) sent to clients, enabling precise handling of traffic scenarios or error messaging in their load balancer configuration."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `fixed_response` block within the `default_action` of the `aws_lb_listener` resource configures a custom HTTP response to be returned by the load balancer when the action type is set to `fixed-response`. This block enables users to define static responses, such as custom status codes, headers, and message bodies, allowing for precise control over how the load balancer handles specific requests without forwarding them to a backend target."
+        },
+        {
+          "name": "forward",
+          "description": "(Optional) Configuration block for creating an action that distributes requests among one or more target groups. Specify only if `type` is `forward`. See below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "stickiness",
+              "description": "(Optional) Configuration block for target group stickiness for the rule. See below.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "duration",
+                  "description": "(Required) Time period, in seconds, during which requests from a client should be routed to the same target group. The range is 1-604800 seconds (7 days). The following arguments are optional:",
+                  "required": true,
+                  "type": "number",
+                  "llm_summary": "The `duration` argument in the `stickiness` context of the `aws_lb_listener` resource specifies the time period, in seconds, during which client requests are consistently routed to the same target group, enabling session persistence. By configuring this value (ranging from 1 to 604800 seconds), users can define the stickiness behavior to optimize user experience and ensure consistent interactions with stateful applications or services."
+                },
+                {
+                  "name": "enabled",
+                  "description": "(Optional) Whether target group stickiness is enabled. Default is `false`.",
+                  "required": false,
+                  "type": "bool",
+                  "llm_summary": "The `enabled` argument for the `stickiness` block in the `aws_lb_listener` resource allows users to control whether target group stickiness is activated, which ensures that client requests are consistently routed to the same target within a load balancer. Setting this argument to `true` enables session persistence, a common goal for applications requiring consistent user experiences or stateful interactions."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The \"stickiness\" configuration block within the \"forward\" context of the `aws_lb_listener` resource enables target group stickiness, ensuring consistent routing of client requests to the same target within a load balancer. It encapsulates settings related to session persistence, allowing users to optimize application performance and maintain stateful interactions by controlling how requests are consistently directed to specific targets."
+            },
+            {
+              "name": "target_group",
+              "description": "(Required) Set of 1-5 target group blocks. See below.  The following arguments are optional:",
+              "cardinality": [
+                1,
+                5
+              ],
+              "arguments": [
+                {
+                  "name": "arn",
+                  "description": "(Required) ARN of the target group. The following arguments are optional:",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `arn` argument specifies the Amazon Resource Name (ARN) of the target group to which the AWS Application Load Balancer (ALB) listener will forward traffic. By defining this required property, users associate the listener with a specific target group, enabling the routing of incoming requests to the appropriate backend resources, such as EC2 instances or containers, based on the listener's rules."
+                },
+                {
+                  "name": "weight",
+                  "description": "(Optional) Weight. The range is 0 to 999.",
+                  "required": false,
+                  "type": "number",
+                  "llm_summary": "The `weight` argument in the `aws_lb_listener` resource allows users to define the relative priority or distribution of traffic routed to a specific `target_group`. By assigning a value between 0 and 999, users can control the proportion of requests directed to this target group in scenarios involving multiple target groups, enabling fine-grained traffic balancing to optimize application performance or meet specific load distribution goals."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `target_group` block within the `forward` configuration of the `aws_lb_listener` resource defines 1-5 target groups to which incoming traffic is routed, enabling precise control over load balancing behavior. This block encapsulates settings for directing traffic to specific backend resources, such as EC2 instances or containers, and helps users achieve efficient traffic distribution and scaling by associating listeners with target groups."
+            }
+          ],
+          "llm_summary": "The \"forward\" configuration block within the \"default_action\" of the \"aws_lb_listener\" resource enables request distribution across one or more target groups, facilitating load balancing and traffic routing. It encapsulates settings for defining target group weights and priorities, allowing users to achieve granular control over how incoming traffic is allocated to backend resources for optimized performance and scalability."
+        },
+        {
+          "name": "redirect",
+          "description": "(Optional) Configuration block for creating a redirect action. Required if `type` is `redirect`. See below.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "host",
+              "description": "(Optional) Hostname. This component is not percent-encoded. The hostname can contain `#{host}`. Defaults to `#{host}`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `host` argument in the `redirect` context of the `aws_lb_listener` resource allows users to specify the hostname for the redirect target, enabling customization of the destination URL's host component. By setting this argument, users can define dynamic or static hostnames, with support for placeholders like `#{{host}}` to preserve the original request's host, ensuring flexible and precise control over redirect behavior for load balancer listeners."
+            },
+            {
+              "name": "path",
+              "description": "(Optional) Absolute path, starting with the leading \"/\". This component is not percent-encoded. The path can contain #{host}, #{path}, and #{port}. Defaults to `/#{path}`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `path` argument in the `redirect` context of the `aws_lb_listener` resource allows users to define the absolute path component of a redirect URL, starting with a leading `/`. It enables dynamic path customization by supporting placeholders like `#{{host}}`, `#{{path}}`, and `#{{port}}`, ensuring flexible URL redirection behavior tailored to specific application routing needs."
+            },
+            {
+              "name": "port",
+              "description": "(Optional) Port. Specify a value from `1` to `65535` or `#{port}`. Defaults to `#{port}`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `port` argument in the `redirect` context of the `aws_lb_listener` resource allows users to specify the destination port for HTTP redirection, either as a fixed value between `1` and `65535` or dynamically using `#{{port}}` to preserve the original request's port. Configuring this argument enables precise control over the port behavior during redirection, supporting use cases like maintaining consistent routing or directing traffic to specific application endpoints."
+            },
+            {
+              "name": "protocol",
+              "description": "(Optional) Protocol. Valid values are `HTTP`, `HTTPS`, or `#{protocol}`. Defaults to `#{protocol}`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `protocol` argument in the `redirect` context of the `aws_lb_listener` resource allows users to specify the protocol (`HTTP` or `HTTPS`) for the redirect action, defining how incoming traffic is redirected. By setting this argument, users can control the behavior of the listener to ensure traffic is redirected securely or appropriately based on the application's requirements, aligning with common goals like enforcing HTTPS or managing traffic flows."
+            },
+            {
+              "name": "query",
+              "description": "(Optional) Query parameters, URL-encoded when necessary, but not percent-encoded. Do not include the leading \"?\". Defaults to `#{query}`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `query` argument in the `redirect` context of the `aws_lb_listener` resource allows users to define custom query parameters for the redirect URL, ensuring precise control over the query string appended to the destination. By setting this argument, users can dynamically pass or modify query data in the redirect response, supporting use cases like preserving original query parameters or customizing URL behavior for specific routing needs."
+            },
+            {
+              "name": "status_code",
+              "description": "(Required) HTTP redirect code. The redirect is either permanent (`HTTP_301`) or temporary (`HTTP_302`). The following arguments are optional:",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `status_code` argument in the `redirect` context of the `aws_lb_listener` resource specifies the HTTP status code for the redirect response, allowing users to define whether the redirect is permanent (`HTTP_301`) or temporary (`HTTP_302`). This configuration is essential for controlling the behavior of client requests, enabling users to align the redirect type with their application's routing or SEO requirements."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `redirect` configuration block within the `default_action` of the `aws_lb_listener` resource defines settings for redirecting incoming requests to a specified destination, enabling URL redirection functionality. It encapsulates parameters such as target protocol, port, path, query, and status code, allowing users to efficiently manage traffic flow and enforce routing rules for improved application accessibility and user experience."
+        }
+      ],
+      "llm_summary": "The `default_action` configuration block in the `aws_lb_listener` resource defines the primary behavior for handling incoming traffic on the listener, such as forwarding requests to target groups, redirecting traffic, or returning fixed responses. It encapsulates settings related to action types and associated parameters, enabling users to control how requests are processed by the load balancer to achieve specific routing or response goals."
+    },
+    {
+      "name": "mutual_authentication",
+      "description": "(Optional) The mutual authentication configuration information. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "advertise_trust_store_ca_names",
+          "description": "(Optional) Valid values are `off` and `on`.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `advertise_trust_store_ca_names` argument for the `aws_lb_listener` resource in the context of mutual authentication controls whether the trust store's Certificate Authority (CA) names are advertised to clients during the TLS handshake. Setting this argument to `on` enables the display of CA names, which can help clients select an appropriate client certificate, while setting it to `off` disables this functionality. This is typically used to enhance client-side certificate validation in mutual TLS configurations."
+        },
+        {
+          "name": "ignore_client_certificate_expiry",
+          "description": "(Optional) Whether client certificate expiry is ignored. Default is `false`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `ignore_client_certificate_expiry` argument for the `aws_lb_listener` resource in the context of mutual authentication allows users to control whether expired client certificates are disregarded during the authentication process. Setting this to `true` enables flexibility in certificate validation, which can be useful for scenarios where strict enforcement of certificate expiry is not required, such as testing environments or legacy systems."
+        },
+        {
+          "name": "mode",
+          "description": "(Required) Valid values are `off`, `verify` and `passthrough`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `mode` argument in the `aws_lb_listener` resource specifies the operational behavior of mutual authentication, allowing users to control how client certificates are handled during TLS connections. By setting this required argument to `off`, `verify`, or `passthrough`, users can define whether mutual authentication is disabled, client certificates are validated, or certificates are forwarded to the backend, enabling secure communication tailored to their application's authentication requirements."
+        },
+        {
+          "name": "trust_store_arn",
+          "description": "(Required) ARN of the elbv2 Trust Store.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `trust_store_arn` argument allows users to specify the Amazon Resource Name (ARN) of an ELBv2 Trust Store, which is essential for configuring mutual TLS authentication on an AWS Application Load Balancer listener. By defining this argument, users establish the trusted certificate authority (CA) bundle used to validate client certificates, enabling secure, client-verified communication for applications requiring enhanced security and compliance."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `mutual_authentication` block in the `aws_lb_listener` resource configures mutual TLS (mTLS) settings, enabling secure, two-way authentication between clients and the load balancer. This block encapsulates related settings for certificate validation and trust, allowing users to enforce stricter security policies and ensure only trusted clients can establish connections."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_lb_listener` resource allows users to specify the maximum duration (in string format, e.g., \"5m\" for 5 minutes) Terraform will wait for the creation of a load balancer listener to complete. Configuring this timeout ensures better control over deployment workflows, particularly in environments where listener creation may take longer due to resource constraints or complex configurations."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block of the `aws_lb_listener` resource allows users to specify the maximum duration (in string format, e.g., \"5m\" for 5 minutes) Terraform will wait for updates to the load balancer listener to complete. Configuring this timeout ensures predictable behavior during resource modifications, helping users manage deployment workflows and avoid prolonged or indefinite waits during listener updates."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_lb_listener` resource defines customizable timeout durations for specific operations, such as creating, updating, or deleting the load balancer listener. This block enables users to manage operation lifecycle timing, ensuring smoother execution and handling of long-running processes in scenarios where default timeout values may be insufficient."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN of the listener (matches `id`).",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

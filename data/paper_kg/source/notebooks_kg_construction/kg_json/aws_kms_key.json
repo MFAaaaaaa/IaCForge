@@ -1,0 +1,132 @@
+{
+    "resource": {
+        "name": "aws_kms_key",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "bypass_policy_lockout_safety_check",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "custom_key_store_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "customer_master_key_spec",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "deletion_window_in_days",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "enable_key_rotation",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "is_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "key_usage",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "multi_region",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "policy",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "rotation_period_in_days",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "xks_key_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "key_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

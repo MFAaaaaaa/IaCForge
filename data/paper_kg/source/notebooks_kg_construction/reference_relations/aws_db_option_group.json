@@ -1,0 +1,17 @@
+[
+    {
+        "argument_path": "option.option_settings.value",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "option.db_security_group_memberships",
+        "references_output": "aws_db_security_group.name",
+        "target_resource_type": "aws_db_security_group"
+    },
+    {
+        "argument_path": "option.vpc_security_group_memberships",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    }
+]

@@ -1,0 +1,393 @@
+{
+  "resource": {
+    "name": "aws_lb",
+    "description": "Provides a Load Balancer resource. aws_alb is known as aws_lb. The functionality is identical.",
+    "llm_summary": "The `aws_lb` Terraform resource enables the creation and management of Elastic Load Balancers (ELBs) in AWS, supporting both application (ALB) and network (NLB) load balancing. It is commonly used to distribute incoming traffic across multiple targets, improve fault tolerance, and optimize application scalability. Users can configure key features such as listener rules, health checks, SSL termination, logging, and advanced routing for high-availability architectures and seamless integration with auto-scaling groups or containerized workloads."
+  },
+  "examples": [
+    {
+      "title": "Application Load Balancer",
+      "code": "resource \"aws_lb\" \"test\" {\n  name               = \"test-lb-tf\"\n  internal           = false\n  load_balancer_type = \"application\"\n  security_groups    = [aws_security_group.lb_sg.id]\n  subnets            = [for subnet in aws_subnet.public : subnet.id]\n\n  enable_deletion_protection = true\n\n  access_logs {\n    bucket  = aws_s3_bucket.lb_logs.id\n    prefix  = \"test-lb\"\n    enabled = true\n  }\n\n  tags = {\n    Environment = \"production\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Application Load Balancer (`aws_lb`) with public subnets, security groups, deletion protection, and access logging enabled. It showcases key configurations such as the `access_logs` block for logging to an S3 bucket, `enable_deletion_protection` for safeguarding the resource, and tagging for environment-specific metadata."
+    },
+    {
+      "title": "Network Load Balancer",
+      "code": "resource \"aws_lb\" \"test\" {\n  name               = \"test-lb-tf\"\n  internal           = false\n  load_balancer_type = \"network\"\n  subnets            = [for subnet in aws_subnet.public : subnet.id]\n\n  enable_deletion_protection = true\n\n  tags = {\n    Environment = \"production\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS Network Load Balancer (`aws_lb`) with public subnets, deletion protection enabled, and environment-specific tagging. Highlights key settings such as `load_balancer_type`, `subnets` using dynamic mapping, and `enable_deletion_protection` for production-grade infrastructure.\""
+    },
+    {
+      "title": "Specifying Elastic IPs",
+      "code": "resource \"aws_lb\" \"example\" {\n  name               = \"example\"\n  load_balancer_type = \"network\"\n\n  subnet_mapping {\n    subnet_id     = aws_subnet.example1.id\n    allocation_id = aws_eip.example1.id\n  }\n\n  subnet_mapping {\n    subnet_id     = aws_subnet.example2.id\n    allocation_id = aws_eip.example2.id\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Network Load Balancer (`aws_lb`) with specific Elastic IPs by using the `subnet_mapping` block and the `allocation_id` argument. It illustrates how to associate Elastic IPs (`aws_eip`) with subnets (`aws_subnet`) for precise control over IP allocation in a multi-subnet setup."
+    },
+    {
+      "title": "Specifying private IP addresses for an internal-facing load balancer",
+      "code": "resource \"aws_lb\" \"example\" {\n  name               = \"example\"\n  load_balancer_type = \"network\"\n\n  subnet_mapping {\n    subnet_id            = aws_subnet.example1.id\n    private_ipv4_address = \"10.0.1.15\"\n  }\n\n  subnet_mapping {\n    subnet_id            = aws_subnet.example2.id\n    private_ipv4_address = \"10.0.2.15\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an internal-facing AWS Network Load Balancer (`aws_lb`) with private IP addresses using the `subnet_mapping` block. It illustrates specifying `private_ipv4_address` for each subnet to ensure the load balancer operates within a private network, ideal for secure, internal applications."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "client_keep_alive",
+      "description": "(Optional) Client keep alive value in seconds. The valid range is 60-604800 seconds. The default is 3600 seconds.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `client_keep_alive` argument for the `aws_lb` resource allows users to configure the duration, in seconds, that the load balancer maintains persistent connections with clients. By setting this value (within the range of 60-604800 seconds), users can optimize connection reuse and reduce latency for recurring client requests, aligning with goals like improving application performance and resource efficiency."
+    },
+    {
+      "name": "customer_owned_ipv4_pool",
+      "description": "(Optional) ID of the customer owned ipv4 pool to use for this load balancer.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `customer_owned_ipv4_pool` argument for the `aws_lb` resource allows users to specify the ID of a customer-owned IPv4 address pool to associate with the load balancer. This enables the use of IP addresses from a custom pool, typically for scenarios requiring control over IP allocation, such as compliance, routing, or integration with on-premises networks."
+    },
+    {
+      "name": "desync_mitigation_mode",
+      "description": "(Optional) How the load balancer handles requests that might pose a security risk to an application due to HTTP desync. Valid values are `monitor`, `defensive` (default), `strictest`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `desync_mitigation_mode` argument for the `aws_lb` resource allows users to configure how the load balancer handles potentially insecure HTTP requests that could lead to desynchronization issues. By specifying modes such as `monitor`, `defensive` (default), or `strictest`, users can define the security posture of the load balancer to balance between monitoring, moderate protection, or strict enforcement, ensuring application security and stability against HTTP desync risks."
+    },
+    {
+      "name": "dns_record_client_routing_policy",
+      "description": "(Optional) How traffic is distributed among the load balancer Availability Zones. Possible values are `any_availability_zone` (default), `availability_zone_affinity`, or `partial_availability_zone_affinity`. See Availability Zone DNS affinity for additional details. Only valid for `network` type load balancers.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `dns_record_client_routing_policy` argument in the `aws_lb` resource allows users to define how DNS traffic is distributed across the load balancer's Availability Zones for network-type load balancers. By specifying values like `any_availability_zone`, `availability_zone_affinity`, or `partial_availability_zone_affinity`, users can control the routing behavior to optimize client connections, improve zone affinity, or balance traffic distribution based on their application's requirements."
+    },
+    {
+      "name": "drop_invalid_header_fields",
+      "description": "(Optional) Whether HTTP headers with header fields that are not valid are removed by the load balancer (true) or routed to targets (false). The default is false. Elastic Load Balancing requires that message header names contain only alphanumeric characters and hyphens. Only valid for Load Balancers of type `application`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `drop_invalid_header_fields` argument for the `aws_lb` resource allows users to control whether the application load balancer removes HTTP headers with invalid field names (`true`) or forwards them to targets (`false`). This configuration ensures compliance with Elastic Load Balancing's header validation rules, enhancing security and reliability by preventing malformed headers from reaching backend targets."
+    },
+    {
+      "name": "enable_cross_zone_load_balancing",
+      "description": "(Optional) If true, cross-zone load balancing of the load balancer will be enabled. For `network` and `gateway` type load balancers, this feature is disabled by default (`false`). For `application` load balancer this feature is always enabled (`true`) and cannot be disabled. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_cross_zone_load_balancing` argument for the `aws_lb` resource controls whether cross-zone load balancing is enabled, allowing traffic distribution across all registered targets in every availability zone. For `network` and `gateway` load balancers, this feature is disabled by default, while it is always enabled for `application` load balancers, ensuring optimized resource utilization and improved fault tolerance across zones."
+    },
+    {
+      "name": "enable_deletion_protection",
+      "description": "(Optional) If true, deletion of the load balancer will be disabled via the AWS API. This will prevent Terraform from deleting the load balancer. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_deletion_protection` argument for the `aws_lb` resource allows users to configure deletion protection for the load balancer, preventing accidental or automated deletion via the AWS API. Setting this to `true` is ideal for safeguarding critical infrastructure, ensuring the load balancer remains intact during Terraform operations or manual interventions."
+    },
+    {
+      "name": "enable_http2",
+      "description": "(Optional) Whether HTTP/2 is enabled in `application` load balancers. Defaults to `true`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_http2` argument for the `aws_lb` resource allows users to control whether HTTP/2 protocol support is enabled for application load balancers. Enabling this feature optimizes client-server communication by supporting multiplexing and reducing latency, aligning with user goals of improving performance and modernizing application delivery."
+    },
+    {
+      "name": "enable_tls_version_and_cipher_suite_headers",
+      "description": "(Optional) Whether the two headers (`x-amzn-tls-version` and `x-amzn-tls-cipher-suite`), which contain information about the negotiated TLS version and cipher suite, are added to the client request before sending it to the target. Only valid for Load Balancers of type `application`. Defaults to `false`",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "Controls whether the Application Load Balancer includes the `x-amzn-tls-version` and `x-amzn-tls-cipher-suite` headers in client requests, providing information about the negotiated TLS version and cipher suite. Enabling this feature enhances visibility into TLS connection details, which can be useful for monitoring, debugging, or compliance purposes."
+    },
+    {
+      "name": "enable_waf_fail_open",
+      "description": "(Optional) Whether to allow a WAF-enabled load balancer to route requests to targets if it is unable to forward the request to AWS WAF. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_waf_fail_open` argument for the `aws_lb` resource allows users to control whether a WAF-enabled load balancer should continue routing requests to targets when AWS WAF is unavailable to process them. Setting this to `true` ensures uninterrupted traffic flow in scenarios where WAF fails, prioritizing availability over security enforcement, while leaving it as `false` (default) prioritizes strict WAF compliance by blocking requests during WAF outages."
+    },
+    {
+      "name": "enable_xff_client_port",
+      "description": "(Optional) Whether the X-Forwarded-For header should preserve the source port that the client used to connect to the load balancer in `application` load balancers. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_xff_client_port` argument for the `aws_lb` resource allows users to control whether the `X-Forwarded-For` header in `application` load balancers includes the source port used by the client when connecting to the load balancer. Enabling this feature enhances visibility into client connection details, which can be useful for debugging, traffic analysis, or custom logging configurations."
+    },
+    {
+      "name": "enable_zonal_shift",
+      "description": "(Optional) Whether zonal shift is enabled. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_zonal_shift` argument for the `aws_lb` resource allows users to control whether zonal shift functionality is enabled for the load balancer, which facilitates traffic redistribution during availability zone disruptions. Setting this to `true` can enhance fault tolerance by enabling dynamic traffic shifts across zones, aligning with disaster recovery and high availability goals."
+    },
+    {
+      "name": "enforce_security_group_inbound_rules_on_private_link_traffic",
+      "description": "(Optional) Whether inbound security group rules are enforced for traffic originating from a PrivateLink. Only valid for Load Balancers of type `network`. The possible values are `on` and `off`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Controls whether inbound security group rules are enforced for traffic originating from PrivateLink connections on network-type load balancers. Setting this argument to `on` ensures stricter security by applying inbound rules to PrivateLink traffic, while `off` allows bypassing these rules, enabling users to tailor security behavior for private connectivity scenarios."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_lb` resource represents the unique identifier of the load balancer, typically used to reference an existing load balancer in Terraform configurations. While not required, setting this argument allows users to manage or interact with a specific load balancer, enabling workflows such as importing resources or linking dependent resources to an already provisioned load balancer."
+    },
+    {
+      "name": "idle_timeout",
+      "description": "(Optional) Time in seconds that the connection is allowed to be idle. Only valid for Load Balancers of type `application`. Default: 60.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `idle_timeout` argument for the `aws_lb` resource allows users to configure the maximum duration, in seconds, that a connection to an Application Load Balancer can remain idle before being terminated. This setting helps optimize resource usage and manage connection lifecycles, particularly for applications with varying traffic patterns or long-lived connections."
+    },
+    {
+      "name": "internal",
+      "description": "(Optional) If true, the LB will be internal. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `internal` argument for the `aws_lb` resource specifies whether the load balancer is internal (accessible only within a private network) or external (publicly accessible). Setting this to `true` is typically used to configure private-facing load balancers for internal applications or services, aligning with goals like securing traffic within a VPC."
+    },
+    {
+      "name": "ip_address_type",
+      "description": "(Optional) Type of IP addresses used by the subnets for your load balancer. The possible values depend upon the load balancer type: `ipv4` (all load balancer types), `dualstack` (all load balancer types), and `dualstack-without-public-ipv4` (type `application` only).",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ip_address_type` argument for the `aws_lb` resource allows users to specify the type of IP addressing used by the load balancer's subnets, such as `ipv4`, `dualstack`, or `dualstack-without-public-ipv4`. This configuration impacts the load balancer's ability to handle IPv4 and/or IPv6 traffic, enabling users to tailor network compatibility and accessibility based on their application's requirements and the load balancer type."
+    },
+    {
+      "name": "load_balancer_type",
+      "description": "(Optional) Type of load balancer to create. Possible values are `application`, `gateway`, or `network`. The default value is `application`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `load_balancer_type` argument in the `aws_lb` resource allows users to specify the type of load balancer to create, enabling control over its functionality and use case. By setting this argument to `application`, `gateway`, or `network`, users can tailor the load balancer to support HTTP/HTTPS traffic, API gateway routing, or low-latency TCP/UDP connections, respectively, aligning with specific workload requirements and network architectures."
+    },
+    {
+      "name": "name",
+      "description": "(Optional) Name of the LB. This name must be unique within your AWS account, can have a maximum of 32 characters, must contain only alphanumeric characters or hyphens, and must not begin or end with a hyphen. If not specified, Terraform will autogenerate a name beginning with `tf-lb`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_lb` resource allows users to define a unique, human-readable identifier for the load balancer within their AWS account, enabling easier management and distinction between resources. If omitted, Terraform will automatically generate a name prefixed with `tf-lb`, making this argument useful for aligning resource naming conventions with organizational standards or deployment environments."
+    },
+    {
+      "name": "name_prefix",
+      "description": "(Optional) Creates a unique name beginning with the specified prefix. Conflicts with `name`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name_prefix` argument for the `aws_lb` resource allows users to define a custom prefix for the load balancer's name, ensuring the generated name is unique while adhering to the specified prefix. This is useful for organizing resources by environment, project, or naming conventions, and avoids conflicts with the `name` argument when dynamically creating load balancers."
+    },
+    {
+      "name": "preserve_host_header",
+      "description": "(Optional) Whether the Application Load Balancer should preserve the Host header in the HTTP request and send it to the target without any change. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `preserve_host_header` argument in the `aws_lb` resource allows users to control whether the Application Load Balancer forwards the original Host header from incoming HTTP requests to the target without modification. Enabling this option (`true`) ensures the Host header remains unchanged, which is useful for applications or services that rely on the original Host header for routing, authentication, or domain-specific logic."
+    },
+    {
+      "name": "security_groups",
+      "description": "(Optional) List of security group IDs to assign to the LB. Only valid for Load Balancers of type `application` or `network`. For load balancers of type `network` security groups cannot be added if none are currently present, and cannot all be removed once added. If either of these conditions are met, this will force a recreation of the resource.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `security_groups` argument for the `aws_lb` resource allows users to specify a set of security group IDs to control inbound and outbound traffic for the load balancer. This is applicable to application and network load balancers, enabling users to define network access rules for enhanced security. For network load balancers, changes to security groups may trigger resource recreation due to restrictions on adding or removing security groups after initial configuration."
+    },
+    {
+      "name": "subnets",
+      "description": "(Optional) List of subnet IDs to attach to the LB. For Load Balancers of type `network` subnets can only be added (see Availability Zones), deleting a subnet for load balancers of type `network` will force a recreation of the resource.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `subnets` argument for the `aws_lb` resource allows users to specify the subnet IDs where the load balancer will be deployed, defining its network placement within the associated VPC. This configuration impacts the availability and connectivity of the load balancer, particularly for `network`-type load balancers, where subnets can only be added and removing them forces resource recreation, aligning with user goals of controlling network accessibility and redundancy."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_lb` resource allows users to assign key-value metadata to the load balancer, enabling organization, categorization, and identification of resources for purposes such as cost allocation, environment labeling, or automation workflows. When set, it can override provider-level default tags, ensuring resource-specific customization and alignment with tagging strategies."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_lb` resource allows users to define a comprehensive set of key-value tags that are automatically applied to the load balancer and any related resources. This enables consistent tagging for resource organization, cost allocation, and governance, aligning with common user goals like managing environments, tracking usage, or enforcing compliance policies."
+    },
+    {
+      "name": "xff_header_processing_mode",
+      "description": "(Optional) Determines how the load balancer modifies the `X-Forwarded-For` header in the HTTP request before sending the request to the target. The possible values are `append`, `preserve`, and `remove`. Only valid for Load Balancers of type `application`. The default is `append`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `xff_header_processing_mode` argument for the `aws_lb` resource allows users to control how the load balancer handles the `X-Forwarded-For` HTTP header, which contains client IP information, before forwarding requests to targets. By specifying values like `append`, `preserve`, or `remove`, users can configure the header's behavior to align with application requirements, such as maintaining original client IPs or modifying the header for downstream processing, particularly for application load balancers."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "access_logs",
+      "description": "(Optional) Access Logs block. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "bucket",
+          "description": "(Required) S3 bucket name to store the logs in.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "Specifies the name of the S3 bucket where access logs for the load balancer will be stored, enabling centralized logging and analysis of traffic patterns and requests. This required argument is essential for configuring the access logging feature, which helps users meet compliance, auditing, or debugging requirements."
+        },
+        {
+          "name": "enabled",
+          "description": "(Optional) Boolean to enable / disable `access_logs`. Defaults to `false`, even when `bucket` is specified.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument for the `access_logs` block in the `aws_lb` resource allows users to control whether access logging is activated for the load balancer. Setting this boolean to `true` enables the logging functionality, which is commonly used to capture detailed request and traffic data for monitoring, auditing, and troubleshooting purposes; leaving it as `false` (default) disables logging even if a bucket is specified."
+        },
+        {
+          "name": "prefix",
+          "description": "(Optional) S3 bucket prefix. Logs are stored in the root if not configured.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `prefix` argument in the `access_logs` block of the `aws_lb` resource allows users to specify a custom S3 bucket prefix for organizing and storing load balancer access logs. By setting this argument, users can define a logical folder structure within the S3 bucket, enabling better organization and easier retrieval of logs; if not set, logs are stored at the root level of the bucket."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"access_logs\" configuration block in the \"aws_lb\" resource enables logging of load balancer activity by defining settings for access log storage and delivery. It encapsulates related settings such as the S3 bucket destination and log format, allowing users to monitor and analyze traffic patterns, troubleshoot issues, and maintain compliance through centralized log management."
+    },
+    {
+      "name": "connection_logs",
+      "description": "(Optional) Connection Logs block. See below. Only valid for Load Balancers of type `application`.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "bucket",
+          "description": "(Required) S3 bucket name to store the logs in.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "Specifies the name of the S3 bucket where connection logs for the load balancer will be stored, enabling centralized logging and analysis of network traffic. This argument is essential for configuring log storage, supporting compliance, monitoring, and troubleshooting goals."
+        },
+        {
+          "name": "enabled",
+          "description": "(Optional) Boolean to enable / disable `connection_logs`. Defaults to `false`, even when `bucket` is specified.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument for the `connection_logs` block in the `aws_lb` resource allows users to control whether connection logging is activated for the load balancer. Setting this boolean to `true` enables logging of connection data to a specified S3 bucket, supporting use cases like traffic analysis, debugging, and compliance monitoring, while leaving it `false` disables this functionality by default."
+        },
+        {
+          "name": "prefix",
+          "description": "(Optional) S3 bucket prefix. Logs are stored in the root if not configured.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `prefix` argument in the `connection_logs` block of the `aws_lb` resource allows users to specify a custom S3 bucket prefix for organizing and storing load balancer connection logs. By defining this prefix, users can structure log storage hierarchically within the bucket, enabling better organization and easier retrieval of logs for monitoring, auditing, or debugging purposes. If not set, logs are stored at the root level of the bucket."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `connection_logs` block in the `aws_lb` resource configures logging for application load balancers, enabling the capture of detailed connection data such as client requests and traffic patterns. This block helps users monitor and analyze load balancer activity by setting up logging mechanisms, which are essential for troubleshooting, performance optimization, and compliance auditing."
+    },
+    {
+      "name": "subnet_mapping",
+      "description": "(Optional) Subnet mapping block. See below. For Load Balancers of type `network` subnet mappings can only be added.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "allocation_id",
+          "description": "(Optional) Allocation ID of the Elastic IP address for an internet-facing load balancer.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "Defines the Elastic IP allocation ID to associate with a subnet in an internet-facing load balancer, enabling the user to control the specific public IP address used for external traffic routing. This configuration is typically used to ensure consistent and predictable public-facing IPs for the load balancer, supporting scenarios like whitelisting or DNS-based routing."
+        },
+        {
+          "name": "ipv6_address",
+          "description": "(Optional) IPv6 address. You associate IPv6 CIDR blocks with your VPC and choose the subnets where you launch both internet-facing and internal Application Load Balancers or Network Load Balancers.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `ipv6_address` argument in the `subnet_mapping` block of the `aws_lb` resource allows users to specify a static IPv6 address for the load balancer within a particular subnet. This enables precise control over the load balancer's IPv6 network configuration, supporting use cases like ensuring predictable addressing for internet-facing or internal Application and Network Load Balancers in environments with IPv6 CIDR blocks."
+        },
+        {
+          "name": "outpost_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `outpost_id` argument in the `subnet_mapping` block of the `aws_lb` resource allows users to specify the ID of an AWS Outpost associated with the subnet. By setting this argument, users can configure the load balancer to operate within an Outpost environment, enabling deployment in on-premises infrastructure managed by AWS for low-latency or hybrid cloud use cases."
+        },
+        {
+          "name": "private_ipv4_address",
+          "description": "(Optional) Private IPv4 address for an internal load balancer.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `private_ipv4_address` argument in the `subnet_mapping` block of the `aws_lb` resource allows users to explicitly define a specific private IPv4 address for an internal load balancer within the associated subnet. This configuration is typically used to ensure predictable IP addressing for the load balancer, which can be important for integration with private networking, DNS records, or applications requiring fixed IPs."
+        },
+        {
+          "name": "subnet_id",
+          "description": "(Required) ID of the subnet of which to attach to the load balancer. You can specify only one subnet per Availability Zone.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `subnet_id` argument in the `subnet_mapping` block of the `aws_lb` resource specifies the unique identifier of the subnet to which the load balancer will be attached within a specific Availability Zone. By defining this required parameter, users control the network placement of the load balancer, ensuring it operates within the desired subnet for traffic routing and availability purposes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `subnet_mapping` block in the `aws_lb` resource specifies the association of subnets to a load balancer, enabling precise control over network placement and IP address allocation. This block is essential for configuring subnet-level settings, particularly for network load balancers, allowing users to define how traffic is distributed across specific subnets to optimize availability and performance."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_lb` resource allows users to specify the maximum duration (in string format, e.g., \"10m\") Terraform will wait for the creation of an AWS Load Balancer to complete. Configuring this timeout ensures users can control deployment behavior in cases where the creation process takes longer than expected, helping to avoid unnecessary failures or delays in infrastructure provisioning."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_lb` resource allows users to specify the maximum duration, as a string, Terraform should wait for the deletion of the load balancer to complete. Configuring this argument helps manage resource lifecycle operations by preventing timeout errors during deletion, ensuring smoother infrastructure teardown processes."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block of the `aws_lb` resource allows users to specify the maximum duration, as a string, for updating an existing load balancer. By configuring this timeout, users can control how long Terraform waits for the update operation to complete, ensuring smoother management of load balancer lifecycle changes and avoiding potential operation timeouts during infrastructure updates."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_lb` resource allows users to define custom timeout durations for specific operations related to the lifecycle management of an AWS Load Balancer, such as creation, update, and deletion. By configuring this block, users gain precise control over operation time limits, ensuring smoother deployment workflows and handling scenarios where default timeout settings may be insufficient for complex or large-scale load balancer setups."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN of the load balancer (matches `id`).",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "arn_suffix",
+      "description": "ARN suffix for use with CloudWatch Metrics.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "dns_name",
+      "description": "DNS name of the load balancer.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "vpc_id",
+      "description": "",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "zone_id",
+      "description": "Canonical hosted zone ID of the load balancer (to be used in a Route 53 Alias record).",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

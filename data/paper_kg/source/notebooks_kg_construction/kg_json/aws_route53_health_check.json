@@ -1,0 +1,162 @@
+{
+    "resource": {
+        "name": "aws_route53_health_check",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "child_health_threshold",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "child_healthchecks",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "cloudwatch_alarm_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "cloudwatch_alarm_region",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "disabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "enable_sni",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "failure_threshold",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "fqdn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "insufficient_data_health_status",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "invert_healthcheck",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "ip_address",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "measure_latency",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "port",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "reference_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "regions",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "request_interval",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "resource_path",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_control_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "search_string",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "triggers",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "type",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

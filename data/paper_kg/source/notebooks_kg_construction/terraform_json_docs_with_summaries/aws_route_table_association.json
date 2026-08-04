@@ -1,0 +1,85 @@
+{
+  "resource": {
+    "name": "aws_route_table_association",
+    "description": "Provides a resource to create an association between a route table and a subnet or a route table and an internet gateway or virtual private gateway.",
+    "llm_summary": "The `aws_route_table_association` resource enables the creation and management of associations between a route table and a subnet, internet gateway, or virtual private gateway within an AWS VPC. It is commonly used to configure network routing for specific subnets or gateways, ensuring proper traffic flow and connectivity in cloud environments. This resource is essential for scenarios like setting up custom routing rules, isolating subnet traffic, or connecting VPCs to external networks via gateways."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_route_table_association\" \"a\" {\n  subnet_id      = aws_subnet.foo.id\n  route_table_id = aws_route_table.bar.id\n}",
+      "llm_summary": "\"Demonstrates the basic configuration of the `aws_route_table_association` resource to associate a specific subnet (`subnet_id`) with a route table (`route_table_id`). This example highlights how to link network components in AWS for routing purposes using minimal required arguments.\""
+    },
+    {
+      "title": "Example 2",
+      "code": "resource \"aws_route_table_association\" \"b\" {\n  gateway_id     = aws_internet_gateway.foo.id\n  route_table_id = aws_route_table.bar.id\n}",
+      "llm_summary": "\"Demonstrates how to associate an AWS route table with an internet gateway using the `aws_route_table_association` resource, showcasing the use of the `gateway_id` and `route_table_id` arguments to enable routing for internet connectivity in a VPC.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "gateway_id",
+      "description": "(Optional) The gateway ID to create an association. Conflicts with `subnet_id`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `gateway_id` argument in the `aws_route_table_association` resource allows users to associate a route table with a specific internet gateway or virtual private gateway, enabling routing for traffic to and from external networks or other VPCs. This configuration is typically used to define connectivity for resources within a VPC, and it conflicts with the `subnet_id` argument, as only one type of association can be specified per resource."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_route_table_association` resource represents the unique identifier of the association between a route table and a subnet or gateway. While optional, it is typically used to reference or manage the association explicitly, enabling users to track or interact with the resource in Terraform configurations or external systems."
+    },
+    {
+      "name": "route_table_id",
+      "description": "(Required) The ID of the routing table to associate with.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "Defines the specific ID of the route table to associate with a subnet or gateway, enabling the routing configuration for network traffic within the associated resource. This argument is essential for linking the route table to the desired network component, ensuring proper traffic flow and connectivity in the AWS environment."
+    },
+    {
+      "name": "subnet_id",
+      "description": "(Optional) The subnet ID to create an association. Conflicts with `gateway_id`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `subnet_id` argument in the `aws_route_table_association` resource allows users to specify the ID of a subnet to associate with a route table, enabling the routing configuration of the specified subnet to be governed by the associated route table. This is commonly used to define network routing behavior for specific subnets within a VPC, ensuring traffic is directed according to the rules in the route table. Note that it conflicts with the `gateway_id` argument, as associations can only target one type of resource at a time."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_route_table_association` resource allows users to specify the maximum duration (in string format, e.g., \"5m\" for 5 minutes) Terraform should wait for the creation of a route table association to complete. Configuring this timeout ensures better control over resource provisioning, particularly in environments where network or API latency may impact the association process."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block for the `aws_route_table_association` resource allows users to specify the maximum duration (as a string, e.g., \"5m\" for 5 minutes) Terraform should wait when deleting an association between a route table and a subnet or gateway. Configuring this timeout ensures predictable behavior during resource destruction, helping users manage infrastructure changes in scenarios where deletion operations may take longer than default settings."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_route_table_association` resource allows users to specify the maximum duration (in string format, e.g., \"5m\" for 5 minutes) Terraform will wait for an update operation to complete when modifying an association between a route table and a subnet or gateway. Configuring this timeout ensures better control over resource lifecycle management, particularly in environments where updates may take longer due to network or infrastructure constraints."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"timeouts\" configuration block in the \"aws_route_table_association\" resource allows users to define custom timeout durations for creating, updating, or deleting route table associations. This block provides granular control over operation time limits, ensuring smoother management of resource lifecycle processes in cases of network latency or extended API response times."
+    }
+  ],
+  "attributes": []
+}

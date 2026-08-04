@@ -1,0 +1,92 @@
+{
+  "resource": {
+    "name": "aws_sagemaker_code_repository",
+    "description": "Provides a SageMaker AI Code Repository resource.",
+    "llm_summary": "\"Manages the creation and configuration of SageMaker AI Code Repositories, enabling seamless integration with source control systems like GitHub or AWS CodeCommit for machine learning workflows. Commonly used to version control training scripts, manage model development code, and automate deployment pipelines in SageMaker projects. Supports configurations for repository lifecycle management, branch settings, and secure access integration to streamline collaborative AI/ML development.\""
+  },
+  "examples": [
+    {
+      "title": "Basic usage",
+      "code": "resource \"aws_sagemaker_code_repository\" \"example\" {\n  code_repository_name = \"example\"\n\n  git_config {\n    repository_url = \"https://github.com/hashicorp/terraform-provider-aws.git\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS SageMaker Code Repository using the `aws_sagemaker_code_repository` resource, specifying a repository name and integrating a Git configuration block with a `repository_url`. It illustrates the basic setup required to link a SageMaker Code Repository to a Git-based source control system."
+    },
+    {
+      "title": "Example with Secret",
+      "code": "resource \"aws_secretsmanager_secret\" \"example\" {\n  name = \"example\"\n}\n\nresource \"aws_secretsmanager_secret_version\" \"example\" {\n  secret_id     = aws_secretsmanager_secret.example.id\n  secret_string = jsonencode({ username = \"example\", password = \"example\" })\n}\n\nresource \"aws_sagemaker_code_repository\" \"example\" {\n  code_repository_name = \"example\"\n\n  git_config {\n    repository_url = \"https://github.com/hashicorp/terraform-provider-aws.git\"\n    secret_arn     = aws_secretsmanager_secret.example.arn\n  }\n\n  depends_on = [aws_secretsmanager_secret_version.example]\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_sagemaker_code_repository` with a Git repository URL and secure authentication using AWS Secrets Manager. Highlights the use of the `git_config` block with the `secret_arn` argument to securely store and retrieve credentials for accessing the repository.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "code_repository_name",
+      "description": "(Required) The name of the Code Repository (must be unique).",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `code_repository_name` argument specifies a unique name for the SageMaker Code Repository, allowing users to define and identify the repository within their AWS environment. Setting this argument ensures the repository is uniquely distinguishable, supporting version control and integration with SageMaker workflows for managing machine learning code."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_sagemaker_code_repository` resource allows users to specify a unique identifier for the code repository within AWS SageMaker. While optional, setting this argument can help users reference and manage the repository programmatically, enabling streamlined integration with other resources or workflows that depend on its identification."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_sagemaker_code_repository` resource allows users to assign metadata in the form of key-value pairs to the code repository, enabling resource categorization, organization, and cost tracking. By defining tags, users can streamline management tasks such as identifying resources by environment, project, or ownership, while also integrating with provider-level default tagging configurations for consistent governance."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_sagemaker_code_repository` resource allows users to define a comprehensive set of key-value tags that are applied to the code repository and inherited from the provider-level default tags. This facilitates resource organization, cost allocation, and metadata management, enabling users to categorize and track the repository within their AWS environment effectively."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "git_config",
+      "description": "(Required) Specifies details about the repository. see Git Config details below.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "branch",
+          "description": "(Optional) The default branch for the Git repository.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `branch` argument in the `git_config` block of the `aws_sagemaker_code_repository` resource allows users to specify the default branch of the Git repository to be used for the code repository. This configuration helps define the primary branch for version control, ensuring SageMaker operations interact with the intended codebase, which is particularly useful for workflows involving multiple branches or environments."
+        },
+        {
+          "name": "repository_url",
+          "description": "(Required) The URL where the Git repository is located.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `repository_url` argument specifies the location of the Git repository to be associated with the SageMaker code repository, enabling SageMaker to access and manage the source code stored at the provided URL. This is a required parameter that defines the primary source control integration, supporting user goals like versioning, collaboration, and automated deployment of machine learning workflows."
+        },
+        {
+          "name": "secret_arn",
+          "description": "(Optional) The Amazon Resource Name (ARN) of the AWS Secrets Manager secret that contains the credentials used to access the git repository. The secret must have a staging label of AWSCURRENT and must be in the following format: `{\"username\": UserName, \"password\": Password}`",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `secret_arn` argument in the `git_config` block of the `aws_sagemaker_code_repository` resource allows users to specify the ARN of an AWS Secrets Manager secret containing credentials (username and password) for accessing a private Git repository. By configuring this argument, users can securely authenticate to the repository, enabling seamless integration of private code repositories into SageMaker workflows without hardcoding sensitive information."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `git_config` block within the `aws_sagemaker_code_repository` resource defines the configuration details for integrating a Git-based source repository, including settings like repository URL and authentication credentials. This block enables users to connect SageMaker to external code repositories, facilitating version-controlled access to machine learning scripts and artifacts for streamlined development and deployment workflows."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) assigned by AWS to this Code Repository.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

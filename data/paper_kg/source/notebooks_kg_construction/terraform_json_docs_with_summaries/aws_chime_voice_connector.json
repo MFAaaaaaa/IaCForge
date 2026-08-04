@@ -1,0 +1,73 @@
+{
+  "resource": {
+    "name": "aws_chime_voice_connector",
+    "description": "Enables you to connect your phone system to the telephone network at a substantial cost savings by using SIP trunking.",
+    "llm_summary": "The `aws_chime_voice_connector` Terraform resource enables the configuration and management of SIP trunking to connect on-premises or cloud-based phone systems with the public telephone network, optimizing costs for voice communication. Common use cases include integrating VoIP systems with PSTN, enabling outbound and inbound calling, and scaling enterprise telephony infrastructure. Users can configure settings such as encryption, call routing, logging, and failover mechanisms to ensure secure and reliable voice connectivity."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_chime_voice_connector\" \"test\" {\n  name               = \"connector-test-1\"\n  require_encryption = true\n  aws_region         = \"us-east-1\"\n}",
+      "llm_summary": "\"Demonstrates the basic setup of an AWS Chime Voice Connector with encryption enabled (`require_encryption = true`), specifying the connector name and AWS region (`aws_region = \"us-east-1\"`). This example helps users configure a secure voice connector for managing SIP-based communication in AWS.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "aws_region",
+      "description": "(Optional) The AWS Region in which the Amazon Chime Voice Connector is created. Default value: `us-east-1`",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `aws_region` argument allows users to specify the AWS Region where the Amazon Chime Voice Connector is provisioned, enabling regional control over the resource's deployment. By setting this argument, users can align the Voice Connector's location with their infrastructure needs, optimize latency, or comply with geographic regulations; the default region is `us-east-1`."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_chime_voice_connector` resource allows users to specify a unique identifier for the voice connector, typically used to reference or manage the resource within AWS. While optional, setting this argument can help ensure consistent identification of the voice connector across Terraform configurations and integrations, supporting resource tracking and updates."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name of the Amazon Chime Voice Connector.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies the unique, user-defined identifier for the Amazon Chime Voice Connector, enabling users to define a meaningful and recognizable label for the resource. Setting this argument is essential for organizing and managing voice connectors within the AWS environment, aligning with common user goals like resource identification and differentiation in multi-connector deployments."
+    },
+    {
+      "name": "require_encryption",
+      "description": "(Required) When enabled, requires encryption for the Amazon Chime Voice Connector. The following arguments are optional:",
+      "required": true,
+      "type": "bool",
+      "llm_summary": "The `require_encryption` argument for the `aws_chime_voice_connector` resource specifies whether encryption is mandatory for voice data transmitted through the Amazon Chime Voice Connector. Enabling this setting ensures secure communication by enforcing encryption, aligning with compliance and security best practices for sensitive voice traffic."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Key-value mapping of resource tags. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_chime_voice_connector` resource allows users to define a key-value mapping of resource tags, enabling the organization, categorization, and identification of the voice connector within their AWS environment. By setting this argument, users can streamline resource management, support cost allocation, and integrate with tagging-based automation or governance policies, with provider-level default tags being overridden if matching keys are specified."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_chime_voice_connector` resource allows users to define a comprehensive set of key-value tags that are applied to the resource, including inherited tags from the provider's default configuration. This facilitates resource organization, cost allocation, and governance by enabling consistent tagging across AWS resources for purposes such as tracking environments, ownership, or compliance."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN (Amazon Resource Name) of the Amazon Chime Voice Connector.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "outbound_host_name",
+      "description": "The outbound host name for the Amazon Chime Voice Connector.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

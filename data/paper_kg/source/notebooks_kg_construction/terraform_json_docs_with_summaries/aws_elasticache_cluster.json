@@ -1,0 +1,320 @@
+{
+  "resource": {
+    "name": "aws_elasticache_cluster",
+    "description": "Provides an ElastiCache Cluster resource, which manages either a Memcached cluster, a single-node Redis instance, or a [read replica in a Redis (Cluster Mode Enabled) replication group]. For working with Redis (Cluster Mode Enabled) replication groups, see the aws_elasticache_replication_group resource. When you change an attribute, such as num_cache_nodes, by default it is applied in the next maintenance window. Because of this, Terraform may report a difference in its planning phase because the actual modification has not yet taken place. You can use the apply_immediately flag to instruct the service to apply the change immediately. Using apply_immediately can result in a brief downtime as the server reboots. See the AWS Documentation on Modifying an ElastiCache Cache Cluster for ElastiCache for Memcached or ElastiCache for Redis for more information. Any attribute changes that re-create the resource will be applied immediately, regardless of the value of apply_immediately.",
+    "llm_summary": "The `aws_elasticache_cluster` Terraform resource enables the creation and management of ElastiCache clusters for in-memory data caching, supporting both Memcached and single-node Redis instances. It is commonly used for scenarios requiring high-performance caching to optimize application latency, session storage, or database query results. Users can configure key attributes such as cluster size (`num_cache_nodes`), engine type, and maintenance behavior, with options for immediate updates (`apply_immediately`) or scheduled changes, making it ideal for lifecycle management and scaling in distributed systems."
+  },
+  "examples": [
+    {
+      "title": "Memcached Cluster",
+      "code": "resource \"aws_elasticache_cluster\" \"example\" {\n  cluster_id           = \"cluster-example\"\n  engine               = \"memcached\"\n  node_type            = \"cache.m4.large\"\n  num_cache_nodes      = 2\n  parameter_group_name = \"default.memcached1.4\"\n  port                 = 11211\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS ElastiCache Memcached cluster using the `aws_elasticache_cluster` resource, specifying key attributes such as `engine`, `node_type`, `num_cache_nodes`, and `parameter_group_name` for a two-node setup with default Memcached parameters on port 11211.\""
+    },
+    {
+      "title": "Redis Instance",
+      "code": "resource \"aws_elasticache_cluster\" \"example\" {\n  cluster_id           = \"cluster-example\"\n  engine               = \"redis\"\n  node_type            = \"cache.m4.large\"\n  num_cache_nodes      = 1\n  parameter_group_name = \"default.redis3.2\"\n  engine_version       = \"3.2.10\"\n  port                 = 6379\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS ElastiCache Redis cluster using the `aws_elasticache_cluster` resource, specifying key attributes such as `engine` set to Redis, `node_type` for instance sizing, `num_cache_nodes` for single-node setup, and `parameter_group_name` for default Redis settings. This example is ideal for users looking to deploy a basic Redis instance with version 3.2.10 on port 6379.\""
+    },
+    {
+      "title": "Redis Cluster Mode Disabled Read Replica Instance",
+      "code": "resource \"aws_elasticache_cluster\" \"replica\" {\n  cluster_id           = \"cluster-example\"\n  replication_group_id = aws_elasticache_replication_group.example.id\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS ElastiCache cluster as a read replica for a Redis replication group with cluster mode disabled, using the `aws_elasticache_cluster` resource. It highlights the use of the `replication_group_id` argument to associate the cluster with an existing replication group."
+    },
+    {
+      "title": "Redis Log Delivery configuration",
+      "code": "resource \"aws_elasticache_cluster\" \"test\" {\n  cluster_id        = \"mycluster\"\n  engine            = \"redis\"\n  node_type         = \"cache.t3.micro\"\n  num_cache_nodes   = 1\n  port              = 6379\n  apply_immediately = true\n  log_delivery_configuration {\n    destination      = aws_cloudwatch_log_group.example.name\n    destination_type = \"cloudwatch-logs\"\n    log_format       = \"text\"\n    log_type         = \"slow-log\"\n  }\n  log_delivery_configuration {\n    destination      = aws_kinesis_firehose_delivery_stream.example.name\n    destination_type = \"kinesis-firehose\"\n    log_format       = \"json\"\n    log_type         = \"engine-log\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure log delivery for an AWS ElastiCache Redis cluster using the `log_delivery_configuration` block. It showcases sending slow logs to CloudWatch Logs in text format and engine logs to a Kinesis Firehose delivery stream in JSON format, providing a clear setup for centralized log management and monitoring."
+    },
+    {
+      "title": "Elasticache Cluster in Outpost",
+      "code": "data \"aws_outposts_outposts\" \"example\" {}\n\ndata \"aws_outposts_outpost\" \"example\" {\n  id = tolist(data.aws_outposts_outposts.example.ids)[0]\n}\n\nresource \"aws_vpc\" \"example\" {\n  cidr_block = \"10.0.0.0/16\"\n}\n\nresource \"aws_subnet\" \"example\" {\n  vpc_id     = aws_vpc.example.id\n  cidr_block = \"10.0.1.0/24\"\n\n  tags = {\n    Name = \"my-subnet\"\n  }\n}\n\nresource \"aws_elasticache_subnet_group\" \"example\" {\n  name       = \"my-cache-subnet\"\n  subnet_ids = [aws_subnet.example.id]\n}\n\nresource \"aws_elasticache_cluster\" \"example\" {\n  cluster_id = \"cluster-example\"\n  # Note that ElastiCache for Outposts only supports `single-outpost` currently\n  outpost_mode          = \"single-outpost\"\n  preferred_outpost_arn = data.aws_outposts_outpost.example.arn\n  engine                = \"memcached\"\n  # Note that ElastiCache for Outposts only supports M5 and R5 node families currently\n  node_type            = \"cache.r5.large\"\n  num_cache_nodes      = 2\n  parameter_group_name = \"default.memcached1.4\"\n  port                 = 11211\n  subnet_group_name    = aws_elasticache_subnet_group.example.name\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS ElastiCache cluster on Outposts with `single-outpost` mode, specifying the preferred Outpost ARN, `cache.r5.large` node type, and a custom subnet group. This example highlights integration with Outposts resources, VPC, and subnet configurations for deploying Memcached in a hybrid cloud environment.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "apply_immediately",
+      "description": "(Optional) Whether any database modifications are applied immediately, or during the next maintenance window. Default is `false`. See Amazon ElastiCache Documentation for more information..",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `apply_immediately` argument for the `aws_elasticache_cluster` resource controls whether configuration changes, such as database modifications, are applied immediately or deferred to the next maintenance window. Setting this to `true` allows users to expedite updates, which is useful for urgent changes, while leaving it as `false` (default) ensures modifications occur during scheduled maintenance to minimize potential disruptions."
+    },
+    {
+      "name": "auto_minor_version_upgrade",
+      "description": "(Optional) Specifies whether minor version engine upgrades will be applied automatically to the underlying Cache Cluster instances during the maintenance window. Only supported for engine type `\"redis\"` and if the engine version is 6 or higher. Defaults to `true`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `auto_minor_version_upgrade` argument for the `aws_elasticache_cluster` resource allows users to control whether minor engine version upgrades for Redis clusters (version 6 or higher) are automatically applied during the maintenance window. This configuration helps ensure the cache remains up-to-date with minimal manual intervention, supporting automated lifecycle management and reducing operational overhead."
+    },
+    {
+      "name": "availability_zone",
+      "description": "(Optional) Availability Zone for the cache cluster. If you want to create cache nodes in multi-az, use `preferred_availability_zones` instead. Default: System chosen Availability Zone. Changing this value will re-create the resource.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `availability_zone` argument for the `aws_elasticache_cluster` resource allows users to specify the specific Availability Zone in which the cache cluster's nodes will be deployed, providing control over the geographic placement of resources for latency optimization or compliance purposes. If not set, the system selects an Availability Zone automatically, and changing this value triggers resource recreation."
+    },
+    {
+      "name": "az_mode",
+      "description": "(Optional, Memcached only) Whether the nodes in this Memcached node group are created in a single Availability Zone or created across multiple Availability Zones in the cluster's region. Valid values for this parameter are `single-az` or `cross-az`, default is `single-az`. If you want to choose `cross-az`, `num_cache_nodes` must be greater than `1`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `az_mode` argument for the `aws_elasticache_cluster` resource allows users to specify the deployment strategy for Memcached nodes, determining whether the nodes are confined to a single Availability Zone (`single-az`) or distributed across multiple Availability Zones (`cross-az`) within the region. Configuring this argument impacts the cluster's fault tolerance and availability, with `cross-az` enhancing resilience but requiring more than one cache node."
+    },
+    {
+      "name": "cluster_id",
+      "description": "\u2013 (Required) Group identifier. ElastiCache converts this name to lowercase. Changing this value will re-create the resource.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `cluster_id` argument specifies the unique, lowercase identifier for the ElastiCache cluster, serving as the primary reference for managing and interacting with the resource. Setting this value defines the cluster's name and triggers resource recreation if changed, enabling users to establish a distinct cache environment for applications or workloads."
+    },
+    {
+      "name": "engine",
+      "description": "\u2013 (Optional, Required if `replication_group_id` is not specified) Name of the cache engine to be used for this cache cluster. Valid values are `memcached` and `redis`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `engine` argument for the `aws_elasticache_cluster` resource allows users to specify the type of cache engine (`memcached` or `redis`) to be used for the cluster, defining the core functionality and behavior of the caching system. Setting this argument determines the underlying technology and features available, enabling users to tailor the cluster to their application's caching requirements, such as in-memory key-value storage or advanced data structures."
+    },
+    {
+      "name": "engine_version",
+      "description": "\u2013 (Optional) Version number of the cache engine to be used. If not set, defaults to the latest version. See Describe Cache Engine Versions in the AWS Documentation for supported versions. When `engine` is `redis` and the version is 7 or higher, the major and minor version should be set, e.g., `7.2`. When the version is 6, the major and minor version can be set, e.g., `6.2`, or the minor version can be unspecified which will use the latest version at creation time, e.g., `6.x`. Otherwise, specify the full version desired, e.g., `5.0.6`. The actual engine version used is returned in the attribute `engine_version_actual`, see Attribute Reference below. Cannot be provided with `replication_group_id.`",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `engine_version` argument in the `aws_elasticache_cluster` resource allows users to specify the version of the cache engine (e.g., Redis or Memcached) to be used for the cluster, enabling precise control over compatibility, features, and performance. By setting this argument, users can ensure their cluster runs a specific engine version or defaults to the latest available version, aligning with application requirements and AWS-supported configurations."
+    },
+    {
+      "name": "final_snapshot_identifier",
+      "description": "(Optional, Redis only) Name of your final cluster snapshot. If omitted, no final snapshot will be made.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `final_snapshot_identifier` argument allows users to specify the name of a final snapshot to be created when the ElastiCache cluster is deleted, enabling data preservation for Redis clusters. If set, this ensures a backup of the cluster's state at the time of deletion, supporting disaster recovery or future restoration needs; if omitted, no final snapshot is created."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_elasticache_cluster` resource represents the unique identifier of the Elasticache cluster, typically used to reference the cluster within Terraform configurations or other dependent resources. While optional, setting this argument allows users to explicitly define or retrieve the cluster's ID for integration, tracking, or resource management purposes."
+    },
+    {
+      "name": "ip_discovery",
+      "description": "(Optional) The IP version to advertise in the discovery protocol. Valid values are `ipv4` or `ipv6`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ip_discovery` argument for the `aws_elasticache_cluster` resource allows users to specify the IP version (`ipv4` or `ipv6`) advertised in the cluster's discovery protocol, enabling control over network compatibility and addressing requirements. This configuration is particularly useful for aligning the cluster's connectivity with the desired network infrastructure or compliance standards."
+    },
+    {
+      "name": "maintenance_window",
+      "description": "\u2013 (Optional) Specifies the weekly time range for when maintenance on the cache cluster is performed. The format is `ddd:hh24:mi-ddd:hh24:mi` (24H Clock UTC). The minimum maintenance window is a 60 minute period. Example: `sun:05:00-sun:09:00`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `maintenance_window` argument allows users to define a specific weekly time range for performing scheduled maintenance on the ElastiCache cluster, ensuring updates and maintenance tasks occur during a predictable and controlled period. This configuration helps minimize disruption to application performance by aligning maintenance with off-peak hours, using a 24-hour UTC format (e.g., `sun:05:00-sun:09:00`)."
+    },
+    {
+      "name": "network_type",
+      "description": "(Optional) The IP versions for cache cluster connections. IPv6 is supported with Redis engine `6.2` onword or Memcached version `1.6.6` for all Nitro system instances. Valid values are `ipv4`, `ipv6` or `dual_stack`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `network_type` argument for the `aws_elasticache_cluster` resource allows users to specify the IP version used for cache cluster connections, enabling configuration of network connectivity as either `ipv4`, `ipv6`, or `dual_stack`. This setting is particularly useful for aligning the cluster's network compatibility with application requirements or compliance needs, especially when using Redis 6.2+ or Memcached 1.6.6+ on Nitro-based instances."
+    },
+    {
+      "name": "node_type",
+      "description": "\u2013 (Required unless `replication_group_id` is provided) The instance class used. See AWS documentation for information on supported node types for Redis and guidance on selecting node types for Redis. See AWS documentation for information on supported node types for Memcached and guidance on selecting node types for Memcached. For Memcached, changing this value will re-create the resource.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `node_type` argument in the `aws_elasticache_cluster` resource specifies the instance class for the cache nodes, allowing users to define the computational and memory capacity of the cluster. This configuration directly impacts performance and cost, enabling users to tailor the cluster to their workload requirements for Redis or Memcached, with changes to this value potentially triggering resource recreation for Memcached clusters."
+    },
+    {
+      "name": "notification_topic_arn",
+      "description": "\u2013 (Optional) ARN of an SNS topic to send ElastiCache notifications to. Example: `arn:aws:sns:us-east-1:012345678999:my_sns_topic`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `notification_topic_arn` argument allows users to specify the ARN of an Amazon SNS topic to receive notifications about events related to the ElastiCache cluster, such as cache node failures or maintenance updates. Configuring this enables automated alerting and monitoring, helping users stay informed about the cluster's operational status and take timely actions."
+    },
+    {
+      "name": "num_cache_nodes",
+      "description": "\u2013 (Required unless `replication_group_id` is provided) The initial number of cache nodes that the cache cluster will have. For Redis, this value must be 1. For Memcached, this value must be between 1 and 40. If this number is reduced on subsequent runs, the highest numbered nodes will be removed.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `num_cache_nodes` argument specifies the initial number of cache nodes in an ElastiCache cluster, allowing users to define the cluster's capacity and scalability. For Redis, it enforces a single-node configuration, while for Memcached, it supports between 1 and 40 nodes, enabling users to tailor the cluster size to meet performance and workload requirements."
+    },
+    {
+      "name": "outpost_mode",
+      "description": "(Optional) Specify the outpost mode that will apply to the cache cluster creation. Valid values are `\"single-outpost\"` and `\"cross-outpost\"`, however AWS currently only supports `\"single-outpost\"` mode.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `outpost_mode` argument for the `aws_elasticache_cluster` resource allows users to specify the deployment mode of the cache cluster in AWS Outposts, enabling control over whether the cluster operates within a single Outpost (`single-outpost`) or across multiple Outposts (`cross-outpost`). Currently, AWS supports only the `single-outpost` mode, which is ideal for users aiming to deploy Elasticache clusters in localized, on-premises environments using AWS Outposts infrastructure."
+    },
+    {
+      "name": "parameter_group_name",
+      "description": "\u2013 (Required unless `replication_group_id` is provided) The name of the parameter group to associate with this cache cluster. The following arguments are optional:",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `parameter_group_name` argument allows users to specify the name of the parameter group to associate with the ElastiCache cluster, enabling fine-grained control over cache engine configuration settings such as memory management, eviction policies, and timeout behaviors. By setting this argument, users can customize the operational parameters of the cluster to align with specific application requirements or performance goals."
+    },
+    {
+      "name": "port",
+      "description": "\u2013 (Optional) The port number on which each of the cache nodes will accept connections. For Memcached the default is 11211, and for Redis the default port is 6379. Cannot be provided with `replication_group_id`. Changing this value will re-create the resource.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `port` argument for the `aws_elasticache_cluster` resource allows users to specify the port number on which cache nodes will accept connections, enabling configuration of network access for the cluster. By setting this value, users can customize the connection endpoint for Memcached (default: 11211) or Redis (default: 6379), but it cannot be used alongside `replication_group_id` and requires resource re-creation if changed."
+    },
+    {
+      "name": "preferred_availability_zones",
+      "description": "(Optional, Memcached only) List of the Availability Zones in which cache nodes are created. If you are creating your cluster in an Amazon VPC you can only locate nodes in Availability Zones that are associated with the subnets in the selected subnet group. The number of Availability Zones listed must equal the value of `num_cache_nodes`. If you want all the nodes in the same Availability Zone, use `availability_zone` instead, or repeat the Availability Zone multiple times in the list. Default: System chosen Availability Zones. Detecting drift of existing node availability zone is not currently supported. Updating this argument by itself to migrate existing node availability zones is not currently supported and will show a perpetual difference.",
+      "required": false,
+      "type": "list(string)",
+      "llm_summary": "The `preferred_availability_zones` argument for the `aws_elasticache_cluster` resource allows users to specify a list of Availability Zones where Memcached cache nodes should be created, ensuring control over the geographic distribution and redundancy of the cluster within a VPC. By setting this argument, users can optimize node placement for performance, fault tolerance, or compliance, aligning with subnet group constraints and the specified number of cache nodes."
+    },
+    {
+      "name": "preferred_outpost_arn",
+      "description": "(Optional, Required if `outpost_mode` is specified) The outpost ARN in which the cache cluster will be created.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `preferred_outpost_arn` argument allows users to specify the Amazon Resource Name (ARN) of the Outpost where the ElastiCache cluster will be deployed, enabling the creation of cache clusters in specific Outpost environments for low-latency or edge computing use cases. This argument is required when `outpost_mode` is enabled, ensuring the cluster is provisioned in the desired Outpost infrastructure to meet specialized deployment goals."
+    },
+    {
+      "name": "replication_group_id",
+      "description": "(Optional, Required if `engine` is not specified) ID of the replication group to which this cluster should belong. If this parameter is specified, the cluster is added to the specified replication group as a read replica; otherwise, the cluster is a standalone primary that is not part of any replication group.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `replication_group_id` argument allows users to specify the ID of an existing ElastiCache replication group to associate the cluster with, enabling it to function as a read replica within that group. If omitted, the cluster operates as a standalone primary node, giving users control over whether the cluster participates in a distributed caching architecture or remains independent."
+    },
+    {
+      "name": "security_group_ids",
+      "description": "\u2013 (Optional, VPC only) One or more VPC security groups associated with the cache cluster. Cannot be provided with `replication_group_id.`",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `security_group_ids` argument for the `aws_elasticache_cluster` resource allows users to specify one or more VPC security groups to control network access to the cache cluster. By defining this argument, users can enforce inbound and outbound traffic rules for the cluster, ensuring secure communication and compliance with network policies within a VPC environment."
+    },
+    {
+      "name": "snapshot_arns",
+      "description": "\u2013 (Optional, Redis only) Single-element string list containing an Amazon Resource Name (ARN) of a Redis RDB snapshot file stored in Amazon S3. The object name cannot contain any commas. Changing `snapshot_arns` forces a new resource.",
+      "required": false,
+      "type": "list(string)",
+      "llm_summary": "The `snapshot_arns` argument for the `aws_elasticache_cluster` resource allows users to specify the Amazon Resource Name (ARN) of a Redis RDB snapshot file stored in Amazon S3, enabling the initialization of a Redis cluster with pre-existing data. Configuring this argument is useful for restoring data from a backup or migrating data into a new cluster, and changes to this value will force the creation of a new Elasticache cluster."
+    },
+    {
+      "name": "snapshot_name",
+      "description": "(Optional, Redis only) Name of a snapshot from which to restore data into the new node group. Changing `snapshot_name` forces a new resource.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `snapshot_name` argument for the `aws_elasticache_cluster` resource allows users to specify the name of an existing Redis snapshot to restore data into the new node group during cluster creation. This enables users to initialize the cache with pre-existing data, supporting use cases like disaster recovery, data migration, or replicating environments. Note that modifying this argument forces the creation of a new resource."
+    },
+    {
+      "name": "snapshot_retention_limit",
+      "description": "(Optional, Redis only) Number of days for which ElastiCache will retain automatic cache cluster snapshots before deleting them. For example, if you set SnapshotRetentionLimit to 5, then a snapshot that was taken today will be retained for 5 days before being deleted. If the value of SnapshotRetentionLimit is set to zero (0), backups are turned off. Please note that setting a `snapshot_retention_limit` is not supported on cache.t1.micro cache nodes",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `snapshot_retention_limit` argument in the `aws_elasticache_cluster` resource allows users to define the number of days Redis automatic snapshots are retained before deletion, enabling backup lifecycle management for cache clusters. Setting this argument helps configure data durability and recovery strategies, with a value of `0` disabling backups entirely; note that it is unsupported for `cache.t1.micro` node types."
+    },
+    {
+      "name": "snapshot_window",
+      "description": "(Optional, Redis only) Daily time range (in UTC) during which ElastiCache will begin taking a daily snapshot of your cache cluster. Example: 05:00-09:00",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `snapshot_window` argument for the `aws_elasticache_cluster` resource allows users to define a specific daily time range (in UTC) during which ElastiCache will initiate automatic snapshots of a Redis cache cluster. Configuring this argument helps ensure consistent backup scheduling, supporting data recovery and retention goals by aligning snapshot creation with operational or maintenance windows."
+    },
+    {
+      "name": "subnet_group_name",
+      "description": "\u2013 (Optional, VPC only) Name of the subnet group to be used for the cache cluster. Changing this value will re-create the resource. Cannot be provided with `replication_group_id.`",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `subnet_group_name` argument allows users to specify the name of the subnet group to associate with the ElastiCache cluster when deploying it within a VPC. This configuration determines the network subnets where the cluster nodes will reside, impacting connectivity and access control, and requires resource recreation if modified."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_elasticache_cluster` resource allows users to assign key-value metadata to the cluster, enabling organization, categorization, and identification of resources for purposes such as cost allocation, environment labeling (e.g., \"dev\" or \"prod\"), or compliance tracking. When set, these tags can override provider-level default tags, ensuring granular control over resource tagging."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_elasticache_cluster` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to all resources associated with the Elasticache cluster. This enables streamlined resource organization, cost allocation, and metadata management, supporting common user goals like tagging for environment identification, compliance, or billing purposes."
+    },
+    {
+      "name": "transit_encryption_enabled",
+      "description": "(Optional) Enable encryption in-transit. Supported only with Memcached versions `1.6.12` and later, running in a VPC. See the ElastiCache in-transit encryption documentation for more details.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `transit_encryption_enabled` argument for the `aws_elasticache_cluster` resource allows users to configure in-transit encryption for data exchanged between clients and the ElastiCache cluster, enhancing security by protecting sensitive data during transmission. This feature is supported only for Memcached versions `1.6.12` and later within a VPC, aligning with common user goals of securing cache communication in cloud environments."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "log_delivery_configuration",
+      "description": "(Optional, Redis only) Specifies the destination and format of Redis SLOWLOG or Redis Engine Log. See the documentation on Amazon ElastiCache. See Log Delivery Configuration below for more details.",
+      "cardinality": [
+        0,
+        2
+      ],
+      "arguments": [
+        {
+          "name": "destination",
+          "description": "Name of either the CloudWatch Logs LogGroup or Kinesis Data Firehose resource.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `destination` argument in the `log_delivery_configuration` block for the `aws_elasticache_cluster` resource specifies the target resource where logs will be delivered, either a CloudWatch Logs LogGroup or a Kinesis Data Firehose stream. By defining this argument, users enable centralized log management or real-time data streaming for monitoring and analytics, aligning with common goals like observability and operational insights."
+        },
+        {
+          "name": "destination_type",
+          "description": "For CloudWatch Logs use `cloudwatch-logs` or for Kinesis Data Firehose use `kinesis-firehose`.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `destination_type` argument in the `log_delivery_configuration` block of the `aws_elasticache_cluster` resource specifies the target service for log delivery, allowing users to define whether logs are sent to CloudWatch Logs (`cloudwatch-logs`) or Kinesis Data Firehose (`kinesis-firehose`). By setting this argument, users can configure the logging behavior to align with their monitoring or data streaming requirements, enabling efficient log management and integration with other AWS services."
+        },
+        {
+          "name": "log_format",
+          "description": "Valid values are `json` or `text`",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `log_format` argument in the `log_delivery_configuration` block of the `aws_elasticache_cluster` resource specifies the format of logs delivered from the ElastiCache cluster, allowing users to choose between `json` or `text` formats. This configuration ensures logs are structured in a way that aligns with the user's logging and monitoring requirements, facilitating easier integration with log analysis tools or centralized logging systems."
+        },
+        {
+          "name": "log_type",
+          "description": "Valid values are `slow-log` or `engine-log`. Max 1 of each.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `log_type` argument specifies the type of log to be delivered for an ElastiCache cluster, allowing users to configure either `slow-log` for query performance insights or `engine-log` for engine-level diagnostics. This enables enhanced monitoring and troubleshooting by capturing specific log data critical for performance tuning and operational visibility."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `log_delivery_configuration` block in the `aws_elasticache_cluster` resource configures the delivery of Redis-specific logs, such as SLOWLOG or Engine Logs, to a specified destination (e.g., CloudWatch Logs, Kinesis, or S3) in a defined format. This block enables centralized log management and monitoring, helping users gain insights into Redis performance and operational issues by integrating log data with external logging and analytics systems."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the created ElastiCache Cluster.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "cache_nodes",
+      "description": "List of node objects including `id`, `address`, `port` and `availability_zone`.",
+      "optional": false,
+      "type": "list(object({address=string,availability_zone=string,id=string,outpost_arn=string,port=number}))"
+    },
+    {
+      "name": "cluster_address",
+      "description": "(Memcached only) DNS name of the cache cluster without the port appended.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "configuration_endpoint",
+      "description": "(Memcached only) Configuration endpoint to allow host discovery.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "engine_version_actual",
+      "description": "Because ElastiCache pulls the latest minor or patch for a version, this attribute returns the running version of the cache engine.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

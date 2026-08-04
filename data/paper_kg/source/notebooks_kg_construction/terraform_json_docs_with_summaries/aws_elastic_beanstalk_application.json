@@ -1,0 +1,101 @@
+{
+  "resource": {
+    "name": "aws_elastic_beanstalk_application",
+    "description": "Provides an Elastic Beanstalk Application Resource. Elastic Beanstalk allows you to deploy and manage applications in the AWS cloud without worrying about the infrastructure that runs those applications. This resource creates an application that has one configuration template named default, and no application versions",
+    "llm_summary": "The `aws_elastic_beanstalk_application` resource enables the creation and management of an Elastic Beanstalk application, simplifying the deployment and scaling of web applications in the AWS cloud without managing underlying infrastructure. It is commonly used for setting up application environments with default configuration templates, supporting scenarios like rapid application deployment, lifecycle management, and version control. This resource is ideal for users looking to streamline application hosting, integrate CI/CD pipelines, or manage application configurations for scalable and fault-tolerant cloud solutions."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_elastic_beanstalk_application\" \"tftest\" {\n  name        = \"tf-test-name\"\n  description = \"tf-test-desc\"\n\n  appversion_lifecycle {\n    service_role          = aws_iam_role.beanstalk_service.arn\n    max_count             = 128\n    delete_source_from_s3 = true\n  }\n}",
+      "llm_summary": "This example demonstrates the basic configuration of an `aws_elastic_beanstalk_application` resource, including setting a custom application name and description, and defining an `appversion_lifecycle` block to manage application version lifecycle settings such as maximum version count, automatic deletion of source files from S3, and specifying a service role. Users can learn how to configure lifecycle management for Elastic Beanstalk applications with essential parameters."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "description",
+      "description": "(Optional) Short description of the application",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_elastic_beanstalk_application` resource allows users to define a short, human-readable summary of the application's purpose or functionality. Setting this argument helps document the application within AWS, improving clarity and organization for teams managing multiple Elastic Beanstalk applications."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_elastic_beanstalk_application` resource allows users to specify a unique identifier for the Elastic Beanstalk application. While optional, this argument can be used to reference or manage the application programmatically, enabling precise control and integration with other resources or workflows."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name of the application, must be unique within your account",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies a unique identifier for the Elastic Beanstalk application within your AWS account, serving as its primary reference for management and deployment. Setting this argument ensures the application is uniquely distinguishable, supporting user goals like organizing and managing multiple applications in a structured and conflict-free manner."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Key-value map of tags for the Elastic Beanstalk Application. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level. Application version lifecycle (appversion_lifecycle) supports the following settings. Only one of either max_count or max_age_in_days can be provided:",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_elastic_beanstalk_application` resource allows users to define a key-value map of metadata tags to organize, categorize, and manage the Elastic Beanstalk application within their AWS environment. By setting this argument, users can enable resource tracking, cost allocation, and governance, while also overriding provider-level default tags for enhanced customization."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_elastic_beanstalk_application` resource allows users to define a comprehensive set of key-value tags that are applied to the application and all associated resources for organizational, billing, or management purposes. By configuring this argument, users can ensure consistent tagging across resources, enabling streamlined resource tracking, cost allocation, and compliance with tagging policies."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "appversion_lifecycle",
+      "description": "",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "delete_source_from_s3",
+          "description": "(Optional) Set to `true` to delete a version's source bundle from S3 when the application version is deleted.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `delete_source_from_s3` argument in the `appversion_lifecycle` configuration of the `aws_elastic_beanstalk_application` resource allows users to define whether the source bundle associated with an application version should be automatically deleted from S3 when the version is removed. This setting helps manage storage lifecycle and optimize S3 usage by enabling automatic cleanup of unused application artifacts."
+        },
+        {
+          "name": "max_age_in_days",
+          "description": "(Optional) The number of days to retain an application version ('max_age_in_days' and 'max_count' cannot be enabled simultaneously.).",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `max_age_in_days` argument for the `appversion_lifecycle` in the `aws_elastic_beanstalk_application` resource allows users to define the maximum retention period, in days, for application versions before they are automatically deleted. This helps manage lifecycle policies by controlling storage costs and maintaining a clean repository of application versions, ensuring older versions are removed after the specified duration."
+        },
+        {
+          "name": "max_count",
+          "description": "(Optional) The maximum number of application versions to retain ('max_age_in_days' and 'max_count' cannot be enabled simultaneously.).",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `max_count` argument in the `appversion_lifecycle` configuration of the `aws_elastic_beanstalk_application` resource allows users to define the maximum number of application versions to retain, enabling control over version lifecycle management and storage optimization. By setting this argument, users can prevent excessive accumulation of application versions, ensuring efficient resource usage and simplifying version maintenance, but it cannot be used simultaneously with `max_age_in_days`."
+        },
+        {
+          "name": "service_role",
+          "description": "(Required) The ARN of an IAM service role under which the application version is deleted. Elastic Beanstalk must have permission to assume this role.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `service_role` argument specifies the IAM role (by ARN) that Elastic Beanstalk assumes to manage the application version lifecycle, particularly for deleting outdated versions. By defining this role, users ensure proper permissions for automated lifecycle operations, supporting version cleanup and retention policies to optimize resource management and compliance."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `appversion_lifecycle` configuration block within the `aws_elastic_beanstalk_application` resource manages lifecycle rules for application versions, enabling automated retention and cleanup of older versions to optimize storage and maintain version control. By configuring this block, users can define policies such as maximum version count or retention duration, ensuring efficient resource management and compliance with organizational standards."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN assigned by AWS for this Elastic Beanstalk Application.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

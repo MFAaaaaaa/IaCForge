@@ -1,0 +1,155 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_analytics_configuration",
+    "description": "Provides a S3 bucket analytics configuration resource. This resource cannot be used with S3 directory buckets.",
+    "llm_summary": "The `aws_s3_bucket_analytics_configuration` resource enables the management of analytics configurations for Amazon S3 buckets, allowing users to collect and analyze storage usage and access patterns. Common use cases include optimizing data lifecycle policies, monitoring bucket performance, and identifying cost-saving opportunities through detailed insights into object-level activity. Key configurations include defining data export destinations, filtering objects based on tags or prefixes, and integrating with storage class analysis to support efficient data management strategies."
+  },
+  "examples": [
+    {
+      "title": "Add analytics configuration for entire S3 bucket and export results to a second S3 bucket",
+      "code": "resource \"aws_s3_bucket_analytics_configuration\" \"example-entire-bucket\" {\n  bucket = aws_s3_bucket.example.id\n  name   = \"EntireBucket\"\n\n  storage_class_analysis {\n    data_export {\n      destination {\n        s3_bucket_destination {\n          bucket_arn = aws_s3_bucket.analytics.arn\n        }\n      }\n    }\n  }\n}\n\nresource \"aws_s3_bucket\" \"example\" {\n  bucket = \"example\"\n}\n\nresource \"aws_s3_bucket\" \"analytics\" {\n  bucket = \"analytics-destination\"\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_s3_bucket_analytics_configuration` resource to enable storage class analysis for an entire S3 bucket and export the analytics results to a separate S3 bucket using the `storage_class_analysis` block and `s3_bucket_destination` configuration. It illustrates how to define the `bucket_arn` for the destination bucket and associate the analytics configuration with a specific S3 bucket."
+    },
+    {
+      "title": "Add analytics configuration with S3 object filter",
+      "code": "resource \"aws_s3_bucket_analytics_configuration\" \"example-filtered\" {\n  bucket = aws_s3_bucket.example.id\n  name   = \"ImportantBlueDocuments\"\n\n  filter {\n    prefix = \"documents/\"\n\n    tags = {\n      priority = \"high\"\n      class    = \"blue\"\n    }\n  }\n}\n\nresource \"aws_s3_bucket\" \"example\" {\n  bucket = \"example\"\n}",
+      "llm_summary": "\"Demonstrates how to configure an S3 bucket analytics configuration with a filter that targets objects based on a specific prefix ('documents/') and associated tags ('priority' and 'class'). This example illustrates the use of the `filter` block to refine analytics data collection for targeted subsets of S3 objects.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bucket",
+      "description": "(Required) Name of the bucket this analytics configuration is associated with.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket` argument specifies the name of the S3 bucket to which the analytics configuration will be applied, enabling users to associate detailed data analysis and reporting functionality with a specific bucket. By defining this required parameter, users can target the bucket for tracking storage usage and access patterns, supporting optimization and compliance goals."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_s3_bucket_analytics_configuration` resource allows users to define a unique identifier for the analytics configuration within an S3 bucket. This identifier is used to distinguish and manage multiple analytics configurations, enabling users to organize and track specific data analysis settings for storage usage and access patterns."
+    },
+    {
+      "name": "name",
+      "description": "(Required) Unique identifier of the analytics configuration for the bucket.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies a unique identifier for the analytics configuration within an S3 bucket, allowing users to define and distinguish individual analytics configurations. This is essential for managing multiple configurations, enabling targeted analysis of bucket data based on specific criteria or use cases."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "filter",
+      "description": "(Optional) Object filtering that accepts a prefix, tags, or a logical AND of prefix and tags (documented below).",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "prefix",
+          "description": "(Optional) Prefix to append to exported analytics data.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `prefix` argument in the `filter` block of the `aws_s3_bucket_analytics_configuration` resource allows users to specify a string that defines the key prefix used to filter objects for analytics data collection. By setting this argument, users can target a specific subset of objects within the S3 bucket, enabling more granular analysis based on object naming patterns, such as isolating analytics for a particular folder or environment."
+        },
+        {
+          "name": "tags",
+          "description": "(Optional) Set of object tags for filtering. The storage_class_analysis configuration supports the following:",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `tags` argument in the `filter` block of the `aws_s3_bucket_analytics_configuration` resource allows users to specify a set of object tags as key-value pairs to refine the scope of analytics by filtering objects in the S3 bucket. By defining tags, users can target specific subsets of objects for storage class analysis, enabling more granular insights into usage patterns and optimizing storage costs."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"filter\" configuration block within the `aws_s3_bucket_analytics_configuration` resource enables fine-grained control over which objects in an S3 bucket are included in analytics by defining filtering criteria based on object prefixes, tags, or a logical combination of both. This block helps users optimize analytics by targeting specific subsets of data, ensuring more precise insights and efficient resource usage."
+    },
+    {
+      "name": "storage_class_analysis",
+      "description": "(Optional) Configuration for the analytics data export (documented below).  The filter configuration supports the following:",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "data_export",
+          "description": "(Required) Data export configuration (documented below).  The data_export configuration supports the following:",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "output_schema_version",
+              "description": "(Optional) Schema version of exported analytics data. Allowed values: `V_1`. Default value: `V_1`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `output_schema_version` argument in the `aws_s3_bucket_analytics_configuration` resource allows users to specify the schema version for the format of exported analytics data in the `data_export` configuration. By setting this argument, users define the structure and compatibility of the exported data, ensuring it aligns with the expected format (`V_1` by default) for downstream processing or integration with analytics tools."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "destination",
+              "description": "(Required) Specifies the destination for the exported analytics data (documented below).  The destination configuration supports the following:",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [],
+              "blocks": [
+                {
+                  "name": "s3_bucket_destination",
+                  "description": "(Required) Analytics data export currently only supports an S3 bucket destination (documented below).  The s3_bucket_destination configuration supports the following:",
+                  "cardinality": [
+                    1,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "bucket_account_id",
+                      "description": "(Optional) Account ID that owns the destination bucket.",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `bucket_account_id` argument allows users to specify the AWS account ID that owns the destination S3 bucket for analytics data export within the `s3_bucket_destination` configuration of the `aws_s3_bucket_analytics_configuration` resource. Setting this argument ensures cross-account access to the destination bucket, enabling analytics data to be stored in a bucket owned by a different AWS account, which is useful for multi-account architectures or centralized data management."
+                    },
+                    {
+                      "name": "bucket_arn",
+                      "description": "(Required) ARN of the destination bucket.",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `bucket_arn` argument specifies the Amazon Resource Name (ARN) of the destination S3 bucket where analytics data will be exported, enabling users to define the target location for storing the results of their S3 bucket analytics configuration. This is a required parameter that ensures the analytics data is routed to the correct bucket, supporting use cases like data analysis, reporting, or integration with downstream workflows."
+                    },
+                    {
+                      "name": "format",
+                      "description": "(Optional) Output format of exported analytics data. Allowed values: `CSV`. Default value: `CSV`.",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `format` argument in the `s3_bucket_destination` block of the `aws_s3_bucket_analytics_configuration` resource specifies the output format for exported analytics data, allowing users to define how the data is structured when delivered to the destination. By setting this argument (default: `CSV`), users can ensure compatibility with downstream processing tools or workflows that rely on a specific data format."
+                    },
+                    {
+                      "name": "prefix",
+                      "description": "(Optional) Prefix to append to exported analytics data.",
+                      "required": false,
+                      "type": "string",
+                      "llm_summary": "The `prefix` argument in the `s3_bucket_destination` block of the `aws_s3_bucket_analytics_configuration` resource allows users to define a string that is prepended to the exported analytics data's object keys in the destination S3 bucket. By setting this argument, users can organize or segregate analytics data within the bucket, enabling structured storage and easier retrieval based on custom naming conventions or logical groupings."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `s3_bucket_destination` configuration block within the `destination` context of the `aws_s3_bucket_analytics_configuration` resource defines the export target for analytics data, specifically an S3 bucket. It encapsulates settings required to specify the destination bucket and related parameters, enabling users to route and store analytics results for further analysis or integration with other workflows."
+                }
+              ],
+              "llm_summary": "The \"destination\" configuration block within the \"data_export\" context of the `aws_s3_bucket_analytics_configuration` resource defines where exported analytics data is sent, enabling users to specify the target location for data storage or processing. It encapsulates settings related to the destination's details, such as bucket and prefix configurations, allowing users to efficiently manage and organize analytics exports for downstream analysis or integration workflows."
+            }
+          ],
+          "llm_summary": "The `data_export` configuration block within the `storage_class_analysis` context of the `aws_s3_bucket_analytics_configuration` resource defines how storage class analysis results are exported to an S3 bucket for further analysis or reporting. It encapsulates settings for specifying the destination bucket and export format, enabling users to automate the collection and external processing of storage usage insights to optimize cost and performance."
+        }
+      ],
+      "llm_summary": "The `storage_class_analysis` configuration block within the `aws_s3_bucket_analytics_configuration` resource enables detailed analysis of S3 storage usage patterns by configuring analytics data export settings. It encapsulates related settings for exporting data to understand storage class transitions and optimize cost management, helping users gain actionable insights into their S3 bucket's storage behavior."
+    }
+  ],
+  "attributes": []
+}

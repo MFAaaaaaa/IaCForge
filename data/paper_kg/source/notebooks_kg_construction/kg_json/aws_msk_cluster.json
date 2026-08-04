@@ -1,0 +1,623 @@
+{
+    "resource": {
+        "name": "aws_msk_cluster",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "cluster_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "enhanced_monitoring",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "kafka_version",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "number_of_broker_nodes",
+            "description": "",
+            "required": true,
+            "type": "number"
+        },
+        {
+            "name": "storage_mode",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "broker_node_group_info",
+            "description": "",
+            "cardinality": [
+                1,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "az_distribution",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "client_subnets",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                },
+                {
+                    "name": "instance_type",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "security_groups",
+                    "description": "",
+                    "required": true,
+                    "type": "set(string)"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "connectivity_info",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "public_access",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "type",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "vpc_connectivity",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [],
+                            "blocks": [
+                                {
+                                    "name": "client_authentication",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "tls",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "bool"
+                                        }
+                                    ],
+                                    "blocks": [
+                                        {
+                                            "name": "sasl",
+                                            "description": "",
+                                            "cardinality": [
+                                                0,
+                                                1
+                                            ],
+                                            "arguments": [
+                                                {
+                                                    "name": "iam",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "bool"
+                                                },
+                                                {
+                                                    "name": "scram",
+                                                    "description": "",
+                                                    "required": false,
+                                                    "type": "bool"
+                                                }
+                                            ],
+                                            "blocks": []
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "storage_info",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "ebs_storage_info",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "volume_size",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                }
+                            ],
+                            "blocks": [
+                                {
+                                    "name": "provisioned_throughput",
+                                    "description": "",
+                                    "cardinality": [
+                                        0,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "enabled",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "bool"
+                                        },
+                                        {
+                                            "name": "volume_throughput",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "number"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "client_authentication",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "unauthenticated",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "sasl",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "iam",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        },
+                        {
+                            "name": "scram",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "tls",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "certificate_authority_arns",
+                            "description": "",
+                            "required": false,
+                            "type": "set(string)"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "configuration_info",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "arn",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "revision",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "encryption_info",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "encryption_at_rest_kms_key_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "encryption_in_transit",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "client_broker",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "in_cluster",
+                            "description": "",
+                            "required": false,
+                            "type": "bool"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "logging_info",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "broker_logs",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "cloudwatch_logs",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "enabled",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "log_group",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "firehose",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "delivery_stream",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "enabled",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "bool"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "s3",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "bucket",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "enabled",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "bool"
+                                },
+                                {
+                                    "name": "prefix",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "string"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "open_monitoring",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "prometheus",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "jmx_exporter",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "enabled_in_broker",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "bool"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "node_exporter",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "enabled_in_broker",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "bool"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "bootstrap_brokers",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "bootstrap_brokers_public_sasl_iam",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "bootstrap_brokers_public_sasl_scram",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "bootstrap_brokers_public_tls",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "bootstrap_brokers_sasl_iam",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "bootstrap_brokers_sasl_scram",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "bootstrap_brokers_tls",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "bootstrap_brokers_vpc_connectivity_sasl_iam",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "bootstrap_brokers_vpc_connectivity_sasl_scram",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "bootstrap_brokers_vpc_connectivity_tls",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_uuid",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "current_version",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "zookeeper_connect_string",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "zookeeper_connect_string_tls",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

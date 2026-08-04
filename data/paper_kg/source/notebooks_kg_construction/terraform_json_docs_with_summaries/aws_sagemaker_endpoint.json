@@ -1,0 +1,289 @@
+{
+  "resource": {
+    "name": "aws_sagemaker_endpoint",
+    "description": "Provides a SageMaker AI Endpoint resource.",
+    "llm_summary": "The `aws_sagemaker_endpoint` Terraform resource enables the creation and management of SageMaker AI endpoints for deploying machine learning models in real-time. It is commonly used to serve trained models for inference, integrate predictive analytics into applications, and scale model deployments with customizable instance types and configurations. Users can configure endpoint settings such as model variants, auto-scaling policies, and lifecycle management to optimize performance, cost, and reliability for production-grade machine learning workflows."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_sagemaker_endpoint\" \"e\" {\n  name                 = \"my-endpoint\"\n  endpoint_config_name = aws_sagemaker_endpoint_configuration.ec.name\n\n  tags = {\n    Name = \"foo\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure a basic AWS SageMaker endpoint using the `aws_sagemaker_endpoint` resource, specifying the `name` and linking it to an existing endpoint configuration via the `endpoint_config_name` argument. It also showcases the use of tags for resource metadata, providing a foundational setup for deploying machine learning models in SageMaker."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "endpoint_config_name",
+      "description": "(Required) The name of the endpoint configuration to use.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `endpoint_config_name` argument specifies the name of the SageMaker endpoint configuration to associate with the `aws_sagemaker_endpoint`, defining the model(s), instance type(s), and scaling behavior for the endpoint. This required parameter ensures the endpoint is properly linked to its configuration, enabling deployment and inference functionality in SageMaker."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_sagemaker_endpoint` resource allows users to specify a unique identifier for the endpoint, typically used to reference the resource within Terraform configurations and outputs. While optional, setting this argument can help users track and manage the endpoint's lifecycle or integrate it with other dependent resources in their infrastructure."
+    },
+    {
+      "name": "name",
+      "description": "(Optional) The name of the endpoint. If omitted, Terraform will assign a random, unique name.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_sagemaker_endpoint` resource allows users to define a custom, human-readable identifier for the endpoint, facilitating easier management and recognition within the AWS environment. If omitted, Terraform generates a unique name automatically, making this argument useful for aligning endpoint naming conventions with organizational standards or workflows."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_sagemaker_endpoint` resource allows users to assign metadata in the form of key-value pairs to the endpoint, enabling resource categorization, organization, and cost tracking. By configuring this argument, users can define custom tags for purposes such as identifying environments (e.g., \"dev\" or \"prod\"), associating ownership, or integrating with tagging-based policies and billing reports, with provider-level default tags being overridden if keys match."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_sagemaker_endpoint` resource allows users to define a comprehensive set of key-value tags that are applied to the endpoint and any associated resources, enabling consistent metadata management and resource categorization across AWS. By setting this argument, users can streamline tagging for cost allocation, access control, or organizational purposes, ensuring uniformity and simplifying governance in multi-resource deployments."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "deployment_config",
+      "description": "(Optional) The deployment configuration for an endpoint, which contains the desired deployment strategy and rollback configurations. See Deployment Config.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "auto_rollback_configuration",
+          "description": "(Optional) Automatic rollback configuration for handling endpoint deployment failures and recovery. See Auto Rollback Configuration.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "alarms",
+              "description": "(Required) List of CloudWatch alarms in your account that are configured to monitor metrics on an endpoint. If any alarms are tripped during a deployment, SageMaker AI rolls back the deployment. See Alarms.",
+              "cardinality": [
+                0,
+                10
+              ],
+              "arguments": [
+                {
+                  "name": "alarm_name",
+                  "description": "(Required) The name of a CloudWatch alarm in your account.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `alarm_name` argument specifies the name of a CloudWatch alarm to associate with the SageMaker endpoint, enabling users to monitor and respond to specific metrics or conditions related to the endpoint's performance or health. By defining this argument, users can integrate automated alerts into their endpoint management workflow, supporting proactive issue detection and resolution."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The \"alarms\" configuration block within the \"auto_rollback_configuration\" of the \"aws_sagemaker_endpoint\" resource specifies a list of CloudWatch alarms that monitor endpoint metrics during deployments. By defining these alarms, users enable automatic rollback of deployments if any alarm is triggered, ensuring robust error handling and maintaining endpoint stability during updates."
+            }
+          ],
+          "llm_summary": "The `auto_rollback_configuration` block within the `deployment_config` of the `aws_sagemaker_endpoint` resource enables automatic rollback mechanisms to handle endpoint deployment failures and ensure recovery. It encapsulates settings related to failure detection and rollback triggers, allowing users to maintain endpoint stability and minimize downtime during deployment processes."
+        },
+        {
+          "name": "blue_green_update_policy",
+          "description": "(Optional) Update policy for a blue/green deployment. If this update policy is specified, SageMaker AI creates a new fleet during the deployment while maintaining the old fleet. SageMaker AI flips traffic to the new fleet according to the specified traffic routing configuration. Only one update policy should be used in the deployment configuration. If no update policy is specified, SageMaker AI uses a blue/green deployment strategy with all at once traffic shifting by default. See Blue Green Update Config.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "maximum_execution_timeout_in_seconds",
+              "description": "",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `maximum_execution_timeout_in_seconds` argument for the `blue_green_update_policy` in the `aws_sagemaker_endpoint` resource allows users to define the maximum duration (in seconds) for the endpoint update process during a blue/green deployment. By configuring this timeout, users can control the upper limit for how long the update operation can run before being terminated, ensuring predictable deployment behavior and mitigating risks of prolonged or stalled updates."
+            },
+            {
+              "name": "termination_wait_in_seconds",
+              "description": "",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `termination_wait_in_seconds` argument in the `blue_green_update_policy` for the `aws_sagemaker_endpoint` resource allows users to define the wait time (in seconds) before terminating the old endpoint variant during an update. This configuration helps control the transition period between endpoint variants, ensuring smoother updates and minimizing potential downtime or disruption during blue-green deployments."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "traffic_routing_configuration",
+              "description": "",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "type",
+                  "description": "(Required) Specifies the endpoint capacity type. Valid values are: `INSTANCE_COUNT`, or `CAPACITY_PERCENT`.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `type` argument in the `traffic_routing_configuration` block of the `aws_sagemaker_endpoint` resource specifies the method used to allocate endpoint capacity during traffic routing. By setting this required argument to either `INSTANCE_COUNT` or `CAPACITY_PERCENT`, users control how endpoint resources are scaled or distributed, enabling precise management of traffic flow and resource utilization to meet deployment or scaling goals."
+                },
+                {
+                  "name": "wait_interval_in_seconds",
+                  "description": "(Required) The waiting time (in seconds) between incremental steps to turn on traffic on the new endpoint fleet. Valid values are between `0` and `3600`.",
+                  "required": true,
+                  "type": "number",
+                  "llm_summary": "The `wait_interval_in_seconds` argument in the `traffic_routing_configuration` of the `aws_sagemaker_endpoint` resource specifies the time delay (in seconds) between incremental traffic shifts to a new endpoint fleet during deployment. This ensures controlled and gradual traffic routing, allowing users to minimize risks and monitor performance during endpoint updates."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "canary_size",
+                  "description": "(Optional) Batch size for the first step to turn on traffic on the new endpoint fleet. Value must be less than or equal to 50% of the variant's total instance count. See Canary Size.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "type",
+                      "description": "(Required) Specifies the endpoint capacity type. Valid values are: `INSTANCE_COUNT`, or `CAPACITY_PERCENT`.",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `type` argument for the `canary_size` configuration in the `aws_sagemaker_endpoint` resource specifies the method used to define the endpoint's capacity during canary deployment. By setting this required string to either `INSTANCE_COUNT` or `CAPACITY_PERCENT`, users control whether the canary size is measured in the number of instances or as a percentage of the overall endpoint capacity, enabling precise scaling and testing strategies for model updates."
+                    },
+                    {
+                      "name": "value",
+                      "description": "(Required) Defines the capacity size, either as a number of instances or a capacity percentage.",
+                      "required": true,
+                      "type": "number",
+                      "llm_summary": "The `value` argument in the `canary_size` block of the `aws_sagemaker_endpoint` resource specifies the capacity allocated for the canary deployment, either as a fixed number of instances or a percentage of the overall endpoint capacity. By defining this value, users control the scale of the canary traffic during endpoint updates, enabling safe testing of new model versions before full deployment."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `canary_size` block within the `traffic_routing_configuration` of the `aws_sagemaker_endpoint` resource defines the batch size for initial traffic redirection during endpoint updates, enabling controlled, incremental deployment to a new endpoint fleet. By specifying a percentage (up to 50% of the variant's instance count), this block facilitates safe canary testing, minimizing risk and ensuring stability during traffic shifts."
+                },
+                {
+                  "name": "linear_step_size",
+                  "description": "(Optional) Batch size for each step to turn on traffic on the new endpoint fleet. Value must be 10-50% of the variant's total instance count. See Linear Step Size.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [
+                    {
+                      "name": "type",
+                      "description": "(Required) Specifies the endpoint capacity type. Valid values are: `INSTANCE_COUNT`, or `CAPACITY_PERCENT`.",
+                      "required": true,
+                      "type": "string",
+                      "llm_summary": "The `type` argument for the `linear_step_size` configuration in the `aws_sagemaker_endpoint` resource specifies the method used to define endpoint capacity adjustments during scaling operations. By setting this required string to either `INSTANCE_COUNT` or `CAPACITY_PERCENT`, users control whether scaling increments are based on the number of instances or a percentage of the current capacity, enabling precise customization of scaling behavior to align with workload demands."
+                    },
+                    {
+                      "name": "value",
+                      "description": "(Required) Defines the capacity size, either as a number of instances or a capacity percentage.",
+                      "required": true,
+                      "type": "number",
+                      "llm_summary": "The `value` argument for the `linear_step_size` in the `aws_sagemaker_endpoint` resource specifies the incremental capacity adjustment, defined as either the number of instances or a percentage of total capacity. This required parameter enables users to control the scaling behavior of the endpoint, ensuring precise step-by-step adjustments to meet workload demands during endpoint updates or auto-scaling operations."
+                    }
+                  ],
+                  "blocks": [],
+                  "llm_summary": "The `linear_step_size` block within the `traffic_routing_configuration` of the `aws_sagemaker_endpoint` resource defines the incremental batch size (10-50% of the variant's total instance count) for gradually shifting traffic to a new endpoint fleet during deployment. This configuration enables controlled, stepwise traffic routing, helping users minimize risk and ensure stability when transitioning to updated machine learning models or endpoint variants."
+                }
+              ],
+              "llm_summary": "The `traffic_routing_configuration` block within the `blue_green_update_policy` for the `aws_sagemaker_endpoint` resource defines how traffic is shifted between endpoint variants during updates, enabling controlled deployment strategies such as canary or linear traffic shifting. By configuring this block, users can manage the routing behavior to minimize downtime and ensure safe transitions between model versions, providing granular control over update processes in machine learning workflows."
+            }
+          ],
+          "llm_summary": "The `blue_green_update_policy` block within the `deployment_config` of the `aws_sagemaker_endpoint` resource defines the strategy for managing blue/green deployments, enabling controlled traffic shifting between old and new model fleets during updates. It encapsulates settings for traffic routing and deployment behavior, allowing users to minimize downtime and ensure seamless transitions when updating machine learning models in production."
+        },
+        {
+          "name": "rolling_update_policy",
+          "description": "(Optional) Specifies a rolling deployment strategy for updating a SageMaker AI endpoint. See Rolling Update Policy.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "maximum_execution_timeout_in_seconds",
+              "description": "(Optional) The time limit for the total deployment. Exceeding this limit causes a timeout. Valid values are between `600` and `14400`.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `maximum_execution_timeout_in_seconds` argument for the `rolling_update_policy` in the `aws_sagemaker_endpoint` resource allows users to define the maximum time limit for completing a model deployment during a rolling update. By setting this value (between 600 and 14400 seconds), users can control the deployment lifecycle to prevent indefinite execution, ensuring timely updates and minimizing downtime risks."
+            },
+            {
+              "name": "wait_interval_in_seconds",
+              "description": "(Required) The length of the baking period, during which SageMaker AI monitors alarms for each batch on the new fleet. Valid values are between `0` and `3600`.",
+              "required": true,
+              "type": "number",
+              "llm_summary": "The `wait_interval_in_seconds` argument in the `rolling_update_policy` for the `aws_sagemaker_endpoint` resource specifies the duration (in seconds) of the baking period during which SageMaker monitors alarms for each batch of the newly deployed fleet. This required setting allows users to control the stabilization time between update batches, ensuring the reliability of endpoint updates by detecting potential issues before proceeding further."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "maximum_batch_size",
+              "description": "(Required) Batch size for each rolling step to provision capacity and turn on traffic on the new endpoint fleet, and terminate capacity on the old endpoint fleet. Value must be between 5% to 50% of the variant's total instance count. See Maximum Batch Size.",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "type",
+                  "description": "",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `type` argument for the `maximum_batch_size` in the `aws_sagemaker_endpoint` resource specifies the data type or format of the input used for batch inference requests, ensuring compatibility with the model's expected input structure. By defining this argument, users control how SageMaker processes batch data, directly impacting the endpoint's ability to handle and interpret requests efficiently for machine learning predictions."
+                },
+                {
+                  "name": "value",
+                  "description": "",
+                  "required": true,
+                  "type": "number",
+                  "llm_summary": "The `value` argument for `maximum_batch_size` in the `aws_sagemaker_endpoint` resource specifies the maximum number of data records or input objects that can be processed in a single batch during inference. By defining this number, users control the batch size for model predictions, optimizing performance and resource utilization to meet workload requirements and ensure efficient handling of large-scale inference tasks."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `maximum_batch_size` block within the `rolling_update_policy` of the `aws_sagemaker_endpoint` resource defines the batch size for incremental capacity updates during endpoint fleet transitions. It enables controlled, stepwise provisioning of new instances and traffic redirection while decommissioning old instances, ensuring smooth updates with minimal disruption. Configuring this block allows users to optimize the rollout process by balancing update speed and stability, with batch size constrained to 5%-50% of the variant's total instance count."
+            },
+            {
+              "name": "rollback_maximum_batch_size",
+              "description": "(Optional) Batch size for rollback to the old endpoint fleet. Each rolling step to provision capacity and turn on traffic on the old endpoint fleet, and terminate capacity on the new endpoint fleet. If this field is absent, the default value will be set to 100% of total capacity which means to bring up the whole capacity of the old fleet at once during rollback. See Rollback Maximum Batch Size.",
+              "cardinality": [
+                0,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "type",
+                  "description": "",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `type` argument for the `rollback_maximum_batch_size` in the `aws_sagemaker_endpoint` resource specifies the method or strategy used to define the rollback batch size during endpoint updates. By setting this argument, users control how the rollback process handles batches, ensuring efficient scaling and minimizing disruption during endpoint transitions, which is critical for maintaining model availability and performance."
+                },
+                {
+                  "name": "value",
+                  "description": "",
+                  "required": true,
+                  "type": "number",
+                  "llm_summary": "The `value` argument for `rollback_maximum_batch_size` in the `aws_sagemaker_endpoint` resource specifies the maximum number of requests that can be processed in a single batch during a rollback operation. By defining this number, users control the scale and efficiency of rollback batch processing, ensuring optimal resource utilization and minimizing potential downtime during endpoint recovery scenarios."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `rollback_maximum_batch_size` block within the `rolling_update_policy` of the `aws_sagemaker_endpoint` resource defines the batch size for rolling back to the previous endpoint fleet during a rollback operation. It enables fine-grained control over the rollback process by specifying the capacity restored in incremental steps, ensuring smoother transitions and minimizing disruption during endpoint fleet recovery."
+            }
+          ],
+          "llm_summary": "The `rolling_update_policy` block within the `deployment_config` of the `aws_sagemaker_endpoint` resource defines a rolling deployment strategy for updating SageMaker AI endpoints, enabling controlled and incremental updates to minimize downtime and ensure endpoint availability. It encapsulates settings related to update behavior, such as batch size and rollback conditions, allowing users to achieve seamless and reliable endpoint updates while mitigating risks during deployment."
+        }
+      ],
+      "llm_summary": "The `deployment_config` block in the `aws_sagemaker_endpoint` resource defines the deployment strategy and rollback settings for managing model updates and endpoint stability. It enables users to control how new model versions are deployed, including strategies for minimizing downtime and handling failures, ensuring reliable and efficient endpoint operations."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) assigned by AWS to this endpoint.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

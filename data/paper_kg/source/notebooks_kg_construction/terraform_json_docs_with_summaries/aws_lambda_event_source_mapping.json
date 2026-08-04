@@ -1,0 +1,472 @@
+{
+  "resource": {
+    "name": "aws_lambda_event_source_mapping",
+    "description": "Provides a Lambda event source mapping. This allows Lambda functions to get events from Kinesis, DynamoDB, SQS, Amazon MQ and Managed Streaming for Apache Kafka (MSK). For information about Lambda and how to use it, see What is AWS Lambda?. For information about event source mappings, see CreateEventSourceMapping in the API docs.",
+    "llm_summary": "The `aws_lambda_event_source_mapping` Terraform resource enables the configuration of event source mappings for AWS Lambda functions, allowing seamless integration with data streams and queues such as Kinesis, DynamoDB, SQS, Amazon MQ, and Managed Streaming for Apache Kafka (MSK). It is commonly used to automate event-driven workflows by connecting Lambda functions to real-time or batch data sources for processing. Users can configure key settings like batch size, event filtering, parallelization, and source-specific parameters to optimize performance and reliability in serverless architectures."
+  },
+  "examples": [
+    {
+      "title": "DynamoDB",
+      "code": "resource \"aws_lambda_event_source_mapping\" \"example\" {\n  event_source_arn  = aws_dynamodb_table.example.stream_arn\n  function_name     = aws_lambda_function.example.arn\n  starting_position = \"LATEST\"\n\n  tags = {\n    Name = \"dynamodb\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_lambda_event_source_mapping` resource to connect an AWS Lambda function to a DynamoDB table stream, using the `event_source_arn` and `function_name` arguments, with the `starting_position` set to `LATEST`. This example highlights stream-based event processing and includes tagging for resource identification.\""
+    },
+    {
+      "title": "Kinesis",
+      "code": "resource \"aws_lambda_event_source_mapping\" \"example\" {\n  event_source_arn  = aws_kinesis_stream.example.arn\n  function_name     = aws_lambda_function.example.arn\n  starting_position = \"LATEST\"\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_lambda_event_source_mapping` resource to connect an AWS Lambda function to a Kinesis stream, using the `event_source_arn` and `function_name` arguments, with the `starting_position` set to `LATEST` for processing new records as they arrive.\""
+    },
+    {
+      "title": "Managed Streaming for Apache Kafka (MSK)",
+      "code": "resource \"aws_lambda_event_source_mapping\" \"example\" {\n  event_source_arn  = aws_msk_cluster.example.arn\n  function_name     = aws_lambda_function.example.arn\n  topics            = [\"Example\"]\n  starting_position = \"TRIM_HORIZON\"\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_lambda_event_source_mapping` to connect an AWS Lambda function to an Amazon MSK cluster, specifying the event source ARN, Kafka topic, and starting position (`TRIM_HORIZON`) for processing messages from the stream.\""
+    },
+    {
+      "title": "Self Managed Apache Kafka",
+      "code": "resource \"aws_lambda_event_source_mapping\" \"example\" {\n  function_name     = aws_lambda_function.example.arn\n  topics            = [\"Example\"]\n  starting_position = \"TRIM_HORIZON\"\n\n  provisioned_poller_config {\n    maximum_poller = 80\n    minimum_poller = 10\n  }\n\n  self_managed_event_source {\n    endpoints = {\n      KAFKA_BOOTSTRAP_SERVERS = \"kafka1.example.com:9092,kafka2.example.com:9092\"\n    }\n  }\n\n  source_access_configuration {\n    type = \"VPC_SUBNET\"\n    uri  = \"subnet:subnet-example1\"\n  }\n\n  source_access_configuration {\n    type = \"VPC_SUBNET\"\n    uri  = \"subnet:subnet-example2\"\n  }\n\n  source_access_configuration {\n    type = \"VPC_SECURITY_GROUP\"\n    uri  = \"security_group:sg-example\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_lambda_event_source_mapping` resource to integrate an AWS Lambda function with a self-managed Apache Kafka cluster. It showcases key configurations such as specifying Kafka bootstrap servers, setting up VPC-based access using subnets and security groups, and defining a `provisioned_poller_config` block for managing poller scaling. Users can learn how to enable event-driven Lambda execution with custom Kafka endpoints and advanced access control settings."
+    },
+    {
+      "title": "SQS",
+      "code": "resource \"aws_lambda_event_source_mapping\" \"example\" {\n  event_source_arn = aws_sqs_queue.sqs_queue_test.arn\n  function_name    = aws_lambda_function.example.arn\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS Lambda function to process messages from an SQS queue using the `aws_lambda_event_source_mapping` resource, showcasing the use of the `event_source_arn` to link the SQS queue and `function_name` to specify the Lambda function.\""
+    },
+    {
+      "title": "SQS with event filter",
+      "code": "resource \"aws_lambda_event_source_mapping\" \"example\" {\n  event_source_arn = aws_sqs_queue.sqs_queue_test.arn\n  function_name    = aws_lambda_function.example.arn\n\n  filter_criteria {\n    filter {\n      pattern = jsonencode({\n        body = {\n          Temperature : [{ numeric : [\">\", 0, \"<=\", 100] }]\n          Location : [\"New York\"]\n        }\n      })\n    }\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_lambda_event_source_mapping` resource to connect an SQS queue to a Lambda function with event filtering criteria. Highlights the use of the `filter_criteria` block to define JSON-based filters, such as numeric conditions and string matching, for selective message processing.\""
+    },
+    {
+      "title": "Amazon MQ (ActiveMQ)",
+      "code": "resource \"aws_lambda_event_source_mapping\" \"example\" {\n  batch_size       = 10\n  event_source_arn = aws_mq_broker.example.arn\n  enabled          = true\n  function_name    = aws_lambda_function.example.arn\n  queues           = [\"example\"]\n\n  source_access_configuration {\n    type = \"BASIC_AUTH\"\n    uri  = aws_secretsmanager_secret_version.example.arn\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_lambda_event_source_mapping` resource to connect an AWS Lambda function to an Amazon MQ (ActiveMQ) broker, enabling event-driven processing of messages from a specified queue. It highlights key configurations such as `batch_size`, `queues`, and the `source_access_configuration` block for secure access using AWS Secrets Manager."
+    },
+    {
+      "title": "Amazon MQ (RabbitMQ)",
+      "code": "resource \"aws_lambda_event_source_mapping\" \"example\" {\n  batch_size       = 1\n  event_source_arn = aws_mq_broker.example.arn\n  enabled          = true\n  function_name    = aws_lambda_function.example.arn\n  queues           = [\"example\"]\n\n  source_access_configuration {\n    type = \"VIRTUAL_HOST\"\n    uri  = \"/example\"\n  }\n\n  source_access_configuration {\n    type = \"BASIC_AUTH\"\n    uri  = aws_secretsmanager_secret_version.example.arn\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_lambda_event_source_mapping` resource to integrate an AWS Lambda function with an Amazon MQ (RabbitMQ) broker. It showcases key configurations such as specifying `queues`, enabling `source_access_configuration` blocks for `VIRTUAL_HOST` and `BASIC_AUTH`, and using Secrets Manager for secure authentication. Users can learn how to set up event-driven processing for RabbitMQ messages with Lambda."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "batch_size",
+      "description": "(Optional) The largest number of records that Lambda will retrieve from your event source at the time of invocation. Defaults to `100` for DynamoDB, Kinesis, MQ and MSK, `10` for SQS.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `batch_size` argument in the `aws_lambda_event_source_mapping` resource allows users to define the maximum number of records that AWS Lambda retrieves from the event source (e.g., DynamoDB, Kinesis, SQS) per invocation. By configuring this parameter, users can optimize event processing throughput and control the volume of data handled by the Lambda function, aligning with performance and resource management goals."
+    },
+    {
+      "name": "bisect_batch_on_function_error",
+      "description": "",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `bisect_batch_on_function_error` argument in the `aws_lambda_event_source_mapping` resource allows users to control whether Lambda should automatically split a batch of records into smaller batches when a function error occurs during processing. Enabling this feature (`true`) helps improve fault isolation and facilitates debugging by narrowing down problematic records within the batch, aligning with user goals of optimizing event-driven workflows and error handling."
+    },
+    {
+      "name": "enabled",
+      "description": "(Optional) Determines if the mapping is enabled. This parameter can be used to enable or disable the mapping, both during resource creation and for already created resources. Defaults to `true`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enabled` argument in the `aws_lambda_event_source_mapping` resource controls whether the event source mapping is active, allowing users to specify if the Lambda function should process events from the configured source. Setting this argument to `true` enables event processing, while `false` disables it, providing flexibility to manage the mapping's lifecycle and operational state without deleting the resource."
+    },
+    {
+      "name": "event_source_arn",
+      "description": "(Optional) The event source ARN - this is required for Kinesis stream, DynamoDB stream, SQS queue, MQ broker, MSK cluster or DocumentDB change stream. It is incompatible with a Self Managed Kafka source.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `event_source_arn` argument in the `aws_lambda_event_source_mapping` resource specifies the Amazon Resource Name (ARN) of the event source, such as a Kinesis stream, DynamoDB stream, SQS queue, MQ broker, MSK cluster, or DocumentDB change stream, that triggers the Lambda function. By configuring this argument, users define the source of events for the Lambda function, enabling integration with specific data streams or message queues to process incoming events automatically."
+    },
+    {
+      "name": "function_name",
+      "description": "(Required) The name or the ARN of the Lambda function that will be subscribing to events.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `function_name` argument specifies the Lambda function, identified by its name or ARN, that will process events from the configured event source. By setting this required parameter, users define the target function for event delivery, enabling the integration of the Lambda function with event-driven architectures such as queues, streams, or other sources."
+    },
+    {
+      "name": "function_response_types",
+      "description": "(Optional) A list of current response type enums applied to the event source mapping for AWS Lambda checkpointing. Only available for SQS and stream sources (DynamoDB and Kinesis). Valid values: `ReportBatchItemFailures`.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `function_response_types` argument in the `aws_lambda_event_source_mapping` resource allows users to specify response behaviors for AWS Lambda when processing events from SQS or stream sources like DynamoDB and Kinesis. By setting this argument, users can enable functionality such as `ReportBatchItemFailures`, which provides detailed feedback on individual batch item failures, improving error handling and checkpointing for event-driven architectures."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_lambda_event_source_mapping` resource represents the unique identifier of the event source mapping. While not required for configuration, it is typically used to reference or manage the mapping after creation, enabling users to retrieve, update, or delete the specific event source mapping associated with a Lambda function and its event source."
+    },
+    {
+      "name": "kms_key_arn",
+      "description": "(Optional) The ARN of the Key Management Service (KMS) customer managed key that Lambda uses to encrypt your function's filter criteria.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `kms_key_arn` argument in the `aws_lambda_event_source_mapping` resource allows users to specify the ARN of a customer-managed KMS key for encrypting the filter criteria used by Lambda to process events from the configured source. By setting this argument, users can enhance data security and compliance by ensuring that sensitive filter criteria are encrypted using a custom encryption key."
+    },
+    {
+      "name": "maximum_batching_window_in_seconds",
+      "description": "(Optional) The maximum amount of time to gather records before invoking the function, in seconds (between 0 and 300). Records will continue to buffer (or accumulate in the case of an SQS queue event source) until either `maximum_batching_window_in_seconds` expires or `batch_size` has been met. For streaming event sources, defaults to as soon as records are available in the stream. If the batch it reads from the stream/queue only has one record in it, Lambda only sends one record to the function. Only available for stream sources (DynamoDB and Kinesis) and SQS standard queues.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `maximum_batching_window_in_seconds` argument allows users to control the maximum time (in seconds) that records are buffered before invoking the Lambda function, enabling fine-tuned batching behavior for stream-based event sources (DynamoDB, Kinesis) and SQS standard queues. By configuring this parameter, users can optimize event processing latency versus batch size, balancing responsiveness with efficiency for their serverless workflows."
+    },
+    {
+      "name": "maximum_record_age_in_seconds",
+      "description": "",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `maximum_record_age_in_seconds` argument for the `aws_lambda_event_source_mapping` resource allows users to define the maximum age, in seconds, that an event record can be retained in the event source before it is discarded. This configuration is typically used to control the processing lifecycle of event records, ensuring that outdated or stale records are not sent to the associated Lambda function, which helps optimize event handling and maintain data relevance."
+    },
+    {
+      "name": "maximum_retry_attempts",
+      "description": "",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `maximum_retry_attempts` argument in the `aws_lambda_event_source_mapping` resource allows users to define the maximum number of retry attempts for processing a failed event from the event source. By configuring this parameter, users can control the resilience and fault tolerance of their Lambda function's event processing, ensuring failed events are retried a specified number of times before being discarded or sent to a dead-letter queue."
+    },
+    {
+      "name": "parallelization_factor",
+      "description": "",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `parallelization_factor` argument in the `aws_lambda_event_source_mapping` resource specifies the number of batches that can be processed concurrently per shard for a streaming event source, such as DynamoDB Streams or Kinesis. Configuring this value allows users to increase the parallelism of their Lambda function's processing, improving throughput and reducing latency for high-volume event streams."
+    },
+    {
+      "name": "queues",
+      "description": "(Optional) The name of the Amazon MQ broker destination queue to consume. Only available for MQ sources. The list must contain exactly one queue name.",
+      "required": false,
+      "type": "list(string)",
+      "llm_summary": "Defines the Amazon MQ broker destination queue for the Lambda function to consume messages from, enabling event-driven processing for MQ sources. This argument specifies a single queue name, ensuring the Lambda function is triggered by messages from the designated MQ queue."
+    },
+    {
+      "name": "starting_position",
+      "description": "(Optional) The position in the stream where AWS Lambda should start reading. Must be one of `AT_TIMESTAMP` (Kinesis only), `LATEST` or `TRIM_HORIZON` if getting events from Kinesis, DynamoDB, MSK or Self Managed Apache Kafka. Must not be provided if getting events from SQS. More information about these positions can be found in the AWS DynamoDB Streams API Reference and AWS Kinesis API Reference.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `starting_position` argument in the `aws_lambda_event_source_mapping` resource allows users to specify the initial point in a data stream (e.g., Kinesis, DynamoDB, MSK, or Self-Managed Kafka) from which AWS Lambda begins processing events. By configuring this, users can control whether Lambda starts reading from the latest events, the earliest available events, or a specific timestamp (for Kinesis), enabling precise stream processing behavior tailored to their application's needs."
+    },
+    {
+      "name": "starting_position_timestamp",
+      "description": "(Optional) A timestamp in RFC3339 format of the data record which to start reading when using `starting_position` set to `AT_TIMESTAMP`. If a record with this exact timestamp does not exist, the next later record is chosen. If the timestamp is older than the current trim horizon, the oldest available record is chosen.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `starting_position_timestamp` argument in the `aws_lambda_event_source_mapping` resource allows users to specify an RFC3339-formatted timestamp that defines the precise point in time from which the Lambda function should begin processing records when the `starting_position` is set to `AT_TIMESTAMP`. This enables fine-grained control over event consumption, ensuring the function starts processing data from a specific historical moment, which is useful for replaying events or recovering from specific points in a data stream."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of tags to assign to the object. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument allows users to assign key-value metadata to the `aws_lambda_event_source_mapping` resource, enabling resource organization, cost allocation, and management through tagging. When specified, these tags can override provider-level default tags, offering granular control over tag customization for this specific event source mapping."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument in the `aws_lambda_event_source_mapping` resource allows users to define a comprehensive set of key-value tags that are applied to the resource, including inherited tags from the provider's default configuration. This facilitates resource organization, cost allocation, and governance by enabling consistent tagging for tracking, auditing, and management purposes across AWS services."
+    },
+    {
+      "name": "topics",
+      "description": "(Optional) The name of the Kafka topics. Only available for MSK sources. A single topic name must be specified.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `topics` argument in the `aws_lambda_event_source_mapping` resource allows users to specify the Kafka topic names from an MSK (Managed Streaming for Apache Kafka) source that the Lambda function will consume events from. By defining this argument, users can control which specific Kafka topics trigger the Lambda function, enabling targeted event processing for stream-based applications."
+    },
+    {
+      "name": "tumbling_window_in_seconds",
+      "description": "(Optional) The duration in seconds of a processing window for AWS Lambda streaming analytics. The range is between 1 second up to 900 seconds. Only available for stream sources (DynamoDB and Kinesis).",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `tumbling_window_in_seconds` argument allows users to define the duration of a fixed processing window (1 to 900 seconds) for AWS Lambda when consuming streaming data from DynamoDB or Kinesis. By configuring this, users can control how data is aggregated and processed in discrete time intervals, enabling efficient streaming analytics and batch processing for event-driven workflows."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "amazon_managed_kafka_event_source_config",
+      "description": "(Optional) Additional configuration block for Amazon Managed Kafka sources. Incompatible with \"self_managed_event_source\" and \"self_managed_kafka_event_source_config\". Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "consumer_group_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `consumer_group_id` argument allows users to specify the Kafka consumer group ID for an Amazon Managed Kafka event source, enabling fine-grained control over how Lambda processes messages from the Kafka topic. By setting this value, users can define a specific consumer group to manage message consumption, ensuring coordinated processing and avoiding conflicts with other consumers."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `amazon_managed_kafka_event_source_config` block within the `aws_lambda_event_source_mapping` resource enables detailed configuration for integrating Amazon Managed Kafka as an event source for AWS Lambda. It encapsulates settings specific to Amazon Managed Kafka, allowing users to optimize event source behavior and ensure compatibility, while excluding configurations for self-managed Kafka or other event sources. This block is essential for users aiming to streamline event-driven architectures using Amazon Managed Kafka with Lambda functions."
+    },
+    {
+      "name": "destination_config",
+      "description": "",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "on_failure",
+          "description": "",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "destination_arn",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `destination_arn` argument specifies the Amazon Resource Name (ARN) of the target resource where failed events from the Lambda function are sent, enabling users to configure the behavior of the `on_failure` feature in `aws_lambda_event_source_mapping`. By setting this argument, users can define a failure handling mechanism, such as routing failed events to an SQS queue, SNS topic, or other supported destinations, to ensure reliable event processing and error tracking."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `on_failure` configuration block within the `destination_config` of the `aws_lambda_event_source_mapping` resource defines the destination for failed event processing, enabling users to specify where unprocessed events should be sent (e.g., an SQS queue or SNS topic). This block helps ensure reliable error handling and facilitates debugging or recovery workflows by routing failed events to a designated target for further analysis or processing."
+        }
+      ],
+      "llm_summary": "The `destination_config` block in the `aws_lambda_event_source_mapping` resource defines the destination settings for handling failed event processing, enabling users to specify an Amazon SQS queue or SNS topic to capture unprocessed events. This configuration helps ensure reliable error handling and event tracking by routing failed events to a designated target for further analysis or retry mechanisms."
+    },
+    {
+      "name": "document_db_event_source_config",
+      "description": "",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "collection_name",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `collection_name` argument in the `document_db_event_source_config` for the `aws_lambda_event_source_mapping` resource allows users to specify the name of the DocumentDB collection that serves as the event source for the Lambda function. By setting this argument, users can target specific collections within their DocumentDB database to trigger Lambda executions, enabling fine-grained control over event-driven workflows tied to database changes."
+        },
+        {
+          "name": "database_name",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `database_name` argument specifies the name of the Amazon DocumentDB database that serves as the event source for the Lambda function. By defining this argument, users enable the Lambda function to process events originating from the specified database, facilitating integration and automation workflows tied to database activity."
+        },
+        {
+          "name": "full_document",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `full_document` argument in the `document_db_event_source_config` of the `aws_lambda_event_source_mapping` resource specifies whether the full content of a modified document in Amazon DocumentDB should be included in the event payload sent to the Lambda function. Setting this argument enables users to control the level of detail in the event data, which is useful for scenarios requiring complete document context for processing or analytics."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `document_db_event_source_config` block within the `aws_lambda_event_source_mapping` resource configures integration settings for using Amazon DocumentDB as an event source for AWS Lambda. It encapsulates parameters related to stream processing, such as connection details and event handling, enabling users to trigger Lambda functions in response to changes in DocumentDB clusters. This block facilitates seamless event-driven architectures by automating the ingestion and processing of database events."
+    },
+    {
+      "name": "filter_criteria",
+      "description": "(Optional) The criteria to use for event filtering Kinesis stream, DynamoDB stream, SQS queue event sources. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "filter",
+          "description": "",
+          "cardinality": [
+            0,
+            10
+          ],
+          "arguments": [
+            {
+              "name": "pattern",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `pattern` argument in the `filter` context of the `aws_lambda_event_source_mapping` resource allows users to define a string-based filtering rule that specifies which incoming events from the event source should trigger the Lambda function. By setting this argument, users can control event processing behavior, enabling selective invocation of the function based on matching patterns, such as specific attributes or payload content."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `filter` configuration block within the `filter_criteria` of the `aws_lambda_event_source_mapping` resource enables fine-grained control over event filtering for Lambda functions. It encapsulates settings that define specific attributes or patterns to match incoming events, allowing users to optimize function invocation by processing only relevant events, reducing unnecessary executions and improving efficiency."
+        }
+      ],
+      "llm_summary": "The `filter_criteria` block in the `aws_lambda_event_source_mapping` resource defines event filtering rules for Kinesis streams, DynamoDB streams, and SQS queues, enabling precise control over which events trigger the associated Lambda function. By configuring this block, users can optimize event processing by specifying conditions that reduce unnecessary invocations and improve efficiency in serverless workflows."
+    },
+    {
+      "name": "metrics_config",
+      "description": "",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "metrics",
+          "description": "",
+          "required": true,
+          "type": "set(string)",
+          "llm_summary": "The `metrics` argument in the `metrics_config` block of the `aws_lambda_event_source_mapping` resource allows users to specify a set of metrics to monitor and track for the event source mapping, such as invocation or processing statistics. By defining these metrics, users can enable detailed performance insights and operational visibility, supporting common goals like optimizing Lambda function efficiency and troubleshooting event source behavior."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `metrics_config` block within the `aws_lambda_event_source_mapping` resource is used to configure metrics collection for monitoring and performance insights related to the event source mapping. It encapsulates settings that enable detailed tracking of invocation metrics, helping users optimize Lambda function performance and troubleshoot issues by providing visibility into event processing behavior."
+    },
+    {
+      "name": "provisioned_poller_config",
+      "description": "",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "maximum_pollers",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `maximum_pollers` argument in the `provisioned_poller_config` of the `aws_lambda_event_source_mapping` resource allows users to define the maximum number of concurrent pollers that retrieve events from the event source. Configuring this parameter helps optimize event processing throughput by controlling the level of parallelism, which is particularly useful for scaling workloads or managing resource utilization in high-demand scenarios."
+        },
+        {
+          "name": "minimum_pollers",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `minimum_pollers` argument in the `provisioned_poller_config` for the `aws_lambda_event_source_mapping` resource allows users to define the minimum number of poller instances provisioned to process events from the mapped source. Configuring this ensures consistent event processing throughput by maintaining a baseline level of pollers, which is particularly useful for workloads requiring predictable performance or high availability."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `provisioned_poller_config` block within the `aws_lambda_event_source_mapping` resource configures settings for a provisioned poller, enabling fine-grained control over how AWS Lambda retrieves and processes events from the event source. This block encapsulates parameters related to the provisioning and behavior of the poller, allowing users to optimize event consumption performance and ensure reliable integration with the specified event source."
+    },
+    {
+      "name": "scaling_config",
+      "description": "(Optional) Scaling configuration of the event source. Only available for SQS queues. Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "maximum_concurrency",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `maximum_concurrency` argument in the `scaling_config` block of the `aws_lambda_event_source_mapping` resource allows users to define the maximum number of concurrent invocations a Lambda function can process for a specific event source. This setting helps control scaling behavior by limiting concurrency at the event source level, enabling users to manage resource utilization and prevent overloading downstream systems."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `scaling_config` block within the `aws_lambda_event_source_mapping` resource defines scaling parameters for event source mappings, specifically for SQS queues, enabling fine-grained control over how Lambda dynamically adjusts concurrency based on the event source's traffic. This configuration helps users optimize resource utilization and performance by managing scaling behavior tailored to workload demands."
+    },
+    {
+      "name": "self_managed_event_source",
+      "description": "",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "endpoints",
+          "description": "",
+          "required": true,
+          "type": "map(string)",
+          "llm_summary": "The `endpoints` argument in the `aws_lambda_event_source_mapping` resource allows users to specify connection details for a self-managed event source, such as Kafka brokers, by providing a map of endpoint strings. Configuring this argument ensures the Lambda function can connect to and consume events from the specified self-managed source, enabling seamless integration with non-AWS-managed event streams."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `self_managed_event_source` configuration block within the `aws_lambda_event_source_mapping` resource enables integration with self-managed event sources, such as Kafka clusters outside of AWS. It encapsulates settings for specifying connection details, authentication mechanisms, and source-specific parameters, allowing users to configure Lambda to process events from non-AWS systems. This block is essential for achieving seamless event-driven architectures with external systems, providing flexibility for hybrid or on-premises environments."
+    },
+    {
+      "name": "self_managed_kafka_event_source_config",
+      "description": "(Optional) Additional configuration block for Self Managed Kafka sources. Incompatible with \"event_source_arn\" and \"amazon_managed_kafka_event_source_config\". Detailed below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "consumer_group_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `consumer_group_id` argument allows users to specify the Kafka consumer group identifier for the self-managed Kafka event source in an AWS Lambda function. By setting this value, users can control how Kafka partitions are consumed, enabling coordinated message processing across multiple consumers and ensuring fault tolerance and scalability for event-driven applications."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `self_managed_kafka_event_source_config` block within the `aws_lambda_event_source_mapping` resource enables detailed configuration for integrating Lambda with self-managed Kafka clusters as an event source. It encapsulates settings specific to self-managed Kafka, allowing users to define connection details and parameters for consuming events, providing granular control over non-AWS-managed Kafka integrations to trigger Lambda functions."
+    },
+    {
+      "name": "source_access_configuration",
+      "description": "",
+      "cardinality": [
+        0,
+        22
+      ],
+      "arguments": [
+        {
+          "name": "type",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument in the `source_access_configuration` block of the `aws_lambda_event_source_mapping` resource specifies the access mechanism or authentication method used to connect the Lambda function to the event source, such as defining whether credentials or permissions are required for the integration. Setting this argument ensures proper configuration of the event source's access type, enabling secure and functional communication between the Lambda function and the source (e.g., SQS, DynamoDB, or Kafka)."
+        },
+        {
+          "name": "uri",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `uri` argument in the `source_access_configuration` block of the `aws_lambda_event_source_mapping` resource specifies the connection endpoint or resource identifier for accessing the event source, such as an Amazon SQS queue or Amazon Kinesis stream. By defining this required string, users establish the direct link between the Lambda function and the event source, enabling seamless event-driven processing and ensuring the Lambda function can retrieve and process events from the specified source."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `source_access_configuration` block in the `aws_lambda_event_source_mapping` resource defines access settings for the event source, enabling secure connectivity between the Lambda function and the source. It encapsulates configurations such as authentication mechanisms or credentials (e.g., secrets or keys) required to access the event source, allowing users to establish controlled and secure integration with services like SQS, Kinesis, or DynamoDB Streams."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The event source mapping ARN.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "function_arn",
+      "description": "The ARN of the Lambda function the event source mapping is sending events to. (Note: this is a computed value that differs from `function_name` above.)",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "last_modified",
+      "description": "The date this resource was last modified.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "last_processing_result",
+      "description": "The result of the last AWS Lambda invocation of your Lambda function.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "state",
+      "description": "The state of the event source mapping.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "state_transition_reason",
+      "description": "The reason the event source mapping is in its current state.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "uuid",
+      "description": "The UUID of the created event source mapping.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

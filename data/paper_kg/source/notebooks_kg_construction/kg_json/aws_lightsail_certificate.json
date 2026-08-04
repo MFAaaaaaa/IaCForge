@@ -1,0 +1,66 @@
+{
+    "resource": {
+        "name": "aws_lightsail_certificate",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "domain_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "subject_alternative_names",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "created_at",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "domain_validation_options",
+            "description": "",
+            "optional": false,
+            "type": "set(object({domain_name=string,resource_record_name=string,resource_record_type=string,resource_record_value=string}))"
+        }
+    ]
+}

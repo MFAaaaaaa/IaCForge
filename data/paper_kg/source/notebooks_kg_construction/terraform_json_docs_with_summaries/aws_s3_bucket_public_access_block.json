@@ -1,0 +1,60 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_public_access_block",
+    "description": "Manages S3 bucket-level Public Access Block configuration. For more information about these settings, see the AWS S3 Block Public Access documentation. This resource cannot be used with S3 directory buckets.",
+    "llm_summary": "Manages the configuration of S3 bucket-level Public Access Block settings to enforce access control and prevent unintended public exposure of data. Commonly used to enhance security by restricting public access to sensitive or private S3 buckets, ensuring compliance with organizational or regulatory policies. Supports configurations for blocking public ACLs, public bucket policies, and controlling access permissions at the bucket level."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"example\"\n}\n\nresource \"aws_s3_bucket_public_access_block\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n\n  block_public_acls       = true\n  block_public_policy     = true\n  ignore_public_acls      = true\n  restrict_public_buckets = true\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS S3 bucket with a `aws_s3_bucket_public_access_block` resource to enforce strict public access restrictions. It showcases key arguments such as `block_public_acls`, `block_public_policy`, `ignore_public_acls`, and `restrict_public_buckets`, ensuring the bucket is fully protected from unintended public exposure."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "block_public_acls",
+      "description": "(Optional) Whether Amazon S3 should block public ACLs for this bucket. Defaults to `false`. Enabling this setting does not affect existing policies or ACLs. When set to `true` causes the following behavior:PUT Bucket acl and PUT Object acl calls will fail if the specified ACL allows public access. PUT Object calls will fail if the request includes an object ACL. - PUT Bucket acl and PUT Object acl calls will fail if the specified ACL allows public access. - PUT Object calls will fail if the request includes an object ACL.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `block_public_acls` argument in the `aws_s3_bucket_public_access_block` resource allows users to control whether Amazon S3 should reject bucket and object ACLs that grant public access. When set to `true`, it enforces stricter access policies by blocking PUT operations for ACLs that permit public access, helping users secure their S3 buckets against unintended public exposure."
+    },
+    {
+      "name": "block_public_policy",
+      "description": "(Optional) Whether Amazon S3 should block public bucket policies for this bucket. Defaults to `false`. Enabling this setting does not affect the existing bucket policy. When set to `true` causes Amazon S3 to:Reject calls to PUT Bucket policy if the specified bucket policy allows public access. - Reject calls to PUT Bucket policy if the specified bucket policy allows public access.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `block_public_policy` argument in the `aws_s3_bucket_public_access_block` resource allows users to control whether Amazon S3 rejects bucket policies that grant public access. When set to `true`, it enforces stricter security by preventing the creation or modification of bucket policies that enable public access, helping users safeguard sensitive data and comply with security best practices."
+    },
+    {
+      "name": "bucket",
+      "description": "(Required) S3 Bucket to which this Public Access Block configuration should be applied.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket` argument specifies the name of the S3 bucket to which the public access block configuration will be applied, enabling users to control access settings that restrict public access to the bucket. This is a required parameter and is central to ensuring compliance with security policies by defining the target bucket for access restrictions."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_s3_bucket_public_access_block` resource allows users to specify a unique identifier for the public access block configuration, primarily for internal tracking or referencing within Terraform state. While optional, setting this argument can help users manage and distinguish multiple configurations, especially in complex environments with multiple resources."
+    },
+    {
+      "name": "ignore_public_acls",
+      "description": "(Optional) Whether Amazon S3 should ignore public ACLs for this bucket. Defaults to `false`. Enabling this setting does not affect the persistence of any existing ACLs and doesn't prevent new public ACLs from being set. When set to `true` causes Amazon S3 to:Ignore public ACLs on this bucket and any objects that it contains. - Ignore public ACLs on this bucket and any objects that it contains.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `ignore_public_acls` argument in the `aws_s3_bucket_public_access_block` resource allows users to control whether Amazon S3 disregards public ACLs for the specified bucket and its objects. When set to `true`, it enhances security by preventing public ACLs from granting unintended access, without altering existing ACLs or blocking the creation of new ones."
+    },
+    {
+      "name": "restrict_public_buckets",
+      "description": "(Optional) Whether Amazon S3 should restrict public bucket policies for this bucket. Defaults to `false`. Enabling this setting does not affect the previously stored bucket policy, except that public and cross-account access within the public bucket policy, including non-public delegation to specific accounts, is blocked. When set to `true`:Only the bucket owner and AWS Services can access this buckets if it has a public policy. - Only the bucket owner and AWS Services can access this buckets if it has a public policy. - PUT Bucket acl and PUT Object acl calls will fail if the specified ACL allows public access. - PUT Object calls will fail if the request includes an object ACL. - Reject calls to PUT Bucket policy if the specified bucket policy allows public access. - Ignore public ACLs on this bucket and any objects that it contains. - Only the bucket owner and AWS Services can access this buckets if it has a public policy.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `restrict_public_buckets` argument in the `aws_s3_bucket_public_access_block` resource allows users to enforce stricter controls on public access by blocking public bucket policies and preventing actions that enable public or cross-account access. When set to `true`, it ensures that only the bucket owner and AWS services can access the bucket, overrides public ACLs, and rejects configurations that permit public access, aligning with security best practices for sensitive or private data."
+    }
+  ],
+  "blocks": [],
+  "attributes": []
+}

@@ -1,0 +1,821 @@
+{
+    "resource": {
+        "name": "aws_instance",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "ami",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "associate_public_ip_address",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "availability_zone",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "cpu_core_count",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "cpu_threads_per_core",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "disable_api_stop",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "disable_api_termination",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "ebs_optimized",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "enable_primary_ipv6",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "get_password_data",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "hibernation",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "host_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "host_resource_group_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "iam_instance_profile",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "instance_initiated_shutdown_behavior",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "instance_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ipv6_address_count",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "ipv6_addresses",
+            "description": "",
+            "required": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "key_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "monitoring",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "placement_group",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "placement_partition_number",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "private_ip",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "secondary_private_ips",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "security_groups",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "source_dest_check",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "subnet_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tenancy",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "user_data",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "user_data_base64",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "user_data_replace_on_change",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "volume_tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "vpc_security_group_ids",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "capacity_reservation_specification",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "capacity_reservation_preference",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "capacity_reservation_target",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "capacity_reservation_id",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "capacity_reservation_resource_group_arn",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "cpu_options",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "amd_sev_snp",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "core_count",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "threads_per_core",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "credit_specification",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "cpu_credits",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "ebs_block_device",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "delete_on_termination",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "device_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "encrypted",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "iops",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "kms_key_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "snapshot_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "tags",
+                    "description": "",
+                    "required": false,
+                    "type": "map(string)"
+                },
+                {
+                    "name": "tags_all",
+                    "description": "",
+                    "required": false,
+                    "type": "map(string)"
+                },
+                {
+                    "name": "throughput",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "volume_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "volume_size",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "volume_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "enclave_options",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "enabled",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "ephemeral_block_device",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "device_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "no_device",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "virtual_name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "instance_market_options",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "market_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "spot_options",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "instance_interruption_behavior",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "max_price",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "spot_instance_type",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "valid_until",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "launch_template",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "version",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "maintenance_options",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "auto_recovery",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "metadata_options",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "http_endpoint",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "http_protocol_ipv6",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "http_put_response_hop_limit",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "http_tokens",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "instance_metadata_tags",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "network_interface",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "delete_on_termination",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "device_index",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                },
+                {
+                    "name": "network_card_index",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "network_interface_id",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "private_dns_name_options",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "enable_resource_name_dns_a_record",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "enable_resource_name_dns_aaaa_record",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "hostname_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "root_block_device",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "delete_on_termination",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "device_name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "encrypted",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "iops",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "kms_key_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "tags",
+                    "description": "",
+                    "required": false,
+                    "type": "map(string)"
+                },
+                {
+                    "name": "tags_all",
+                    "description": "",
+                    "required": false,
+                    "type": "map(string)"
+                },
+                {
+                    "name": "throughput",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "volume_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "volume_size",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "volume_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "read",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "instance_lifecycle",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "instance_state",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "outpost_arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "password_data",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "primary_network_interface_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "private_dns",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "public_dns",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "public_ip",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "spot_instance_request_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

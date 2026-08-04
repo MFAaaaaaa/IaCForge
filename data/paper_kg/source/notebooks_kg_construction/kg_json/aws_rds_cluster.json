@@ -1,0 +1,620 @@
+{
+    "resource": {
+        "name": "aws_rds_cluster",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "allocated_storage",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "allow_major_version_upgrade",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "apply_immediately",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "availability_zones",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "backtrack_window",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "backup_retention_period",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "ca_certificate_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_identifier_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_members",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "cluster_scalability_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "copy_tags_to_snapshot",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "database_insights_mode",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "database_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "db_cluster_instance_class",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "db_cluster_parameter_group_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "db_instance_parameter_group_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "db_subnet_group_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "db_system_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "delete_automated_backups",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "deletion_protection",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "domain",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "domain_iam_role_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "enable_global_write_forwarding",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "enable_http_endpoint",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "enable_local_write_forwarding",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "enabled_cloudwatch_logs_exports",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "engine",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "engine_lifecycle_support",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "engine_mode",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "engine_version",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "final_snapshot_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "global_cluster_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "iam_database_authentication_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "iam_roles",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "iops",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "kms_key_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "manage_master_user_password",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "master_password",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "master_password_wo",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "master_password_wo_version",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "master_user_secret_kms_key_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "master_username",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "monitoring_interval",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "monitoring_role_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "network_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "performance_insights_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "performance_insights_kms_key_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "performance_insights_retention_period",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "port",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "preferred_backup_window",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "preferred_maintenance_window",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "replication_source_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "skip_final_snapshot",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "snapshot_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "source_region",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "storage_encrypted",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "storage_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "vpc_security_group_ids",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "restore_to_point_in_time",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "restore_to_time",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "restore_type",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "source_cluster_identifier",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "source_cluster_resource_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "use_latest_restorable_time",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "s3_import",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "bucket_name",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "bucket_prefix",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "ingestion_role",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "source_engine",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "source_engine_version",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "scaling_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "auto_pause",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "max_capacity",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "min_capacity",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "seconds_before_timeout",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "seconds_until_auto_pause",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "timeout_action",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "serverlessv2_scaling_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "max_capacity",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                },
+                {
+                    "name": "min_capacity",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                },
+                {
+                    "name": "seconds_until_auto_pause",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "ca_certificate_valid_till",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_resource_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "endpoint",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "engine_version_actual",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "hosted_zone_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "master_user_secret",
+            "description": "",
+            "optional": false,
+            "type": "list(object({kms_key_id=string,secret_arn=string,secret_status=string}))"
+        },
+        {
+            "name": "reader_endpoint",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

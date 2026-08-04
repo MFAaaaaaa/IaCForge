@@ -1,0 +1,743 @@
+{
+  "resource": {
+    "name": "aws_kinesis_analytics_application",
+    "description": "Provides a Kinesis Analytics Application resource. Kinesis Analytics is a managed service that allows processing and analyzing streaming data using standard SQL. For more details, see the Amazon Kinesis Analytics Documentation. To manage Amazon Kinesis Data Analytics for Apache Flink applications, use the aws_kinesisanalyticsv2_application resource.",
+    "llm_summary": "The `aws_kinesis_analytics_application` resource enables the creation and management of Kinesis Analytics applications for processing and analyzing real-time streaming data using SQL queries. Common use cases include building data pipelines for real-time analytics, transforming streaming data, and integrating with Kinesis streams or Firehose for ingestion. Users can configure input sources, output destinations, SQL query logic, and application lifecycle settings to optimize streaming data workflows and analytics operations."
+  },
+  "examples": [
+    {
+      "title": "Kinesis Stream Input",
+      "code": "resource \"aws_kinesis_stream\" \"test_stream\" {\n  name        = \"terraform-kinesis-test\"\n  shard_count = 1\n}\n\nresource \"aws_kinesis_analytics_application\" \"test_application\" {\n  name = \"kinesis-analytics-application-test\"\n\n  inputs {\n    name_prefix = \"test_prefix\"\n\n    kinesis_stream {\n      resource_arn = aws_kinesis_stream.test_stream.arn\n      role_arn     = aws_iam_role.test.arn\n    }\n\n    parallelism {\n      count = 1\n    }\n\n    schema {\n      record_columns {\n        mapping  = \"$.test\"\n        name     = \"test\"\n        sql_type = \"VARCHAR(8)\"\n      }\n\n      record_encoding = \"UTF-8\"\n\n      record_format {\n        mapping_parameters {\n          json {\n            record_row_path = \"$\"\n          }\n        }\n      }\n    }\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_kinesis_analytics_application` to process data from an `aws_kinesis_stream` by specifying input settings, schema definitions, and record format mapping parameters. Highlights key configurations such as `kinesis_stream` resource integration, IAM role association, and JSON-based schema mapping for real-time analytics.\""
+    },
+    {
+      "title": "Starting An Application",
+      "code": "resource \"aws_cloudwatch_log_group\" \"example\" {\n  name = \"analytics\"\n}\n\nresource \"aws_cloudwatch_log_stream\" \"example\" {\n  name           = \"example-kinesis-application\"\n  log_group_name = aws_cloudwatch_log_group.example.name\n}\n\nresource \"aws_kinesis_stream\" \"example\" {\n  name        = \"example-kinesis-stream\"\n  shard_count = 1\n}\n\nresource \"aws_kinesis_firehose_delivery_stream\" \"example\" {\n  name        = \"example-kinesis-delivery-stream\"\n  destination = \"extended_s3\"\n\n  extended_s3_configuration {\n    bucket_arn = aws_s3_bucket.example.arn\n    role_arn   = aws_iam_role.example.arn\n  }\n}\n\nresource \"aws_kinesis_analytics_application\" \"test\" {\n  name = \"example-application\"\n\n  cloudwatch_logging_options {\n    log_stream_arn = aws_cloudwatch_log_stream.example.arn\n    role_arn       = aws_iam_role.example.arn\n  }\n\n  inputs {\n    name_prefix = \"example_prefix\"\n\n    schema {\n      record_columns {\n        name     = \"COLUMN_1\"\n        sql_type = \"INTEGER\"\n      }\n\n      record_format {\n        mapping_parameters {\n          csv {\n            record_column_delimiter = \",\"\n            record_row_delimiter    = \"|\"\n          }\n        }\n      }\n    }\n\n    kinesis_stream {\n      resource_arn = aws_kinesis_stream.example.arn\n      role_arn     = aws_iam_role.example.arn\n    }\n\n    starting_position_configuration {\n      starting_position = \"NOW\"\n    }\n  }\n\n  outputs {\n    name = \"OUTPUT_1\"\n\n    schema {\n      record_format_type = \"CSV\"\n    }\n\n    kinesis_firehose {\n      resource_arn = aws_kinesis_firehose_delivery_stream.example.arn\n      role_arn     = aws_iam_role.example.arn\n    }\n  }\n\n  start_application = true\n}",
+      "llm_summary": "This example demonstrates how to configure and start an AWS Kinesis Analytics Application with integrated CloudWatch logging, Kinesis Stream input, and Kinesis Firehose output. It showcases key configurations such as `inputs` with schema mapping, `outputs` for data delivery, and the `start_application` argument to automatically launch the application."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "code",
+      "description": "(Optional) SQL Code to transform input data, and generate output.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `code` argument for the `aws_kinesis_analytics_application` resource allows users to define the SQL code that processes and transforms streaming input data within the application. By specifying this argument, users can configure the application's core logic to analyze, filter, or aggregate data and generate meaningful output, enabling custom stream processing workflows tailored to their use case."
+    },
+    {
+      "name": "description",
+      "description": "(Optional) Description of the application.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_kinesis_analytics_application` resource allows users to define a human-readable summary or metadata about the application, providing context or purpose for its functionality. Setting this argument helps document the application's role within the infrastructure, aiding in organization, clarity, and collaboration, especially in environments with multiple analytics applications."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_kinesis_analytics_application` resource represents the unique identifier of the application, typically auto-generated by AWS upon creation. While optional, it can be used to reference the application in other resources or outputs, enabling users to manage and track the application within their infrastructure."
+    },
+    {
+      "name": "name",
+      "description": "(Required) Name of the Kinesis Analytics Application.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies the unique identifier for the Kinesis Analytics Application, allowing users to define a meaningful and recognizable name for the application. Setting this argument is essential for distinguishing the application within the AWS environment, enabling users to manage, reference, and organize analytics workflows effectively."
+    },
+    {
+      "name": "start_application",
+      "description": "(Optional) Whether to start or stop the Kinesis Analytics Application. To start an application, an input with a defined `starting_position` must be configured. To modify an application's starting position, first stop the application by setting `start_application = false`, then update `starting_position` and set `start_application = true`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `start_application` argument controls whether the Kinesis Analytics Application is actively running or stopped. Setting this to `true` starts the application (requiring an input with a defined `starting_position`), while setting it to `false` stops the application, enabling updates to the starting position or other configurations. This argument is essential for managing the application's lifecycle and operational state."
+    },
+    {
+      "name": "tags",
+      "description": "Key-value map of tags for the Kinesis Analytics Application. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument allows users to assign a key-value map of metadata to the Kinesis Analytics Application, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or compliance tracking. When combined with provider-level `default_tags`, it ensures granular control by overriding matching keys, supporting consistent tagging strategies across cloud resources."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_kinesis_analytics_application` resource allows users to define a comprehensive set of key-value tags that are automatically merged with resource-specific tags, enabling consistent metadata management across AWS resources. By setting this argument, users can streamline tagging for purposes like cost allocation, resource organization, or compliance tracking, ensuring uniform application of tags across their infrastructure."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "cloudwatch_logging_options",
+      "description": "(Optional) The CloudWatch log stream options to monitor application errors. See CloudWatch Logging Options below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `id` argument in the `cloudwatch_logging_options` block of the `aws_kinesis_analytics_application` resource allows users to specify a unique identifier for the CloudWatch log stream associated with the application's logging configuration. By defining this argument, users can control which specific log stream is used for monitoring and troubleshooting application activity, enabling targeted log management and analysis within CloudWatch."
+        },
+        {
+          "name": "log_stream_arn",
+          "description": "(Required) The ARN of the CloudWatch Log Stream.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `log_stream_arn` argument specifies the Amazon Resource Name (ARN) of the CloudWatch Log Stream where application logs for the Kinesis Analytics Application will be sent. By configuring this required parameter, users enable detailed logging of application activity, which supports monitoring, troubleshooting, and auditing goals."
+        },
+        {
+          "name": "role_arn",
+          "description": "(Required) The ARN of the IAM Role used to send application messages.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `role_arn` argument specifies the Amazon Resource Name (ARN) of the IAM role that grants permissions for the Kinesis Analytics application to send logs to CloudWatch. By defining this required parameter, users enable CloudWatch logging functionality, ensuring visibility into application events and operational metrics for monitoring and troubleshooting purposes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "\"Configures CloudWatch log stream settings to monitor application errors for the `aws_kinesis_analytics_application` resource, enabling centralized logging and error tracking. This block encapsulates options for integrating with CloudWatch Logs, helping users enhance observability and troubleshoot issues effectively.\""
+    },
+    {
+      "name": "inputs",
+      "description": "(Optional) Input configuration of the application. See Inputs below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `id` argument in the `inputs` block of the `aws_kinesis_analytics_application` resource allows users to specify a unique identifier for an input configuration within the application. This identifier is typically used to distinguish and reference individual input sources, enabling precise management and mapping of data streams or files being processed by the analytics application."
+        },
+        {
+          "name": "name_prefix",
+          "description": "(Required) The Name Prefix to use when creating an in-application stream.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `name_prefix` argument specifies a custom prefix for naming in-application streams within the inputs of an AWS Kinesis Analytics Application. By defining this required string, users can control the naming convention for streams, ensuring unique and identifiable stream names that align with organizational standards or application-specific requirements."
+        },
+        {
+          "name": "stream_names",
+          "description": "",
+          "required": false,
+          "type": "list(string)",
+          "llm_summary": "The `stream_names` argument allows users to specify a list of Amazon Kinesis data streams that serve as input sources for the Kinesis Analytics application. By defining these stream names, users configure the application to ingest and process real-time data from the specified streams, enabling analytics workflows and insights based on the incoming data."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "kinesis_firehose",
+          "description": "(Optional) The Kinesis Firehose configuration for the streaming source. Conflicts with `kinesis_stream`. See Kinesis Firehose below for more details.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "resource_arn",
+              "description": "(Required) The ARN of the Kinesis Firehose delivery stream.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `resource_arn` argument specifies the Amazon Resource Name (ARN) of the Kinesis Firehose delivery stream to which the analytics application will send processed data. By defining this required parameter, users establish the integration between the analytics application and the target Firehose stream, enabling seamless data delivery for downstream processing or storage."
+            },
+            {
+              "name": "role_arn",
+              "description": "(Required) The ARN of the IAM Role used to access the stream.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `role_arn` argument specifies the Amazon Resource Name (ARN) of the IAM role that grants the `aws_kinesis_analytics_application` permission to access the associated Kinesis Firehose stream. By defining this role, users enable secure data ingestion and processing within the application, ensuring proper authorization for stream interactions and compliance with IAM policies."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `kinesis_firehose` configuration block within the `inputs` of the `aws_kinesis_analytics_application` resource defines the integration of a Kinesis Firehose stream as a data source for the analytics application. It encapsulates settings required to connect and manage the streaming source, enabling users to process real-time data from Firehose. This block is essential for configuring the application's input stream when Firehose is used, providing an alternative to Kinesis Stream and supporting seamless ingestion of streaming data for analytics workflows."
+        },
+        {
+          "name": "kinesis_stream",
+          "description": "(Optional) The Kinesis Stream configuration for the streaming source. Conflicts with `kinesis_firehose`. See Kinesis Stream below for more details.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "resource_arn",
+              "description": "(Required) The ARN of the Kinesis Stream.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `resource_arn` argument specifies the Amazon Resource Name (ARN) of the Kinesis Stream that serves as the data source for the `aws_kinesis_analytics_application`. By defining this required parameter, users link the analytics application to a specific stream, enabling real-time data ingestion and processing from the specified source."
+            },
+            {
+              "name": "role_arn",
+              "description": "(Required) The ARN of the IAM Role used to access the stream.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `role_arn` argument specifies the Amazon Resource Name (ARN) of the IAM role that grants the Kinesis Analytics application permissions to access the associated Kinesis stream. By configuring this required parameter, users enable the application to read data from the stream or write results to it, ensuring proper integration and secure access control."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `kinesis_stream` configuration block within the `inputs` of the `aws_kinesis_analytics_application` resource defines the streaming source by integrating an Amazon Kinesis Stream, enabling real-time data ingestion for analytics processing. It encapsulates settings related to the stream source, providing users with the ability to specify and manage the input data pipeline for their analytics application, ensuring seamless data flow and compatibility with Kinesis-based architectures."
+        },
+        {
+          "name": "parallelism",
+          "description": "(Optional) The number of Parallel in-application streams to create. See Parallelism below for more details.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "count",
+              "description": "(Required) The Count of streams.",
+              "required": false,
+              "type": "number",
+              "llm_summary": "The `count` argument in the context of `parallelism` for the `aws_kinesis_analytics_application` resource specifies the number of parallel input streams to process within the application. Configuring this value allows users to optimize data processing throughput by defining the degree of parallelism, which is critical for scaling and handling high-volume streaming workloads efficiently."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "\"Defines the number of parallel in-application streams within the 'inputs' configuration of an AWS Kinesis Analytics Application, enabling enhanced data processing concurrency and scalability. Configuring this block allows users to optimize stream throughput and performance for real-time analytics workloads.\""
+        },
+        {
+          "name": "processing_configuration",
+          "description": "(Optional) The Processing Configuration to transform records as they are received from the stream. See Processing Configuration below for more details.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [],
+          "blocks": [
+            {
+              "name": "lambda",
+              "description": "(Required) The Lambda function configuration. See Lambda below for more details.",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "resource_arn",
+                  "description": "(Required) The ARN of the Lambda function.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `resource_arn` argument specifies the Amazon Resource Name (ARN) of the Lambda function to be invoked by the Kinesis Analytics application, enabling users to integrate custom processing logic into their data streams. By defining this required parameter, users can configure the application to execute Lambda functions for real-time data transformation, enrichment, or analysis, aligning with common goals like event-driven processing and dynamic stream manipulation."
+                },
+                {
+                  "name": "role_arn",
+                  "description": "(Required) The ARN of the IAM Role used to access the Lambda function.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `role_arn` argument specifies the ARN of the IAM role that grants the necessary permissions for the Kinesis Analytics application to invoke and interact with the associated Lambda function. By defining this role, users enable secure access and execution of Lambda functions, ensuring the application can process streaming data as intended."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `lambda` configuration block within the `processing_configuration` of the `aws_kinesis_analytics_application` resource defines the integration of a Lambda function to process streaming data in real-time. It encapsulates settings required to specify and manage the Lambda function used for data transformation, enabling users to implement custom processing logic for their Kinesis Analytics application. Configuring this block allows users to leverage serverless compute for dynamic data manipulation, enhancing the application's ability to handle complex processing workflows."
+            }
+          ],
+          "llm_summary": "The `processing_configuration` block within the `inputs` of the `aws_kinesis_analytics_application` resource enables the transformation of incoming records from the stream before further processing. It encapsulates settings for defining and managing record preprocessing logic, allowing users to implement custom transformations or enrichments, ensuring data is in the desired format for analytics workflows."
+        },
+        {
+          "name": "schema",
+          "description": "(Required) The Schema format of the data in the streaming source. See Source Schema below for more details.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "record_encoding",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `record_encoding` argument in the `aws_kinesis_analytics_application` resource allows users to specify the character encoding format (e.g., UTF-8) for data records within the application's schema. Configuring this argument ensures proper interpretation and processing of incoming data streams, aligning with the application's data handling requirements and enabling seamless integration with downstream analytics workflows."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "record_columns",
+              "description": "",
+              "cardinality": [
+                1,
+                1000
+              ],
+              "arguments": [
+                {
+                  "name": "mapping",
+                  "description": "(Optional) The Mapping reference to the data element.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `mapping` argument in the `record_columns` block of the `aws_kinesis_analytics_application` resource allows users to define a reference to the specific data element within the streaming source that corresponds to the column. By setting this argument, users can map incoming data fields to the application's schema, enabling precise data transformation and processing within the Kinesis Analytics application."
+                },
+                {
+                  "name": "name",
+                  "description": "(Required) Name of the column.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `name` argument specifies the unique identifier for a column within the `record_columns` configuration of the `aws_kinesis_analytics_application` resource. By defining this argument, users establish the column's name used to reference and organize data fields in the application's schema, enabling precise mapping and processing of streaming data for analytics workflows."
+                },
+                {
+                  "name": "sql_type",
+                  "description": "(Required) The SQL Type of the column.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `sql_type` argument specifies the data type of a column in the schema for records processed by the Kinesis Analytics application, ensuring compatibility with SQL-based queries and transformations. By defining this required property, users control how data is interpreted and processed within the application, aligning it with their analytics goals and the structure of incoming data streams."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `record_columns` configuration block within the `schema` of the `aws_kinesis_analytics_application` resource defines the structure of the data records processed by the application, specifying individual columns with attributes such as name, mapping, and SQL type. This block enables users to precisely configure how incoming data streams are interpreted and mapped, ensuring compatibility with the application's analytics logic and facilitating accurate data processing and querying."
+            },
+            {
+              "name": "record_format",
+              "description": "",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "record_format_type",
+                  "description": "(Required) The type of Record Format. Can be `CSV` or `JSON`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `record_format_type` argument specifies the data serialization format (`CSV` or `JSON`) for the records processed by the Kinesis Analytics application, enabling users to define how incoming data is structured and interpreted. This configuration is essential for aligning the application's processing logic with the format of the source data, ensuring accurate parsing and analysis."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "mapping_parameters",
+                  "description": "(Optional) The Mapping Information for the record format. See Mapping Parameters below for more details.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [],
+                  "blocks": [
+                    {
+                      "name": "csv",
+                      "description": "(Optional) Mapping information when the record format uses delimiters. See CSV Mapping Parameters below for more details.",
+                      "cardinality": [
+                        0,
+                        1
+                      ],
+                      "arguments": [
+                        {
+                          "name": "record_column_delimiter",
+                          "description": "",
+                          "required": true,
+                          "type": "string",
+                          "llm_summary": "The `record_column_delimiter` argument specifies the character used to separate columns in CSV-formatted records within the Kinesis Analytics application. By defining this delimiter, users ensure proper parsing and processing of incoming data streams, enabling accurate extraction and mapping of individual fields for analytics workflows."
+                        },
+                        {
+                          "name": "record_row_delimiter",
+                          "description": "",
+                          "required": true,
+                          "type": "string",
+                          "llm_summary": "The `record_row_delimiter` argument in the `aws_kinesis_analytics_application` resource specifies the character or sequence used to delineate rows in a CSV-formatted data stream, enabling the application to correctly parse and process individual records. By defining this delimiter, users ensure accurate data ingestion and transformation within the Kinesis Analytics application, aligning with common goals of configuring data parsing behavior for real-time analytics."
+                        }
+                      ],
+                      "blocks": [],
+                      "llm_summary": "The `csv` configuration block within `mapping_parameters` for the `aws_kinesis_analytics_application` resource defines mapping details for processing records formatted with delimiters, such as CSV files. It encapsulates settings that specify how data fields are parsed and interpreted, enabling users to accurately ingest and analyze delimited data streams in their Kinesis Analytics application. Configuring this block ensures precise data extraction and transformation, facilitating seamless integration with structured data sources."
+                    },
+                    {
+                      "name": "json",
+                      "description": "(Optional) Mapping information when JSON is the record format on the streaming source. See JSON Mapping Parameters below for more details.",
+                      "cardinality": [
+                        0,
+                        1
+                      ],
+                      "arguments": [
+                        {
+                          "name": "record_row_path",
+                          "description": "",
+                          "required": true,
+                          "type": "string",
+                          "llm_summary": "The `record_row_path` argument specifies the JSONPath expression used to extract individual rows of data from a JSON-encoded record within the input stream for an AWS Kinesis Analytics Application. By defining this path, users control how the application parses and processes structured JSON data, enabling accurate mapping of input records to the application's schema for real-time analytics."
+                        }
+                      ],
+                      "blocks": [],
+                      "llm_summary": "The `json` configuration block within `mapping_parameters` for the `aws_kinesis_analytics_application` resource defines how JSON-formatted records from a streaming source are interpreted and mapped for processing. It encapsulates settings that specify the structure and schema of JSON data, enabling users to accurately parse and analyze streaming records in real-time applications. Configuring this block ensures seamless integration of JSON data formats, facilitating precise data extraction and transformation for analytics workflows."
+                    }
+                  ],
+                  "llm_summary": "The `mapping_parameters` block within the `record_format` configuration of the `aws_kinesis_analytics_application` resource defines the schema mapping rules for interpreting incoming data records. It encapsulates settings that specify how data fields are extracted and structured, enabling precise control over the transformation of raw streaming data into a format suitable for analytics processing. Configuring this block ensures accurate data parsing, which is critical for building reliable and efficient real-time analytics workflows."
+                }
+              ],
+              "llm_summary": "The `record_format` configuration block within the `schema` of the `aws_kinesis_analytics_application` resource defines the format of the data records processed by the application, enabling users to specify how incoming data is structured and interpreted. It encapsulates settings related to serialization methods, such as JSON or CSV, ensuring compatibility with the application's schema and facilitating accurate data parsing for analytics workflows."
+            }
+          ],
+          "llm_summary": "The `schema` block within the `inputs` configuration of the `aws_kinesis_analytics_application` resource defines the structure and format of the data in the streaming source, enabling the application to interpret and process incoming data correctly. By specifying the schema, users ensure compatibility between the streaming source and the analytics application, facilitating accurate data ingestion and transformation."
+        },
+        {
+          "name": "starting_position_configuration",
+          "description": "(Optional) The point at which the application starts processing records from the streaming source. See Starting Position Configuration below for more details.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "starting_position",
+              "description": "(Required) The starting position on the stream. Valid values: `LAST_STOPPED_POINT`, `NOW`, `TRIM_HORIZON`.",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `starting_position` argument in the `starting_position_configuration` of the `aws_kinesis_analytics_application` resource allows users to define the initial point in the Kinesis stream from which the application begins processing data. By specifying values such as `LAST_STOPPED_POINT`, `NOW`, or `TRIM_HORIZON`, users can control whether the application resumes from its last checkpoint, starts processing new incoming data, or reads the stream from its earliest available records, enabling precise control over data ingestion behavior to align with application requirements."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `starting_position_configuration` block in the `aws_kinesis_analytics_application` resource defines where the application begins processing records from its streaming source, enabling control over data ingestion starting points. This configuration allows users to specify the initial position (e.g., latest, earliest, or a specific timestamp) for stream processing, ensuring precise alignment with data processing requirements and workflows."
+        }
+      ],
+      "llm_summary": "The \"inputs\" configuration block in the `aws_kinesis_analytics_application` resource defines the input data streams or sources for the application, enabling it to ingest and process real-time data. This block encapsulates settings related to stream configuration, such as source details, input schema, and mapping parameters, allowing users to specify and control how the application interacts with Kinesis or other supported data sources to achieve efficient data analysis and transformation."
+    },
+    {
+      "name": "outputs",
+      "description": "(Optional) Output destination configuration of the application. See Outputs below for more details.",
+      "cardinality": [
+        0,
+        3
+      ],
+      "arguments": [
+        {
+          "name": "id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `id` argument in the `outputs` block of the `aws_kinesis_analytics_application` resource specifies a unique identifier for the output configuration, allowing users to distinguish and reference individual outputs within the application. This is typically used to manage and track specific data streams or destinations, ensuring precise control over how application results are routed."
+        },
+        {
+          "name": "name",
+          "description": "(Required) The Name of the in-application stream.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `name` argument specifies the unique identifier for an in-application stream within the `outputs` configuration of the `aws_kinesis_analytics_application` resource. By defining this required string, users establish the stream's name, enabling downstream data processing, routing, or integration with other services, which is essential for managing and referencing output streams in analytics workflows."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "kinesis_firehose",
+          "description": "(Optional) The Kinesis Firehose configuration for the destination stream. Conflicts with `kinesis_stream`. See Kinesis Firehose below for more details.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "resource_arn",
+              "description": "(Required) The ARN of the Kinesis Firehose delivery stream.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `resource_arn` argument specifies the Amazon Resource Name (ARN) of the Kinesis Firehose delivery stream to which the Kinesis Analytics Application will send processed data. By defining this required parameter, users establish the target destination for analytics output, enabling seamless integration and data delivery to the specified Firehose stream for further processing or storage."
+            },
+            {
+              "name": "role_arn",
+              "description": "(Required) The ARN of the IAM Role used to access the stream.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `role_arn` argument specifies the Amazon Resource Name (ARN) of the IAM role that grants the `aws_kinesis_analytics_application` permission to access the associated Kinesis Firehose stream. By defining this role, users enable secure data ingestion and processing within the application, ensuring proper authorization for stream interactions and compliance with IAM policies."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `kinesis_firehose` configuration block within the `outputs` of the `aws_kinesis_analytics_application` resource defines the settings for directing application output to an Amazon Kinesis Firehose delivery stream. It enables users to configure the destination stream for processed data, providing seamless integration with Firehose for data delivery and storage workflows. This block is essential for users who need to route analytics results to Firehose for further processing, transformation, or storage, and it cannot be used simultaneously with the `kinesis_stream` configuration."
+        },
+        {
+          "name": "kinesis_stream",
+          "description": "(Optional) The Kinesis Stream configuration for the destination stream. Conflicts with `kinesis_firehose`. See Kinesis Stream below for more details.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "resource_arn",
+              "description": "(Required) The ARN of the Kinesis Stream.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `resource_arn` argument specifies the Amazon Resource Name (ARN) of the Kinesis Stream that serves as the data source for the `aws_kinesis_analytics_application`. By defining this required parameter, users link the analytics application to a specific stream, enabling real-time data ingestion and processing from the specified source."
+            },
+            {
+              "name": "role_arn",
+              "description": "(Required) The ARN of the IAM Role used to access the stream.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `role_arn` argument specifies the Amazon Resource Name (ARN) of the IAM role that grants the Kinesis Analytics application permissions to access the associated Kinesis stream. By configuring this required parameter, users enable the application to read data from the stream or write results to it, ensuring proper integration and secure access control."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `kinesis_stream` configuration block within the `outputs` of the `aws_kinesis_analytics_application` resource defines the destination Kinesis Stream for output data, enabling real-time data delivery from the analytics application. It encapsulates settings for stream integration, allowing users to route processed data to a Kinesis Stream for further processing or consumption, and provides an alternative to using Kinesis Firehose for output delivery."
+        },
+        {
+          "name": "lambda",
+          "description": "(Optional) The Lambda function destination. See Lambda below for more details.",
+          "cardinality": [
+            0,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "resource_arn",
+              "description": "(Required) The ARN of the Lambda function.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `resource_arn` argument specifies the Amazon Resource Name (ARN) of the Lambda function to be invoked by the Kinesis Analytics application, enabling users to integrate custom processing logic into their data streams. By defining this required parameter, users can configure the application to execute Lambda functions for real-time data transformation, enrichment, or analysis, aligning with common goals like event-driven processing and dynamic stream manipulation."
+            },
+            {
+              "name": "role_arn",
+              "description": "(Required) The ARN of the IAM Role used to access the Lambda function.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `role_arn` argument specifies the ARN of the IAM Role that grants the Kinesis Analytics Application permission to invoke the associated Lambda function. Setting this required argument ensures the application can seamlessly integrate with Lambda for data processing or event-driven workflows, aligning with user goals of defining secure and functional access control."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "\"Defines the Lambda function destination for the outputs of the Kinesis Analytics application, enabling integration with AWS Lambda for downstream processing or event handling. This block encapsulates settings to configure how application output data is routed to a specified Lambda function, facilitating real-time data transformation or custom logic execution.\""
+        },
+        {
+          "name": "schema",
+          "description": "(Required) The Schema format of the data written to the destination. See Destination Schema below for more details.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "record_format_type",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `record_format_type` argument in the `aws_kinesis_analytics_application` resource specifies the format of the data records within the application's schema, such as JSON or CSV. This required parameter ensures proper parsing and interpretation of incoming data streams, enabling users to define how the application processes and analyzes data for real-time analytics."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `schema` configuration block within the `outputs` of the `aws_kinesis_analytics_application` resource defines the format of the data written to the destination, ensuring compatibility and proper structuring for downstream processing or storage. By configuring this block, users can specify the schema details required to align the application's output with the expected data structure, enabling seamless integration with target systems or analytics workflows."
+        }
+      ],
+      "llm_summary": "The \"outputs\" configuration block in the `aws_kinesis_analytics_application` resource defines the destination settings for processed data emitted by the application, enabling users to route analytics results to specific AWS services like Kinesis streams, Firehose delivery streams, or Lambda functions. By configuring this block, users can control where and how the application's output is delivered, facilitating integration with downstream systems for further processing, storage, or real-time actions."
+    },
+    {
+      "name": "reference_data_sources",
+      "description": "(Optional) An S3 Reference Data Source for the application. See Reference Data Sources below for more details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `id` argument in the `reference_data_sources` block of the `aws_kinesis_analytics_application` resource allows users to specify a unique identifier for the reference data source within the application. This identifier is used to distinguish and manage individual reference data sources, enabling precise configuration and retrieval of external data for stream processing tasks."
+        },
+        {
+          "name": "table_name",
+          "description": "(Required) The in-application Table Name.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `table_name` argument specifies the name of the in-application table within the `reference_data_sources` configuration of the `aws_kinesis_analytics_application` resource. By defining this required string, users establish the identifier for the table that stores reference data used in SQL queries and analytics operations, enabling structured data processing and integration within the Kinesis Analytics application."
+        }
+      ],
+      "blocks": [
+        {
+          "name": "s3",
+          "description": "(Optional) The S3 configuration for the reference data source. See S3 Reference below for more details.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "bucket_arn",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `bucket_arn` argument specifies the Amazon Resource Name (ARN) of the S3 bucket that serves as a source or destination for the Kinesis Analytics application, enabling the application to read input data or store output results. This required parameter ensures the application can integrate with S3 for data processing workflows, supporting common use cases like streaming analytics, data ingestion, or result archival."
+            },
+            {
+              "name": "file_key",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `file_key` argument specifies the exact key (path) of the object in the S3 bucket that contains the application code or configuration for the Kinesis Analytics Application. By defining this required string, users ensure the application can retrieve and process the correct file from S3, enabling functionality such as streaming data analysis or application initialization."
+            },
+            {
+              "name": "role_arn",
+              "description": "",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `role_arn` argument specifies the Amazon Resource Name (ARN) of the IAM role that grants the Kinesis Analytics application permissions to access the specified S3 bucket. This is required to enable the application to read input data, write output, or access other resources stored in S3, ensuring proper authorization and secure interaction with S3 services."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `s3` configuration block within the `reference_data_sources` of the `aws_kinesis_analytics_application` resource defines the S3 bucket settings used to provide reference data for the analytics application. It encapsulates parameters for specifying the source location and access details of the reference data, enabling users to integrate external datasets stored in S3 for real-time analytics processing. Configuring this block allows users to seamlessly connect their Kinesis application to structured data in S3, facilitating enhanced data analysis and operational insights."
+        },
+        {
+          "name": "schema",
+          "description": "(Required) The Schema format of the data in the streaming source. See Source Schema below for more details.",
+          "cardinality": [
+            1,
+            1
+          ],
+          "arguments": [
+            {
+              "name": "record_encoding",
+              "description": "",
+              "required": false,
+              "type": "string",
+              "llm_summary": "The `record_encoding` argument in the `aws_kinesis_analytics_application` resource allows users to specify the character encoding format (e.g., UTF-8) for data records within the application's schema. Configuring this argument ensures proper interpretation and processing of incoming data streams, aligning with the application's data handling requirements and enabling accurate schema parsing."
+            }
+          ],
+          "blocks": [
+            {
+              "name": "record_columns",
+              "description": "",
+              "cardinality": [
+                1,
+                1000
+              ],
+              "arguments": [
+                {
+                  "name": "mapping",
+                  "description": "(Optional) The Mapping reference to the data element.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `mapping` argument in the `record_columns` block of the `aws_kinesis_analytics_application` resource allows users to define a reference to the specific data element within the streaming source that corresponds to the column. By setting this argument, users can map incoming data fields to the application's schema, enabling precise data transformation and processing within the Kinesis Analytics application."
+                },
+                {
+                  "name": "name",
+                  "description": "(Required) Name of the column.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `name` argument specifies the unique identifier for a column within the `record_columns` configuration of an `aws_kinesis_analytics_application`. This allows users to define the schema of the application's input or output data stream by naming individual data fields, enabling precise mapping and processing of streaming data."
+                },
+                {
+                  "name": "sql_type",
+                  "description": "(Required) The SQL Type of the column.",
+                  "required": true,
+                  "type": "string",
+                  "llm_summary": "The `sql_type` argument specifies the data type of a column in the schema for records processed by the Kinesis Analytics application, ensuring compatibility with SQL-based queries and transformations. By defining this required property, users can control how data is interpreted and processed within the application, aligning it with their analytics goals and the structure of incoming data streams."
+                }
+              ],
+              "blocks": [],
+              "llm_summary": "The `record_columns` configuration block within the `schema` of the `aws_kinesis_analytics_application` resource defines the structure of the data records processed by the application, specifying individual columns with attributes such as name, mapping, and data type. This block enables users to precisely configure how incoming streaming data is interpreted and mapped, ensuring compatibility with the application's SQL-based analytics and facilitating accurate data processing and querying."
+            },
+            {
+              "name": "record_format",
+              "description": "",
+              "cardinality": [
+                1,
+                1
+              ],
+              "arguments": [
+                {
+                  "name": "record_format_type",
+                  "description": "(Required) The type of Record Format. Can be `CSV` or `JSON`.",
+                  "required": false,
+                  "type": "string",
+                  "llm_summary": "The `record_format_type` argument specifies the data serialization format (`CSV` or `JSON`) for the records processed by the Kinesis Analytics application, enabling users to define how incoming data is structured and interpreted. Configuring this argument ensures compatibility with the application's data processing logic, aligning the record format with the expected schema for analytics workflows."
+                }
+              ],
+              "blocks": [
+                {
+                  "name": "mapping_parameters",
+                  "description": "(Optional) The Mapping Information for the record format. See Mapping Parameters below for more details.",
+                  "cardinality": [
+                    0,
+                    1
+                  ],
+                  "arguments": [],
+                  "blocks": [
+                    {
+                      "name": "csv",
+                      "description": "(Optional) Mapping information when the record format uses delimiters. See CSV Mapping Parameters below for more details.",
+                      "cardinality": [
+                        0,
+                        1
+                      ],
+                      "arguments": [
+                        {
+                          "name": "record_column_delimiter",
+                          "description": "",
+                          "required": true,
+                          "type": "string",
+                          "llm_summary": "The `record_column_delimiter` argument specifies the character used to separate columns in CSV-formatted data within the Kinesis Analytics application, enabling the application to correctly parse and process structured records. By defining this delimiter, users ensure accurate data ingestion and transformation, aligning with common goals like configuring input data formats for real-time analytics."
+                        },
+                        {
+                          "name": "record_row_delimiter",
+                          "description": "",
+                          "required": true,
+                          "type": "string",
+                          "llm_summary": "The `record_row_delimiter` argument in the `aws_kinesis_analytics_application` resource specifies the character or sequence used to delineate rows in a CSV-formatted data stream, enabling the application to correctly parse and process individual records. By defining this delimiter, users ensure accurate data ingestion and transformation within the Kinesis Analytics application, aligning with common goals of configuring data parsing behavior for real-time analytics workflows."
+                        }
+                      ],
+                      "blocks": [],
+                      "llm_summary": "The `csv` configuration block within the `mapping_parameters` of the `aws_kinesis_analytics_application` resource defines how records are parsed when using a delimiter-based CSV format. It encapsulates settings for specifying the structure and delimiters of incoming data, enabling precise mapping of CSV-formatted records to the application's schema. Configuring this block ensures accurate data ingestion and processing by aligning the application's input mapping with the format of the source data."
+                    },
+                    {
+                      "name": "json",
+                      "description": "(Optional) Mapping information when JSON is the record format on the streaming source. See JSON Mapping Parameters below for more details.",
+                      "cardinality": [
+                        0,
+                        1
+                      ],
+                      "arguments": [
+                        {
+                          "name": "record_row_path",
+                          "description": "",
+                          "required": true,
+                          "type": "string",
+                          "llm_summary": "The `record_row_path` argument specifies the JSONPath expression used to extract individual rows of data from JSON records in the input stream for an AWS Kinesis Analytics Application. By defining this path, users control how the application parses and maps incoming JSON data into a tabular format for processing, enabling accurate data transformation and analysis within the application."
+                        }
+                      ],
+                      "blocks": [],
+                      "llm_summary": "The `json` configuration block within `mapping_parameters` for the `aws_kinesis_analytics_application` resource defines the mapping details required to interpret streaming source records in JSON format. It enables users to specify how JSON-encoded data is parsed and processed, ensuring accurate schema alignment and data extraction for analytics applications."
+                    }
+                  ],
+                  "llm_summary": "The `mapping_parameters` block within the `record_format` configuration of the `aws_kinesis_analytics_application` resource defines the schema mapping details for interpreting incoming data records. It encapsulates settings that specify how data is parsed (e.g., JSON or CSV formats), enabling precise control over the structure and format of streaming data for analytics processing. Configuring this block ensures accurate data ingestion and transformation, aligning the application's input with the expected record format."
+                }
+              ],
+              "llm_summary": "The `record_format` configuration block within the `schema` of the `aws_kinesis_analytics_application` resource defines the format of the data records processed by the application, enabling users to specify how incoming data is structured for analysis. It encapsulates settings related to serialization, such as specifying formats like JSON or CSV, and ensures compatibility between the application's schema and the data stream, facilitating accurate data parsing and transformation for real-time analytics."
+            }
+          ],
+          "llm_summary": "The `schema` configuration block within the `reference_data_sources` of the `aws_kinesis_analytics_application` resource defines the structure and format of the data in the streaming source, ensuring compatibility and proper interpretation of incoming data. By specifying the schema, users can accurately map and process reference data for analytics applications, enabling seamless integration and reliable data analysis workflows."
+        }
+      ],
+      "llm_summary": "\"Defines an S3-based reference data source for the Kinesis Analytics application, enabling the application to access and utilize static data for real-time analytics. This block encapsulates settings for configuring the S3 bucket, object details, and schema mapping, allowing users to integrate external datasets to enrich streaming data processing.\""
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the Kinesis Analytics Appliation.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "create_timestamp",
+      "description": "The Timestamp when the application version was created.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "last_update_timestamp",
+      "description": "The Timestamp when the application was last updated.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "description": "The Status of the application.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "version",
+      "description": "The Version of the application.",
+      "optional": false,
+      "type": "number"
+    }
+  ]
+}

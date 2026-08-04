@@ -1,0 +1,52 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_ownership_controls",
+    "description": "Provides a resource to manage S3 Bucket Ownership Controls. For more information, see the S3 Developer Guide. This resource cannot be used with S3 directory buckets.",
+    "llm_summary": "\"Manages the configuration of S3 Bucket Ownership Controls to enforce ownership settings and ensure compliance with access and data governance policies. Commonly used to configure bucket ownership transfer rules, such as enforcing Object Writer or Bucket Owner settings, to align with organizational security and accountability requirements. Ideal for scenarios requiring strict control over object ownership in shared or multi-account environments.\""
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"example\"\n}\n\nresource \"aws_s3_bucket_ownership_controls\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n\n  rule {\n    object_ownership = \"BucketOwnerPreferred\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure S3 bucket ownership controls using the `aws_s3_bucket_ownership_controls` resource, setting the `object_ownership` rule to `BucketOwnerPreferred` for centralized ownership management. Highlights the integration with an `aws_s3_bucket` resource to enforce ownership settings at the bucket level.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bucket",
+      "description": "(Required) Name of the bucket that you want to associate this access point with.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket` argument specifies the name of the S3 bucket to which ownership controls will be applied, enabling users to define and enforce ownership-related policies for the bucket. This is a required parameter that ensures the resource is explicitly associated with the intended bucket, supporting common goals like managing access and compliance for data governance."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_s3_bucket_ownership_controls` resource allows users to specify a unique identifier for the ownership controls configuration associated with an S3 bucket. While optional, setting this argument can help users manage and reference the resource explicitly, aiding in organization, tracking, or integration with other Terraform resources or workflows."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "rule",
+      "description": "(Required) Configuration block(s) with Ownership Controls rules. Detailed below.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "object_ownership",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `object_ownership` argument in the `rule` block of the `aws_s3_bucket_ownership_controls` resource specifies the ownership model for objects uploaded to the S3 bucket, allowing users to define whether ownership defaults to the bucket owner or remains with the object uploader. Setting this argument ensures compliance with access control policies and simplifies permissions management by aligning object ownership with organizational requirements."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"rule\" configuration block within the `aws_s3_bucket_ownership_controls` resource defines ownership control policies for an S3 bucket, ensuring compliance with bucket ownership requirements. It encapsulates settings that enforce ownership rules, such as restricting object ownership to the bucket owner, enabling users to achieve secure and consistent ownership management across their S3 resources."
+    }
+  ],
+  "attributes": []
+}

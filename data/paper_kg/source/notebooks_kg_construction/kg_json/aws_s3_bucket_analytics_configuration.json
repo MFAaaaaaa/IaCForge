@@ -1,0 +1,128 @@
+{
+    "resource": {
+        "name": "aws_s3_bucket_analytics_configuration",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "bucket",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "filter",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "prefix",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "tags",
+                    "description": "",
+                    "required": false,
+                    "type": "map(string)"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "storage_class_analysis",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "data_export",
+                    "description": "",
+                    "cardinality": [
+                        1,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "output_schema_version",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": [
+                        {
+                            "name": "destination",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                1
+                            ],
+                            "arguments": [],
+                            "blocks": [
+                                {
+                                    "name": "s3_bucket_destination",
+                                    "description": "",
+                                    "cardinality": [
+                                        1,
+                                        1
+                                    ],
+                                    "arguments": [
+                                        {
+                                            "name": "bucket_account_id",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "bucket_arn",
+                                            "description": "",
+                                            "required": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "format",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "name": "prefix",
+                                            "description": "",
+                                            "required": false,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "blocks": []
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "attributes": []
+}

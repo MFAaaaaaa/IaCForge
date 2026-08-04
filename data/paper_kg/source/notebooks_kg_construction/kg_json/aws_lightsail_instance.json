@@ -1,0 +1,156 @@
+{
+    "resource": {
+        "name": "aws_lightsail_instance",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "availability_zone",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "blueprint_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "bundle_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ip_address_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "key_pair_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "user_data",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "add_on",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "snapshot_time",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "status",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "type",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "cpu_count",
+            "description": "",
+            "optional": false,
+            "type": "number"
+        },
+        {
+            "name": "created_at",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "ipv6_addresses",
+            "description": "",
+            "optional": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "is_static_ip",
+            "description": "",
+            "optional": false,
+            "type": "bool"
+        },
+        {
+            "name": "private_ip_address",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "public_ip_address",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "ram_size",
+            "description": "",
+            "optional": false,
+            "type": "number"
+        },
+        {
+            "name": "username",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

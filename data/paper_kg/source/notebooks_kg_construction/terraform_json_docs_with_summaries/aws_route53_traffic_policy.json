@@ -1,0 +1,65 @@
+{
+  "resource": {
+    "name": "aws_route53_traffic_policy",
+    "description": "Manages a Route53 Traffic Policy.",
+    "llm_summary": "\"Manages the creation and configuration of Route 53 Traffic Policies, enabling advanced DNS routing strategies for applications. Common use cases include implementing geolocation-based routing, latency optimization, weighted traffic distribution, and failover configurations to enhance application performance and availability. This resource allows users to define and manage complex DNS traffic flow policies, supporting scalable and resilient multi-region or multi-cloud architectures.\""
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_route53_traffic_policy\" \"example\" {\n  name     = \"example\"\n  comment  = \"example comment\"\n  document = <<EOF\n{\n  \"AWSPolicyFormatVersion\": \"2015-10-01\",\n  \"RecordType\": \"A\",\n  \"Endpoints\": {\n    \"endpoint-start-NkPh\": {\n      \"Type\": \"value\",\n      \"Value\": \"10.0.0.2\"\n    }\n  },\n  \"StartEndpoint\": \"endpoint-start-NkPh\"\n}\nEOF\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Route 53 Traffic Policy using the `aws_route53_traffic_policy` resource, specifying a custom JSON policy document with endpoints and a start endpoint. It illustrates key arguments such as `name`, `comment`, and `document`, showcasing how to define routing logic for DNS records with the `AWSPolicyFormatVersion` and `RecordType` settings."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "comment",
+      "description": "(Optional) Comment for the traffic policy.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `comment` argument in the `aws_route53_traffic_policy` resource allows users to specify an optional descriptive note or annotation for the traffic policy. This helps document the policy's purpose, context, or configuration details, aiding in resource management and collaboration by providing clarity for future reference or team communication."
+    },
+    {
+      "name": "document",
+      "description": "(Required) Policy document. This is a JSON formatted string. For more information about building Route53 traffic policy documents, see the AWS Route53 Traffic Policy document format The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `document` argument in the `aws_route53_traffic_policy` resource allows users to define the core configuration of a Route53 traffic policy by specifying a JSON-formatted policy document. This document outlines routing rules, traffic management strategies, and DNS behaviors, enabling users to control how traffic is directed across endpoints based on criteria like geolocation, latency, or weighted distribution."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_route53_traffic_policy` resource represents the unique identifier of the traffic policy, allowing users to reference or manage an existing policy within Route 53. While optional, setting this argument typically facilitates operations like updates, lookups, or integrations with other resources by explicitly specifying the traffic policy to target."
+    },
+    {
+      "name": "name",
+      "description": "(Required) Name of the traffic policy.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument specifies the unique, user-defined identifier for the Route 53 traffic policy, enabling users to define a meaningful and recognizable label for the policy. Setting this argument ensures the traffic policy can be easily referenced, managed, and distinguished within DNS configurations and across multiple policies in the AWS environment."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) of the traffic policy.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "type",
+      "description": "DNS type of the resource record sets that Amazon Route 53 creates when you use a traffic policy to create a traffic policy instance.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "version",
+      "description": "Version number of the traffic policy. This value is automatically incremented by AWS after each update of this resource.",
+      "optional": false,
+      "type": "number"
+    }
+  ]
+}

@@ -1,0 +1,215 @@
+{
+    "resource": {
+        "name": "aws_cognito_user_pool_client",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "access_token_validity",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "allowed_oauth_flows",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "allowed_oauth_flows_user_pool_client",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "allowed_oauth_scopes",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "auth_session_validity",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "callback_urls",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "default_redirect_uri",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "enable_propagate_additional_user_context_data",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "enable_token_revocation",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "explicit_auth_flows",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "generate_secret",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id_token_validity",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "logout_urls",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "prevent_user_existence_errors",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "read_attributes",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "refresh_token_validity",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "supported_identity_providers",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "user_pool_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "write_attributes",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "analytics_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "application_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "application_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "external_id",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "role_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "user_data_shared",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "token_validity_units",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "access_token",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "id_token",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "refresh_token",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "client_secret",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

@@ -1,0 +1,32 @@
+[
+    {
+        "argument_path": "instance",
+        "references_output": "aws_instance.id",
+        "target_resource_type": "aws_instance"
+    },
+    {
+        "argument_path": "network_interface",
+        "references_output": "aws_network_interface.id",
+        "target_resource_type": "aws_network_interface"
+    },
+    {
+        "argument_path": "associate_with_private_ip",
+        "references_output": "aws_network_interface.private_ips",
+        "target_resource_type": "aws_network_interface"
+    },
+    {
+        "argument_path": "ipam_pool_id",
+        "references_output": "aws_vpc_ipam_pool.id",
+        "target_resource_type": "aws_vpc_ipam_pool"
+    },
+    {
+        "argument_path": "customer_owned_ipv4_pool",
+        "references_output": "aws_customer_owned_ip_pool.id",
+        "target_resource_type": "aws_customer_owned_ip_pool"
+    },
+    {
+        "argument_path": "public_ipv4_pool",
+        "references_output": "aws_ec2_public_ipv4_pool.id",
+        "target_resource_type": "aws_ec2_public_ipv4_pool"
+    }
+]

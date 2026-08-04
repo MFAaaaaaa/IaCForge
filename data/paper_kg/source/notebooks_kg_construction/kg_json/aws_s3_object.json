@@ -1,0 +1,245 @@
+{
+    "resource": {
+        "name": "aws_s3_object",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "acl",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "bucket",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "bucket_key_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "cache_control",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "checksum_algorithm",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "content",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "content_base64",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "content_disposition",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "content_encoding",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "content_language",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "content_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "etag",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "force_destroy",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "key",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "kms_key_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "metadata",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "object_lock_legal_hold_status",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "object_lock_mode",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "object_lock_retain_until_date",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "server_side_encryption",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "source",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "source_hash",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "storage_class",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "website_redirect",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "override_provider",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [],
+            "blocks": [
+                {
+                    "name": "default_tags",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "tags",
+                            "description": "",
+                            "required": false,
+                            "type": "map(string)"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "checksum_crc32",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "checksum_crc32c",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "checksum_crc64nvme",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "checksum_sha1",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "checksum_sha256",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "version_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

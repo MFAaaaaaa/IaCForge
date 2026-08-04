@@ -1,0 +1,17 @@
+[
+    {
+        "argument_path": "event_bus_name",
+        "references_output": "aws_cloudwatch_event_bus.name",
+        "target_resource_type": "aws_cloudwatch_event_bus"
+    },
+    {
+        "argument_path": "event_bus_name",
+        "references_output": "aws_cloudwatch_event_bus.arn",
+        "target_resource_type": "aws_cloudwatch_event_bus"
+    },
+    {
+        "argument_path": "role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    }
+]

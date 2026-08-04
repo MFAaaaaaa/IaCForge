@@ -1,0 +1,22 @@
+[
+    {
+        "argument_path": "role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "vpc_security_group_ids",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "vpc_subnet_ids",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "auth.secret_arn",
+        "references_output": "aws_secretsmanager_secret.arn",
+        "target_resource_type": "aws_secretsmanager_secret"
+    }
+]

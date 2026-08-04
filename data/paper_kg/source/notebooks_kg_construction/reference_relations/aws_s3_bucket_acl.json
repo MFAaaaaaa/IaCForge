@@ -1,0 +1,17 @@
+[
+    {
+        "argument_path": "bucket",
+        "references_output": "aws_s3_bucket.id",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "access_control_policy.grant.grantee.id",
+        "references_output": "data.aws_canonical_user_id.id",
+        "target_resource_type": "data.aws_canonical_user_id"
+    },
+    {
+        "argument_path": "access_control_policy.owner.id",
+        "references_output": "data.aws_canonical_user_id.id",
+        "target_resource_type": "data.aws_canonical_user_id"
+    }
+]

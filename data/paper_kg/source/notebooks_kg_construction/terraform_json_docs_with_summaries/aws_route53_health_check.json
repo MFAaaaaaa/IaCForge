@@ -1,0 +1,213 @@
+{
+  "resource": {
+    "name": "aws_route53_health_check",
+    "description": "Provides a Route53 health check.",
+    "llm_summary": "The `aws_route53_health_check` resource enables the creation and management of Route 53 health checks to monitor the availability and performance of endpoints or services. Common use cases include configuring health checks for failover routing, load balancing, and ensuring high availability by automatically redirecting traffic from unhealthy endpoints. Users can customize settings such as the protocol (HTTP, HTTPS, TCP), request intervals, failure thresholds, and health check regions, making it a versatile tool for robust DNS and infrastructure monitoring."
+  },
+  "examples": [
+    {
+      "title": "Connectivity and HTTP Status Code Check",
+      "code": "resource \"aws_route53_health_check\" \"example\" {\n  fqdn              = \"example.com\"\n  port              = 80\n  type              = \"HTTP\"\n  resource_path     = \"/\"\n  failure_threshold = \"5\"\n  request_interval  = \"30\"\n\n  tags = {\n    Name = \"tf-test-health-check\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an AWS Route 53 health check to monitor the HTTP connectivity and status of a specific domain (`example.com`) on port 80, with customizable settings for request intervals, failure thresholds, and tagging for resource identification.\""
+    },
+    {
+      "title": "Connectivity and String Matching Check",
+      "code": "resource \"aws_route53_health_check\" \"example\" {\n  failure_threshold = \"5\"\n  fqdn              = \"example.com\"\n  port              = 443\n  request_interval  = \"30\"\n  resource_path     = \"/\"\n  search_string     = \"example\"\n  type              = \"HTTPS_STR_MATCH\"\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS Route 53 health check to verify HTTPS connectivity and match a specific string in the response using the `HTTPS_STR_MATCH` type. Key configurations include setting the `fqdn`, `port`, `resource_path`, `search_string`, and adjusting thresholds like `failure_threshold` and `request_interval` for precise monitoring."
+    },
+    {
+      "title": "Aggregate Check",
+      "code": "resource \"aws_route53_health_check\" \"parent\" {\n  type                   = \"CALCULATED\"\n  child_health_threshold = 1\n  child_healthchecks     = [aws_route53_health_check.child.id]\n\n  tags = {\n    Name = \"tf-test-calculated-health-check\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an aggregated Route 53 health check using the `CALCULATED` type, which evaluates the health of child health checks based on a defined threshold (`child_health_threshold`). This example showcases the use of the `child_healthchecks` argument to reference dependent health checks and includes tagging for resource identification.\""
+    },
+    {
+      "title": "CloudWatch Alarm Check",
+      "code": "resource \"aws_cloudwatch_metric_alarm\" \"foobar\" {\n  alarm_name          = \"terraform-test-foobar5\"\n  comparison_operator = \"GreaterThanOrEqualToThreshold\"\n  evaluation_periods  = \"2\"\n  metric_name         = \"CPUUtilization\"\n  namespace           = \"AWS/EC2\"\n  period              = \"120\"\n  statistic           = \"Average\"\n  threshold           = \"80\"\n  alarm_description   = \"This metric monitors ec2 cpu utilization\"\n}\n\nresource \"aws_route53_health_check\" \"foo\" {\n  type                            = \"CLOUDWATCH_METRIC\"\n  cloudwatch_alarm_name           = aws_cloudwatch_metric_alarm.foobar.alarm_name\n  cloudwatch_alarm_region         = \"us-west-2\"\n  insufficient_data_health_status = \"Healthy\"\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_route53_health_check` resource to monitor the health of an AWS CloudWatch alarm tied to EC2 CPU utilization. Highlights the use of the `type` argument set to `CLOUDWATCH_METRIC` and key configurations like `cloudwatch_alarm_name`, `cloudwatch_alarm_region`, and `insufficient_data_health_status` for integrating Route 53 health checks with CloudWatch metrics.\""
+    },
+    {
+      "title": "CloudWatch Alarm Check With Triggers",
+      "code": "resource \"aws_cloudwatch_metric_alarm\" \"example\" {\n  alarm_name          = \"example\"\n  comparison_operator = \"GreaterThanOrEqualToThreshold\"\n  evaluation_periods  = \"2\"\n  metric_name         = \"CPUUtilization\"\n  namespace           = \"AWS/EC2\"\n  period              = \"120\"\n  statistic           = \"Average\"\n  threshold           = \"80\"\n  alarm_description   = \"This metric monitors ec2 cpu utilization\"\n}\n\nresource \"aws_route53_health_check\" \"example\" {\n  type                            = \"CLOUDWATCH_METRIC\"\n  cloudwatch_alarm_name           = aws_cloudwatch_metric_alarm.example.alarm_name\n  cloudwatch_alarm_region         = \"us-west-2\"\n  insufficient_data_health_status = \"Healthy\"\n\n  triggers = {\n    threshold = aws_cloudwatch_metric_alarm.example.threshold\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_route53_health_check` resource to monitor a CloudWatch alarm tied to EC2 CPU utilization, using the `CLOUDWATCH_METRIC` type. Highlights key configurations such as linking the health check to a CloudWatch alarm via `cloudwatch_alarm_name` and `cloudwatch_alarm_region`, and setting `insufficient_data_health_status` for handling alarm states.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "child_health_threshold",
+      "description": "(Optional) The minimum number of child health checks that must be healthy for Route 53 to consider the parent health check to be healthy. Valid values are integers between 0 and 256, inclusive",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `child_health_threshold` argument in the `aws_route53_health_check` resource allows users to define the minimum number of associated child health checks that must be healthy for the parent health check to be considered healthy. This configuration is typically used to implement failover or dependency-based health monitoring, ensuring that Route 53 evaluates the overall health of a system based on multiple underlying checks."
+    },
+    {
+      "name": "child_healthchecks",
+      "description": "(Optional) For a specified parent health check, a list of HealthCheckId values for the associated child health checks.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `child_healthchecks` argument in the `aws_route53_health_check` resource allows users to specify a set of HealthCheck IDs that are associated as child health checks to a parent health check. This configuration enables hierarchical health check behavior, where the parent health check's status is determined based on the combined statuses of the specified child health checks, supporting advanced health monitoring and failover strategies."
+    },
+    {
+      "name": "cloudwatch_alarm_name",
+      "description": "(Optional) The name of the CloudWatch alarm.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cloudwatch_alarm_name` argument for the `aws_route53_health_check` resource allows users to associate a specific CloudWatch alarm with the health check, enabling enhanced monitoring and automated responses based on alarm conditions. By specifying this argument, users can integrate CloudWatch metrics into Route 53 health checks to trigger actions or notifications when predefined thresholds are breached, supporting proactive infrastructure management and reliability goals."
+    },
+    {
+      "name": "cloudwatch_alarm_region",
+      "description": "(Optional) The region that the CloudWatch alarm was created in.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cloudwatch_alarm_region` argument for the `aws_route53_health_check` resource allows users to specify the AWS region where the associated CloudWatch alarm is located. Configuring this argument ensures the health check can monitor the alarm in the correct region, enabling region-specific health tracking and integration with CloudWatch metrics for improved reliability and targeted monitoring."
+    },
+    {
+      "name": "disabled",
+      "description": "(Optional) A boolean value that stops Route 53 from performing health checks. When set to true, Route 53 will do the following depending on the type of health check: For health checks that check the health of endpoints, Route53 stops submitting requests to your application, server, or other resource. For calculated health checks, Route 53 stops aggregating the status of the referenced health checks. For health checks that monitor CloudWatch alarms, Route 53 stops monitoring the corresponding CloudWatch metrics. Note:After you disable a health check, Route 53 considers the status of the health check to always be healthy. If you configured DNS failover, Route 53 continues to route traffic to the corresponding resources. If you want to stop routing traffic to a resource, change the value of `invert_healthcheck`. - For health checks that check the health of endpoints, Route53 stops submitting requests to your application, server, or other resource. - For calculated health checks, Route 53 stops aggregating the status of the referenced health checks. - For health checks that monitor CloudWatch alarms, Route 53 stops monitoring the corresponding CloudWatch metrics.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `disabled` argument in the `aws_route53_health_check` resource allows users to control whether Route 53 actively performs health checks on endpoints, calculated health checks, or CloudWatch alarms. When set to `true`, it stops all health check activities, treating the resource as always healthy, which is useful for scenarios like testing, maintenance, or overriding health check behavior without affecting DNS failover routing."
+    },
+    {
+      "name": "enable_sni",
+      "description": "(Optional) A boolean value that indicates whether Route53 should send the `fqdn` to the endpoint when performing the health check. This defaults to AWS' defaults: when the `type` is \"HTTPS\" `enable_sni` defaults to `true`, when `type` is anything else `enable_sni` defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_sni` argument in the `aws_route53_health_check` resource allows users to control whether Route 53 includes the `fqdn` (Fully Qualified Domain Name) in the Server Name Indication (SNI) during HTTPS health checks. This impacts the behavior of the health check by enabling compatibility with endpoints that require SNI for secure communication, aligning with user goals of ensuring accurate and reliable health monitoring for HTTPS-based services."
+    },
+    {
+      "name": "failure_threshold",
+      "description": "(Optional) The number of consecutive health checks that an endpoint must pass or fail.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `failure_threshold` argument in the `aws_route53_health_check` resource allows users to define the number of consecutive health check failures required to mark an endpoint as unhealthy. By configuring this threshold, users can control the sensitivity of health checks, balancing responsiveness to failures with tolerance for transient issues, which is critical for ensuring reliable DNS routing and application availability."
+    },
+    {
+      "name": "fqdn",
+      "description": "(Optional) The fully qualified domain name of the endpoint to be checked. If a value is set for `ip_address`, the value set for `fqdn` will be passed in the `Host` header.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `fqdn` argument in the `aws_route53_health_check` resource allows users to specify the fully qualified domain name (FQDN) of the endpoint to be monitored for health checks. When set, it defines the hostname used in the `Host` header during the health check request, enabling users to target specific domain-based endpoints for monitoring, even if an `ip_address` is also provided."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_route53_health_check` resource represents the unique identifier of the Route 53 health check. While not required for resource creation, it is typically used to reference or manage an existing health check, enabling users to retrieve or interact with its configuration for tasks like monitoring or updates."
+    },
+    {
+      "name": "insufficient_data_health_status",
+      "description": "(Optional) The status of the health check when CloudWatch has insufficient data about the state of associated alarm. Valid values are `Healthy` , `Unhealthy` and `LastKnownStatus`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `insufficient_data_health_status` argument for the `aws_route53_health_check` resource allows users to define the health status (`Healthy`, `Unhealthy`, or `LastKnownStatus`) that Route 53 should assign to the health check when CloudWatch lacks sufficient data about the state of the associated alarm. This configuration ensures predictable behavior for DNS routing decisions in scenarios where monitoring data is unavailable, aligning with user goals of maintaining reliable failover and traffic management."
+    },
+    {
+      "name": "invert_healthcheck",
+      "description": "(Optional) A boolean value that indicates whether the status of health check should be inverted. For example, if a health check is healthy but Inverted is True , then Route 53 considers the health check to be unhealthy.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `invert_healthcheck` argument in the `aws_route53_health_check` resource allows users to control whether the health check status is logically inverted, treating a healthy endpoint as unhealthy and vice versa. This is useful for scenarios where the desired behavior requires reversing the default health evaluation, such as testing failover configurations or handling specific routing logic."
+    },
+    {
+      "name": "ip_address",
+      "description": "(Optional) The IP address of the endpoint to be checked.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ip_address` argument in the `aws_route53_health_check` resource allows users to specify the IP address of the endpoint that Route 53 will monitor for health checks. Configuring this argument enables targeted health monitoring of specific network endpoints, ensuring accurate detection of availability and performance issues for services hosted at the specified IP."
+    },
+    {
+      "name": "measure_latency",
+      "description": "(Optional) A Boolean value that indicates whether you want Route 53 to measure the latency between health checkers in multiple AWS regions and your endpoint and to display CloudWatch latency graphs in the Route 53 console.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `measure_latency` argument in the `aws_route53_health_check` resource allows users to enable latency measurement between Route 53 health checkers across AWS regions and their endpoint. When set to `true`, it provides CloudWatch latency graphs in the Route 53 console, helping users monitor and optimize endpoint performance across regions."
+    },
+    {
+      "name": "port",
+      "description": "(Optional) The port of the endpoint to be checked.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `port` argument in the `aws_route53_health_check` resource allows users to specify the network port on the endpoint being monitored for health checks. Configuring this argument enables precise control over which port the health check targets, ensuring alignment with the application's expected connectivity and monitoring requirements."
+    },
+    {
+      "name": "reference_name",
+      "description": "(Optional) This is a reference name used in Caller Reference (helpful for identifying single health_check set amongst others)",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `reference_name` argument for the `aws_route53_health_check` resource allows users to define a human-readable identifier that is included in the Caller Reference, aiding in the organization and differentiation of individual health checks within a larger set. While optional, setting this argument helps users track and manage health checks more effectively, especially in environments with multiple checks."
+    },
+    {
+      "name": "regions",
+      "description": "(Optional) A list of AWS regions that you want Amazon Route 53 health checkers to check the specified endpoint from.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `regions` argument in the `aws_route53_health_check` resource allows users to specify a set of AWS regions from which Route 53 health checkers will perform endpoint health checks. Configuring this argument enables users to control the geographic distribution of health checks, improving reliability and ensuring coverage across specific regions to meet compliance, latency, or redundancy requirements."
+    },
+    {
+      "name": "request_interval",
+      "description": "(Required) The number of seconds between the time that Amazon Route 53 gets a response from your endpoint and the time that it sends the next health-check request.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `request_interval` argument in the `aws_route53_health_check` resource allows users to define the frequency, in seconds, at which Amazon Route 53 sends health-check requests to the specified endpoint. Configuring this interval impacts the responsiveness of health monitoring, enabling users to balance between faster detection of endpoint issues and reduced request overhead."
+    },
+    {
+      "name": "resource_path",
+      "description": "(Optional) The path that you want Amazon Route 53 to request when performing health checks.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `resource_path` argument in the `aws_route53_health_check` resource allows users to specify the exact URL path that Amazon Route 53 should request during health checks, enabling fine-grained control over the endpoint being monitored. By configuring this argument, users can tailor health checks to target specific application routes or API endpoints, ensuring accurate monitoring of critical functionality."
+    },
+    {
+      "name": "routing_control_arn",
+      "description": "(Optional) The Amazon Resource Name (ARN) for the Route 53 Application Recovery Controller routing control. This is used when health check type is `RECOVERY_CONTROL`",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `routing_control_arn` argument allows users to specify the Amazon Resource Name (ARN) of a Route 53 Application Recovery Controller routing control, enabling integration with health checks of type `RECOVERY_CONTROL`. By setting this argument, users can define failover or recovery behavior tied to routing control states, supporting disaster recovery and high availability goals."
+    },
+    {
+      "name": "search_string",
+      "description": "(Optional) String searched in the first 5120 bytes of the response body for check to be considered healthy. Only valid with `HTTP_STR_MATCH` and `HTTPS_STR_MATCH`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `search_string` argument in the `aws_route53_health_check` resource allows users to define a specific string to be searched within the first 5120 bytes of the HTTP or HTTPS response body to determine the health of the endpoint. This enables precise health check validation by ensuring the response contains expected content, supporting user goals like monitoring service availability and verifying application functionality."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the health check. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument allows users to assign key-value metadata to the `aws_route53_health_check` resource, enabling organization, categorization, and resource management (e.g., by environment, cost center, or project). When specified, these tags can override provider-level default tags, ensuring precise control over tagging for governance, billing, or operational purposes."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_route53_health_check` resource allows users to define a comprehensive set of key-value tags inherited by the health check, including both user-defined and automatically propagated tags. This facilitates resource organization, cost allocation, and metadata management, aligning the health check with tagging strategies for environments, projects, or compliance requirements."
+    },
+    {
+      "name": "triggers",
+      "description": "(Optional) Map of arbitrary keys and values that, when changed, will trigger an in-place update of the CloudWatch alarm arguments. Use this argument to synchronize the health check when an alarm is changed. See example above. reference_name - (Optional) This is a reference name used in Caller Reference (helpful for identifying single health_check set amongst others) fqdn - (Optional) The fully qualified domain name of the endpoint to be checked. If a value is set for ip_address, the value set for fqdn will be passed in the Host header. ip_address - (Optional) The IP address of the endpoint to be checked. port - (Optional) The port of the endpoint to be checked. type - (Required) The protocol to use when performing health checks. Valid values are HTTP, HTTPS, HTTP_STR_MATCH, HTTPS_STR_MATCH, TCP, CALCULATED, CLOUDWATCH_METRIC and RECOVERY_CONTROL. failure_threshold - (Optional) The number of consecutive health checks that an endpoint must pass or fail. request_interval - (Required) The number of seconds between the time that Amazon Route 53 gets a response from your endpoint and the time that it sends the next health-check request. resource_path - (Optional) The path that you want Amazon Route 53 to request when performing health checks. search_string - (Optional) String searched in the first 5120 bytes of the response body for check to be considered healthy. Only valid with HTTP_STR_MATCH and HTTPS_STR_MATCH. measure_latency - (Optional) A Boolean value that indicates whether you want Route 53 to measure the latency between health checkers in multiple AWS regions and your endpoint and to display CloudWatch latency graphs in the Route 53 console. invert_healthcheck - (Optional) A boolean value that indicates whether the status of health check should be inverted. For example, if a health check is healthy but Inverted is True , then Route 53 considers the health check to be unhealthy. disabled - (Optional) A boolean value that stops Route 53 from performing health checks. When set to true, Route 53 will do the following depending on the type of health check: - For health checks that check the health of endpoints, Route53 stops submitting requests to your application, server, or other resource. - For calculated health checks, Route 53 stops aggregating the status of the referenced health checks. - For health checks that monitor CloudWatch alarms, Route 53 stops monitoring the corresponding CloudWatch metrics. After you disable a health check, Route 53 considers the status of the health check to always be healthy. If you configured DNS failover, Route 53 continues to route traffic to the corresponding resources. If you want to stop routing traffic to a resource, change the value of invert_healthcheck. enable_sni - (Optional) A boolean value that indicates whether Route53 should send the fqdn to the endpoint when performing the health check. This defaults to AWS' defaults: when the type is \"HTTPS\" enable_sni defaults to true, when type is anything else enable_sni defaults to false. child_healthchecks - (Optional) For a specified parent health check, a list of HealthCheckId values for the associated child health checks. child_health_threshold - (Optional) The minimum number of child health checks that must be healthy for Route 53 to consider the parent health check to be healthy. Valid values are integers between 0 and 256, inclusive cloudwatch_alarm_name - (Optional) The name of the CloudWatch alarm. cloudwatch_alarm_region - (Optional) The region that the CloudWatch alarm was created in. insufficient_data_health_status - (Optional) The status of the health check when CloudWatch has insufficient data about the state of associated alarm. Valid values are Healthy , Unhealthy and LastKnownStatus. regions - (Optional) A list of AWS regions that you want Amazon Route 53 health checkers to check the specified endpoint from. routing_control_arn - (Optional) The Amazon Resource Name (ARN) for the Route 53 Application Recovery Controller routing control. This is used when health check type is RECOVERY_CONTROL tags - (Optional) A map of tags to assign to the health check. If configured with a provider default_tags configuration block present, tags with matching keys will overwrite those defined at the provider-level. triggers - (Optional) Map of arbitrary keys and values that, when changed, will trigger an in-place update of the CloudWatch alarm arguments. Use this argument to synchronize the health check when an alarm is changed. See example above.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `triggers` argument in the `aws_route53_health_check` resource allows users to define a map of arbitrary key-value pairs that act as change triggers for in-place updates to the associated CloudWatch alarm configuration. This argument is typically used to synchronize health checks with changes in external configurations, ensuring the health check remains aligned with updated alarm settings or other dynamic dependencies."
+    },
+    {
+      "name": "type",
+      "description": "(Required) The protocol to use when performing health checks. Valid values are `HTTP`, `HTTPS`, `HTTP_STR_MATCH`, `HTTPS_STR_MATCH`, `TCP`, `CALCULATED`, `CLOUDWATCH_METRIC` and `RECOVERY_CONTROL`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `type` argument in the `aws_route53_health_check` resource specifies the protocol or method used to perform health checks on a target resource, such as HTTP, HTTPS, TCP, or metrics-based checks. By defining this argument, users control how Route 53 evaluates the health and availability of their resources, enabling tailored monitoring strategies to meet specific application or infrastructure requirements."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) of the Health Check.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+{
+    "resource": {
+        "name": "aws_iam_role",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "assume_role_policy",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "description",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "force_detach_policies",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "managed_policy_arns",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "max_session_duration",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "path",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "permissions_boundary",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "inline_policy",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "name",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "policy",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "create_date",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "unique_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

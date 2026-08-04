@@ -1,0 +1,46 @@
+{
+  "resource": {
+    "name": "aws_iam_group_membership",
+    "description": "Multiple aws_iam_group_membership resources with the same group name will produce inconsistent behavior! Provides a top level resource to manage IAM Group membership for IAM Users. For more information on managing IAM Groups or IAM Users, see IAM Groups or IAM Users aws_iam_group_membership will conflict with itself if used more than once with the same group. To non-exclusively manage the users in a group, see the aws_iam_user_group_membership resource.",
+    "llm_summary": "The `aws_iam_group_membership` Terraform resource manages the assignment of IAM users to IAM groups, ensuring centralized control over group membership for access management in AWS. It is commonly used to define and enforce user-group relationships for role-based access control (RBAC) in cloud environments. This resource is ideal for scenarios requiring exclusive management of group memberships, but users should avoid using it multiple times for the same group to prevent conflicts; for non-exclusive membership management, the `aws_iam_user_group_membership` resource is recommended."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_iam_group_membership\" \"team\" {\n  name = \"tf-testing-group-membership\"\n\n  users = [\n    aws_iam_user.user_one.name,\n    aws_iam_user.user_two.name,\n  ]\n\n  group = aws_iam_group.group.name\n}\n\nresource \"aws_iam_group\" \"group\" {\n  name = \"test-group\"\n}\n\nresource \"aws_iam_user\" \"user_one\" {\n  name = \"test-user\"\n}\n\nresource \"aws_iam_user\" \"user_two\" {\n  name = \"test-user-two\"\n}",
+      "llm_summary": "This example demonstrates how to configure an AWS IAM group membership using the `aws_iam_group_membership` resource, associating multiple IAM users (`aws_iam_user`) with a specific IAM group (`aws_iam_group`) via the `users` and `group` arguments. It illustrates the basic setup for managing user-group relationships in AWS IAM, enabling centralized access control."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "group",
+      "description": "\u2013 (Required) The IAM Group name to attach the list of `users` to",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `group` argument in the `aws_iam_group_membership` resource specifies the name of the IAM Group to which the defined list of users will be attached. By setting this argument, users can control group-based access management, enabling centralized permission assignment and governance for multiple IAM users within AWS."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_iam_group_membership` resource allows users to define a unique identifier for the group membership configuration, enabling precise tracking and management of the resource within Terraform's state. While optional, setting this argument can help users ensure consistency and clarity when referencing or managing IAM group memberships across their infrastructure."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The name to identify the Group Membership",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument in the `aws_iam_group_membership` resource specifies a unique identifier for the group membership configuration, allowing users to define and manage the association between IAM users and an IAM group. Setting this argument ensures the resource is uniquely identifiable within Terraform, enabling precise control over group membership assignments in AWS IAM for access management."
+    },
+    {
+      "name": "users",
+      "description": "(Required) A list of IAM User names to associate with the Group",
+      "required": true,
+      "type": "set(string)",
+      "llm_summary": "The `users` argument in the `aws_iam_group_membership` resource specifies the set of IAM user names to associate with an IAM group, enabling centralized management of user permissions by grouping users under a shared access policy. By defining this argument, users can efficiently assign and manage access controls for multiple IAM users within the specified group, aligning with common goals of role-based access management and security best practices."
+    }
+  ],
+  "blocks": [],
+  "attributes": []
+}

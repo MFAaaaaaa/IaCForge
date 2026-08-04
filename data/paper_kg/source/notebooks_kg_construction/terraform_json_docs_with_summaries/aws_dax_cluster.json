@@ -1,0 +1,207 @@
+{
+  "resource": {
+    "name": "aws_dax_cluster",
+    "description": "Provides a DAX Cluster resource.",
+    "llm_summary": "The `aws_dax_cluster` Terraform resource enables the creation and management of Amazon DynamoDB Accelerator (DAX) clusters, providing in-memory caching to improve the performance of DynamoDB queries. It is commonly used for scenarios requiring low-latency access to DynamoDB, such as high-throughput applications or real-time data processing. Users can configure key aspects like cluster size, node types, replication factors, security groups, parameter groups, and encryption settings to optimize caching, scalability, and security for their workloads."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_dax_cluster\" \"bar\" {\n  cluster_name       = \"cluster-example\"\n  iam_role_arn       = data.aws_iam_role.example.arn\n  node_type          = \"dax.r4.large\"\n  replication_factor = 1\n}",
+      "llm_summary": "This example demonstrates how to configure a basic AWS DAX (DynamoDB Accelerator) cluster using the `aws_dax_cluster` resource. It showcases key arguments such as `cluster_name`, `iam_role_arn`, `node_type`, and `replication_factor`, providing a foundational setup for a single-node DAX cluster with IAM role integration."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "availability_zones",
+      "description": "(Optional) List of Availability Zones in which the nodes will be created",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `availability_zones` argument for the `aws_dax_cluster` resource allows users to specify the set of Availability Zones where the DAX cluster nodes will be deployed, enabling control over the cluster's geographic distribution and fault tolerance. Configuring this argument helps optimize high availability and resilience by ensuring nodes are distributed across multiple zones within the selected AWS region."
+    },
+    {
+      "name": "cluster_endpoint_encryption_type",
+      "description": "\u2013 (Optional) The type of encryption the cluster's endpoint should support. Valid values are: `NONE` and `TLS`. Default value is `NONE`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cluster_endpoint_encryption_type` argument for the `aws_dax_cluster` resource allows users to specify the encryption protocol for the cluster's endpoint, controlling whether communication is secured using TLS or left unencrypted (`NONE`). This configuration impacts the security of data in transit, enabling users to align the cluster's endpoint behavior with their application's encryption requirements or compliance standards."
+    },
+    {
+      "name": "cluster_name",
+      "description": "\u2013 (Required) Group identifier. DAX converts this name to lowercase",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `cluster_name` argument specifies the unique, lowercase identifier for the DAX cluster, serving as the primary name used to reference and manage the cluster within AWS. Setting this argument allows users to define the cluster's identity, which is essential for organizing and accessing distributed in-memory caching resources in applications."
+    },
+    {
+      "name": "description",
+      "description": "\u2013 (Optional) Description for the cluster",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_dax_cluster` resource allows users to define a human-readable text that describes the purpose or context of the DAX cluster. Setting this argument helps document the cluster's role within the infrastructure, aiding in resource identification and management, especially in environments with multiple clusters."
+    },
+    {
+      "name": "iam_role_arn",
+      "description": "(Required) A valid Amazon Resource Name (ARN) that identifies an IAM role. At runtime, DAX will assume this role and use the role's permissions to access DynamoDB on your behalf",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `iam_role_arn` argument for the `aws_dax_cluster` resource specifies the Amazon Resource Name (ARN) of an IAM role that the DAX cluster will assume at runtime. This role grants the necessary permissions for the cluster to securely access DynamoDB on behalf of the user, enabling seamless integration and controlled access to database resources."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_dax_cluster` resource allows users to specify a unique identifier for the DAX cluster, typically used to reference the cluster within Terraform configurations and outputs. While optional, setting this argument can help users manage and track the cluster's lifecycle or integrate it with other resources in their infrastructure."
+    },
+    {
+      "name": "maintenance_window",
+      "description": "\u2013 (Optional) Specifies the weekly time range for when maintenance on the cluster is performed. The format is `ddd:hh24:mi-ddd:hh24:mi` (24H Clock UTC). The minimum maintenance window is a 60 minute period. Example: `sun:05:00-sun:09:00`",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `maintenance_window` argument for the `aws_dax_cluster` resource allows users to define a specific weekly time range during which maintenance operations on the DAX cluster are performed. By configuring this window, users can control when updates or maintenance tasks occur to minimize disruption to application performance, ensuring alignment with operational schedules and business needs."
+    },
+    {
+      "name": "node_type",
+      "description": "\u2013 (Required) The compute and memory capacity of the nodes. See Nodes for supported node types",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `node_type` argument for the `aws_dax_cluster` resource specifies the compute and memory capacity of each node in the DAX cluster, directly impacting performance and scalability. By defining this required parameter, users configure the hardware characteristics of the cluster to align with workload demands, such as caching efficiency and query throughput."
+    },
+    {
+      "name": "notification_topic_arn",
+      "description": "\u2013 (Optional) An Amazon Resource Name (ARN) of an SNS topic to send DAX notifications to. Example: `arn:aws:sns:us-east-1:012345678999:my_sns_topic`",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `notification_topic_arn` argument for the `aws_dax_cluster` resource allows users to specify the Amazon Resource Name (ARN) of an SNS topic to receive notifications about events related to the DAX cluster, such as maintenance updates or operational issues. Configuring this argument enables automated alerting and monitoring, helping users stay informed about the cluster's status and ensuring proactive management of their caching infrastructure."
+    },
+    {
+      "name": "parameter_group_name",
+      "description": "\u2013 (Optional) Name of the parameter group to associate with this DAX cluster",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `parameter_group_name` argument for the `aws_dax_cluster` resource allows users to specify the name of a DAX parameter group to associate with the cluster, enabling customization of cluster settings such as cache behavior, memory management, and performance tuning. By defining this argument, users can tailor the operational parameters of the DAX cluster to meet specific application requirements or optimize for particular workloads."
+    },
+    {
+      "name": "replication_factor",
+      "description": "\u2013 (Required) The number of nodes in the DAX cluster. A replication factor of 1 will create a single-node cluster, without any read replicas",
+      "required": true,
+      "type": "number",
+      "llm_summary": "The `replication_factor` argument in the `aws_dax_cluster` resource specifies the number of nodes in the DAX cluster, allowing users to define the cluster's size and redundancy. Setting this value impacts the cluster's scalability and fault tolerance, with higher replication factors enabling read replicas for improved performance and availability, while a value of 1 creates a single-node cluster without redundancy."
+    },
+    {
+      "name": "security_group_ids",
+      "description": "\u2013 (Optional) One or more VPC security groups associated with the cluster",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `security_group_ids` argument for the `aws_dax_cluster` resource allows users to specify one or more VPC security groups to control inbound and outbound network traffic for the DAX cluster. By configuring this argument, users can enforce network-level access restrictions, ensuring secure communication and compliance with organizational security policies."
+    },
+    {
+      "name": "subnet_group_name",
+      "description": "\u2013 (Optional) Name of the subnet group to be used for the cluster",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `subnet_group_name` argument for the `aws_dax_cluster` resource allows users to specify the name of the subnet group that defines the subnets in which the DAX cluster will operate. Configuring this argument enables control over the network placement of the cluster, ensuring it resides within specific subnets for security, connectivity, or compliance purposes, typically aligning with VPC design and access requirements."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level. cluster_endpoint_encryption_type \u2013 (Optional) The type of encryption the cluster's endpoint should support. Valid values are: NONE and TLS. Default value is NONE. cluster_name \u2013 (Required) Group identifier. DAX converts this name to lowercase iam_role_arn - (Required) A valid Amazon Resource Name (ARN) that identifies an IAM role. At runtime, DAX will assume this role and use the role's permissions to access DynamoDB on your behalf node_type \u2013 (Required) The compute and memory capacity of the nodes. See Nodes for supported node types replication_factor \u2013 (Required) The number of nodes in the DAX cluster. A replication factor of 1 will create a single-node cluster, without any read replicas availability_zones - (Optional) List of Availability Zones in which the nodes will be created description \u2013 (Optional) Description for the cluster notification_topic_arn \u2013 (Optional) An Amazon Resource Name (ARN) of an SNS topic to send DAX notifications to. Example: arn:aws:sns:us-east-1:012345678999:my_sns_topic parameter_group_name \u2013 (Optional) Name of the parameter group to associate with this DAX cluster maintenance_window \u2013 (Optional) Specifies the weekly time range for when maintenance on the cluster is performed. The format is ddd:hh24:mi-ddd:hh24:mi (24H Clock UTC). The minimum maintenance window is a 60 minute period. Example: sun:05:00-sun:09:00 security_group_ids \u2013 (Optional) One or more VPC security groups associated with the cluster server_side_encryption - (Optional) Encrypt at rest options subnet_group_name \u2013 (Optional) Name of the subnet group to be used for the cluster tags - (Optional) A map of tags to assign to the resource. If configured with a provider default_tags configuration block present, tags with matching keys will overwrite those defined at the provider-level. The server_side_encryption object supports the following:",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_dax_cluster` resource allows users to assign metadata in the form of key-value pairs to the DAX cluster, enabling organization, categorization, and identification of the resource for purposes such as cost allocation, environment labeling (e.g., \"dev\" or \"prod\"), and resource management. When configured, these tags can override provider-level default tags, ensuring precise control over tagging behavior for the cluster."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_dax_cluster` resource allows users to define a comprehensive set of key-value tags that are automatically merged from both user-defined tags and provider-level default tags. This enables streamlined resource organization, cost allocation, and metadata management across the DAX cluster, supporting common goals like tagging for environments, ownership, or compliance tracking."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "server_side_encryption",
+      "description": "(Optional) Encrypt at rest options",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enabled",
+          "description": "(Optional) Whether to enable encryption at rest. Defaults to `false`.",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument for the `server_side_encryption` configuration in the `aws_dax_cluster` resource allows users to specify whether encryption at rest is activated for the DAX cluster. Setting this to `true` enhances data security by encrypting stored data, aligning with common goals of protecting sensitive information in caching and database environments."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `server_side_encryption` block in the `aws_dax_cluster` resource enables encryption at rest for the DAX cluster, ensuring data stored within the cluster is securely encrypted to meet compliance and security requirements. This block encapsulates settings related to enabling or managing encryption, helping users safeguard sensitive data and achieve enhanced data protection for their in-memory caching workloads."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_dax_cluster` resource allows users to specify the maximum duration (as a string) Terraform should wait for the creation of a DAX cluster to complete. By configuring this timeout, users can control the lifecycle behavior of the resource, ensuring operations do not hang indefinitely and align with deployment expectations for distributed caching infrastructure."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_dax_cluster` resource allows users to specify the maximum duration (as a string) Terraform will wait for the deletion of a DAX cluster to complete. By configuring this timeout, users can control the lifecycle behavior during resource teardown, ensuring operations do not hang indefinitely or fail prematurely due to insufficient wait time."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block of the `aws_dax_cluster` resource allows users to specify the maximum duration Terraform should wait for updates to the DAX cluster to complete. By configuring this timeout, users can control the behavior of long-running update operations, ensuring smoother resource management and avoiding potential timeout errors during cluster modifications."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_dax_cluster` resource allows users to define custom timeout durations for specific operations, such as creating, updating, or deleting a DAX cluster. By configuring this block, users gain precise control over operation time limits, ensuring smoother management of cluster lifecycle processes in scenarios with varying network or resource constraints."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN of the DAX cluster",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "cluster_address",
+      "description": "The DNS name of the DAX cluster without the port appended",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "configuration_endpoint",
+      "description": "The configuration endpoint for this DAX cluster, consisting of a DNS name and a port number",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "nodes",
+      "description": "List of node objects including `id`, `address`, `port` and `availability_zone`. Referenceable e.g., as `${aws_dax_cluster.test.nodes.0.address}`",
+      "optional": false,
+      "type": "list(object({address=string,availability_zone=string,id=string,port=number}))"
+    },
+    {
+      "name": "port",
+      "description": "The port used by the configuration endpoint",
+      "optional": false,
+      "type": "number"
+    }
+  ]
+}

@@ -1,0 +1,751 @@
+{
+  "resource": {
+    "name": "aws_rds_cluster",
+    "description": "Manages a RDS Aurora Cluster or a RDS Multi-AZ DB Cluster. To manage cluster instances that inherit configuration from the cluster (when not running the cluster in serverless engine mode), see the aws_rds_cluster_instance resource. To manage non-Aurora DB instances (e.g., MySQL, PostgreSQL, SQL Server, etc.), see the aws_db_instance resource. For information on the difference between the available Aurora MySQL engines see Comparison between Aurora MySQL 1 and Aurora MySQL 2 in the Amazon RDS User Guide. Changes to an RDS Cluster can occur when you manually change a parameter, such as port, and are reflected in the next maintenance window. Because of this, Terraform may report a difference in its planning phase because a modification has not yet taken place. You can use the apply_immediately flag to instruct the service to apply the change immediately (see documentation below). Multi-AZ DB clusters are supported only for the MySQL and PostgreSQL DB engines. ca_certificate_identifier is only supported for Multi-AZ DB clusters. using apply_immediately can result in a brief downtime as the server reboots. See the AWS Docs on RDS Maintenance for more information. All arguments including the username and password will be stored in the raw state as plain-text. Read more about sensitive data in state. Terraform provides both a standalone RDS Cluster Role Association - (an association between an RDS Cluster and a single IAM Role) and an RDS Cluster resource with iam_roles attributes. Use one resource or the other to associate IAM Roles and RDS Clusters. Not doing so will cause a conflict of associations and will result in the association being overwritten. Write-Only argument master_password_wo is available to use in place of master_password. Write-Only arguments are supported in HashiCorp Terraform 1.11.0 and later. Learn more.",
+    "llm_summary": "The `aws_rds_cluster` Terraform resource manages the configuration of Amazon RDS Aurora Clusters and Multi-AZ DB Clusters, enabling users to deploy highly available, scalable relational databases for MySQL and PostgreSQL workloads. It supports key configurations such as cluster instance management, engine version selection (e.g., Aurora MySQL 1 vs. 2), IAM role associations, and immediate or scheduled parameter updates. Common use cases include setting up fault-tolerant database clusters, optimizing database performance, and securely managing sensitive credentials for production-grade applications."
+  },
+  "examples": [
+    {
+      "title": "Aurora MySQL 2.x (MySQL 5.7)",
+      "code": "resource \"aws_rds_cluster\" \"default\" {\n  cluster_identifier      = \"aurora-cluster-demo\"\n  engine                  = \"aurora-mysql\"\n  engine_version          = \"5.7.mysql_aurora.2.03.2\"\n  availability_zones      = [\"us-west-2a\", \"us-west-2b\", \"us-west-2c\"]\n  database_name           = \"mydb\"\n  master_username         = \"foo\"\n  master_password         = \"must_be_eight_characters\"\n  backup_retention_period = 5\n  preferred_backup_window = \"07:00-09:00\"\n}",
+      "llm_summary": "This example demonstrates how to configure an Amazon Aurora MySQL 2.x cluster (compatible with MySQL 5.7) using the `aws_rds_cluster` resource in Terraform. It showcases key configurations such as specifying the engine version, availability zones, database name, master credentials, backup retention period, and preferred backup window for a highly available and managed database cluster."
+    },
+    {
+      "title": "Aurora MySQL 1.x (MySQL 5.6)",
+      "code": "resource \"aws_rds_cluster\" \"default\" {\n  cluster_identifier      = \"aurora-cluster-demo\"\n  availability_zones      = [\"us-west-2a\", \"us-west-2b\", \"us-west-2c\"]\n  database_name           = \"mydb\"\n  master_username         = \"foo\"\n  master_password         = \"must_be_eight_characters\"\n  backup_retention_period = 5\n  preferred_backup_window = \"07:00-09:00\"\n}",
+      "llm_summary": "This example demonstrates how to configure an Amazon Aurora MySQL 1.x (MySQL 5.6) cluster using the `aws_rds_cluster` resource in Terraform. It showcases key configurations such as specifying availability zones, setting up database credentials, defining a backup retention period, and configuring a preferred backup window for automated backups."
+    },
+    {
+      "title": "Aurora with PostgreSQL engine",
+      "code": "resource \"aws_rds_cluster\" \"postgresql\" {\n  cluster_identifier      = \"aurora-cluster-demo\"\n  engine                  = \"aurora-postgresql\"\n  availability_zones      = [\"us-west-2a\", \"us-west-2b\", \"us-west-2c\"]\n  database_name           = \"mydb\"\n  master_username         = \"foo\"\n  master_password         = \"must_be_eight_characters\"\n  backup_retention_period = 5\n  preferred_backup_window = \"07:00-09:00\"\n}",
+      "llm_summary": "\"Demonstrates how to configure an Amazon Aurora cluster with the PostgreSQL engine using the `aws_rds_cluster` resource, including multi-AZ deployment, custom database name, master credentials, backup retention, and a preferred backup window.\""
+    },
+    {
+      "title": "RDS Multi-AZ Cluster",
+      "code": "resource \"aws_rds_cluster\" \"example\" {\n  cluster_identifier        = \"example\"\n  availability_zones        = [\"us-west-2a\", \"us-west-2b\", \"us-west-2c\"]\n  engine                    = \"mysql\"\n  db_cluster_instance_class = \"db.r6gd.xlarge\"\n  storage_type              = \"io1\"\n  allocated_storage         = 100\n  iops                      = 1000\n  master_username           = \"test\"\n  master_password           = \"mustbeeightcharaters\"\n}",
+      "llm_summary": "\"Demonstrates how to configure an Amazon RDS Multi-AZ cluster with MySQL, specifying availability zones, instance class (`db.r6gd.xlarge`), high-performance storage (`io1` with 1000 IOPS), and essential parameters like `master_username` and `master_password`. This example is ideal for users setting up a resilient, high-throughput database cluster in AWS.\""
+    },
+    {
+      "title": "RDS Serverless v2 Cluster",
+      "code": "resource \"aws_rds_cluster\" \"example\" {\n  cluster_identifier = \"example\"\n  engine             = \"aurora-postgresql\"\n  engine_mode        = \"provisioned\"\n  engine_version     = \"13.6\"\n  database_name      = \"test\"\n  master_username    = \"test\"\n  master_password    = \"must_be_eight_characters\"\n  storage_encrypted  = true\n\n  serverlessv2_scaling_configuration {\n    max_capacity             = 1.0\n    min_capacity             = 0.0\n    seconds_until_auto_pause = 3600\n  }\n}\n\nresource \"aws_rds_cluster_instance\" \"example\" {\n  cluster_identifier = aws_rds_cluster.example.id\n  instance_class     = \"db.serverless\"\n  engine             = aws_rds_cluster.example.engine\n  engine_version     = aws_rds_cluster.example.engine_version\n}",
+      "llm_summary": "This example demonstrates how to configure an Amazon Aurora PostgreSQL RDS cluster with serverless v2 scaling using the `aws_rds_cluster` resource. It highlights key configurations such as the `serverlessv2_scaling_configuration` block for dynamic capacity management, encryption with `storage_encrypted`, and provisioning a `db.serverless` instance via the `aws_rds_cluster_instance` resource."
+    },
+    {
+      "title": "RDS/Aurora Managed Master Passwords via Secrets Manager, default KMS Key",
+      "code": "resource \"aws_rds_cluster\" \"test\" {\n  cluster_identifier          = \"example\"\n  database_name               = \"test\"\n  manage_master_user_password = true\n  master_username             = \"test\"\n}",
+      "llm_summary": "\"Demonstrates how to configure an Amazon RDS Aurora cluster (`aws_rds_cluster`) with managed master user password storage using AWS Secrets Manager (`manage_master_user_password`), leveraging the default KMS key for encryption. This example highlights secure password management and basic cluster setup with essential arguments like `cluster_identifier`, `database_name`, and `master_username`.\""
+    },
+    {
+      "title": "RDS/Aurora Managed Master Passwords via Secrets Manager, specific KMS Key",
+      "code": "resource \"aws_kms_key\" \"example\" {\n  description = \"Example KMS Key\"\n}\n\nresource \"aws_rds_cluster\" \"test\" {\n  cluster_identifier            = \"example\"\n  database_name                 = \"test\"\n  manage_master_user_password   = true\n  master_username               = \"test\"\n  master_user_secret_kms_key_id = aws_kms_key.example.key_id\n}",
+      "llm_summary": "\"Demonstrates how to configure an Amazon RDS Aurora cluster (`aws_rds_cluster`) with managed master user password storage in AWS Secrets Manager, secured using a specific KMS key (`aws_kms_key`). Highlights the use of `manage_master_user_password` and `master_user_secret_kms_key_id` for enhanced security and automated password management.\""
+    },
+    {
+      "title": "Global Cluster Restored From Snapshot",
+      "code": "data \"aws_db_cluster_snapshot\" \"example\" {\n  db_cluster_identifier = \"example-original-cluster\"\n  most_recent           = true\n}\n\nresource \"aws_rds_cluster\" \"example\" {\n  # Because the global cluster is sourced from this cluster, the initial\n  # engine and engine_version values are defined here and automatically\n  # inherited by the global cluster.\n  engine         = \"aurora\"\n  engine_version = \"5.6.mysql_aurora.1.22.4\"\n\n  cluster_identifier  = \"example\"\n  snapshot_identifier = data.aws_db_cluster_snapshot.example.id\n\n  lifecycle {\n    ignore_changes = [snapshot_identifier, global_cluster_identifier]\n  }\n}\n\nresource \"aws_rds_global_cluster\" \"example\" {\n  global_cluster_identifier    = \"example\"\n  source_db_cluster_identifier = aws_rds_cluster.example.arn\n  force_destroy                = true\n}",
+      "llm_summary": "This example demonstrates how to restore an Amazon Aurora RDS cluster from a snapshot and configure it as the source for a global cluster using the `aws_rds_cluster` and `aws_rds_global_cluster` resources. Key configurations include specifying the `snapshot_identifier` for restoration, inheriting engine settings for the global cluster, and using the `lifecycle` block to ignore changes to snapshot-related attributes."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "allocated_storage",
+      "description": "(Optional, Required for Multi-AZ DB cluster) The amount of storage in gibibytes (GiB) to allocate to each DB instance in the Multi-AZ DB cluster.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `allocated_storage` argument for the `aws_rds_cluster` resource specifies the amount of storage (in gibibytes, GiB) allocated to each database instance within a Multi-AZ DB cluster. Configuring this parameter allows users to define the storage capacity for their database instances, ensuring sufficient space for data storage and supporting high availability in Multi-AZ deployments."
+    },
+    {
+      "name": "allow_major_version_upgrade",
+      "description": "(Optional) Enable to allow major engine version upgrades when changing engine versions. Defaults to `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `allow_major_version_upgrade` argument in the `aws_rds_cluster` resource controls whether major engine version upgrades are permitted during changes to the database engine version. Enabling this option (`true`) allows users to perform significant version upgrades, which can be useful for adopting new features or improvements, but may require additional testing to ensure compatibility with existing applications."
+    },
+    {
+      "name": "apply_immediately",
+      "description": "(Optional) Specifies whether any cluster modifications are applied immediately, or during the next maintenance window. Default is `false`. See Amazon RDS Documentation for more information.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `apply_immediately` argument in the `aws_rds_cluster` resource allows users to control whether configuration changes to the RDS cluster are applied immediately or deferred to the next maintenance window. Setting this to `true` enables immediate application of modifications, which is useful for urgent updates, while leaving it as `false` ensures changes are applied during scheduled maintenance to minimize potential disruptions."
+    },
+    {
+      "name": "availability_zones",
+      "description": "(Optional) List of EC2 Availability Zones for the DB cluster storage where DB cluster instances can be created. RDS automatically assigns 3 AZs if less than 3 AZs are configured, which will show as a difference requiring resource recreation next Terraform apply. We recommend specifying 3 AZs or using the `lifecycle` configuration block `ignore_changes` argument if necessary. A maximum of 3 AZs can be configured.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `availability_zones` argument for the `aws_rds_cluster` resource allows users to specify up to three EC2 Availability Zones for the DB cluster's storage, controlling the geographic distribution and fault tolerance of the cluster instances. Configuring this argument ensures predictable placement of resources across specified zones, aligning with high availability goals, while omitting it lets RDS automatically assign zones, potentially triggering resource recreation during updates."
+    },
+    {
+      "name": "backtrack_window",
+      "description": "(Optional) Target backtrack window, in seconds. Only available for `aurora` and `aurora-mysql` engines currently. To disable backtracking, set this value to `0`. Defaults to `0`. Must be between `0` and `259200` (72 hours)",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `backtrack_window` argument in the `aws_rds_cluster` resource allows users to configure the ability to backtrack an Aurora or Aurora MySQL database cluster to a previous state within a specified time window, measured in seconds. By setting this value (ranging from `0` to `259200`), users can enable or disable backtracking functionality, which is useful for recovering from accidental changes or errors without requiring a full restore from backups."
+    },
+    {
+      "name": "backup_retention_period",
+      "description": "(Optional) Days to retain backups for. Default `1`",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `backup_retention_period` argument for the `aws_rds_cluster` resource allows users to define the number of days automated backups of the database cluster are retained. Configuring this parameter impacts the cluster's backup lifecycle, enabling users to meet data retention policies or disaster recovery requirements by specifying how long backups should be preserved, with a default of 1 day if not set."
+    },
+    {
+      "name": "ca_certificate_identifier",
+      "description": "(Optional) The CA certificate identifier to use for the DB cluster's server certificate.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ca_certificate_identifier` argument for the `aws_rds_cluster` resource allows users to specify the identifier of the CA certificate used to validate the server certificate for the database cluster. Configuring this argument ensures secure communication by defining the trusted certificate authority, which is particularly useful for compliance or security-sensitive environments requiring custom or updated CA certificates."
+    },
+    {
+      "name": "cluster_identifier",
+      "description": "(Optional, Forces new resources) The cluster identifier. If omitted, Terraform will assign a random, unique identifier.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cluster_identifier` argument allows users to define a unique name for the RDS cluster, serving as its primary identifier within AWS. Setting this argument enables precise management and referencing of the cluster, and omitting it results in Terraform generating a random identifier, which may impact workflows requiring predictable naming conventions or integration with other resources."
+    },
+    {
+      "name": "cluster_identifier_prefix",
+      "description": "(Optional, Forces new resource) Creates a unique cluster identifier beginning with the specified prefix. Conflicts with `cluster_identifier`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cluster_identifier_prefix` argument allows users to define a custom prefix for the unique identifier of an RDS cluster, enabling consistent naming conventions across environments or deployments. Setting this argument ensures the cluster identifier begins with the specified prefix, which is useful for organizing resources by project, environment, or purpose, and automatically generates a unique identifier to avoid naming conflicts."
+    },
+    {
+      "name": "cluster_members",
+      "description": "",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `cluster_members` argument in the `aws_rds_cluster` resource allows users to specify the identifiers of RDS instances that are part of the cluster. By defining this set, users can control which database instances are associated with the cluster, enabling high availability and load balancing across the specified members. This configuration is essential for managing multi-instance setups in an RDS cluster environment."
+    },
+    {
+      "name": "cluster_scalability_type",
+      "description": "(Optional, Forces new resources) Specifies the scalability mode of the Aurora DB cluster. When set to `limitless`, the cluster operates as an Aurora Limitless Database. When set to `standard` (the default), the cluster uses normal DB instance creation. Valid values: `limitless`, `standard`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cluster_scalability_type` argument for the `aws_rds_cluster` resource allows users to define the scalability mode of an Aurora DB cluster, enabling either standard instance-based scaling (`standard`) or Aurora Limitless Database scaling (`limitless`) for dynamic, serverless-like capacity adjustments. This configuration impacts how the cluster handles resource allocation and scaling, aligning with user goals for optimizing performance or cost efficiency based on workload demands."
+    },
+    {
+      "name": "copy_tags_to_snapshot",
+      "description": "\u2013 (Optional, boolean) Copy all Cluster `tags` to snapshots. Default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `copy_tags_to_snapshot` argument in the `aws_rds_cluster` resource controls whether all tags associated with the RDS cluster are automatically copied to its snapshots. Enabling this option (`true`) helps maintain consistent metadata across the cluster and its snapshots, which is useful for tagging-based cost allocation, resource organization, or compliance tracking."
+    },
+    {
+      "name": "database_insights_mode",
+      "description": "(Optional) The mode of Database Insights to enable for the DB cluster. Valid values: `standard`, `advanced`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `database_insights_mode` argument for the `aws_rds_cluster` resource allows users to configure the level of performance monitoring and insights enabled for the database cluster. By specifying either `standard` or `advanced`, users can control the depth of diagnostic data collected, which impacts the ability to analyze and optimize database performance for operational or troubleshooting purposes."
+    },
+    {
+      "name": "database_name",
+      "description": "(Optional) Name for an automatically created database on cluster creation. There are different naming restrictions per database engine: RDS Naming Constraints",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `database_name` argument for the `aws_rds_cluster` resource allows users to specify the name of an initial database automatically created during the cluster's provisioning. This is particularly useful for defining a default database to streamline application setup or development workflows, with naming constraints varying by the selected database engine."
+    },
+    {
+      "name": "db_cluster_instance_class",
+      "description": "(Optional, Required for Multi-AZ DB cluster) The compute and memory capacity of each DB instance in the Multi-AZ DB cluster, for example `db.m6g.xlarge`. Not all DB instance classes are available in all AWS Regions, or for all database engines. For the full list of DB instance classes and availability for your engine, see DB instance class in the Amazon RDS User Guide.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `db_cluster_instance_class` argument for the `aws_rds_cluster` resource allows users to define the compute and memory capacity of each database instance within a Multi-AZ DB cluster, specifying the instance class (e.g., `db.m6g.xlarge`) to optimize performance and resource allocation. Setting this argument impacts the scalability, cost, and availability of the cluster, aligning with user goals such as configuring high-availability database environments or tailoring infrastructure to workload requirements."
+    },
+    {
+      "name": "db_cluster_parameter_group_name",
+      "description": "(Optional) A cluster parameter group to associate with the cluster.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `db_cluster_parameter_group_name` argument allows users to specify a custom cluster parameter group for the RDS cluster, enabling fine-grained control over database engine settings and operational parameters. By setting this argument, users can tailor the cluster's behavior to meet specific application requirements, such as performance tuning, security configurations, or compatibility adjustments."
+    },
+    {
+      "name": "db_instance_parameter_group_name",
+      "description": "(Optional) Instance parameter group to associate with all instances of the DB cluster. The `db_instance_parameter_group_name` parameter is only valid in combination with the `allow_major_version_upgrade` parameter.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the parameter group to configure database instance-level settings for all instances within the RDS cluster, enabling fine-grained control over instance-specific behaviors such as performance tuning or feature activation. This argument is typically used in conjunction with `allow_major_version_upgrade` to ensure compatibility during version upgrades."
+    },
+    {
+      "name": "db_subnet_group_name",
+      "description": "(Optional) DB subnet group to associate with this DB cluster. NOTE: This must match the `db_subnet_group_name` specified on every `aws_rds_cluster_instance` in the cluster.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `db_subnet_group_name` argument allows users to specify the DB subnet group associated with the RDS cluster, defining the network configuration for the cluster's database instances. By setting this argument, users ensure the cluster operates within specific subnets, typically to control access, enhance security, and enable connectivity within a VPC, aligning with common goals like network isolation and compliance."
+    },
+    {
+      "name": "db_system_id",
+      "description": "(Optional) For use with RDS Custom.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `db_system_id` argument in the `aws_rds_cluster` resource allows users to specify the identifier of an RDS Custom database system, enabling the configuration of clusters tailored for custom database engines or advanced use cases. This optional parameter is typically used to integrate and manage RDS Custom environments, providing greater control over specialized database setups."
+    },
+    {
+      "name": "delete_automated_backups",
+      "description": "(Optional) Specifies whether to remove automated backups immediately after the DB cluster is deleted. Default is `true`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `delete_automated_backups` argument in the `aws_rds_cluster` resource controls whether automated backups associated with the RDS cluster are immediately removed upon cluster deletion. Setting this argument to `true` (default) ensures backups are deleted as part of the cluster's lifecycle cleanup, while setting it to `false` retains the backups for potential recovery or compliance purposes, aligning with user goals for data retention and disaster recovery."
+    },
+    {
+      "name": "deletion_protection",
+      "description": "(Optional) If the DB cluster should have deletion protection enabled. The database can't be deleted when this value is set to `true`. The default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `deletion_protection` argument for the `aws_rds_cluster` resource allows users to define whether the database cluster is safeguarded against accidental deletion. Enabling this feature (`true`) ensures the cluster cannot be deleted, supporting lifecycle management and protecting critical environments like production systems, while the default value (`false`) permits deletion."
+    },
+    {
+      "name": "domain",
+      "description": "(Optional) The ID of the Directory Service Active Directory domain to create the cluster in.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `domain` argument in the `aws_rds_cluster` resource allows users to specify the ID of an Active Directory domain managed by AWS Directory Service, enabling integration of the RDS cluster with Active Directory for authentication and access control. This configuration is typically used to support enterprise-grade security requirements, such as centralized user management and Kerberos-based authentication, aligning with common goals like enhancing database access governance."
+    },
+    {
+      "name": "domain_iam_role_name",
+      "description": "(Optional, but required if `domain` is provided) The name of the IAM role to be used when making API calls to the Directory Service.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `domain_iam_role_name` argument for the `aws_rds_cluster` resource specifies the IAM role name required for the cluster to interact with AWS Directory Service when a domain is configured. Setting this argument enables seamless integration with Active Directory, allowing the RDS cluster to authenticate and manage database users through the directory service."
+    },
+    {
+      "name": "enable_global_write_forwarding",
+      "description": "(Optional) Whether cluster should forward writes to an associated global cluster. Applied to secondary clusters to enable them to forward writes to an `aws_rds_global_cluster`'s primary cluster. See the User Guide for Aurora for more information.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_global_write_forwarding` argument in the `aws_rds_cluster` resource allows users to configure whether a secondary Aurora cluster forwards write operations to the primary cluster within an associated global cluster (`aws_rds_global_cluster`). Enabling this functionality is typically used to support global database architectures, ensuring write consistency across regions by routing writes to the primary cluster."
+    },
+    {
+      "name": "enable_http_endpoint",
+      "description": "(Optional) Enable HTTP endpoint (data API). Only valid for some combinations of `engine_mode`, `engine` and `engine_version` and only available in some regions. See the Region and version availability section of the documentation. This option also does not work with any of these options specified: `snapshot_identifier`, `replication_source_identifier`, `s3_import`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_http_endpoint` argument allows users to enable the Data API for the RDS cluster, providing an HTTP-based interface to interact with the database without requiring a persistent connection. This feature is useful for serverless applications or environments where direct database connections are impractical, but its availability depends on specific combinations of engine, engine mode, engine version, and region, and it is incompatible with certain configurations like snapshots or replication sources."
+    },
+    {
+      "name": "enable_local_write_forwarding",
+      "description": "(Optional) Whether read replicas can forward write operations to the writer DB instance in the DB cluster. By default, write operations aren't allowed on reader DB instances.. See the User Guide for Aurora for more information. NOTE: Local write forwarding requires Aurora MySQL version 3.04 or higher.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_local_write_forwarding` argument for the `aws_rds_cluster` resource allows users to control whether read replicas in an Aurora DB cluster can forward write operations to the primary writer instance. Enabling this feature facilitates local write forwarding, which can improve write performance in distributed environments, but requires Aurora MySQL version 3.04 or higher."
+    },
+    {
+      "name": "enabled_cloudwatch_logs_exports",
+      "description": "(Optional) Set of log types to export to cloudwatch. If omitted, no logs will be exported. The following log types are supported: `audit`, `error`, `general`, `slowquery`, `iam-db-auth-error`, `postgresql` (PostgreSQL).",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `enabled_cloudwatch_logs_exports` argument for the `aws_rds_cluster` resource allows users to specify which database log types (e.g., `audit`, `error`, `general`, `slowquery`, etc.) should be exported to Amazon CloudWatch Logs. Configuring this argument enables centralized log monitoring and analysis, helping users achieve enhanced observability, troubleshooting, and compliance for their RDS cluster."
+    },
+    {
+      "name": "engine",
+      "description": "(Required) Name of the database engine to be used for this DB cluster. Valid Values: `aurora-mysql`, `aurora-postgresql`, `mysql`, `postgres`. (Note that `mysql` and `postgres` are Multi-AZ RDS clusters).",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `engine` argument specifies the database engine type for the `aws_rds_cluster`, allowing users to define the underlying technology powering the cluster, such as `aurora-mysql`, `aurora-postgresql`, `mysql`, or `postgres`. Setting this argument determines the cluster's compatibility, features, and behavior, aligning with user goals like selecting the appropriate database system for application requirements or enabling Multi-AZ configurations for high availability."
+    },
+    {
+      "name": "engine_lifecycle_support",
+      "description": "(Optional) The life cycle type for this DB instance. This setting is valid for cluster types Aurora DB clusters and Multi-AZ DB clusters. Valid values are `open-source-rds-extended-support`, `open-source-rds-extended-support-disabled`. Default value is `open-source-rds-extended-support`. [Using Amazon RDS Extended Support]: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/extended-support.html",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `engine_lifecycle_support` argument for the `aws_rds_cluster` resource allows users to specify the lifecycle type of the database engine, controlling whether Amazon RDS Extended Support is enabled or disabled for Aurora and Multi-AZ DB clusters. This setting impacts the level of maintenance and extended support provided for open-source database engines, aligning with user goals for managing long-term compatibility and support policies."
+    },
+    {
+      "name": "engine_mode",
+      "description": "(Optional) Database engine mode. Valid values: `global` (only valid for Aurora MySQL 1.21 and earlier), `parallelquery`, `provisioned`, `serverless`. Defaults to: `provisioned`. Specify an empty value (`\"\"`) for no engine mode. See the RDS User Guide for limitations when using `serverless`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `engine_mode` argument for the `aws_rds_cluster` resource allows users to define the operational mode of the database engine, enabling configurations such as `provisioned` for standard deployments, `serverless` for on-demand scaling, or specialized modes like `parallelquery` for enhanced query performance. This setting directly impacts the cluster's scalability, cost model, and query execution behavior, aligning with user goals such as optimizing resource utilization or enabling advanced database features."
+    },
+    {
+      "name": "engine_version",
+      "description": "(Optional) Database engine version. Updating this argument results in an outage. See the Aurora MySQL and Aurora Postgres documentation for your configured engine to determine this value, or by running `aws rds describe-db-engine-versions`. For example with Aurora MySQL 2, a potential value for this argument is `5.7.mysql_aurora.2.03.2`. The value can contain a partial version where supported by the API. The actual engine version used is returned in the attribute `engine_version_actual`, , see Attribute Reference below.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `engine_version` argument for the `aws_rds_cluster` resource allows users to specify the database engine version for their Aurora MySQL or Aurora PostgreSQL cluster, enabling precise control over compatibility and feature sets. Setting this argument impacts the cluster's behavior and may result in downtime during updates, making it essential for aligning with application requirements or compliance standards."
+    },
+    {
+      "name": "final_snapshot_identifier",
+      "description": "(Optional) Name of your final DB snapshot when this DB cluster is deleted. If omitted, no final snapshot will be made.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `final_snapshot_identifier` argument allows users to specify the name of a final DB snapshot to be automatically created when the RDS cluster is deleted, enabling data backup and recovery as part of the cluster's lifecycle management. If omitted, no final snapshot is created, which may be suitable for scenarios where data retention is not required."
+    },
+    {
+      "name": "global_cluster_identifier",
+      "description": "(Optional) Global cluster identifier specified on `aws_rds_global_cluster`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "\"Defines the association of the RDS cluster with a global database by specifying the global cluster identifier from `aws_rds_global_cluster`, enabling cross-region replication and global database functionality for high availability and disaster recovery.\""
+    },
+    {
+      "name": "iam_database_authentication_enabled",
+      "description": "(Optional) Specifies whether or not mappings of AWS Identity and Access Management (IAM) accounts to database accounts is enabled. Please see AWS Documentation for availability and limitations.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "Enables IAM-based database authentication for the RDS cluster, allowing users to map AWS IAM accounts to database accounts for enhanced access control and security. This configuration is optional and typically used to integrate IAM roles and policies with database authentication mechanisms."
+    },
+    {
+      "name": "iam_roles",
+      "description": "(Optional) List of ARNs for the IAM roles to associate to the RDS Cluster.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `iam_roles` argument for the `aws_rds_cluster` resource allows users to specify a set of IAM role ARNs to associate with the RDS cluster, enabling the cluster to assume these roles for tasks such as accessing other AWS services securely. Configuring this argument is typically used to grant the cluster permissions for operations like exporting logs to S3, interacting with AWS KMS for encryption, or integrating with other services, aligning with common security and access control goals."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_rds_cluster` resource allows users to specify a unique identifier for the RDS cluster, typically used to reference the cluster in Terraform configurations and outputs. While optional, setting this argument can help streamline resource management and integration with other Terraform resources or external systems by providing a consistent and predictable identifier."
+    },
+    {
+      "name": "iops",
+      "description": "(Optional) Amount of Provisioned IOPS (input/output operations per second) to be initially allocated for each DB instance in the Multi-AZ DB cluster. For information about valid Iops values, see Amazon RDS Provisioned IOPS storage to improve performance in the Amazon RDS User Guide. (This setting is required to create a Multi-AZ DB cluster). Must be a multiple between .5 and 50 of the storage amount for the DB cluster.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `iops` argument in the `aws_rds_cluster` resource allows users to define the amount of Provisioned IOPS (input/output operations per second) allocated for each DB instance in a Multi-AZ DB cluster, directly impacting the cluster's storage performance and throughput. This configuration is essential for optimizing database workloads with high I/O demands and must align with the storage size, adhering to specific proportional constraints."
+    },
+    {
+      "name": "kms_key_id",
+      "description": "(Optional) ARN for the KMS encryption key. When specifying `kms_key_id`, `storage_encrypted` needs to be set to true.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `kms_key_id` argument allows users to specify the ARN of a KMS encryption key to enable encryption at rest for the RDS cluster. By configuring this, users can enforce data security and compliance requirements, provided that `storage_encrypted` is also set to `true`."
+    },
+    {
+      "name": "manage_master_user_password",
+      "description": "(Optional) Set to true to allow RDS to manage the master user password in Secrets Manager. Cannot be set if `master_password` is provided.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "Enables automated management of the master user password for the RDS cluster by storing and rotating it in AWS Secrets Manager, simplifying password lifecycle management and enhancing security. This argument cannot be used alongside manual password configuration via `master_password`."
+    },
+    {
+      "name": "master_password",
+      "description": "(Optional, required unless `manage_master_user_password` is set to true, a `snapshot_identifier`, `replication_source_identifier`, or `master_password_wo` is provided or unless a `global_cluster_identifier` is provided when the cluster is the \"secondary\" cluster of a global database) Password for the master DB user. Note that this may show up in logs, and it will be stored in the state file. Please refer to the RDS Naming Constraints. Cannot be set if `manage_master_user_password` is set to `true`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `master_password` argument allows users to define the password for the master database user in an RDS cluster, enabling authentication and access control for the primary database administrator. It is typically used to configure secure access credentials but must be omitted if `manage_master_user_password` is enabled or certain other configurations (e.g., snapshots, replication sources, or global clusters) are specified."
+    },
+    {
+      "name": "master_password_wo",
+      "description": "(Optional, Write-Only required unless `manage_master_user_password` is set to true, a `snapshot_identifier`, `replication_source_identifier`, or `master_password` is provided or unless a `global_cluster_identifier` is provided when the cluster is the \"secondary\" cluster of a global database) Password for the master DB user. Note that this may show up in logs. Please refer to the RDS Naming Constraints. Cannot be set if `manage_master_user_password` is set to `true`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `master_password_wo` argument in the `aws_rds_cluster` resource allows users to define the password for the master database user, enabling authentication and access control for the cluster's primary database user. This write-only argument is typically used to configure secure access credentials unless automated password management (`manage_master_user_password`) or alternative configurations like snapshots, replication sources, or global database setups are in place."
+    },
+    {
+      "name": "master_password_wo_version",
+      "description": "(Optional) Used together with `master_password_wo` to trigger an update. Increment this value when an update to the `master_password_wo` is required.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `master_password_wo_version` argument in the `aws_rds_cluster` resource is a numeric value used to trigger updates to the cluster's master password when paired with the `master_password_wo` argument. By incrementing this value, users can enforce password rotation or updates, supporting secure lifecycle management of database credentials without directly modifying the password itself."
+    },
+    {
+      "name": "master_user_secret_kms_key_id",
+      "description": "(Optional) Amazon Web Services KMS key identifier is the key ARN, key ID, alias ARN, or alias name for the KMS key. To use a KMS key in a different Amazon Web Services account, specify the key ARN or alias ARN. If not specified, the default KMS key for your Amazon Web Services account is used.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `master_user_secret_kms_key_id` argument in the `aws_rds_cluster` resource allows users to specify the AWS KMS key (via ARN, key ID, alias ARN, or alias name) used to encrypt the secret containing the master user credentials for the RDS cluster. By setting this argument, users can control the encryption behavior and ensure secure management of sensitive credentials, including using a KMS key from a different AWS account if needed."
+    },
+    {
+      "name": "master_username",
+      "description": "(Required unless a `snapshot_identifier` or `replication_source_identifier` is provided or unless a `global_cluster_identifier` is provided when the cluster is the \"secondary\" cluster of a global database) Username for the master DB user. Please refer to the RDS Naming Constraints. This argument does not support in-place updates and cannot be changed during a restore from snapshot.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `master_username` argument allows users to define the primary administrative username for the master database user in an RDS cluster, enabling control over database access and management. It is essential for initial database authentication unless the cluster is created from a snapshot, replication source, or as part of a global database configuration, and cannot be updated in-place or modified during snapshot restores."
+    },
+    {
+      "name": "monitoring_interval",
+      "description": "(Optional) Interval, in seconds, in seconds, between points when Enhanced Monitoring metrics are collected for the DB cluster. To turn off collecting Enhanced Monitoring metrics, specify 0. The default is 0. Valid Values: 0, 1, 5, 10, 15, 30, 60.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `monitoring_interval` argument for the `aws_rds_cluster` resource allows users to configure the frequency, in seconds, at which Enhanced Monitoring metrics are collected for the database cluster. By setting this value, users can enable detailed performance insights and operational metrics at intervals ranging from 1 to 60 seconds or disable monitoring entirely by specifying `0`, aligning with goals like performance optimization and operational visibility."
+    },
+    {
+      "name": "monitoring_role_arn",
+      "description": "(Optional) ARN for the IAM role that permits RDS to send enhanced monitoring metrics to CloudWatch Logs. You can find more information on the AWS Documentation what IAM permissions are needed to allow Enhanced Monitoring for RDS Clusters.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "Defines the IAM role ARN that grants RDS permission to send enhanced monitoring metrics to CloudWatch Logs, enabling detailed performance insights and operational visibility for the RDS cluster. This argument is optional and typically used to configure advanced monitoring capabilities for compliance, debugging, or performance optimization purposes."
+    },
+    {
+      "name": "network_type",
+      "description": "(Optional) Network type of the cluster. Valid values: `IPV4`, `DUAL`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `network_type` argument for the `aws_rds_cluster` resource allows users to specify the cluster's network connectivity mode, choosing between `IPV4` or `DUAL` (IPv4 and IPv6). Configuring this argument impacts how the database cluster communicates within the network, enabling compatibility with either IPv4-only environments or dual-stack (IPv4 and IPv6) networks to meet specific infrastructure or compliance requirements."
+    },
+    {
+      "name": "performance_insights_enabled",
+      "description": "(Optional) Enables Performance Insights.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `performance_insights_enabled` argument allows users to enable Amazon RDS Performance Insights for the `aws_rds_cluster`, providing advanced monitoring and diagnostic capabilities to analyze database performance metrics. Activating this feature helps users optimize database performance and troubleshoot issues by gaining deeper visibility into query execution and resource utilization."
+    },
+    {
+      "name": "performance_insights_kms_key_id",
+      "description": "(Optional) Specifies the KMS Key ID to encrypt Performance Insights data. If not specified, the default RDS KMS key will be used (`aws/rds`).",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `performance_insights_kms_key_id` argument allows users to specify a custom AWS KMS Key ID for encrypting Performance Insights data in an RDS cluster, providing enhanced control over encryption and compliance requirements. If omitted, the default RDS KMS key (`aws/rds`) is used, making this argument useful for users aiming to enforce specific security policies or integrate with organization-managed encryption keys."
+    },
+    {
+      "name": "performance_insights_retention_period",
+      "description": "(Optional) Specifies the amount of time to retain performance insights data for. Defaults to 7 days if Performance Insights are enabled. Valid values are `7`, `month * 31` (where month is a number of months from 1-23), and `731`. See here for more information on retention periods.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `performance_insights_retention_period` argument for the `aws_rds_cluster` resource allows users to define the duration for retaining Performance Insights data, enabling detailed monitoring and analysis of database performance over time. By configuring this argument, users can align retention periods with their monitoring needs, choosing between short-term (7 days) or long-term retention (up to 731 days) to support performance optimization and compliance goals."
+    },
+    {
+      "name": "port",
+      "description": "(Optional) Port on which the DB accepts connections.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `port` argument for the `aws_rds_cluster` resource allows users to specify the network port on which the database cluster accepts incoming connections, enabling control over the connectivity configuration for applications and services. By setting this value, users can align the database's access point with their environment's networking requirements, such as standard database ports (e.g., 3306 for MySQL or 5432 for PostgreSQL) or custom port configurations for enhanced security or compatibility."
+    },
+    {
+      "name": "preferred_backup_window",
+      "description": "(Optional) Daily time range during which automated backups are created if automated backups are enabled using the BackupRetentionPeriod parameter.Time in UTC. Default: A 30-minute window selected at random from an 8-hour block of time per region, e.g. `04:00-09:00`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `preferred_backup_window` argument for the `aws_rds_cluster` resource allows users to define a specific daily time range in UTC during which automated backups are created, ensuring predictable scheduling of backup operations. By configuring this parameter, users can align backup processes with their operational needs, such as minimizing performance impact during peak hours or adhering to compliance requirements for data protection."
+    },
+    {
+      "name": "preferred_maintenance_window",
+      "description": "(Optional) Weekly time range during which system maintenance can occur, in (UTC) e.g., `wed:04:00-wed:04:30`",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `preferred_maintenance_window` argument for the `aws_rds_cluster` resource allows users to define a specific weekly time range in UTC during which system maintenance, such as software updates or patches, can occur. This configuration helps users control when maintenance activities are performed to minimize disruption to database operations during critical periods."
+    },
+    {
+      "name": "replication_source_identifier",
+      "description": "(Optional) ARN of a source DB cluster or DB instance if this DB cluster is to be created as a Read Replica. Note: Removing this attribute after creation will promote the read replica to a standalone cluster. If DB Cluster is part of a Global Cluster, use the `lifecycle` configuration block `ignore_changes` argument to prevent Terraform from showing differences for this argument instead of configuring this value.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `replication_source_identifier` argument allows users to specify the ARN of a source DB cluster or DB instance to create the RDS cluster as a Read Replica, enabling replication for high availability or disaster recovery. Configuring this argument establishes the cluster's replication relationship, and removing it post-creation promotes the Read Replica to a standalone cluster, impacting its lifecycle and behavior."
+    },
+    {
+      "name": "skip_final_snapshot",
+      "description": "(Optional) Determines whether a final DB snapshot is created before the DB cluster is deleted. If true is specified, no DB snapshot is created. If false is specified, a DB snapshot is created before the DB cluster is deleted, using the value from `final_snapshot_identifier`. Default is `false`.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `skip_final_snapshot` argument in the `aws_rds_cluster` resource controls whether a final database snapshot is created before the cluster is deleted. Setting this to `true` skips the creation of the snapshot, which is useful for scenarios where retaining a backup is unnecessary, while setting it to `false` ensures a snapshot is created for recovery or archival purposes, aligning with lifecycle management and data retention goals."
+    },
+    {
+      "name": "snapshot_identifier",
+      "description": "(Optional) Specifies whether or not to create this cluster from a snapshot. You can use either the name or ARN when specifying a DB cluster snapshot, or the ARN when specifying a DB snapshot. Conflicts with `global_cluster_identifier`. Clusters cannot be restored from snapshot and joined to an existing global cluster in a single operation. See the AWS documentation or the Global Cluster Restored From Snapshot example for instructions on building a global cluster starting with a snapshot.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `snapshot_identifier` argument for the `aws_rds_cluster` resource allows users to specify a DB cluster or DB snapshot (by name or ARN) to restore the RDS cluster from, enabling the creation of a new cluster based on a pre-existing snapshot. This is commonly used for disaster recovery, cloning environments, or initializing clusters with pre-configured data, but it cannot be combined with joining an existing global cluster in a single operation."
+    },
+    {
+      "name": "source_region",
+      "description": "(Optional) The source region for an encrypted replica DB cluster.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `source_region` argument in the `aws_rds_cluster` resource allows users to specify the AWS region of the source database when creating an encrypted replica DB cluster. By setting this argument, users can configure cross-region replication for encrypted RDS clusters, enabling disaster recovery, data redundancy, or geographic distribution of their database workloads."
+    },
+    {
+      "name": "storage_encrypted",
+      "description": "(Optional) Specifies whether the DB cluster is encrypted. The default is `false` for `provisioned` `engine_mode` and `true` for `serverless` `engine_mode`. When restoring an unencrypted `snapshot_identifier`, the `kms_key_id` argument must be provided to encrypt the restored cluster. Terraform will only perform drift detection if a configuration value is provided.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `storage_encrypted` argument for the `aws_rds_cluster` resource allows users to specify whether the database cluster's storage is encrypted at rest, enhancing data security. Setting this argument to `true` enables encryption using AWS Key Management Service (KMS), which is required for serverless engine mode by default and necessary when restoring unencrypted snapshots with a provided `kms_key_id`."
+    },
+    {
+      "name": "storage_type",
+      "description": "(Optional, Required for Multi-AZ DB cluster) (Forces new for Multi-AZ DB clusters) Specifies the storage type to be associated with the DB cluster. For Aurora DB clusters, `storage_type` modifications can be done in-place. For Multi-AZ DB Clusters, the `iops` argument must also be set. Valid values are: `\"\"`, `aurora-iopt1` (Aurora DB Clusters); `io1`, `io2` (Multi-AZ DB Clusters). Default: `\"\"` (Aurora DB Clusters); `io1` (Multi-AZ DB Clusters).",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `storage_type` argument in the `aws_rds_cluster` resource allows users to specify the type of storage associated with the database cluster, enabling control over performance and cost optimization. For Aurora DB clusters, it supports in-place modifications, while for Multi-AZ DB clusters, it requires additional configuration (e.g., `iops`) and impacts the cluster's durability and throughput. Common use cases include tailoring storage for high-performance workloads or ensuring fault tolerance in multi-region deployments."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the DB cluster. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_rds_cluster` resource allows users to assign metadata in the form of key-value pairs to the DB cluster, enabling organization, categorization, and identification of resources for purposes such as cost allocation, environment labeling (e.g., \"production\" or \"development\"), or compliance tracking. When set, these tags can override provider-level default tags with matching keys, ensuring granular control over resource tagging."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_rds_cluster` resource allows users to define a comprehensive set of key-value tags that are applied to the cluster and all associated resources, enabling consistent metadata management for organization, cost allocation, and resource tracking. By setting this argument, users can ensure uniform tagging across related resources, supporting common goals like governance, auditing, and automation workflows."
+    },
+    {
+      "name": "vpc_security_group_ids",
+      "description": "(Optional) List of VPC security groups to associate with the Cluster",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "Defines the VPC security groups to associate with the RDS cluster, enabling control over inbound and outbound network traffic for the cluster. This argument is commonly used to enforce network-level access restrictions, such as limiting access to specific IP ranges or other resources within the VPC."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "restore_to_point_in_time",
+      "description": "(Optional) Nested attribute for point in time restore. More details below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "restore_to_time",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `restore_to_time` argument for the `aws_rds_cluster` resource within the `restore_to_point_in_time` context allows users to specify the exact timestamp (in ISO 8601 format) to which the RDS cluster should be restored. This enables precise point-in-time recovery of the database, helping users revert to a specific state for disaster recovery, debugging, or data correction purposes."
+        },
+        {
+          "name": "restore_type",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `restore_type` argument in the `restore_to_point_in_time` context of the `aws_rds_cluster` resource allows users to specify the method of restoration for an RDS cluster, such as whether to perform a full copy or a snapshot-based restore. Configuring this argument impacts how the cluster is recreated, enabling users to tailor the restoration process to meet specific recovery or replication needs."
+        },
+        {
+          "name": "source_cluster_identifier",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `source_cluster_identifier` argument specifies the identifier of the source RDS cluster from which to restore when creating a new cluster using the `restore_to_point_in_time` functionality. By setting this argument, users can define the origin cluster for point-in-time recovery, enabling the creation of a new cluster that replicates the state of the source cluster at a specified time, typically for disaster recovery or cloning purposes."
+        },
+        {
+          "name": "source_cluster_resource_id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `source_cluster_resource_id` argument specifies the identifier of the source RDS cluster from which to restore when performing a point-in-time recovery. By setting this argument, users can define the origin cluster for the restoration process, enabling the creation of a new cluster based on the state of the specified source cluster at a particular timestamp, which is useful for disaster recovery or cloning environments."
+        },
+        {
+          "name": "use_latest_restorable_time",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `use_latest_restorable_time` argument in the `restore_to_point_in_time` context of the `aws_rds_cluster` resource allows users to specify whether the cluster should be restored to the most recent restorable time automatically. Setting this boolean to `true` simplifies recovery workflows by ensuring the cluster is restored to the latest available backup, which is useful for minimizing data loss and achieving quick disaster recovery without manually specifying a restore timestamp."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `restore_to_point_in_time` configuration block in the `aws_rds_cluster` resource enables point-in-time restoration of an Amazon RDS cluster, allowing users to recover a database to a specific timestamp or from a source cluster. It encapsulates settings related to the restore operation, such as defining the target restore time and source cluster details, helping users achieve precise recovery for disaster recovery or data rollback scenarios."
+    },
+    {
+      "name": "s3_import",
+      "description": "",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "bucket_name",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `bucket_name` argument specifies the name of the Amazon S3 bucket from which data will be imported into the RDS cluster during the `s3_import` process. By defining this required string, users enable the cluster to access and load data from the designated S3 bucket, supporting use cases like database initialization, migration, or bulk data ingestion."
+        },
+        {
+          "name": "bucket_prefix",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `bucket_prefix` argument for the `s3_import` configuration in the `aws_rds_cluster` resource allows users to specify a string prefix for objects in the designated S3 bucket that will be imported into the RDS cluster. By setting this argument, users can control which subset of objects within the bucket are included in the import process, enabling targeted data ingestion and organization based on naming conventions or folder structures."
+        },
+        {
+          "name": "ingestion_role",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `ingestion_role` argument specifies the IAM role that grants permissions for the RDS cluster to access and import data from an S3 bucket during the `s3_import` process. By configuring this required role, users enable secure and controlled ingestion of external data into the database, aligning with common goals like data migration or initialization workflows."
+        },
+        {
+          "name": "source_engine",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `source_engine` argument specifies the database engine type of the source system from which data is being imported into an Amazon RDS cluster via S3. By defining this required parameter, users enable the `s3_import` functionality to correctly interpret and process the data format, ensuring compatibility during the migration or restoration process."
+        },
+        {
+          "name": "source_engine_version",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `source_engine_version` argument specifies the version of the database engine used in the source system for an Amazon RDS cluster's S3 import process. By defining this, users ensure compatibility between the source database backup and the target RDS cluster, enabling seamless migration or restoration of data from S3 into the cluster."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `s3_import` configuration block within the `aws_rds_cluster` resource enables the import of data from Amazon S3 into an RDS cluster, facilitating bulk data loading for database initialization or migration. It encapsulates settings related to the S3 bucket, file paths, and authentication, allowing users to define the source and access details for seamless integration of external data into their database environment."
+    },
+    {
+      "name": "scaling_configuration",
+      "description": "(Optional) Nested attribute with scaling properties. Only valid when `engine_mode` is set to `serverless`. More details below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "auto_pause",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `auto_pause` argument in the `scaling_configuration` block of the `aws_rds_cluster` resource allows users to enable or disable automatic pausing of the Aurora database cluster when it is idle. Setting this argument to `true` helps optimize costs by suspending compute resources during periods of inactivity, making it ideal for workloads with intermittent or unpredictable usage patterns."
+        },
+        {
+          "name": "max_capacity",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `max_capacity` argument in the `scaling_configuration` block of the `aws_rds_cluster` resource allows users to define the maximum number of Aurora capacity units (ACUs) for the cluster's auto-scaling behavior. By setting this value, users can control the upper limit of compute and memory resources allocated during peak demand, ensuring cost efficiency while maintaining performance for workloads."
+        },
+        {
+          "name": "min_capacity",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `min_capacity` argument in the `scaling_configuration` block of the `aws_rds_cluster` resource specifies the minimum number of Aurora capacity units (ACUs) that the cluster can scale down to when using Aurora Serverless v2. By defining this value, users can control the baseline compute resources allocated to the database, ensuring cost efficiency while maintaining sufficient capacity for low-demand periods."
+        },
+        {
+          "name": "seconds_before_timeout",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `seconds_before_timeout` argument in the `scaling_configuration` block of the `aws_rds_cluster` resource allows users to define the duration (in seconds) before a timeout occurs during automatic scaling operations for the cluster. By configuring this value, users can control the responsiveness and stability of scaling events, ensuring optimal performance and avoiding premature termination of scaling processes in dynamic workloads."
+        },
+        {
+          "name": "seconds_until_auto_pause",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `seconds_until_auto_pause` argument in the `scaling_configuration` block of the `aws_rds_cluster` resource allows users to define the idle timeout period (in seconds) before an Aurora Serverless cluster is automatically paused. Configuring this value helps optimize cost by suspending compute resources during periods of inactivity, aligning with common user goals of cost efficiency and dynamic resource management."
+        },
+        {
+          "name": "timeout_action",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `timeout_action` argument in the `scaling_configuration` block of the `aws_rds_cluster` resource allows users to define the behavior of the cluster when a scaling operation exceeds its timeout limit. By setting this argument, users can specify whether the operation should proceed or roll back, enabling control over the cluster's stability and responsiveness during scaling events."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `scaling_configuration` block in the `aws_rds_cluster` resource defines scaling properties for serverless RDS clusters, enabling dynamic adjustment of compute capacity based on workload demands. It encapsulates settings related to minimum and maximum capacity thresholds, allowing users to optimize cost and performance by tailoring resource scaling behavior to application requirements."
+    },
+    {
+      "name": "serverlessv2_scaling_configuration",
+      "description": "",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "max_capacity",
+          "description": "",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `max_capacity` argument in the `serverlessv2_scaling_configuration` of the `aws_rds_cluster` resource specifies the maximum number of Aurora capacity units (ACUs) that the serverless database cluster can scale up to. By defining this value, users control the upper limit of compute and memory resources available for handling peak workloads, ensuring cost efficiency while meeting performance requirements."
+        },
+        {
+          "name": "min_capacity",
+          "description": "",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `min_capacity` argument in the `serverlessv2_scaling_configuration` block for the `aws_rds_cluster` resource specifies the minimum number of Aurora capacity units (ACUs) that the serverless database cluster can scale down to. This allows users to define the baseline compute capacity for their serverless Aurora cluster, ensuring consistent performance for workloads while optimizing cost efficiency during periods of low demand."
+        },
+        {
+          "name": "seconds_until_auto_pause",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `seconds_until_auto_pause` argument in the `serverlessv2_scaling_configuration` of the `aws_rds_cluster` resource allows users to define the idle timeout period (in seconds) before an Amazon Aurora Serverless v2 cluster automatically pauses when no connections are active. Configuring this argument helps optimize cost by reducing resource usage during periods of inactivity, aligning with common user goals of efficient resource management and cost control in serverless environments."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `serverlessv2_scaling_configuration` block within the `aws_rds_cluster` resource defines scaling parameters for Amazon Aurora Serverless v2, enabling dynamic adjustment of compute capacity based on workload demands. It encapsulates settings such as minimum and maximum capacity units, allowing users to optimize cost and performance by tailoring the cluster's scalability to application requirements."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_rds_cluster` resource allows users to specify the maximum duration (in string format, e.g., \"30m\" for 30 minutes) Terraform will wait for the creation of an RDS cluster to complete. By configuring this timeout, users can control the lifecycle behavior of the resource, ensuring Terraform does not prematurely fail or hang during cluster provisioning, which is critical for managing deployment reliability in cloud environments."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_rds_cluster` resource allows users to specify the maximum duration (in string format, e.g., \"30m\") Terraform will wait for the deletion of the RDS cluster to complete. Configuring this argument helps control the timeout behavior during resource destruction, ensuring alignment with operational requirements or preventing prolonged waits in cases of slow deletion processes."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block of the `aws_rds_cluster` resource allows users to specify the maximum duration (in string format, e.g., \"30m\") Terraform will wait for an update operation on the RDS cluster to complete. Configuring this timeout ensures predictable behavior during cluster modifications, helping users manage long-running updates and avoid premature failures in infrastructure provisioning workflows."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_rds_cluster` resource defines customizable time limits for specific operations, such as creating, updating, or deleting an RDS cluster. By configuring this block, users can manage operation durations to prevent timeouts in long-running processes, ensuring smoother lifecycle management and better control over resource provisioning and updates."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) of cluster",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "ca_certificate_valid_till",
+      "description": "Expiration date of the DB instance\u2019s server certificate",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "cluster_resource_id",
+      "description": "RDS Cluster Resource ID",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "endpoint",
+      "description": "DNS address of the RDS instance",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "engine_version_actual",
+      "description": "Running version of the database.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "hosted_zone_id",
+      "description": "Route53 Hosted Zone ID of the endpoint",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "master_user_secret",
+      "description": "Block that specifies the master user secret. Only available when `manage_master_user_password` is set to true. Documented below.",
+      "optional": false,
+      "type": "list(object({kms_key_id=string,secret_arn=string,secret_status=string}))"
+    },
+    {
+      "name": "reader_endpoint",
+      "description": "Read-only endpoint for the Aurora cluster, automatically load-balanced across replicas",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

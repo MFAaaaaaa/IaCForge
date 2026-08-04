@@ -1,0 +1,27 @@
+[
+    {
+        "argument_path": "rest_api_id",
+        "references_output": "aws_api_gateway_rest_api.id",
+        "target_resource_type": "aws_api_gateway_rest_api"
+    },
+    {
+        "argument_path": "resource_id",
+        "references_output": "aws_api_gateway_resource.id",
+        "target_resource_type": "aws_api_gateway_resource"
+    },
+    {
+        "argument_path": "authorizer_id",
+        "references_output": "aws_api_gateway_authorizer.id",
+        "target_resource_type": "aws_api_gateway_authorizer"
+    },
+    {
+        "argument_path": "request_models",
+        "references_output": "aws_api_gateway_model.name",
+        "target_resource_type": "aws_api_gateway_model"
+    },
+    {
+        "argument_path": "request_validator_id",
+        "references_output": "aws_api_gateway_request_validator.id",
+        "target_resource_type": "aws_api_gateway_request_validator"
+    }
+]

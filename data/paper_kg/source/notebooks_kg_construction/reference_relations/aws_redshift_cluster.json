@@ -1,0 +1,52 @@
+[
+    {
+        "argument_path": "default_iam_role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "vpc_security_group_ids",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "cluster_subnet_group_name",
+        "references_output": "aws_redshift_subnet_group.name",
+        "target_resource_type": "aws_redshift_subnet_group"
+    },
+    {
+        "argument_path": "master_password_secret_kms_key_id",
+        "references_output": "aws_kms_key.id",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "kms_key_id",
+        "references_output": "aws_kms_key.arn",
+        "target_resource_type": "aws_kms_key"
+    },
+    {
+        "argument_path": "snapshot_arn",
+        "references_output": "aws_redshift_snapshot.arn",
+        "target_resource_type": "aws_redshift_snapshot"
+    },
+    {
+        "argument_path": "snapshot_identifier",
+        "references_output": "aws_redshift_snapshot.id",
+        "target_resource_type": "aws_redshift_snapshot"
+    },
+    {
+        "argument_path": "snapshot_cluster_identifier",
+        "references_output": "aws_redshift_cluster.cluster_identifier",
+        "target_resource_type": "aws_redshift_cluster"
+    },
+    {
+        "argument_path": "iam_roles",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "logging.bucket_name",
+        "references_output": "aws_s3_bucket.bucket",
+        "target_resource_type": "aws_s3_bucket"
+    }
+]

@@ -1,0 +1,29 @@
+{
+    "resource": {
+        "name": "aws_vpc_dhcp_options_association",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "dhcp_options_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "vpc_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": []
+}

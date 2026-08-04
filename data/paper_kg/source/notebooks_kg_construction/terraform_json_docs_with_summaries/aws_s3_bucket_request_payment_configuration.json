@@ -1,0 +1,46 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_request_payment_configuration",
+    "description": "Provides an S3 bucket request payment configuration resource. For more information, see Requester Pays Buckets. Destroying an aws_s3_bucket_request_payment_configuration resource resets the bucket's payer to the S3 default: the bucket owner. This resource cannot be used with S3 directory buckets.",
+    "llm_summary": "Manages the configuration of S3 bucket request payment settings, enabling the \"Requester Pays\" feature where data access costs are shifted to the requester instead of the bucket owner. Commonly used for scenarios involving shared datasets, public data distribution, or cost-sharing models in multi-tenant environments. This resource allows users to control payment responsibility for S3 bucket requests but resets to the default bucket owner payer upon deletion and is incompatible with S3 directory-style buckets."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_s3_bucket_request_payment_configuration\" \"example\" {\n  bucket = aws_s3_bucket.example.id\n  payer  = \"Requester\"\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_s3_bucket_request_payment_configuration` resource to enable requester-pays functionality for an S3 bucket, using the `payer` argument set to `\"Requester\"`. It shows how to associate the configuration with an existing S3 bucket and implement cost allocation where data access costs are billed to the requester."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bucket",
+      "description": "(Required, Forces new resource) Name of the bucket.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket` argument specifies the name of the S3 bucket for which the request payment configuration is being applied, serving as the unique identifier to target the bucket. Setting this argument ensures the resource is tied to the correct bucket, enabling the configuration of payment responsibility for data access requests, a common goal for managing billing policies in S3."
+    },
+    {
+      "name": "expected_bucket_owner",
+      "description": "(Optional, Forces new resource) Account ID of the expected bucket owner.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `expected_bucket_owner` argument allows users to specify the AWS account ID of the expected owner of the S3 bucket associated with the request payment configuration. This ensures that the resource is only applied if the bucket is owned by the specified account, enhancing security and preventing accidental misconfiguration in multi-account environments."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_s3_bucket_request_payment_configuration` resource allows users to specify a unique identifier for the request payment configuration associated with an S3 bucket. While optional, setting this argument can help manage and reference the configuration explicitly, supporting workflows that require precise identification or tracking of payment-related settings for the bucket."
+    },
+    {
+      "name": "payer",
+      "description": "(Required) Specifies who pays for the download and request fees. Valid values: `BucketOwner`, `Requester`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `payer` argument in the `aws_s3_bucket_request_payment_configuration` resource specifies who is responsible for covering the costs associated with S3 request and download fees, allowing users to define whether the bucket owner (`BucketOwner`) or the requester (`Requester`) bears these charges. This configuration is essential for managing cost allocation in scenarios where external users or services access the bucket, aligning with billing and access control strategies."
+    }
+  ],
+  "blocks": [],
+  "attributes": []
+}

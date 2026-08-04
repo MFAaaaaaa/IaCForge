@@ -1,0 +1,29 @@
+{
+    "resource": {
+        "name": "aws_iam_role_policy_attachment",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "policy_arn",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "role",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": []
+}

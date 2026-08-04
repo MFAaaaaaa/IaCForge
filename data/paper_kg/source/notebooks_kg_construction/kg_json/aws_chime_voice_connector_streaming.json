@@ -1,0 +1,65 @@
+{
+    "resource": {
+        "name": "aws_chime_voice_connector_streaming",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "data_retention",
+            "description": "",
+            "required": true,
+            "type": "number"
+        },
+        {
+            "name": "disabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "streaming_notification_targets",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "voice_connector_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "media_insights_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "configuration_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "disabled",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": []
+}

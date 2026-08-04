@@ -1,0 +1,180 @@
+{
+    "resource": {
+        "name": "aws_eip",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "address",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "associate_with_private_ip",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "customer_owned_ipv4_pool",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "domain",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "instance",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ipam_pool_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "network_border_group",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "network_interface",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "public_ipv4_pool",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "vpc",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "read",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "allocation_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "association_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "carrier_ip",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "customer_owned_ip",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "private_dns",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "private_ip",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "ptr_record",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "public_dns",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "public_ip",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

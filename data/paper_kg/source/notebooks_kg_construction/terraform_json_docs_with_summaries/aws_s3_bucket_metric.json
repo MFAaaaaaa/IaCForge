@@ -1,0 +1,83 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_metric",
+    "description": "Provides a S3 bucket metrics configuration resource. This resource cannot be used with S3 directory buckets.",
+    "llm_summary": "The `aws_s3_bucket_metric` resource manages the configuration of detailed metrics for an Amazon S3 bucket, enabling users to monitor and analyze bucket-level performance and usage data. Common use cases include tracking storage activity, optimizing costs, and improving operational efficiency by integrating metrics with monitoring tools like CloudWatch. This resource supports configurations for granular insights into request patterns, data transfer, and storage utilization, but cannot be used with S3 directory-style buckets."
+  },
+  "examples": [
+    {
+      "title": "Add metrics configuration for entire S3 bucket",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"example\"\n}\n\nresource \"aws_s3_bucket_metric\" \"example-entire-bucket\" {\n  bucket = aws_s3_bucket.example.id\n  name   = \"EntireBucket\"\n}",
+      "llm_summary": "This example demonstrates how to configure an S3 bucket-wide metrics configuration using the `aws_s3_bucket_metric` resource in Terraform. It shows how to associate the `bucket` argument with an existing S3 bucket and define a simple metrics setup with the `name` argument for monitoring the entire bucket."
+    },
+    {
+      "title": "Add metrics configuration with S3 object filter",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"example\"\n}\n\nresource \"aws_s3_bucket_metric\" \"example-filtered\" {\n  bucket = aws_s3_bucket.example.id\n  name   = \"ImportantBlueDocuments\"\n\n  filter {\n    prefix = \"documents/\"\n\n    tags = {\n      priority = \"high\"\n      class    = \"blue\"\n    }\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_s3_bucket_metric` resource with a custom metrics filter, using a prefix (`documents/`) and specific tags (`priority` and `class`) to monitor S3 bucket objects selectively. This example illustrates advanced filtering capabilities for S3 metrics based on object attributes.\""
+    },
+    {
+      "title": "Add metrics configuration with S3 object filter for S3 Access Point",
+      "code": "resource \"aws_s3_bucket\" \"example\" {\n  bucket = \"example\"\n}\n\nresource \"aws_s3_access_point\" \"example-access-point\" {\n  bucket = aws_s3_bucket.example.id\n  name   = \"example-access-point\"\n}\n\nresource \"aws_s3_bucket_metric\" \"example-filtered\" {\n  bucket = aws_s3_bucket.example.id\n  name   = \"ImportantBlueDocuments\"\n\n  filter {\n    access_point = aws_s3_access_point.example-access-point.arn\n\n    tags = {\n      priority = \"high\"\n      class    = \"blue\"\n    }\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_s3_bucket_metric` resource with a filter that targets objects accessed via an S3 Access Point and matches specific tags (`priority` and `class`). This example illustrates advanced metric configuration for monitoring S3 bucket activity based on object attributes and access patterns.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bucket",
+      "description": "(Required) Name of the bucket to put metric configuration.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket` argument specifies the name of the S3 bucket for which metric configurations will be applied, enabling users to monitor and analyze operational data such as storage usage or request patterns for that specific bucket. This is a required parameter that directly ties the metric configuration to the targeted bucket, supporting common goals like optimizing performance, tracking usage, or ensuring compliance."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_s3_bucket_metric` resource allows users to define a unique identifier for the S3 bucket metric configuration. This identifier is used to distinguish and manage specific metric settings within the bucket, enabling users to track and analyze performance or usage data for targeted monitoring and optimization purposes."
+    },
+    {
+      "name": "name",
+      "description": "(Required) Unique identifier of the metrics configuration for the bucket. Must be less than or equal to 64 characters in length.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument in the `aws_s3_bucket_metric` resource specifies a unique identifier for the metrics configuration associated with an S3 bucket, enabling users to define and manage distinct monitoring setups for bucket-level performance and usage metrics. By setting this required string value (up to 64 characters), users can organize and reference specific metrics configurations to support analytics, compliance, or optimization goals."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "filter",
+      "description": "(Optional) Object filtering that accepts a prefix, tags, or a logical AND of prefix and tags (documented below).  The filter metric configuration supports the following:  At least one of access_point, prefix, or tags is required when specifying a filter",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "access_point",
+          "description": "(Optional) S3 Access Point ARN for filtering (singular).",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `access_point` argument allows users to specify the Amazon Resource Name (ARN) of an S3 Access Point to filter metrics for the associated S3 bucket. By defining this, users can target metrics collection to objects accessed through a specific access point, enabling granular monitoring and analysis aligned with access point-specific workflows or permissions."
+        },
+        {
+          "name": "prefix",
+          "description": "(Optional) Object prefix for filtering (singular).",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `prefix` argument in the `filter` block of the `aws_s3_bucket_metric` resource allows users to specify an object key prefix to narrow the scope of metrics collection to objects matching the defined prefix. By setting this argument, users can target specific subsets of S3 objects for monitoring, enabling more granular insights and optimization of storage or access patterns within the bucket."
+        },
+        {
+          "name": "tags",
+          "description": "(Optional) Object tags for filtering (up to 10).",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `tags` argument in the `filter` block of the `aws_s3_bucket_metric` resource allows users to specify a map of object tags (up to 10) to refine metrics collection for S3 bucket objects. By defining tags, users can filter metrics to focus on specific subsets of objects based on their associated metadata, enabling targeted monitoring and analysis aligned with organizational tagging strategies, such as tracking environment-specific data or application-specific usage."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"filter\" configuration block in the `aws_s3_bucket_metric` resource enables granular control over metric collection by defining object-level filtering criteria based on prefixes, tags, or a logical combination of both. This block allows users to target specific subsets of S3 objects for metric analysis, ensuring precise monitoring and optimization of storage usage and access patterns."
+    }
+  ],
+  "attributes": []
+}

@@ -1,0 +1,113 @@
+{
+  "resource": {
+    "name": "aws_vpc_security_group_egress_rule",
+    "description": "Manages an outbound (egress) rule for a security group. When specifying an outbound rule for your security group in a VPC, the configuration must include a destination for the traffic. Using aws_vpc_security_group_egress_rule and aws_vpc_security_group_ingress_rule resources is the current best practice. Avoid using the aws_security_group_rule resource and the ingress and egress arguments of the aws_security_group resource for configuring in-line rules, as they struggle with managing multiple CIDR blocks, and tags and descriptions due to the historical lack of unique IDs. You should not use the aws_vpc_security_group_egress_rule and aws_vpc_security_group_ingress_rule resources in conjunction with the aws_security_group resource with in-line rules (using the ingress and egress arguments of aws_security_group) or the aws_security_group_rule resource. Doing so may cause rule conflicts, perpetual differences, and result in rules being overwritten.",
+    "llm_summary": "The `aws_vpc_security_group_egress_rule` resource manages outbound traffic rules for AWS VPC security groups, enabling precise control over egress traffic destinations. It is commonly used to define granular access policies for external communication, such as allowing specific CIDR blocks, IP ranges, or protocols to ensure secure and compliant network configurations. This resource is ideal for scenarios requiring scalable management of multiple egress rules, tags, and descriptions, avoiding conflicts and limitations associated with in-line rules or legacy resources like `aws_security_group_rule`."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_vpc_security_group_egress_rule\" \"example\" {\n  security_group_id = aws_security_group.example.id\n\n  cidr_ipv4   = \"10.0.0.0/8\"\n  from_port   = 80\n  ip_protocol = \"tcp\"\n  to_port     = 80\n}",
+      "llm_summary": "This example demonstrates how to configure an egress rule for an AWS security group using the `aws_vpc_security_group_egress_rule` resource. It shows how to allow outbound TCP traffic on port 80 to a specified IPv4 CIDR range (`10.0.0.0/8`) by defining key arguments such as `security_group_id`, `cidr_ipv4`, `from_port`, `to_port`, and `ip_protocol`."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "cidr_ipv4",
+      "description": "(Optional) The destination IPv4 CIDR range.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cidr_ipv4` argument in the `aws_vpc_security_group_egress_rule` resource allows users to specify the destination IPv4 CIDR range for outbound traffic rules. By setting this argument, users can control which IPv4 address ranges are permitted as targets for egress traffic, enabling precise network access management and ensuring secure communication boundaries."
+    },
+    {
+      "name": "cidr_ipv6",
+      "description": "(Optional) The destination IPv6 CIDR range.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cidr_ipv6` argument in the `aws_vpc_security_group_egress_rule` resource allows users to specify the destination IPv6 CIDR range for outbound traffic rules. By setting this argument, users can control which IPv6 address ranges are permitted as targets for egress traffic, enabling precise network access management and compliance with IPv6-based routing requirements."
+    },
+    {
+      "name": "description",
+      "description": "(Optional) The security group rule description.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_vpc_security_group_egress_rule` resource allows users to define a human-readable explanation or label for the egress rule, providing context or documentation about its purpose, such as identifying the rule's intent or associated application. Setting this argument enhances clarity and maintainability, especially in environments with multiple rules, by enabling users to track and understand the rule's function within the security group configuration."
+    },
+    {
+      "name": "from_port",
+      "description": "(Optional) The start of port range for the TCP and UDP protocols, or an ICMP/ICMPv6 type.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `from_port` argument in the `aws_vpc_security_group_egress_rule` resource allows users to define the starting port of a range for outbound traffic when using TCP, UDP, or ICMP protocols. By setting this value, users can control which specific port or range of ports are permitted for egress traffic, enabling precise configuration of network security rules to meet application or compliance requirements."
+    },
+    {
+      "name": "ip_protocol",
+      "description": "(Optional) The IP protocol name or number. Use `-1` to specify all protocols. Note that if `ip_protocol` is set to `-1`, it translates to all protocols, all port ranges, and `from_port` and `to_port` values should not be defined.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `ip_protocol` argument in the `aws_vpc_security_group_egress_rule` resource specifies the IP protocol (e.g., TCP, UDP, ICMP) or protocol number for outbound traffic rules. Setting this argument allows users to control the type of network traffic permitted by the egress rule, with the option to use `-1` to enable all protocols, effectively creating a catch-all rule for unrestricted outbound communication."
+    },
+    {
+      "name": "prefix_list_id",
+      "description": "(Optional) The ID of the destination prefix list.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `prefix_list_id` argument in the `aws_vpc_security_group_egress_rule` resource allows users to specify the ID of a destination prefix list, enabling the configuration of egress rules that target predefined sets of IP address ranges managed as prefix lists. This is typically used to simplify and standardize network traffic rules for common destinations, such as AWS services or external networks, enhancing scalability and consistency in security group configurations."
+    },
+    {
+      "name": "referenced_security_group_id",
+      "description": "(Optional) The destination security group that is referenced in the rule.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `referenced_security_group_id` argument in the `aws_vpc_security_group_egress_rule` resource allows users to specify the ID of a destination security group to which outbound traffic is permitted. By setting this argument, users can define egress rules that target specific security groups, enabling controlled communication between resources within different security groups in a VPC."
+    },
+    {
+      "name": "security_group_id",
+      "description": "(Required) The ID of the security group.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `security_group_id` argument specifies the ID of the security group to which the egress rule will be applied, enabling users to define outbound traffic permissions for a specific security group. By setting this required argument, users associate the egress rule with the intended security group, ensuring precise control over outbound network traffic behavior in their AWS VPC environment."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_vpc_security_group_egress_rule` resource allows users to assign metadata in the form of key-value pairs to the egress rule, enabling resource categorization, organization, and identification for purposes such as cost allocation, environment labeling, or automation workflows. When configured, these tags can override provider-level default tags, ensuring granular control over tagging behavior specific to this resource."
+    },
+    {
+      "name": "to_port",
+      "description": "(Optional) The end of port range for the TCP and UDP protocols, or an ICMP/ICMPv6 code.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `to_port` argument in the `aws_vpc_security_group_egress_rule` resource specifies the upper boundary of the port range for TCP and UDP protocols or defines the ICMP/ICMPv6 code when configuring outbound traffic rules. By setting this argument, users can control the scope of allowed egress traffic, ensuring precise network security configurations tailored to application requirements."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) of the security group rule.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "id",
+      "description": "",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "security_group_rule_id",
+      "description": "The ID of the security group rule.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "tags_all",
+      "description": "A map of tags assigned to the resource, including those inherited from the provider `default_tags` configuration block.",
+      "optional": false,
+      "type": "map(string)"
+    }
+  ]
+}

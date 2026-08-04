@@ -1,0 +1,46 @@
+{
+  "resource": {
+    "name": "aws_egress_only_internet_gateway",
+    "description": "[IPv6 only] Creates an egress-only Internet gateway for your VPC. An egress-only Internet gateway is used to enable outbound communication over IPv6 from instances in your VPC to the Internet, and prevents hosts outside of your VPC from initiating an IPv6 connection with your instance.",
+    "llm_summary": "The `aws_egress_only_internet_gateway` resource enables the creation of an IPv6-only egress gateway for a VPC, facilitating outbound communication from instances to the Internet while blocking inbound IPv6 traffic from external hosts. It is commonly used to secure VPC environments by restricting unsolicited inbound connections while allowing instances to access external services over IPv6. This resource is ideal for configuring IPv6-specific network architectures, ensuring compliance with security best practices, and managing controlled outbound traffic flows in cloud environments."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_vpc\" \"example\" {\n  cidr_block                       = \"10.1.0.0/16\"\n  assign_generated_ipv6_cidr_block = true\n}\n\nresource \"aws_egress_only_internet_gateway\" \"example\" {\n  vpc_id = aws_vpc.example.id\n\n  tags = {\n    Name = \"main\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_egress_only_internet_gateway` resource to enable IPv6-only outbound internet access for a VPC. It showcases the use of the `vpc_id` argument to associate the gateway with an IPv6-enabled VPC and includes a basic `tags` block for resource identification."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_egress_only_internet_gateway` resource represents the unique identifier of the egress-only internet gateway. While not required, it allows users to reference or retrieve the specific gateway for operations such as dependency management, resource tracking, or integration with other Terraform resources, enabling precise control and visibility within their cloud infrastructure."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_egress_only_internet_gateway` resource allows users to assign metadata in the form of key-value pairs to the resource, enabling organization, categorization, and identification within their cloud infrastructure. By setting this argument, users can define tags for purposes such as cost allocation, environment labeling (e.g., \"production\" or \"development\"), or resource tracking, with the ability to override provider-level default tags if applicable."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_egress_only_internet_gateway` resource allows users to define a comprehensive set of key-value tags that are automatically merged with resource-specific tags, enabling consistent metadata management across AWS resources. By configuring this argument, users can streamline tagging for purposes such as cost allocation, resource organization, or environment identification, ensuring alignment with broader tagging strategies."
+    },
+    {
+      "name": "vpc_id",
+      "description": "(Required) The VPC ID to create in.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `vpc_id` argument specifies the ID of the VPC in which the egress-only internet gateway will be created, enabling outbound IPv6 traffic from resources within the VPC to the internet while blocking inbound traffic. This required parameter ensures the gateway is associated with the correct VPC, aligning with user goals of controlling network connectivity and security for IPv6-enabled environments."
+    }
+  ],
+  "blocks": [],
+  "attributes": []
+}

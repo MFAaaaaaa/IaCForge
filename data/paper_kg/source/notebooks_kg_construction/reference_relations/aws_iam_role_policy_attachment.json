@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "role",
+        "references_output": "aws_iam_role.name",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "policy_arn",
+        "references_output": "aws_iam_policy.arn",
+        "target_resource_type": "aws_iam_policy"
+    }
+]

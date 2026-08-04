@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "vault_name",
+        "references_output": "aws_glacier_vault.name",
+        "target_resource_type": "aws_glacier_vault"
+    },
+    {
+        "argument_path": "policy",
+        "references_output": "aws_iam_policy_document.json",
+        "target_resource_type": "aws_iam_policy_document"
+    }
+]

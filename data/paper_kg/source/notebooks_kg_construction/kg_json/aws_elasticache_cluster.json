@@ -1,0 +1,258 @@
+{
+    "resource": {
+        "name": "aws_elasticache_cluster",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "apply_immediately",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "auto_minor_version_upgrade",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "availability_zone",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "az_mode",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "cluster_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "engine",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "engine_version",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "final_snapshot_identifier",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ip_discovery",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "maintenance_window",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "network_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "node_type",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "notification_topic_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "num_cache_nodes",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "outpost_mode",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "parameter_group_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "port",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "preferred_availability_zones",
+            "description": "",
+            "required": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "preferred_outpost_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "replication_group_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "security_group_ids",
+            "description": "",
+            "required": false,
+            "type": "set(string)"
+        },
+        {
+            "name": "snapshot_arns",
+            "description": "",
+            "required": false,
+            "type": "list(string)"
+        },
+        {
+            "name": "snapshot_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "snapshot_retention_limit",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "snapshot_window",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "subnet_group_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "transit_encryption_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "log_delivery_configuration",
+            "description": "",
+            "cardinality": [
+                0,
+                2
+            ],
+            "arguments": [
+                {
+                    "name": "destination",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "destination_type",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "log_format",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "log_type",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "cache_nodes",
+            "description": "",
+            "optional": false,
+            "type": "list(object({address=string,availability_zone=string,id=string,outpost_arn=string,port=number}))"
+        },
+        {
+            "name": "cluster_address",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "configuration_endpoint",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "engine_version_actual",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

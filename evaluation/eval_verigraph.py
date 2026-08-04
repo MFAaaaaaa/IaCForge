@@ -19,6 +19,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from functools import lru_cache
 from pathlib import Path
 
 import pandas as pd
@@ -26,8 +27,8 @@ import pandas as pd
 import graph_ir
 import evidence_projection
 import hcl_metrics
-import hcl_safety
 import ir_schema_checker
+import local_repair
 import models
 import opa_evaluator
 import prompt_templates_verigraph as prompt_templates
@@ -61,8 +62,7 @@ PLANNER_SYSTEM_PROMPT = (
 COMPILER_SYSTEM_PROMPT = (
     "You are a deterministic Infrastructure-as-Code compiler. Emit concise, "
     "complete, offline-valid Terraform HCL that exactly implements the supplied "
-    "typed contract. Never reference undeclared input variables, and never use "
-    "an input variable without a concrete default. Never use hidden benchmark labels, reference outputs, "
+    "typed contract. Never use hidden benchmark labels, reference outputs, "
     "evaluator policies, or feedback traces."
 )
 SYSTEM_PROMPT = COMPILER_SYSTEM_PROMPT
@@ -357,26 +357,6 @@ def result_category(mode):
     return categories[mode]
 
 
-def hcl_skeleton_enabled():
-    """Return whether the non-default deterministic skeleton ablation is enabled."""
-
-    return os.environ.get("IAC_USE_HCL_SKELETON", "0").lower() in {
-        "1",
-        "true",
-        "yes",
-    }
-
-
-def hcl_safety_repair_enabled():
-    """Enable one prompt-only repair for deterministic HCL safety failures."""
-
-    return os.environ.get("IAC_REPAIR_UNDECLARED_VARIABLES", "1").lower() in {
-        "1",
-        "true",
-        "yes",
-    }
-
-
 def _graph_details(raw_graph_ir):
     validation = graph_ir.safe_parse_graph_ir(raw_graph_ir)
     return validation, graph_ir.provenance("", validation)
@@ -405,7 +385,87 @@ def _version_manifest():
     )
 
 
+@lru_cache(maxsize=2)
+def _load_legacy_evidence_index(path_text):
+    index = {}
+    with Path(path_text).open(encoding="utf-8") as handle:
+        for line in handle:
+            row = json.loads(line)
+            key = row.get("prompt_sha256") or graph_ir.prompt_sha256(
+                row.get("prompt", "")
+            )
+            index.setdefault(key, []).append(row)
+    return index
+
+
 def _kg_evidence_for_prompt(question_prompt):
+    profile = os.environ.get("IAC_KG_PROFILE", "clean_multigranular").strip().lower()
+    if profile == "paper":
+        allowed = os.environ.get(
+            "IAC_ALLOW_BENCHMARK_SCOPED_PAPER_KG", "0"
+        ).lower() in {"1", "true", "yes"}
+        if not allowed:
+            raise ValueError(
+                "The paper KG may be benchmark-scoped. Set "
+                "IAC_ALLOW_BENCHMARK_SCOPED_PAPER_KG=1 only for the explicitly "
+                "labelled paper-reference experiments."
+            )
+        paper_root = ROOT_DIR / "data" / "paper_kg" / "source"
+        paper_chroma = ROOT_DIR / "data" / "paper_kg" / "chroma"
+        os.environ.setdefault("IAC_KG_PAPER_REPLICATION_ROOT", str(paper_root))
+        os.environ.setdefault("IAC_KG_PAPER_CHROMA_DIR", str(paper_chroma))
+        from iac_kg.paper_replication_json_retriever import (
+            retrieve_paper_replication_json_evidence,
+        )
+
+        parsed = json.loads(retrieve_paper_replication_json_evidence(question_prompt))
+        return parsed, {
+            "source": "paper_replication_json",
+            "profile": profile,
+            "prompt_sha256": graph_ir.prompt_sha256(question_prompt),
+            "evidence_sha256": versioning.canonical_sha256(parsed),
+            "leakage_class": "paper_reference_potentially_benchmark_scoped",
+        }
+
+    if profile in {"hybrid", "hybrid_cached_evidence_rebuilt_kg"}:
+        evidence_path = Path(
+            os.environ.get(
+                "IAC_HYBRID_EVIDENCE_FILE",
+                ROOT_DIR
+                / "data"
+                / "hybrid_paper_fullkg"
+                / "evidence_v1"
+                / "publickg_full458.jsonl",
+            )
+        )
+        prompt_hash = graph_ir.prompt_sha256(question_prompt)
+        evidence = None
+        for row in _load_legacy_evidence_index(str(evidence_path.resolve())).get(
+            prompt_hash, []
+        ):
+            if row.get("prompt") not in {None, question_prompt}:
+                continue
+            evidence = row.get("evidence")
+            break
+        if evidence is None:
+            raise KeyError(
+                f"Hybrid evidence-v1 has no entry for prompt_sha256={prompt_hash}"
+            )
+        parsed = json.loads(evidence) if isinstance(evidence, str) else evidence
+        return parsed, {
+            "source": "first_build_offline_evidence",
+            "profile": "hybrid_cached_evidence_rebuilt_kg",
+            "prompt_sha256": prompt_hash,
+            "evidence_sha256": versioning.canonical_sha256(parsed),
+            "evidence_build": "v1_first_build",
+            "kg_build": "v2_rebuilt_after_original_loss",
+            "version_alignment": "best_effort_content_may_differ_slightly",
+            "leakage_class": "historical_semi_clean_reference",
+        }
+
+    if profile != "clean_multigranular":
+        raise ValueError(f"Unknown IAC_KG_PROFILE: {profile}")
+
     from iac_kg.offline_provider_contract_cache import (
         configured_cache_path,
         get_offline_provider_contract_entry,
@@ -446,6 +506,7 @@ def _kg_evidence_for_prompt(question_prompt):
         source = "online_provider_contract_retriever"
     return entry["evidence"], {
         "source": source,
+        "profile": profile,
         "prompt_sha256": entry.get("prompt_sha256", ""),
         "retriever_version": entry.get("retriever_version", ""),
         "provider_version": entry.get("provider_version", ""),
@@ -468,9 +529,20 @@ def build_generation_prompt(mode, question_prompt):
         }
         return prompt_templates.baseline_generation_prompt(question_prompt), notes
 
-    planner_kg_modes = {"planner_kg", "full", "full_strict", "full_repair1"}
-    compiler_kg_modes = {"compiler_kg", "full", "full_strict", "full_repair1"}
-    kg_modes = planner_kg_modes | compiler_kg_modes
+    kg_modes = {"planner_kg", "compiler_kg", "full", "full_strict", "full_repair1"}
+    if mode == "planner_kg":
+        injection_stage = "ir"
+    elif mode == "compiler_kg":
+        injection_stage = "hcl"
+    else:
+        injection_stage = os.environ.get(
+            "IAC_KG_INJECTION_STAGE",
+            os.environ.get("VERIGRAPH_KG_INJECTION_STAGE", "both"),
+        ).strip().lower()
+    if injection_stage not in {"ir", "hcl", "both"}:
+        raise ValueError(f"Unknown KG injection stage: {injection_stage}")
+    planner_kg_enabled = mode in kg_modes and injection_stage in {"ir", "both"}
+    compiler_kg_enabled = mode in kg_modes and injection_stage in {"hcl", "both"}
     kg_evidence = {}
     kg_note = None
     planner_evidence = {}
@@ -479,7 +551,7 @@ def build_generation_prompt(mode, question_prompt):
         started = time.perf_counter()
         kg_evidence, kg_note = _kg_evidence_for_prompt(question_prompt)
         retrieval_ms = round((time.perf_counter() - started) * 1000)
-    if mode in planner_kg_modes:
+    if planner_kg_enabled:
         planner_evidence = evidence_projection.project_planner_evidence(kg_evidence)
         graph_prompt = prompt_templates.full_kg_resource_graph_ir_prompt_only_prompt(
             question_prompt,
@@ -501,59 +573,6 @@ def build_generation_prompt(mode, question_prompt):
     graph_note["planner_evidence_sha256"] = (
         versioning.canonical_sha256(planner_evidence) if planner_evidence else ""
     )
-    retrieval_note = {
-        "candidate_types": [
-            item.get("type", "")
-            for item in planner_evidence.get("candidate_resources", [])
-        ],
-        "scores": [
-            item.get("score", 0)
-            for item in planner_evidence.get("candidate_resources", [])
-        ],
-        "matched_rules": [
-            item.get("matched_by", [])
-            for item in planner_evidence.get("candidate_resources", [])
-        ],
-        "planner_evidence_sha256": (
-            versioning.canonical_sha256(planner_evidence)
-            if planner_evidence
-            else ""
-        ),
-    }
-
-    # Invalid structured output must not become an empty hard constraint. Keep
-    # its provenance, then safely fall back to the visible prompt.
-    has_provider_nodes = bool(graph_ir.resource_types(normalized_graph))
-    if not validation.valid or not has_provider_nodes:
-        fallback_reason = (
-            "planner output failed safe parsing or structural validation"
-            if not validation.valid
-            else "planner output contains no AWS resource or data source"
-        )
-        fallback_code = "invalid_graph_ir" if not validation.valid else "empty_graph_ir"
-        return prompt_templates.baseline_generation_prompt(question_prompt), {
-            "mode": mode,
-            "version_manifest": _version_manifest(),
-            "generation_inputs": ["Prompt", "safe fallback after invalid Graph IR"],
-            "fallback": {
-                "stage": "graph_ir",
-                "reason": fallback_reason,
-            },
-            "graph_ir": graph_note,
-            "kg": kg_note,
-            "retrieval": retrieval_note,
-            "compiler_contract": {
-                "applied": False,
-                "fallback_reason": fallback_code,
-                "validation": {"valid": False, "violations": []},
-            },
-            "generation_cost": {
-                "retrieval_ms": retrieval_ms,
-                "ir": _generation_note(ir_output),
-            },
-            "_normalized_ir": graph_ir.empty_graph_ir(),
-            "_provider_contract": {},
-        }
 
     if mode == "ir_only":
         prompt = prompt_templates.resource_graph_ir_generation_prompt(
@@ -569,92 +588,46 @@ def build_generation_prompt(mode, question_prompt):
             },
             "_normalized_ir": normalized_graph,
             "_provider_contract": {},
+            "_schema_context": "",
         }
 
     schema_check = ir_schema_checker.check_graph_ir(normalized_graph)
-    schema_check = ir_schema_checker.salvage_by_dropping_invalid_bindings(schema_check)
     normalized_graph = schema_check.graph
     graph_note["schema_consistency"] = schema_check.as_dict()
-    if not schema_check.valid:
-        return prompt_templates.baseline_generation_prompt(question_prompt), {
-            "mode": mode,
-            "version_manifest": _version_manifest(),
-            "generation_inputs": [
-                "Prompt",
-                "safe fallback after IR-Schema validation failure",
-            ],
-            "fallback": {
-                "stage": "ir_schema_checker",
-                "reason": "Graph IR is inconsistent with the configured provider schema",
-            },
-            "graph_ir": graph_note,
-            "kg": kg_note,
-            "retrieval": retrieval_note,
-            "compiler_contract": {
-                "applied": False,
-                "fallback_reason": "invalid_ir_schema",
-                "validation": schema_check.as_dict(),
-            },
-            "generation_cost": {
-                "retrieval_ms": retrieval_ms,
-                "ir": _generation_note(ir_output),
-            },
-            "_normalized_ir": graph_ir.empty_graph_ir(),
-            "_provider_contract": {},
-        }
     schema = schema_rag.retrieve_schema_for_graph(normalized_graph, question_prompt)
-    if mode in compiler_kg_modes:
-        candidate_contract = provider_contract_builder.build_provider_contract(
+    if compiler_kg_enabled:
+        provider_contract = provider_contract_builder.build_provider_contract(
             question_prompt,
             normalized_graph,
             schema.projection,
             kg_evidence,
         )
         contract_validation = provider_contract_builder.validate_provider_contract(
-            candidate_contract
+            provider_contract
         )
-        # The canonical full pipeline lets the compiler generate HCL from the
-        # prompt, normalized IR, exact schema projection and Provider Contract.
-        # A deterministic skeleton is retained only as an explicit ablation.
-        contract_applied = bool(contract_validation.get("valid"))
-        use_skeleton = contract_applied and hcl_skeleton_enabled()
-        if contract_applied:
-            provider_contract = candidate_contract
-            skeleton = (
-                provider_contract_builder.build_hcl_skeleton(provider_contract)
-                if use_skeleton
-                else ""
-            )
-            prompt = prompt_templates.resource_graph_ir_schema_contract_generation_prompt(
-                question_prompt,
-                graph_ir.render_graph_ir(normalized_graph),
-                schema.context,
-                provider_contract_builder.render_provider_contract(provider_contract),
-                skeleton,
-            )
-            inputs = [
-                "Prompt",
-                "normalized typed Graph IR",
-                "IR-guided exact provider schema",
-                "validated task-specific canonical Provider Contract",
-            ]
-            if use_skeleton:
-                inputs.append("deterministic HCL skeleton (explicit ablation)")
-        else:
-            # A rejected contract remains in provenance, but is never presented
-            # to the compiler as an implementation contract.
-            provider_contract = {}
-            prompt = prompt_templates.resource_graph_ir_schema_generation_prompt(
-                question_prompt,
-                graph_ir.render_graph_ir(normalized_graph),
-                schema.context,
-            )
-            inputs = [
-                "Prompt",
-                "normalized typed Graph IR",
-                "IR-guided exact provider schema",
-                "safe fallback after Provider Contract validation failure",
-            ]
+        use_skeleton = os.environ.get("IAC_USE_HCL_SKELETON", "1").lower() in {
+            "1",
+            "true",
+            "yes",
+        }
+        skeleton = (
+            provider_contract_builder.build_hcl_skeleton(provider_contract)
+            if use_skeleton
+            else ""
+        )
+        prompt = prompt_templates.resource_graph_ir_schema_contract_generation_prompt(
+            question_prompt,
+            graph_ir.render_graph_ir(normalized_graph),
+            schema.context,
+            provider_contract_builder.render_provider_contract(provider_contract),
+            skeleton,
+        )
+        inputs = [
+            "Prompt",
+            "normalized typed Graph IR",
+            "IR-guided exact provider schema",
+            "task-specific canonical Provider Contract",
+        ]
     else:
         provider_contract = {}
         contract_validation = {"valid": True, "violations": []}
@@ -671,38 +644,33 @@ def build_generation_prompt(mode, question_prompt):
         "graph_ir": graph_note,
         "schema_rag": schema.as_dict(),
         "kg": kg_note,
-        "retrieval": retrieval_note,
-        "compiler_contract": {
-            "contract_sha256": (
-                candidate_contract.get("contract_sha256", "")
-                if mode in compiler_kg_modes
+        "retrieval": {
+            "kg_profile": os.environ.get("IAC_KG_PROFILE", "clean_multigranular"),
+            "injection_stage": injection_stage,
+            "candidate_types": [
+                item.get("type", "")
+                for item in planner_evidence.get("candidate_resources", [])
+            ],
+            "scores": [
+                item.get("score", 0)
+                for item in planner_evidence.get("candidate_resources", [])
+            ],
+            "matched_rules": [
+                item.get("matched_by", [])
+                for item in planner_evidence.get("candidate_resources", [])
+            ],
+            "planner_evidence_sha256": (
+                versioning.canonical_sha256(planner_evidence)
+                if planner_evidence
                 else ""
             ),
-            "applied": bool(
-                mode in compiler_kg_modes and contract_validation.get("valid")
-            ),
-            "fallback_reason": (
-                ""
-                if mode not in compiler_kg_modes or contract_validation.get("valid")
-                else "invalid_provider_contract"
-            ),
-            "hcl_skeleton_enabled": bool(
-                mode in compiler_kg_modes
-                and contract_validation.get("valid")
-                and hcl_skeleton_enabled()
-            ),
+        },
+        "compiler_contract": {
+            "contract_sha256": provider_contract.get("contract_sha256", ""),
             "resource_instances": sorted(
-                (
-                    candidate_contract.get("instance_contracts", {})
-                    if mode in compiler_kg_modes
-                    else {}
-                )
+                provider_contract.get("instance_contracts", {})
             ),
-            "bindings": (
-                candidate_contract.get("bindings", [])
-                if mode in compiler_kg_modes
-                else []
-            ),
+            "bindings": provider_contract.get("bindings", []),
             "validation": contract_validation,
         },
         "generation_cost": {
@@ -711,6 +679,7 @@ def build_generation_prompt(mode, question_prompt):
         },
         "_normalized_ir": normalized_graph,
         "_provider_contract": provider_contract,
+        "_schema_context": schema.context,
     }
 
 
@@ -722,6 +691,7 @@ def evaluate_one(row, mode, static_plan):
         generation_prompt, notes = build_generation_prompt(mode, question_prompt)
         normalized_ir = notes.pop("_normalized_ir", graph_ir.empty_graph_ir())
         compiler_contract = notes.pop("_provider_contract", {})
+        schema_context = notes.pop("_schema_context", "")
         resource_count = len(
             compiler_contract.get("instance_contracts", {})
             or normalized_ir.get("resources", [])
@@ -755,18 +725,17 @@ def evaluate_one(row, mode, static_plan):
     with tempfile.TemporaryDirectory(prefix="iacforge-") as tmp:
         workdir = Path(tmp)
         (workdir / "main.tf").write_text(hcl, encoding="utf-8")
-        initial_validate = False
+        compilable, compile_error = terraform_validate(workdir, static_plan)
+        initial_validate = bool(compilable)
         initial_plan = False
         repair_used = False
 
-        def repair_once(diagnostic, reason="terraform_diagnostic"):
+        def repair_once(diagnostic):
             nonlocal hcl, raw_llm_hcl, normalization_diff, repair_used
-            repair_prompt = prompt_templates.local_repair_prompt(
+            repair_prompt = local_repair.build_prompt(
                 question_prompt,
                 graph_ir.render_graph_ir(normalized_ir),
-                provider_contract_builder.render_provider_contract(
-                    compiler_contract
-                ),
+                schema_context,
                 hcl,
                 diagnostic,
             )
@@ -782,44 +751,13 @@ def evaluate_one(row, mode, static_plan):
             )
             (workdir / "main.tf").write_text(hcl, encoding="utf-8")
             repair_used = True
-            notes["repair"] = {
-                "calls": 1,
-                "reason": reason,
-                "input_policy": [
-                    "Prompt",
-                    "Graph IR",
-                    "Provider Contract",
-                    "original HCL",
-                    "Terraform diagnostic",
-                ],
-                "opa_feedback_used": False,
-                "generation": _generation_note(output),
-            }
+            notes["repair"] = local_repair.policy_manifest()
+            notes["repair"]["calls"] = 1
+            notes["repair"]["generation"] = _generation_note(output)
             notes["hcl_generation"]["repaired_raw_llm_hcl"] = raw_llm_hcl
             notes["hcl_generation"]["repaired_normalized_hcl"] = hcl
             notes["hcl_generation"]["repair_normalization_diff"] = normalization_diff
 
-        safety_before = hcl_safety.diagnostics(hcl)
-        notes["hcl_safety"] = {"before_repair": safety_before}
-        safety_repair_modes = {"compiler_kg", "full", "full_strict", "full_repair1"}
-        if (
-            mode in safety_repair_modes
-            and hcl_safety_repair_enabled()
-            and hcl_safety.has_issues(safety_before)
-        ):
-            repair_once(
-                hcl_safety.render_repair_diagnostic(safety_before),
-                reason="deterministic_hcl_safety",
-            )
-        safety_after = hcl_safety.diagnostics(hcl)
-        notes["hcl_safety"]["after_repair"] = safety_after
-        notes["hcl_safety"]["passed"] = not hcl_safety.has_issues(safety_after)
-
-        compilable, compile_error = terraform_validate(workdir, static_plan)
-        initial_validate = bool(compilable)
-        if not compilable and mode == "full_repair1" and not repair_used:
-            repair_once(compile_error, reason="terraform_validate")
-            compilable, compile_error = terraform_validate(workdir, static_plan)
         result["LLM Compilable? #0"] = bool(compilable)
         result["LLM Compile Phase Error #0"] = "" if compilable else compile_error
         if not compilable:
@@ -836,7 +774,7 @@ def evaluate_one(row, mode, static_plan):
 
         plannable, plan_json, plan_error = terraform_plan_json(workdir, static_plan)
         initial_plan = bool(plannable)
-        if not plannable and mode == "full_repair1" and not repair_used:
+        if not plannable and mode == "full_repair1":
             repair_once(plan_error)
             compilable, compile_error = terraform_validate(workdir, static_plan)
             result["LLM Compilable? #0"] = bool(compilable)
@@ -911,14 +849,9 @@ def restore_checkpoint(df, candidates):
 
 
 def row_completed(row):
-    def has_value(value):
-        if value is None or pd.isna(value):
-            return False
-        return bool(str(value).strip())
-
     return bool(
-        has_value(row.get("LLM Output #0", ""))
-        or has_value(row.get("LLM Compile Phase Error #0", ""))
+        str(row.get("LLM Output #0", "") or "").strip()
+        or str(row.get("LLM Compile Phase Error #0", "") or "").strip()
     )
 
 

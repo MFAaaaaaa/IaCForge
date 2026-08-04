@@ -1,0 +1,74 @@
+{
+  "resource": {
+    "name": "aws_sagemaker_image",
+    "description": "Provides a SageMaker AI Image resource.",
+    "llm_summary": "The `aws_sagemaker_image` Terraform resource enables the creation and management of SageMaker AI image configurations, which serve as containerized environments for machine learning workflows. It is commonly used to define custom images for training, inference, or data processing tasks, supporting scenarios like integrating pre-built ML libraries, optimizing runtime dependencies, and ensuring reproducibility across SageMaker jobs. Key configurations include specifying image URIs, versioning, and lifecycle management, making it ideal for users seeking to streamline ML model development and deployment in AWS SageMaker."
+  },
+  "examples": [
+    {
+      "title": "Basic usage",
+      "code": "resource \"aws_sagemaker_image\" \"example\" {\n  image_name = \"example\"\n  role_arn   = aws_iam_role.test.arn\n}",
+      "llm_summary": "This example demonstrates the basic configuration of the `aws_sagemaker_image` resource, showcasing how to define a SageMaker image with the `image_name` argument and associate it with an IAM role using the `role_arn` attribute. Users can learn how to set up a SageMaker image for machine learning workflows with minimal configuration."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "description",
+      "description": "(Optional) The description of the image.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_sagemaker_image` resource allows users to define a human-readable summary or metadata about the image, providing context or purpose for its use within SageMaker workflows. Setting this argument helps document the image's role, making it easier to manage and identify in environments with multiple images or complex machine learning pipelines."
+    },
+    {
+      "name": "display_name",
+      "description": "(Optional) The display name of the image. When the image is added to a domain (must be unique to the domain).",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `display_name` argument for the `aws_sagemaker_image` resource allows users to define a human-readable, unique name for the image within a SageMaker domain. Setting this argument helps users identify and organize images in the domain, enhancing clarity and usability when managing multiple images in machine learning workflows."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_sagemaker_image` resource allows users to specify a unique identifier for the SageMaker image, typically used to reference or manage the resource programmatically within Terraform configurations. While optional, setting this argument can help ensure consistent identification of the image across workflows, enabling efficient resource tracking and integration with other dependent resources."
+    },
+    {
+      "name": "image_name",
+      "description": "(Required) The name of the image. Must be unique to your account.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `image_name` argument specifies a unique identifier for the SageMaker image within the user's AWS account, allowing users to define and distinguish the image for machine learning workflows. Setting this argument ensures the image can be referenced and managed independently, supporting tasks like model training, deployment, or custom environment creation."
+    },
+    {
+      "name": "role_arn",
+      "description": "(Required) The Amazon Resource Name (ARN) of an IAM role that enables Amazon SageMaker AI to perform tasks on your behalf.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `role_arn` argument specifies the IAM role Amazon Resource Name (ARN) that grants SageMaker permissions to execute tasks on behalf of the user, such as accessing resources or managing operations tied to the `aws_sagemaker_image`. Setting this argument ensures the SageMaker image can securely interact with other AWS services, aligning with user goals like enabling AI workflows and resource orchestration."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_sagemaker_image` resource allows users to assign metadata in the form of key-value pairs to the SageMaker image, enabling resource categorization, organization, and cost tracking. When set, it helps users manage and identify resources for purposes like billing, access control, or environment-specific grouping, and can override provider-level default tags if matching keys are defined."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_sagemaker_image` resource allows users to define a comprehensive set of key-value tags that are automatically propagated to all resources associated with the SageMaker image. This facilitates consistent tagging for resource organization, cost allocation, and access management, aligning with common user goals like enforcing tagging policies across cloud infrastructure."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) assigned by AWS to this Image.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

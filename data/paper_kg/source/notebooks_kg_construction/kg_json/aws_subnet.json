@@ -1,0 +1,168 @@
+{
+    "resource": {
+        "name": "aws_subnet",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "assign_ipv6_address_on_creation",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "availability_zone",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "availability_zone_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "cidr_block",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "customer_owned_ipv4_pool",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "enable_dns64",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "enable_lni_at_device_index",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "enable_resource_name_dns_a_record_on_launch",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "enable_resource_name_dns_aaaa_record_on_launch",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ipv6_cidr_block",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ipv6_native",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "map_customer_owned_ip_on_launch",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "map_public_ip_on_launch",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "outpost_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "private_dns_hostname_type_on_launch",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "vpc_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "delete",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "ipv6_cidr_block_association_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "owner_id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

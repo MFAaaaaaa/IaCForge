@@ -1,0 +1,60 @@
+{
+    "resource": {
+        "name": "random_id",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "byte_length",
+            "description": "",
+            "required": true,
+            "type": "number"
+        },
+        {
+            "name": "keepers",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "b64_std",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "b64_url",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "dec",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "hex",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

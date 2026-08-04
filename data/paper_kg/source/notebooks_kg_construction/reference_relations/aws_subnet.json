@@ -1,0 +1,22 @@
+[
+    {
+        "argument_path": "vpc_id",
+        "references_output": "aws_vpc.id",
+        "target_resource_type": "aws_vpc"
+    },
+    {
+        "argument_path": "vpc_id",
+        "references_output": "aws_vpc_ipv4_cidr_block_association.vpc_id",
+        "target_resource_type": "aws_vpc_ipv4_cidr_block_association"
+    },
+    {
+        "argument_path": "customer_owned_ipv4_pool",
+        "references_output": "aws_outposts_outpost.customer_owned_ipv4_pool",
+        "target_resource_type": "aws_outposts_outpost"
+    },
+    {
+        "argument_path": "outpost_arn",
+        "references_output": "aws_outposts_outpost.arn",
+        "target_resource_type": "aws_outposts_outpost"
+    }
+]

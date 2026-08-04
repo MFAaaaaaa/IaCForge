@@ -1,0 +1,35 @@
+{
+    "resource": {
+        "name": "aws_chime_voice_connector_logging",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "enable_media_metric_logs",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "enable_sip_logs",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "voice_connector_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": []
+}

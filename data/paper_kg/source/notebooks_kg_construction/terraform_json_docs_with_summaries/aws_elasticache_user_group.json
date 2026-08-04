@@ -1,0 +1,67 @@
+{
+  "resource": {
+    "name": "aws_elasticache_user_group",
+    "description": "Provides an ElastiCache user group resource.",
+    "llm_summary": "The `aws_elasticache_user_group` resource enables the creation and management of ElastiCache user groups, allowing fine-grained access control for Redis clusters using Role-Based Access Control (RBAC). It is commonly used to define and manage user permissions, ensuring secure and organized access to ElastiCache resources in multi-user environments. Key configurations include associating users with specific user groups, managing access policies, and integrating with Redis AUTH for enhanced security and compliance."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_elasticache_user\" \"test\" {\n  user_id       = \"testUserId\"\n  user_name     = \"default\"\n  access_string = \"on ~app::* -@all +@read +@hash +@bitmap +@geo -setbit -bitfield -hset -hsetnx -hmset -hincrby -hincrbyfloat -hdel -bitop -geoadd -georadius -georadiusbymember\"\n  engine        = \"redis\"\n  passwords     = [\"password123456789\"]\n}\n\nresource \"aws_elasticache_user_group\" \"test\" {\n  engine        = \"redis\"\n  user_group_id = \"userGroupId\"\n  user_ids      = [aws_elasticache_user.test.user_id]\n}",
+      "llm_summary": "\"Demonstrates how to configure an `aws_elasticache_user_group` resource for Redis by associating it with an `aws_elasticache_user` that defines granular access permissions using the `access_string` argument. This example showcases user group creation, user association, and fine-grained access control for ElastiCache.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "engine",
+      "description": "(Required) The current supported value are `redis`, `valkey` (case insensitive).",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `engine` argument specifies the type of caching engine (e.g., `redis` or `valkey`) to be used for the `aws_elasticache_user_group` resource, ensuring compatibility with the desired database technology. By defining this argument, users configure the foundational behavior of the user group to align with the selected engine's features and access control requirements, typically to manage permissions for Redis-based caching environments."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_elasticache_user_group` resource allows users to specify a unique identifier for the user group, enabling precise definition and management of the group within the Elasticache service. Setting this argument helps ensure consistent referencing and organization of user groups, which are used to control access permissions for Elasticache clusters."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Key-value map of resource tags. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_elasticache_user_group` resource allows users to define a key-value map of metadata to organize and manage the resource, such as categorizing by environment, cost center, or project. Configuring this argument helps streamline resource identification, tracking, and governance, with provider-level `default_tags` being overridden by explicitly defined tags for enhanced customization."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_elasticache_user_group` resource allows users to define a comprehensive set of key-value tags that are automatically merged with resource-specific tags, enabling consistent metadata management across AWS resources. By configuring this argument, users can streamline tagging for purposes like cost allocation, resource organization, or environment identification, ensuring alignment with broader tagging strategies."
+    },
+    {
+      "name": "user_group_id",
+      "description": "(Required) The ID of the user group. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `user_group_id` argument specifies the unique identifier for an ElastiCache user group, enabling users to define and manage access control for Redis authentication and permissions. By setting this required value, users establish the core identity of the user group, which is essential for associating users and enforcing security policies within their ElastiCache environment."
+    },
+    {
+      "name": "user_ids",
+      "description": "(Optional) The list of user IDs that belong to the user group.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `user_ids` argument in the `aws_elasticache_user_group` resource allows users to specify a set of user IDs that are associated with the user group, enabling fine-grained access control for ElastiCache operations. By defining this argument, users can manage permissions and configure which individual users are authorized to interact with the cache resources tied to the user group, supporting secure and tailored access policies."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The ARN that identifies the user group.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

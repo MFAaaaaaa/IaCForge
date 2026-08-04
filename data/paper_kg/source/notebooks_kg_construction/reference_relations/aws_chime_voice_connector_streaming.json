@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "voice_connector_id",
+        "references_output": "aws_chime_voice_connector.id",
+        "target_resource_type": "aws_chime_voice_connector"
+    },
+    {
+        "argument_path": "media_insights_configuration.configuration_arn",
+        "references_output": "aws_chimesdkmediapipelines_media_insights_pipeline_configuration.arn",
+        "target_resource_type": "aws_chimesdkmediapipelines_media_insights_pipeline_configuration"
+    }
+]

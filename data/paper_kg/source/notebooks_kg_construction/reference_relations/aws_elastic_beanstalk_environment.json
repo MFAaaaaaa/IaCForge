@@ -1,0 +1,27 @@
+[
+    {
+        "argument_path": "application",
+        "references_output": "aws_elastic_beanstalk_application.name",
+        "target_resource_type": "aws_elastic_beanstalk_application"
+    },
+    {
+        "argument_path": "setting.value",
+        "references_output": "aws_vpc.id",
+        "target_resource_type": "aws_vpc"
+    },
+    {
+        "argument_path": "setting.value",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "platform_arn",
+        "references_output": "aws_elastic_beanstalk_platform.arn",
+        "target_resource_type": "aws_elastic_beanstalk_platform"
+    },
+    {
+        "argument_path": "version_label",
+        "references_output": "aws_elastic_beanstalk_application_version.label",
+        "target_resource_type": "aws_elastic_beanstalk_application_version"
+    }
+]

@@ -1,0 +1,204 @@
+{
+    "resource": {
+        "name": "aws_sns_topic",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "application_failure_feedback_role_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "application_success_feedback_role_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "application_success_feedback_sample_rate",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "archive_policy",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "content_based_deduplication",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "delivery_policy",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "display_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "fifo_topic",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "firehose_failure_feedback_role_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "firehose_success_feedback_role_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "firehose_success_feedback_sample_rate",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "http_failure_feedback_role_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "http_success_feedback_role_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "http_success_feedback_sample_rate",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "kms_master_key_id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "lambda_failure_feedback_role_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "lambda_success_feedback_role_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "lambda_success_feedback_sample_rate",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name_prefix",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "policy",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "signature_version",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "sqs_failure_feedback_role_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "sqs_success_feedback_role_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "sqs_success_feedback_sample_rate",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tracing_config",
+            "description": "",
+            "required": false,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "beginning_archive_time",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        },
+        {
+            "name": "owner",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

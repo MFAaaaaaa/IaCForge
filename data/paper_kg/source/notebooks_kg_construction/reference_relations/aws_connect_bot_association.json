@@ -1,0 +1,17 @@
+[
+    {
+        "argument_path": "instance_id",
+        "references_output": "aws_connect_instance.id",
+        "target_resource_type": "aws_connect_instance"
+    },
+    {
+        "argument_path": "lex_bot.name",
+        "references_output": "aws_lex_bot.name",
+        "target_resource_type": "aws_lex_bot"
+    },
+    {
+        "argument_path": "lex_bot.lex_region",
+        "references_output": "data.aws_region.name",
+        "target_resource_type": "data.aws_region"
+    }
+]

@@ -1,0 +1,46 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_accelerate_configuration",
+    "description": "Provides an S3 bucket accelerate configuration resource. See the Requirements for using Transfer Acceleration for more details. This resource cannot be used with S3 directory buckets.",
+    "llm_summary": "The `aws_s3_bucket_accelerate_configuration` Terraform resource manages the configuration of Amazon S3 Transfer Acceleration for an S3 bucket, enabling faster data transfers over long distances by leveraging Amazon CloudFront's globally distributed edge locations. This resource is commonly used to optimize performance for high-speed uploads and downloads, especially in scenarios involving large files or geographically dispersed users. It allows users to enable and control Transfer Acceleration settings, making it ideal for applications requiring low-latency data access and efficient content delivery."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_s3_bucket\" \"mybucket\" {\n  bucket = \"mybucket\"\n}\n\nresource \"aws_s3_bucket_accelerate_configuration\" \"example\" {\n  bucket = aws_s3_bucket.mybucket.id\n  status = \"Enabled\"\n}",
+      "llm_summary": "\"Demonstrates how to enable S3 Transfer Acceleration for an Amazon S3 bucket using the `aws_s3_bucket_accelerate_configuration` resource, with the `status` argument set to `Enabled`. This example shows the basic setup required to configure Transfer Acceleration for faster data transfers to and from the bucket.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "bucket",
+      "description": "(Required, Forces new resource) Name of the bucket.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket` argument specifies the name of the S3 bucket for which the accelerate configuration is being applied, serving as a required identifier to enable or manage S3 Transfer Acceleration for that bucket. By defining this argument, users link the acceleration settings to a specific bucket, optimizing data transfer speeds for high-latency or geographically distant clients."
+    },
+    {
+      "name": "expected_bucket_owner",
+      "description": "(Optional, Forces new resource) Account ID of the expected bucket owner.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `expected_bucket_owner` argument in the `aws_s3_bucket_accelerate_configuration` resource allows users to specify the AWS account ID of the intended owner of the S3 bucket, ensuring that operations on the bucket's acceleration configuration are restricted to the expected account. This helps enforce ownership validation and prevents accidental or unauthorized changes to the bucket's acceleration settings in multi-account environments."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_s3_bucket_accelerate_configuration` resource represents the unique identifier of the S3 bucket's acceleration configuration. While not required, it is typically used for referencing or managing the resource in Terraform's state, enabling users to track and interact with the acceleration settings programmatically."
+    },
+    {
+      "name": "status",
+      "description": "(Required) Transfer acceleration state of the bucket. Valid values: `Enabled`, `Suspended`.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `status` argument in the `aws_s3_bucket_accelerate_configuration` resource specifies the transfer acceleration state of an S3 bucket, allowing users to enable or suspend the feature. Setting this argument to `Enabled` activates S3 Transfer Acceleration, which optimizes data transfer speeds by leveraging Amazon CloudFront's globally distributed edge locations, making it ideal for performance-critical applications."
+    }
+  ],
+  "blocks": [],
+  "attributes": []
+}

@@ -1,0 +1,186 @@
+{
+  "resource": {
+    "name": "aws_lexv2models_bot",
+    "description": "Terraform resource for managing an AWS Lex V2 Models Bot.",
+    "llm_summary": "The `aws_lexv2models_bot` Terraform resource enables the creation and management of conversational AI bots using AWS Lex V2, supporting natural language understanding for automated interactions. It is commonly used to configure bots for customer support, virtual assistants, or workflow automation, with features like intent recognition, multi-language support, and integration with AWS services. Users can define bot lifecycle settings, versioning, input/output configurations, and advanced conversational parameters to tailor bot behavior and optimize user experiences."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_lexv2models_bot\" \"example\" {\n  name        = \"example\"\n  description = \"Example description\"\n  data_privacy {\n    child_directed = false\n  }\n  idle_session_ttl_in_seconds = 60\n  role_arn                    = aws_iam_role.example.arn\n  type                        = \"Bot\"\n\n  tags = {\n    foo = \"bar\"\n  }\n}\n\nresource \"aws_iam_role\" \"example\" {\n  name = \"example\"\n\n  assume_role_policy = jsonencode({\n    Version = \"2012-10-17\"\n    Statement = [\n      {\n        Action = \"sts:AssumeRole\"\n        Effect = \"Allow\"\n        Sid    = \"\"\n        Principal = {\n          Service = \"lexv2.amazonaws.com\"\n        }\n      },\n    ]\n  })\n\n  tags = {\n    created_by = \"aws\"\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an Amazon Lex V2 bot using the `aws_lexv2models_bot` resource, including essential settings like `data_privacy`, `idle_session_ttl_in_seconds`, and `role_arn` for IAM integration. It also illustrates creating an IAM role with an appropriate trust policy for Lex V2 and applying tags to both the bot and the role for resource organization."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "description",
+      "description": "Description of the bot. It appears in lists to help you identify a particular bot.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `description` argument for the `aws_lexv2models_bot` resource allows users to define a human-readable summary or identifier for the bot, aiding in distinguishing and organizing bots within lists or management interfaces. Setting this argument enhances clarity and usability, especially in environments with multiple bots, by providing contextual information about the bot's purpose or functionality."
+    },
+    {
+      "name": "idle_session_ttl_in_seconds",
+      "description": "Time, in seconds, that Amazon Lex should keep information about a user's conversation with the bot. You can specify between 60 (1 minute) and 86,400 (24 hours) seconds.",
+      "required": true,
+      "type": "number",
+      "llm_summary": "The `idle_session_ttl_in_seconds` argument for the `aws_lexv2models_bot` resource defines the duration, in seconds, that Amazon Lex retains user session data during inactivity, enabling control over conversation lifecycle management. By specifying a value between 60 and 86,400 seconds, users can configure how long the bot preserves context for seamless user interactions or resets the session after prolonged idle periods."
+    },
+    {
+      "name": "name",
+      "description": "Name of the bot. The bot name must be unique in the account that creates the bot. Type String. Length Constraints: Minimum length of 1. Maximum length of 100.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument for the `aws_lexv2models_bot` resource specifies the unique identifier for the bot within the AWS account, allowing users to define a meaningful and recognizable name for their conversational AI bot. Setting this argument ensures the bot can be distinctly referenced and managed, aligning with user goals of organizing and deploying bots for specific applications or use cases."
+    },
+    {
+      "name": "role_arn",
+      "description": "ARN of an IAM role that has permission to access the bot. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `role_arn` argument specifies the Amazon Resource Name (ARN) of an IAM role that grants the necessary permissions for the Lex V2 bot to access AWS resources during its operation. Setting this required argument ensures the bot can perform tasks such as invoking Lambda functions, accessing logs, or interacting with other AWS services, aligning with user goals of securely managing resource access and enabling bot functionality."
+    },
+    {
+      "name": "tags",
+      "description": "List of tags to add to the bot. You can only add tags when you create a bot.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_lexv2models_bot` resource allows users to define key-value pairs that categorize or organize the bot by assigning metadata, such as environment identifiers, ownership details, or project tags. Setting this argument helps streamline resource management, improve searchability, and enable cost allocation tracking within AWS. Tags can only be applied during the bot's creation."
+    },
+    {
+      "name": "test_bot_alias_tags",
+      "description": "List of tags to add to the test alias for a bot. You can only add tags when you create a bot.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "\"Defines a set of key-value tags to associate with the test alias of an AWS Lex V2 bot during its creation, enabling users to organize, categorize, or track the bot's test alias for resource management, billing, or operational purposes.\""
+    },
+    {
+      "name": "type",
+      "description": "Type of a bot to create. Possible values are `\"Bot\"` and `\"BotNetwork\"`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `type` argument for the `aws_lexv2models_bot` resource specifies the operational scope of the bot being created, allowing users to define whether the bot functions as a standalone entity (`Bot`) or as part of a networked group of bots (`BotNetwork`). This configuration impacts the bot's deployment architecture and interaction model, enabling users to tailor the bot's behavior to their specific conversational AI use case."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "data_privacy",
+      "description": "Provides information on additional privacy protections Amazon Lex should use with the bot's data. See `data_privacy`",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "child_directed",
+          "description": "",
+          "required": true,
+          "type": "bool",
+          "llm_summary": "The `child_directed` argument in the `aws_lexv2models_bot` resource specifies whether the bot is designed to interact with children under 13, enabling compliance with data privacy regulations such as COPPA (Children's Online Privacy Protection Act). Setting this required boolean ensures the bot's behavior and data handling align with legal requirements for child-directed services, impacting how user data is processed and stored."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `data_privacy` configuration block in the `aws_lexv2models_bot` resource defines additional privacy protections for the bot's data, ensuring compliance with data handling and security requirements. By enabling and configuring this block, users can enforce privacy controls, such as disabling data storage, to safeguard sensitive information and meet regulatory or organizational standards."
+    },
+    {
+      "name": "members",
+      "description": "List of bot members in a network to be created. See `bot_members`.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "alias_id",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `alias_id` argument specifies the unique identifier for a bot alias within the \"members\" configuration of the `aws_lexv2models_bot` resource. By defining this required string, users associate the bot with a specific alias, enabling versioning and targeted deployment of the bot for different environments or use cases, such as staging or production."
+        },
+        {
+          "name": "alias_name",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `alias_name` argument specifies a unique identifier for an alias associated with the Lex V2 bot, allowing users to define a named version of the bot for deployment or testing purposes. Setting this argument enables users to manage bot lifecycle stages, such as differentiating between development, staging, or production environments, and facilitates version control and targeted updates."
+        },
+        {
+          "name": "id",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `id` argument for the `members` block in the `aws_lexv2models_bot` resource specifies the unique identifier of a member within the bot configuration, enabling users to define and reference individual entities or components that contribute to the bot's functionality. Setting this argument ensures precise identification and association of members, which is critical for managing roles, permissions, or specific behaviors within the bot's operational scope."
+        },
+        {
+          "name": "name",
+          "description": "Name of the bot. The bot name must be unique in the account that creates the bot. Type String. Length Constraints: Minimum length of 1. Maximum length of 100.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `name` argument specifies the unique identifier for the Lex V2 bot within the account, allowing users to define a distinct and recognizable name for the bot. Setting this argument is essential for creating and managing the bot, as it ensures proper identification and differentiation from other bots in the same account, supporting organizational clarity and resource management."
+        },
+        {
+          "name": "version",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `version` argument specifies the version identifier of a bot member within the `aws_lexv2models_bot` resource, allowing users to define which iteration of the bot's configuration or functionality is deployed. Setting this argument ensures the bot operates with the desired version, enabling precise control over updates, compatibility, and feature sets in conversational AI workflows."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"members\" configuration block within the `aws_lexv2models_bot` resource defines the list of bot members in a network, enabling the creation and management of multiple interconnected bots as part of a unified conversational AI system. This block encapsulates settings related to individual bot definitions, allowing users to specify and organize bot members to achieve seamless collaboration and functionality across a network of bots."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_lexv2models_bot` resource allows users to specify the maximum duration (as a string) Terraform should wait for the bot creation process to complete before timing out. Configuring this argument helps ensure smoother resource provisioning by accommodating longer setup times for complex bots or addressing potential delays in AWS service responsiveness."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_lexv2models_bot` resource allows users to specify the maximum duration (as a string) Terraform will wait for the deletion of an Amazon Lex V2 bot to complete. By configuring this timeout, users can control the lifecycle behavior during resource destruction, ensuring operations do not exceed their desired time limits or fail prematurely due to extended deletion processes."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block for the `aws_lexv2models_bot` resource allows users to specify the maximum duration (as a string) Terraform will wait for updates to the Lex V2 bot to complete. Configuring this argument helps manage deployment workflows by ensuring Terraform does not prematurely time out during bot updates, which is critical for maintaining smooth infrastructure changes and avoiding errors in long-running operations."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_lexv2models_bot` resource defines customizable time limits for operations related to the creation, update, and deletion of Lex V2 bots. By configuring this block, users can manage operation durations to prevent timeouts during lengthy processes, ensuring smoother lifecycle management and better control over resource provisioning in complex environments."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "id",
+      "description": "Unique identifier for a particular bot. ### Data Privacy",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "optional": false,
+      "type": "map(string)"
+    }
+  ]
+}

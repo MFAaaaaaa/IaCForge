@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "endpoint_config_name",
+        "references_output": "aws_sagemaker_endpoint_configuration.name",
+        "target_resource_type": "aws_sagemaker_endpoint_configuration"
+    },
+    {
+        "argument_path": "deployment_config.auto_rollback_configuration.alarms.alarm_name",
+        "references_output": "aws_cloudwatch_metric_alarm.name",
+        "target_resource_type": "aws_cloudwatch_metric_alarm"
+    }
+]

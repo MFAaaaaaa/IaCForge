@@ -1,0 +1,42 @@
+[
+    {
+        "argument_path": "replication_group_id",
+        "references_output": "aws_elasticache_replication_group.id",
+        "target_resource_type": "aws_elasticache_replication_group"
+    },
+    {
+        "argument_path": "log_delivery_configuration.destination",
+        "references_output": "aws_cloudwatch_log_group.name",
+        "target_resource_type": "aws_cloudwatch_log_group"
+    },
+    {
+        "argument_path": "log_delivery_configuration.destination",
+        "references_output": "aws_kinesis_firehose_delivery_stream.name",
+        "target_resource_type": "aws_kinesis_firehose_delivery_stream"
+    },
+    {
+        "argument_path": "preferred_outpost_arn",
+        "references_output": "aws_outposts_outpost.arn",
+        "target_resource_type": "aws_outposts_outpost"
+    },
+    {
+        "argument_path": "subnet_group_name",
+        "references_output": "aws_elasticache_subnet_group.name",
+        "target_resource_type": "aws_elasticache_subnet_group"
+    },
+    {
+        "argument_path": "security_group_ids",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "snapshot_arns",
+        "references_output": "aws_s3_bucket_object.arn",
+        "target_resource_type": "aws_s3_bucket_object"
+    },
+    {
+        "argument_path": "notification_topic_arn",
+        "references_output": "aws_sns_topic.arn",
+        "target_resource_type": "aws_sns_topic"
+    }
+]

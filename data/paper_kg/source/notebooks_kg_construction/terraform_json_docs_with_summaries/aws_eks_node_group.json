@@ -1,0 +1,368 @@
+{
+  "resource": {
+    "name": "aws_eks_node_group",
+    "description": "Manages an EKS Node Group, which can provision and optionally update an Auto Scaling Group of Kubernetes worker nodes compatible with EKS. Additional documentation about this functionality can be found in the EKS User Guide.",
+    "llm_summary": "The `aws_eks_node_group` resource manages the provisioning and lifecycle of Kubernetes worker nodes within an Amazon EKS cluster by creating and optionally updating an Auto Scaling Group. It is commonly used to automate the deployment, scaling, and updates of EKS-compatible node groups for containerized workloads. Users can configure node group properties such as instance types, scaling policies, AMI types, and version updates to optimize performance, cost, and compatibility with their Kubernetes applications."
+  },
+  "examples": [
+    {
+      "title": "Ignoring Changes to Desired Size",
+      "code": "resource \"aws_eks_node_group\" \"example\" {\n  # ... other configurations ...\n\n  scaling_config {\n    # Example: Create EKS Node Group with 2 instances to start\n    desired_size = 2\n\n    # ... other configurations ...\n  }\n\n  # Optional: Allow external changes without Terraform plan difference\n  lifecycle {\n    ignore_changes = [scaling_config[0].desired_size]\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_eks_node_group` resource with a `scaling_config` block to set an initial desired size for the node group while using the `lifecycle` block to ignore changes to the `desired_size` attribute. It illustrates how to allow external modifications to the node group's size without causing Terraform plan differences, enabling flexible scaling outside of Terraform management."
+    },
+    {
+      "title": "Tracking the latest EKS Node Group AMI releases",
+      "code": "data \"aws_ssm_parameter\" \"eks_ami_release_version\" {\n  name = \"/aws/service/eks/optimized-ami/${aws_eks_cluster.example.version}/amazon-linux-2023/x86_64/standard/recommended/release_version\"\n}\n\nresource \"aws_eks_node_group\" \"example\" {\n  cluster_name    = aws_eks_cluster.example.name\n  node_group_name = \"example\"\n  version         = aws_eks_cluster.example.version\n  release_version = nonsensitive(data.aws_ssm_parameter.eks_ami_release_version.value)\n  node_role_arn   = aws_iam_role.example.arn\n  subnet_ids      = aws_subnet.example[*].id\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_eks_node_group` resource to dynamically track the latest Amazon EKS optimized AMI release version using the `aws_ssm_parameter` data source. It highlights the use of the `release_version` argument to ensure the node group always uses the recommended AMI version for a specific Kubernetes cluster version, enabling automated updates and compatibility."
+    },
+    {
+      "title": "Example IAM Role for EKS Node Group",
+      "code": "resource \"aws_iam_role\" \"example\" {\n  name = \"eks-node-group-example\"\n\n  assume_role_policy = jsonencode({\n    Statement = [{\n      Action = \"sts:AssumeRole\"\n      Effect = \"Allow\"\n      Principal = {\n        Service = \"ec2.amazonaws.com\"\n      }\n    }]\n    Version = \"2012-10-17\"\n  })\n}\n\nresource \"aws_iam_role_policy_attachment\" \"example-AmazonEKSWorkerNodePolicy\" {\n  policy_arn = \"arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy\"\n  role       = aws_iam_role.example.name\n}\n\nresource \"aws_iam_role_policy_attachment\" \"example-AmazonEKS_CNI_Policy\" {\n  policy_arn = \"arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy\"\n  role       = aws_iam_role.example.name\n}\n\nresource \"aws_iam_role_policy_attachment\" \"example-AmazonEC2ContainerRegistryReadOnly\" {\n  policy_arn = \"arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly\"\n  role       = aws_iam_role.example.name\n}",
+      "llm_summary": "\"Demonstrates how to create an IAM role with the necessary policies for an EKS Node Group, including `AmazonEKSWorkerNodePolicy`, `AmazonEKS_CNI_Policy`, and `AmazonEC2ContainerRegistryReadOnly`, enabling EC2 instances to function as worker nodes in an EKS cluster. Highlights the use of `aws_iam_role` and `aws_iam_role_policy_attachment` resources to configure role-based access for EKS node group operations.\""
+    },
+    {
+      "title": "Example Subnets for EKS Node Group",
+      "code": "data \"aws_availability_zones\" \"available\" {\n  state = \"available\"\n}\n\nresource \"aws_subnet\" \"example\" {\n  count = 2\n\n  availability_zone = data.aws_availability_zones.available.names[count.index]\n  cidr_block        = cidrsubnet(aws_vpc.example.cidr_block, 8, count.index)\n  vpc_id            = aws_vpc.example.id\n}",
+      "llm_summary": "\"Demonstrates how to create subnets across multiple availability zones for use with an EKS Node Group by leveraging the `aws_subnet` resource and `aws_availability_zones` data source. Highlights dynamic subnet creation using `count`, `cidrsubnet`, and VPC integration to ensure proper networking for EKS clusters.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "ami_type",
+      "description": "(Optional) Type of Amazon Machine Image (AMI) associated with the EKS Node Group. See the AWS documentation for valid values. Terraform will only perform drift detection if a configuration value is provided.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `ami_type` argument for the `aws_eks_node_group` resource allows users to specify the type of Amazon Machine Image (AMI) used by the EKS Node Group, enabling control over the underlying operating system and compatibility with specific workloads or Kubernetes versions. Setting this argument ensures consistency in node configuration and facilitates drift detection when a value is provided."
+    },
+    {
+      "name": "capacity_type",
+      "description": "(Optional) Type of capacity associated with the EKS Node Group. Valid values: `ON_DEMAND`, `SPOT`. Terraform will only perform drift detection if a configuration value is provided.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `capacity_type` argument in the `aws_eks_node_group` resource allows users to specify the type of compute capacity for the node group, choosing between `ON_DEMAND` for standard pricing or `SPOT` for cost-optimized, ephemeral instances. This configuration impacts the cost model and availability of the nodes, enabling users to align the node group's capacity strategy with their workload requirements and budget goals."
+    },
+    {
+      "name": "cluster_name",
+      "description": "\u2013 (Required) Name of the EKS Cluster.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `cluster_name` argument specifies the name of the Amazon EKS cluster to which the node group will be associated, ensuring the node group is correctly linked to the desired Kubernetes control plane. By setting this required value, users define the target cluster for deploying and managing worker nodes, aligning with common goals like scaling workloads and configuring cluster infrastructure."
+    },
+    {
+      "name": "disk_size",
+      "description": "(Optional) Disk size in GiB for worker nodes. Defaults to `50` for Windows, `20` all other node groups. Terraform will only perform drift detection if a configuration value is provided.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `disk_size` argument in the `aws_eks_node_group` resource allows users to specify the storage capacity (in GiB) allocated to worker node volumes, enabling customization of disk space based on workload requirements. By setting this value, users can optimize node performance for applications with specific storage needs, while default values ensure compatibility across Windows (`50 GiB`) and other node groups (`20 GiB`)."
+    },
+    {
+      "name": "force_update_version",
+      "description": "(Optional) Force version update if existing pods are unable to be drained due to a pod disruption budget issue.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `force_update_version` argument in the `aws_eks_node_group` resource allows users to control whether the node group's version update proceeds even if existing pods cannot be drained due to pod disruption budget constraints. Enabling this argument ensures updates are applied forcefully, overriding disruption budget limitations, which is useful for maintaining cluster version consistency in scenarios where pod eviction policies might otherwise block updates."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_eks_node_group` resource allows users to specify a unique identifier for the node group, typically used to reference or manage the resource programmatically. While optional, setting this argument can help ensure consistent identification of the node group across Terraform configurations and external integrations."
+    },
+    {
+      "name": "instance_types",
+      "description": "(Optional) List of instance types associated with the EKS Node Group. Defaults to `[\"t3.medium\"]`. Terraform will only perform drift detection if a configuration value is provided.",
+      "required": false,
+      "type": "list(string)",
+      "llm_summary": "The `instance_types` argument for the `aws_eks_node_group` resource allows users to specify the EC2 instance types that will be used for the worker nodes in the EKS Node Group. By configuring this, users can control the compute capacity, performance characteristics, and cost optimization of their Kubernetes workloads, aligning the node group with specific application requirements or budget constraints."
+    },
+    {
+      "name": "labels",
+      "description": "(Optional) Key-value map of Kubernetes labels. Only labels that are applied with the EKS API are managed by this argument. Other Kubernetes labels applied to the EKS Node Group will not be managed.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `labels` argument in the `aws_eks_node_group` resource allows users to define a key-value map of Kubernetes labels that are applied to the EKS Node Group via the EKS API. This enables users to tag node groups with metadata for organizational, operational, or workload-specific purposes, such as identifying environments (e.g., `env=production`) or associating nodes with specific applications, while ensuring only API-managed labels are controlled through Terraform."
+    },
+    {
+      "name": "node_group_name",
+      "description": "\u2013 (Optional) Name of the EKS Node Group. If omitted, Terraform will assign a random, unique name. Conflicts with `node_group_name_prefix`. The node group name can't be longer than 63 characters. It must start with a letter or digit, but can also include hyphens and underscores for the remaining characters.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `node_group_name` argument allows users to define a custom, human-readable name for the EKS Node Group, enabling easier identification and organization of node groups within an AWS EKS cluster. If omitted, Terraform generates a unique name automatically, but specifying this argument is useful for aligning node group naming conventions with environment or application-specific goals, such as staging, production, or workload categorization."
+    },
+    {
+      "name": "node_group_name_prefix",
+      "description": "\u2013 (Optional) Creates a unique name beginning with the specified prefix. Conflicts with `node_group_name`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `node_group_name_prefix` argument in the `aws_eks_node_group` resource allows users to define a custom prefix for the automatically generated name of an EKS node group, ensuring uniqueness while avoiding manual name specification. This is particularly useful for dynamically creating node groups in environments where naming conventions or automation workflows require consistent prefixes, and it conflicts with the explicit `node_group_name` argument."
+    },
+    {
+      "name": "node_role_arn",
+      "description": "\u2013 (Required) Amazon Resource Name (ARN) of the IAM Role that provides permissions for the EKS Node Group.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `node_role_arn` argument specifies the Amazon Resource Name (ARN) of the IAM role that grants permissions to the EKS Node Group, enabling it to perform essential operations such as pulling container images, managing EC2 instances, and interacting with other AWS services. By defining this required role, users ensure the Node Group has the necessary access to support Kubernetes workloads and infrastructure management within the EKS cluster."
+    },
+    {
+      "name": "release_version",
+      "description": "\u2013 (Optional) AMI version of the EKS Node Group. Defaults to latest version for Kubernetes version.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `release_version` argument for the `aws_eks_node_group` resource allows users to specify the AMI version used by the EKS Node Group, enabling control over the Kubernetes node software stack. By setting this argument, users can ensure compatibility with specific Kubernetes versions or maintain consistency across environments, while omitting it defaults to the latest AMI version for the selected Kubernetes version."
+    },
+    {
+      "name": "subnet_ids",
+      "description": "\u2013 (Required) Identifiers of EC2 Subnets to associate with the EKS Node Group. The following arguments are optional:",
+      "required": true,
+      "type": "set(string)",
+      "llm_summary": "The `subnet_ids` argument in the `aws_eks_node_group` resource specifies the set of EC2 subnet IDs where the EKS Node Group's instances will be deployed. By defining this argument, users control the network placement of the node group, ensuring it operates within specific subnets for connectivity, security, and resource isolation, which is essential for configuring the cluster's underlying infrastructure."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Key-value map of resource tags. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument in the `aws_eks_node_group` resource allows users to define a key-value map of resource tags, enabling the categorization, organization, and identification of the node group for purposes such as cost allocation, environment labeling, or operational management. When set, these tags can override provider-level default tags, ensuring granular control over metadata applied to the EKS node group."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_eks_node_group` resource allows users to define a comprehensive set of key-value tags that are automatically applied to the node group and all associated resources. This enables consistent tagging for purposes such as cost allocation, resource organization, and governance across the AWS environment, ensuring alignment with tagging policies and simplifying resource management."
+    },
+    {
+      "name": "version",
+      "description": "\u2013 (Optional) Kubernetes version. Defaults to EKS Cluster Kubernetes version. Terraform will only perform drift detection if a configuration value is provided.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `version` argument in the `aws_eks_node_group` resource allows users to specify the Kubernetes version for the node group, overriding the default version inherited from the associated EKS cluster. Setting this argument enables precise control over the node group's Kubernetes version, which can be useful for managing compatibility, testing specific versions, or ensuring consistency across environments."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "launch_template",
+      "description": "(Optional) Configuration block with Launch Template settings. See `launch_template` below for details. Conflicts with `remote_access`.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "id",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `id` argument in the `launch_template` block of the `aws_eks_node_group` resource allows users to specify the unique identifier of an existing EC2 launch template to define custom configurations for the node group's instances. By setting this argument, users can control advanced instance settings such as networking, storage, or user data scripts, enabling greater flexibility and alignment with specific infrastructure requirements."
+        },
+        {
+          "name": "name",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `name` argument for the `launch_template` in the `aws_eks_node_group` resource allows users to specify the name of the launch template to be associated with the node group. By setting this argument, users can define the underlying configuration template for EC2 instances in the node group, enabling customization of instance properties such as AMI, instance type, and additional settings to align with specific workload or environment requirements."
+        },
+        {
+          "name": "version",
+          "description": "\u2013 (Optional) Kubernetes version. Defaults to EKS Cluster Kubernetes version. Terraform will only perform drift detection if a configuration value is provided.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `version` argument for the `launch_template` in the `aws_eks_node_group` resource allows users to explicitly define the Kubernetes version for the node group, overriding the default version inherited from the EKS cluster. Setting this argument ensures consistency across node groups or enables targeted upgrades/downgrades to meet specific application or compatibility requirements."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `launch_template` block in the `aws_eks_node_group` resource allows users to define custom EC2 launch template settings for EKS-managed node groups, providing granular control over instance configurations such as AMI, instance type, and additional parameters. This block enables advanced customization of node group infrastructure, offering flexibility for users to align node configurations with specific workload or compliance requirements, and it cannot be used in conjunction with the `remote_access` block."
+    },
+    {
+      "name": "node_repair_config",
+      "description": "(Optional) The node auto repair configuration for the node group. See `node_repair_config` below for details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "enabled",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `enabled` argument in the `node_repair_config` block of the `aws_eks_node_group` resource allows users to control whether automatic node repair functionality is activated for the managed node group. When set to `true`, it enables automated health monitoring and remediation of unhealthy nodes, helping to maintain cluster reliability and reduce manual intervention."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `node_repair_config` block in the `aws_eks_node_group` resource enables automated health monitoring and repair of nodes within an EKS node group, ensuring high availability and resilience. It encapsulates settings related to node auto-repair mechanisms, allowing users to configure self-healing capabilities that detect and remediate unhealthy nodes, thereby optimizing cluster reliability and reducing manual intervention."
+    },
+    {
+      "name": "remote_access",
+      "description": "(Optional) Configuration block with remote access settings. See `remote_access` below for details. Conflicts with `launch_template`.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "ec2_ssh_key",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `ec2_ssh_key` argument specifies the name of the EC2 key pair to enable SSH access to the nodes in the EKS node group. By configuring this, users can securely connect to the underlying EC2 instances for troubleshooting, maintenance, or custom configuration, aligning with common goals of managing remote access to Kubernetes worker nodes."
+        },
+        {
+          "name": "source_security_group_ids",
+          "description": "",
+          "required": false,
+          "type": "set(string)",
+          "llm_summary": "The `source_security_group_ids` argument in the `remote_access` configuration of the `aws_eks_node_group` resource allows users to specify a set of security group IDs that control which sources can access the nodes via SSH. By defining this argument, users can restrict or permit remote access to the node group based on their security requirements, ensuring secure and controlled connectivity for administrative purposes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `remote_access` configuration block in the `aws_eks_node_group` resource enables secure remote connectivity to worker nodes within an EKS node group by defining settings such as SSH key pairs and source security groups. This block facilitates administrative access for troubleshooting or management purposes and is essential for users requiring direct node-level access, but it cannot be used alongside a `launch_template`."
+    },
+    {
+      "name": "scaling_config",
+      "description": "(Required) Configuration block with scaling settings. See `scaling_config` below for details.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "desired_size",
+          "description": "",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `desired_size` argument in the `scaling_config` block of the `aws_eks_node_group` resource specifies the target number of worker nodes to maintain in the node group. By defining this value, users control the baseline capacity of the node group, ensuring sufficient compute resources are available to support workloads in the EKS cluster."
+        },
+        {
+          "name": "max_size",
+          "description": "",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `max_size` argument in the `scaling_config` block of the `aws_eks_node_group` resource specifies the maximum number of nodes that the node group can scale up to, allowing users to define the upper limit of compute capacity for their Kubernetes workloads. This configuration is essential for managing resource availability and cost control, ensuring the cluster can handle peak demand while preventing over-provisioning."
+        },
+        {
+          "name": "min_size",
+          "description": "",
+          "required": true,
+          "type": "number",
+          "llm_summary": "The `min_size` argument in the `scaling_config` block of the `aws_eks_node_group` resource specifies the minimum number of worker nodes that must always be running in the node group, ensuring baseline capacity for workloads. By defining this value, users can guarantee consistent availability and performance for applications, even during periods of low demand."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `scaling_config` block in the `aws_eks_node_group` resource defines scaling settings for the node group, enabling control over the minimum, maximum, and desired number of worker nodes in an Amazon EKS cluster. Configuring this block allows users to optimize resource allocation and ensure the cluster can dynamically scale to meet workload demands, balancing cost efficiency and performance."
+    },
+    {
+      "name": "taint",
+      "description": "(Optional) The Kubernetes taints to be applied to the nodes in the node group. Maximum of 50 taints per node group. See taint below for details.",
+      "cardinality": [
+        0,
+        50
+      ],
+      "arguments": [
+        {
+          "name": "effect",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `effect` argument in the `taint` configuration for the `aws_eks_node_group` resource specifies the behavior applied to pods that do not tolerate the taint, controlling whether they are **prevented from scheduling** (`NoSchedule`), **evicted from the node** (`NoExecute`), or **allowed with reduced priority** (`PreferNoSchedule`). This argument enables users to define how taints impact pod placement and lifecycle, ensuring alignment with workload isolation, resource management, or operational policies."
+        },
+        {
+          "name": "key",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `key` argument in the `taint` block of the `aws_eks_node_group` resource specifies the unique identifier for the taint applied to nodes within the EKS node group. By defining this string value, users can control how Kubernetes workloads are scheduled on these nodes, ensuring that only pods with matching tolerations can run on them, which is commonly used for isolating workloads or enforcing specific node usage policies."
+        },
+        {
+          "name": "value",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `value` argument within the `taint` block of the `aws_eks_node_group` resource specifies the value associated with the taint applied to nodes in the EKS node group. This value is used in conjunction with the `key` and `effect` arguments to define scheduling rules for pods, enabling users to control workload placement by influencing which pods can or cannot be scheduled on the tainted nodes."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"taint\" configuration block in the `aws_eks_node_group` resource defines Kubernetes taints applied to nodes within the node group, enabling fine-grained control over workload scheduling by restricting or prioritizing which pods can run on specific nodes. This block encapsulates settings for defining up to 50 taints per node group, helping users enforce node-level constraints and optimize cluster resource allocation based on application requirements."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block of the `aws_eks_node_group` resource allows users to specify the maximum duration (in string format, e.g., \"30m\") Terraform will wait for the creation of an EKS node group to complete. Configuring this timeout ensures better control over resource provisioning, helping users avoid prolonged or indefinite waits during deployment workflows."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_eks_node_group` resource allows users to specify the maximum duration (as a string) Terraform should wait for the deletion of an EKS node group to complete. By configuring this timeout, users can control the lifecycle behavior during resource teardown, ensuring operations do not hang indefinitely or fail prematurely due to insufficient wait time."
+        },
+        {
+          "name": "update",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `update` argument within the `timeouts` block of the `aws_eks_node_group` resource allows users to specify the maximum duration (in string format) Terraform will wait for an update operation on an EKS node group to complete. Configuring this timeout ensures better control over resource lifecycle management, preventing prolonged or indefinite waits during updates, which is critical for maintaining predictable deployment workflows."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_eks_node_group` resource allows users to define custom time limits for specific operations, such as creating, updating, or deleting an EKS node group. This block provides fine-grained control over operation durations, helping users manage long-running tasks and avoid unexpected timeouts in their infrastructure workflows."
+    },
+    {
+      "name": "update_config",
+      "description": "(Optional) Configuration block with update settings. See `update_config` below for details.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "max_unavailable",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `max_unavailable` argument in the `update_config` block of the `aws_eks_node_group` resource specifies the maximum number of nodes that can be unavailable during an update process. This allows users to control the update strategy by balancing application availability with the speed of rolling updates, ensuring minimal disruption to workloads running on the node group."
+        },
+        {
+          "name": "max_unavailable_percentage",
+          "description": "",
+          "required": false,
+          "type": "number",
+          "llm_summary": "The `max_unavailable_percentage` argument in the `update_config` block of the `aws_eks_node_group` resource specifies the maximum percentage of nodes in the node group that can be unavailable during an update. This allows users to control the balance between update speed and application availability, ensuring that workloads maintain desired levels of uptime while rolling out updates."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `update_config` block within the `aws_eks_node_group` resource defines settings for managing node group updates, including parameters like update behavior and disruption thresholds. Configuring this block allows users to control how updates are applied to EKS node groups, ensuring minimal downtime and optimized cluster performance during version upgrades or configuration changes."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) of the EKS Node Group.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "resources",
+      "description": "List of objects containing information about underlying resources.`autoscaling_groups` - List of objects containing information about AutoScaling Groups.`name` - Name of the AutoScaling Group. `remote_access_security_group_id` - Identifier of the remote access EC2 Security Group.",
+      "optional": false,
+      "type": "list(object({autoscaling_groups=list(object({name=string})),remote_access_security_group_id=string}))"
+    },
+    {
+      "name": "status",
+      "description": "Status of the EKS Node Group.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

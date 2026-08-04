@@ -1,0 +1,46 @@
+{
+  "resource": {
+    "name": "aws_chime_voice_connector_logging",
+    "description": "Adds a logging configuration for the specified Amazon Chime Voice Connector. The logging configuration specifies whether SIP message logs are enabled for sending to Amazon CloudWatch Logs.",
+    "llm_summary": "Manages the logging configuration for Amazon Chime Voice Connectors, enabling SIP message logs to be sent to Amazon CloudWatch Logs for monitoring and troubleshooting. Commonly used to enhance visibility into VoIP traffic, debug call flows, and ensure compliance with operational or security requirements. Supports configuring log delivery settings to streamline real-time analysis and integration with CloudWatch-based observability workflows."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_chime_voice_connector\" \"default\" {\n  name               = \"vc-name-test\"\n  require_encryption = true\n}\n\nresource \"aws_chime_voice_connector_logging\" \"default\" {\n  enable_sip_logs          = true\n  enable_media_metric_logs = true\n  voice_connector_id       = aws_chime_voice_connector.default.id\n}",
+      "llm_summary": "This example demonstrates how to configure logging for an AWS Chime Voice Connector using the `aws_chime_voice_connector_logging` resource. It showcases enabling SIP logs and media metric logs (`enable_sip_logs` and `enable_media_metric_logs`) while linking the logging configuration to a Voice Connector (`voice_connector_id`) created with the `aws_chime_voice_connector` resource."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "enable_media_metric_logs",
+      "description": "(Optional) When true, enables logging of detailed media metrics for Voice Connectors to Amazon CloudWatch logs.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_media_metric_logs` argument in the `aws_chime_voice_connector_logging` resource allows users to control whether detailed media metrics for Voice Connectors are logged to Amazon CloudWatch. Enabling this feature provides enhanced visibility into media performance and quality, supporting monitoring and troubleshooting goals for voice communication infrastructure."
+    },
+    {
+      "name": "enable_sip_logs",
+      "description": "(Optional) When true, enables SIP message logs for sending to Amazon CloudWatch Logs.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `enable_sip_logs` argument in the `aws_chime_voice_connector_logging` resource allows users to control whether SIP message logs are sent to Amazon CloudWatch Logs, enabling detailed monitoring and troubleshooting of voice connector SIP traffic. Setting this argument to `true` is typically used to enhance visibility into call signaling for diagnostic or compliance purposes."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_chime_voice_connector_logging` resource specifies the unique identifier of the associated Chime Voice Connector for which logging settings are being configured. By defining this argument, users link the logging configuration to a specific Voice Connector, enabling the tracking and monitoring of call-related events for that resource."
+    },
+    {
+      "name": "voice_connector_id",
+      "description": "(Required) The Amazon Chime Voice Connector ID.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "Specifies the unique identifier of the Amazon Chime Voice Connector to enable logging for call events and diagnostics. By setting this required argument, users associate logging configurations with a specific Voice Connector, ensuring detailed insights and monitoring for call-related activities within their Chime infrastructure."
+    }
+  ],
+  "blocks": [],
+  "attributes": []
+}

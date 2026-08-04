@@ -1,0 +1,550 @@
+{
+    "resource": {
+        "name": "aws_lb_listener",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "alpn_policy",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "certificate_arn",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "load_balancer_arn",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "port",
+            "description": "",
+            "required": false,
+            "type": "number"
+        },
+        {
+            "name": "protocol",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_request_x_amzn_mtls_clientcert_header_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_request_x_amzn_mtls_clientcert_issuer_header_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_request_x_amzn_mtls_clientcert_leaf_header_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_request_x_amzn_mtls_clientcert_serial_number_header_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_request_x_amzn_mtls_clientcert_subject_header_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_request_x_amzn_mtls_clientcert_validity_header_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_request_x_amzn_tls_cipher_suite_header_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_request_x_amzn_tls_version_header_name",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_response_access_control_allow_credentials_header_value",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_response_access_control_allow_headers_header_value",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_response_access_control_allow_methods_header_value",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_response_access_control_allow_origin_header_value",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_response_access_control_expose_headers_header_value",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_response_access_control_max_age_header_value",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_response_content_security_policy_header_value",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_response_server_enabled",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "routing_http_response_strict_transport_security_header_value",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_response_x_content_type_options_header_value",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "routing_http_response_x_frame_options_header_value",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "ssl_policy",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "tags",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tags_all",
+            "description": "",
+            "required": false,
+            "type": "map(string)"
+        },
+        {
+            "name": "tcp_idle_timeout_seconds",
+            "description": "",
+            "required": false,
+            "type": "number"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "default_action",
+            "description": "",
+            "cardinality": [
+                1,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "order",
+                    "description": "",
+                    "required": false,
+                    "type": "number"
+                },
+                {
+                    "name": "target_group_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "type",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": [
+                {
+                    "name": "authenticate_cognito",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "authentication_request_extra_params",
+                            "description": "",
+                            "required": false,
+                            "type": "map(string)"
+                        },
+                        {
+                            "name": "on_unauthenticated_request",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "scope",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "session_cookie_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "session_timeout",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "user_pool_arn",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "user_pool_client_id",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "user_pool_domain",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "authenticate_oidc",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "authentication_request_extra_params",
+                            "description": "",
+                            "required": false,
+                            "type": "map(string)"
+                        },
+                        {
+                            "name": "authorization_endpoint",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "client_id",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "client_secret",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "issuer",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "on_unauthenticated_request",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "scope",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "session_cookie_name",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "session_timeout",
+                            "description": "",
+                            "required": false,
+                            "type": "number"
+                        },
+                        {
+                            "name": "token_endpoint",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "user_info_endpoint",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "fixed_response",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "content_type",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        },
+                        {
+                            "name": "message_body",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "status_code",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                },
+                {
+                    "name": "forward",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [],
+                    "blocks": [
+                        {
+                            "name": "stickiness",
+                            "description": "",
+                            "cardinality": [
+                                0,
+                                1
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "duration",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "number"
+                                },
+                                {
+                                    "name": "enabled",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "bool"
+                                }
+                            ],
+                            "blocks": []
+                        },
+                        {
+                            "name": "target_group",
+                            "description": "",
+                            "cardinality": [
+                                1,
+                                5
+                            ],
+                            "arguments": [
+                                {
+                                    "name": "arn",
+                                    "description": "",
+                                    "required": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "name": "weight",
+                                    "description": "",
+                                    "required": false,
+                                    "type": "number"
+                                }
+                            ],
+                            "blocks": []
+                        }
+                    ]
+                },
+                {
+                    "name": "redirect",
+                    "description": "",
+                    "cardinality": [
+                        0,
+                        1
+                    ],
+                    "arguments": [
+                        {
+                            "name": "host",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "path",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "port",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "protocol",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "query",
+                            "description": "",
+                            "required": false,
+                            "type": "string"
+                        },
+                        {
+                            "name": "status_code",
+                            "description": "",
+                            "required": true,
+                            "type": "string"
+                        }
+                    ],
+                    "blocks": []
+                }
+            ]
+        },
+        {
+            "name": "mutual_authentication",
+            "description": "",
+            "cardinality": [
+                0,
+                1
+            ],
+            "arguments": [
+                {
+                    "name": "advertise_trust_store_ca_names",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "ignore_client_certificate_expiry",
+                    "description": "",
+                    "required": false,
+                    "type": "bool"
+                },
+                {
+                    "name": "mode",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                },
+                {
+                    "name": "trust_store_arn",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        },
+        {
+            "name": "timeouts",
+            "description": "",
+            "cardinality": [
+                0,
+                0
+            ],
+            "arguments": [
+                {
+                    "name": "create",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                },
+                {
+                    "name": "update",
+                    "description": "",
+                    "required": false,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": [
+        {
+            "name": "arn",
+            "description": "",
+            "optional": false,
+            "type": "string"
+        }
+    ]
+}

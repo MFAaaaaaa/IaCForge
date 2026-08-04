@@ -1,0 +1,47 @@
+{
+    "resource": {
+        "name": "aws_chime_voice_connector_group",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [
+        {
+            "name": "connector",
+            "description": "",
+            "cardinality": [
+                0,
+                3
+            ],
+            "arguments": [
+                {
+                    "name": "priority",
+                    "description": "",
+                    "required": true,
+                    "type": "number"
+                },
+                {
+                    "name": "voice_connector_id",
+                    "description": "",
+                    "required": true,
+                    "type": "string"
+                }
+            ],
+            "blocks": []
+        }
+    ],
+    "attributes": []
+}

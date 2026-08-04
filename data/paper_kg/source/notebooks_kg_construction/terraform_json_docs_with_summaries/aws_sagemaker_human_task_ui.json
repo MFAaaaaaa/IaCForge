@@ -1,0 +1,87 @@
+{
+  "resource": {
+    "name": "aws_sagemaker_human_task_ui",
+    "description": "Provides a SageMaker AI Human Task UI resource.",
+    "llm_summary": "The `aws_sagemaker_human_task_ui` resource enables the creation and management of custom Human Task UI workflows in Amazon SageMaker, facilitating human-in-the-loop machine learning tasks. It is commonly used to configure user interfaces for annotation, review, or data labeling tasks in workflows like SageMaker Ground Truth. Key configurations include defining UI templates, integrating with task input/output data, and customizing the user experience for human workers to ensure efficient and accurate task execution."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_sagemaker_human_task_ui\" \"example\" {\n  human_task_ui_name = \"example\"\n\n  ui_template {\n    content = file(\"sagemaker-human-task-ui-template.html\")\n  }\n}",
+      "llm_summary": "\"Demonstrates the basic setup of the `aws_sagemaker_human_task_ui` resource, showcasing how to define a custom human task UI for Amazon SageMaker Ground Truth by specifying the `human_task_ui_name` and providing an HTML template using the `ui_template` block with the `content` argument.\""
+    }
+  ],
+  "arguments": [
+    {
+      "name": "human_task_ui_name",
+      "description": "(Required) The name of the Human Task UI.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `human_task_ui_name` argument specifies the unique name of the Human Task UI in Amazon SageMaker, allowing users to define and identify the custom interface used for human annotation tasks. Setting this argument ensures the resource is uniquely recognized within the SageMaker environment, enabling the configuration and management of user interfaces for human-in-the-loop workflows."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_sagemaker_human_task_ui` resource allows users to specify a unique identifier for the human task UI configuration. While optional, setting this argument can help users reference or manage the resource programmatically, enabling streamlined integration with other AWS services or workflows that require consistent identification of the human task UI."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) A map of tags to assign to the resource. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_sagemaker_human_task_ui` resource allows users to assign metadata in the form of key-value pairs to the resource, enabling organization, categorization, and cost management. By defining tags, users can streamline resource tracking, implement governance policies, and integrate with billing or compliance workflows, with provider-level default tags being overridden if matching keys are specified."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_sagemaker_human_task_ui` resource allows users to define a comprehensive set of key-value tags that are automatically merged with resource-specific tags, enabling consistent metadata management across AWS resources. By configuring this argument, users can streamline resource organization, tracking, and cost allocation, aligning with common goals like tagging for governance, billing, or operational insights."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "ui_template",
+      "description": "(Required) The Liquid template for the worker user interface. See UI Template below.",
+      "cardinality": [
+        1,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "content",
+          "description": "(Required) The content of the Liquid template for the worker user interface.",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `content` argument in the `ui_template` block of the `aws_sagemaker_human_task_ui` resource allows users to define the Liquid template that specifies the structure and design of the worker user interface for human review tasks. By setting this argument, users can customize the layout, instructions, and interactive elements presented to workers, enabling tailored workflows and improving task clarity and efficiency."
+        },
+        {
+          "name": "content_sha256",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `content_sha256` argument allows users to specify the SHA-256 hash of the `ui_template` content, ensuring data integrity and verifying that the template has not been altered. This is particularly useful for validating the correctness of the UI template during deployment, aligning with security and compliance goals."
+        },
+        {
+          "name": "url",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `url` argument in the `ui_template` block of the `aws_sagemaker_human_task_ui` resource allows users to specify the location of a hosted HTML file that defines the user interface for human review tasks. By setting this argument, users can customize the appearance and functionality of the UI presented to human workers, enabling tailored workflows and improved task clarity."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `ui_template` block in the `aws_sagemaker_human_task_ui` resource defines the Liquid template used to create a custom worker user interface for human review tasks in Amazon SageMaker. By configuring this block, users can design and control the layout, content, and behavior of the UI presented to human workers, enabling tailored task experiences for specific annotation or review workflows."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "The Amazon Resource Name (ARN) assigned by AWS to this Human Task UI.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

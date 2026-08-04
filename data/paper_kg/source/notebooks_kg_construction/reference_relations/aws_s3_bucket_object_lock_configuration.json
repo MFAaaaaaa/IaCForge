@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "bucket",
+        "references_output": "aws_s3_bucket.id",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "expected_bucket_owner",
+        "references_output": "aws_s3_bucket.account_id",
+        "target_resource_type": "aws_s3_bucket"
+    }
+]

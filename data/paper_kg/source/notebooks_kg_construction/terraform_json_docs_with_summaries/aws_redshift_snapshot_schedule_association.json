@@ -1,0 +1,39 @@
+{
+  "resource": {
+    "name": "aws_redshift_snapshot_schedule_association",
+    "description": "",
+    "llm_summary": "The `aws_redshift_snapshot_schedule_association` resource in Terraform enables the association of Amazon Redshift clusters with snapshot schedules, automating the creation of backups at predefined intervals. This resource is commonly used for implementing data lifecycle management, ensuring regular and reliable backups for disaster recovery and compliance purposes. Users can configure Redshift clusters to adhere to specific snapshot schedules, optimizing backup frequency and retention policies to meet organizational requirements."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_redshift_cluster\" \"default\" {\n  cluster_identifier = \"tf-redshift-cluster\"\n  database_name      = \"mydb\"\n  master_username    = \"foo\"\n  master_password    = \"Mustbe8characters\"\n  node_type          = \"dc1.large\"\n  cluster_type       = \"single-node\"\n}\n\nresource \"aws_redshift_snapshot_schedule\" \"default\" {\n  identifier = \"tf-redshift-snapshot-schedule\"\n  definitions = [\n    \"rate(12 hours)\",\n  ]\n}\n\nresource \"aws_redshift_snapshot_schedule_association\" \"default\" {\n  cluster_identifier  = aws_redshift_cluster.default.id\n  schedule_identifier = aws_redshift_snapshot_schedule.default.id\n}",
+      "llm_summary": "This example demonstrates how to associate an Amazon Redshift cluster with a snapshot schedule using the `aws_redshift_snapshot_schedule_association` resource. It showcases the configuration of a single-node Redshift cluster, the creation of a snapshot schedule with a 12-hour interval, and the linkage of the schedule to the cluster, enabling automated backups."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "cluster_identifier",
+      "description": "(Required, Forces new resource) The cluster identifier.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `cluster_identifier` argument specifies the unique identifier of the Amazon Redshift cluster to associate with a snapshot schedule, enabling automated snapshot management for the specified cluster. By defining this required parameter, users ensure the snapshot schedule is applied to the correct cluster, supporting goals like data backup, recovery, and lifecycle management."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_redshift_snapshot_schedule_association` resource represents the unique identifier of the association between a Redshift cluster and a snapshot schedule. While optional, it is typically used for referencing or managing the association within Terraform configurations, enabling users to track and control this specific resource instance."
+    },
+    {
+      "name": "schedule_identifier",
+      "description": "(Required, Forces new resource) The snapshot schedule identifier.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `schedule_identifier` argument specifies the unique identifier of the snapshot schedule to associate with a Redshift cluster, enabling automated snapshot creation based on the defined schedule. By setting this required value, users can configure the lifecycle and frequency of cluster backups, ensuring data protection and recovery aligned with their operational needs."
+    }
+  ],
+  "blocks": [],
+  "attributes": []
+}

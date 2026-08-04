@@ -1,0 +1,133 @@
+{
+  "resource": {
+    "name": "aws_eks_fargate_profile",
+    "description": "Manages an EKS Fargate Profile.",
+    "llm_summary": "\"Manages the configuration of AWS EKS Fargate Profiles, enabling serverless compute for Kubernetes pods by specifying namespaces and workload selectors to run on Fargate. Commonly used to simplify Kubernetes cluster management by eliminating the need to provision or manage EC2 instances, while optimizing cost and scaling for specific workloads. Supports configurations for pod execution roles, subnets, and selectors to define which pods run on Fargate, making it ideal for running lightweight, isolated, and cost-efficient workloads in EKS.\""
+  },
+  "examples": [
+    {
+      "title": "Example IAM Role for EKS Fargate Profile",
+      "code": "resource \"aws_iam_role\" \"example\" {\n  name = \"eks-fargate-profile-example\"\n\n  assume_role_policy = jsonencode({\n    Statement = [{\n      Action = \"sts:AssumeRole\"\n      Effect = \"Allow\"\n      Principal = {\n        Service = \"eks-fargate-pods.amazonaws.com\"\n      }\n    }]\n    Version = \"2012-10-17\"\n  })\n}\n\nresource \"aws_iam_role_policy_attachment\" \"example-AmazonEKSFargatePodExecutionRolePolicy\" {\n  policy_arn = \"arn:aws:iam::aws:policy/AmazonEKSFargatePodExecutionRolePolicy\"\n  role       = aws_iam_role.example.name\n}",
+      "llm_summary": "This example demonstrates how to create an IAM role with the necessary trust policy and attach the `AmazonEKSFargatePodExecutionRolePolicy` for use with an `aws_eks_fargate_profile`. It illustrates the configuration of the `assume_role_policy` to allow EKS Fargate pods to assume the role and ensures proper permissions for pod execution in an EKS Fargate environment."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "cluster_name",
+      "description": "\u2013 (Required) Name of the EKS Cluster.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `cluster_name` argument specifies the name of the Amazon EKS cluster to which the Fargate profile will be associated, enabling users to define the target cluster where workloads will run on Fargate. By setting this required parameter, users ensure the Fargate profile is correctly linked to the desired EKS environment, aligning with common goals like workload orchestration and resource isolation within Kubernetes-managed infrastructure."
+    },
+    {
+      "name": "fargate_profile_name",
+      "description": "\u2013 (Required) Name of the EKS Fargate Profile.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `fargate_profile_name` argument specifies the unique name of the EKS Fargate Profile, allowing users to define and identify the profile that governs which Kubernetes pods run on AWS Fargate within an EKS cluster. Setting this argument is essential for creating and managing Fargate profiles, enabling users to configure workload isolation and optimize resource allocation for serverless container execution."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_eks_fargate_profile` resource allows users to specify a unique identifier for the Fargate profile, which can be used to reference or manage the profile within Terraform configurations and workflows. While optional, setting this argument helps ensure consistent identification of the resource, supporting tasks like state management and integration with other resources."
+    },
+    {
+      "name": "pod_execution_role_arn",
+      "description": "\u2013 (Required) Amazon Resource Name (ARN) of the IAM Role that provides permissions for the EKS Fargate Profile.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "Defines the Amazon Resource Name (ARN) of the IAM role that grants permissions for the EKS Fargate Profile to manage pod execution, including pulling container images and writing logs to AWS services. This required argument ensures proper IAM access control, enabling seamless pod operations within the Fargate environment."
+    },
+    {
+      "name": "subnet_ids",
+      "description": "\u2013 (Required) Identifiers of private EC2 Subnets to associate with the EKS Fargate Profile. These subnets must have the following resource tag: `kubernetes.io/cluster/CLUSTER_NAME` (where `CLUSTER_NAME` is replaced with the name of the EKS Cluster). The following arguments are optional:",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `subnet_ids` argument in the `aws_eks_fargate_profile` resource allows users to specify the private EC2 subnets where Fargate tasks will run within an EKS cluster. By defining these subnets, users control the network placement and isolation of workloads, ensuring they operate within tagged subnets that are associated with the cluster for secure and efficient communication."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Key-value map of resource tags. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_eks_fargate_profile` resource allows users to define a key-value map of resource tags, enabling the categorization, organization, and management of the Fargate profile within their AWS environment. By setting this argument, users can apply custom metadata for cost allocation, access control, or resource tracking, with the ability to override provider-level default tags if configured."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_eks_fargate_profile` resource allows users to define a comprehensive set of key-value tags inherited by the Fargate profile, including both user-defined tags and those automatically applied by AWS. This enables consistent resource tagging for cost allocation, organization, and management purposes across the AWS environment."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "selector",
+      "description": "(Required) Configuration block(s) for selecting Kubernetes Pods to execute with this EKS Fargate Profile. Detailed below.",
+      "cardinality": [
+        1,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "labels",
+          "description": "",
+          "required": false,
+          "type": "map(string)",
+          "llm_summary": "The `labels` argument in the `selector` block of the `aws_eks_fargate_profile` resource allows users to define a set of key-value pairs (map of strings) that act as metadata to match Kubernetes pods for inclusion in the Fargate profile. By specifying labels, users can control which pods are scheduled onto Fargate based on their associated metadata, enabling targeted workload placement and resource optimization within an EKS cluster."
+        },
+        {
+          "name": "namespace",
+          "description": "",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `namespace` argument specifies the Kubernetes namespace to which the Fargate profile's selector applies, allowing users to define the scope of workloads that will automatically run on AWS Fargate within an EKS cluster. By setting this argument, users can target specific namespaces for serverless compute provisioning, aligning resource allocation with organizational or application-specific boundaries."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The \"selector\" configuration block in the `aws_eks_fargate_profile` resource defines criteria for selecting Kubernetes Pods to run on AWS Fargate, enabling users to specify namespaces and labels for targeted workload execution. By configuring this block, users can achieve granular control over which Pods are offloaded to Fargate, optimizing resource allocation and simplifying infrastructure management for serverless Kubernetes deployments."
+    },
+    {
+      "name": "timeouts",
+      "description": "",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "create",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `create` argument within the `timeouts` block for the `aws_eks_fargate_profile` resource allows users to specify the maximum duration (in string format, e.g., \"10m\") Terraform will wait for the creation of an EKS Fargate profile to complete. By configuring this timeout, users can control the lifecycle behavior of the resource, ensuring operations do not hang indefinitely and align with deployment expectations in time-sensitive workflows."
+        },
+        {
+          "name": "delete",
+          "description": "",
+          "required": false,
+          "type": "string",
+          "llm_summary": "The `delete` argument within the `timeouts` block of the `aws_eks_fargate_profile` resource allows users to specify the maximum duration (as a string) Terraform should wait for the deletion of the Fargate profile to complete. Configuring this timeout helps manage resource lifecycle operations by preventing prolonged waits or failures during profile removal, aligning with user-defined infrastructure management goals."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `timeouts` configuration block in the `aws_eks_fargate_profile` resource defines customizable time limits for specific operations, such as creating, updating, or deleting the Fargate profile. By configuring this block, users can manage operation durations to prevent timeout errors during resource provisioning or modification, ensuring smoother lifecycle management of EKS Fargate profiles."
+    }
+  ],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "Amazon Resource Name (ARN) of the EKS Fargate Profile.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "description": "Status of the EKS Fargate Profile.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

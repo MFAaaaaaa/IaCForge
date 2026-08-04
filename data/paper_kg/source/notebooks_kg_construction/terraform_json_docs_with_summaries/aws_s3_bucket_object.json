@@ -1,0 +1,233 @@
+{
+  "resource": {
+    "name": "aws_s3_bucket_object",
+    "description": "The aws_s3_bucket_object resource is DEPRECATED and will be removed in a future version! Use aws_s3_object instead, where new features and fixes will be added. When replacing aws_s3_bucket_object with aws_s3_object in your configuration, on the next apply, Terraform will recreate the object. If you prefer to not have Terraform recreate the object, import the object using aws_s3_object. Provides an S3 object resource.",
+    "llm_summary": "The `aws_s3_bucket_object` resource enables the management of individual objects within an Amazon S3 bucket, including uploading files, setting metadata, and configuring access permissions. Common use cases include storing and retrieving data, managing static assets for web applications, or integrating S3 with other services for data processing workflows. Note that this resource is deprecated; users should transition to `aws_s3_object` for enhanced features, fixes, and lifecycle management capabilities, ensuring seamless object configuration and import without unnecessary recreation."
+  },
+  "examples": [
+    {
+      "title": "Uploading a file to a bucket",
+      "code": "resource \"aws_s3_bucket_object\" \"object\" {\n  bucket = \"your_bucket_name\"\n  key    = \"new_object_key\"\n  source = \"path/to/file\"\n\n  # The filemd5() function is available in Terraform 0.11.12 and later\n  # For Terraform 0.11.11 and earlier, use the md5() function and the file() function:\n  # etag = \"${md5(file(\"path/to/file\"))}\"\n  etag = filemd5(\"path/to/file\")\n}",
+      "llm_summary": "This example demonstrates how to use the `aws_s3_bucket_object` resource to upload a file to an S3 bucket by specifying the `bucket`, `key`, and `source` arguments. It highlights the use of the `filemd5()` function to compute the file's MD5 checksum for the `etag` attribute, ensuring data integrity during upload."
+    },
+    {
+      "title": "Encrypting with KMS Key",
+      "code": "resource \"aws_kms_key\" \"examplekms\" {\n  description             = \"KMS key 1\"\n  deletion_window_in_days = 7\n}\n\nresource \"aws_s3_bucket\" \"examplebucket\" {\n  bucket = \"examplebuckettftest\"\n}\n\nresource \"aws_s3_bucket_acl\" \"example\" {\n  bucket = aws_s3_bucket.examplebucket.id\n  acl    = \"private\"\n}\n\nresource \"aws_s3_bucket_object\" \"example\" {\n  key        = \"someobject\"\n  bucket     = aws_s3_bucket.examplebucket.id\n  source     = \"index.html\"\n  kms_key_id = aws_kms_key.examplekms.arn\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_s3_bucket_object` resource to store an object in an S3 bucket with server-side encryption using a custom AWS KMS key. It highlights the use of the `kms_key_id` argument to specify the KMS key ARN, along with related resources for creating the S3 bucket, setting its ACL to private, and provisioning the KMS key."
+    },
+    {
+      "title": "Server Side Encryption with S3 Default Master Key",
+      "code": "resource \"aws_s3_bucket\" \"examplebucket\" {\n  bucket = \"examplebuckettftest\"\n}\n\nresource \"aws_s3_bucket_acl\" \"example\" {\n  bucket = aws_s3_bucket.examplebucket.id\n  acl    = \"private\"\n}\n\nresource \"aws_s3_bucket_object\" \"example\" {\n  key                    = \"someobject\"\n  bucket                 = aws_s3_bucket.examplebucket.id\n  source                 = \"index.html\"\n  server_side_encryption = \"aws:kms\"\n}",
+      "llm_summary": "This example demonstrates how to configure server-side encryption for an S3 object using the default AWS KMS master key (`aws:kms`) with the `aws_s3_bucket_object` resource. It also illustrates setting up an S3 bucket with private ACL and uploading an object from a local source file (`index.html`) while ensuring encrypted storage."
+    },
+    {
+      "title": "Server Side Encryption with AWS-Managed Key",
+      "code": "resource \"aws_s3_bucket\" \"examplebucket\" {\n  bucket = \"examplebuckettftest\"\n}\n\nresource \"aws_s3_bucket_acl\" \"example\" {\n  bucket = aws_s3_bucket.examplebucket.id\n  acl    = \"private\"\n}\n\nresource \"aws_s3_bucket_object\" \"example\" {\n  key                    = \"someobject\"\n  bucket                 = aws_s3_bucket.examplebucket.id\n  source                 = \"index.html\"\n  server_side_encryption = \"AES256\"\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_s3_bucket_object` with server-side encryption using the AWS-managed key (`AES256`) for secure storage in an S3 bucket. It also includes the creation of an S3 bucket and setting its ACL to `private`, showcasing how to securely upload an object with encryption and access control."
+    },
+    {
+      "title": "S3 Object Lock",
+      "code": "resource \"aws_s3_bucket\" \"examplebucket\" {\n  bucket = \"examplebuckettftest\"\n\n  object_lock_enabled = true\n}\n\nresource \"aws_s3_bucket_acl\" \"example\" {\n  bucket = aws_s3_bucket.examplebucket.id\n  acl    = \"private\"\n}\n\nresource \"aws_s3_bucket_versioning\" \"example\" {\n  bucket = aws_s3_bucket.examplebucket.id\n  versioning_configuration {\n    status = \"Enabled\"\n  }\n}\n\nresource \"aws_s3_bucket_object\" \"example\" {\n  # Must have bucket versioning enabled first\n  depends_on = [aws_s3_bucket_versioning.example]\n\n  key    = \"someobject\"\n  bucket = aws_s3_bucket.examplebucket.id\n  source = \"important.txt\"\n\n  object_lock_legal_hold_status = \"ON\"\n  object_lock_mode              = \"GOVERNANCE\"\n  object_lock_retain_until_date = \"2021-12-31T23:59:60Z\"\n\n  force_destroy = true\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_s3_bucket_object` with Object Lock features, including legal hold status, governance mode, and a retention date, ensuring compliance and data protection. It also showcases prerequisite configurations such as enabling bucket versioning and Object Lock on the S3 bucket, along with private ACL settings."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "acl",
+      "description": "(Optional) Canned ACL to apply. Valid values are `private`, `public-read`, `public-read-write`, `aws-exec-read`, `authenticated-read`, `bucket-owner-read`, and `bucket-owner-full-control`. Defaults to `private`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `acl` argument in the `aws_s3_bucket_object` resource allows users to define the access control list (ACL) for the object, specifying its visibility and permissions. By setting this argument, users can control whether the object is private, publicly accessible, or restricted to specific AWS principals, aligning with common goals like managing security and access policies for S3 objects."
+    },
+    {
+      "name": "bucket",
+      "description": "(Required) Name of the bucket to put the file in. Alternatively, an S3 access point ARN can be specified.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `bucket` argument specifies the target S3 bucket where the object will be stored, allowing users to define the storage location by providing the bucket's name or an S3 access point ARN. This is a required parameter that directly determines the destination for the uploaded file, aligning with user goals of managing object storage and organizing data within AWS S3."
+    },
+    {
+      "name": "bucket_key_enabled",
+      "description": "(Optional) Whether or not to use Amazon S3 Bucket Keys for SSE-KMS.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `bucket_key_enabled` argument in the `aws_s3_bucket_object` resource allows users to control whether Amazon S3 Bucket Keys are utilized for server-side encryption with AWS KMS (SSE-KMS). Enabling this feature optimizes encryption performance and reduces costs by minimizing the number of KMS requests, making it ideal for users prioritizing efficient encryption management for S3 objects."
+    },
+    {
+      "name": "cache_control",
+      "description": "(Optional) Caching behavior along the request/reply chain Read w3c cache_control for further details.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cache_control` argument in the `aws_s3_bucket_object` resource allows users to define HTTP caching directives for the object, specifying how requests and responses should be cached along the delivery chain. This configuration helps optimize performance and control content delivery by setting rules like expiration times or revalidation requirements, aligning with common goals of managing cache behavior for web assets."
+    },
+    {
+      "name": "content",
+      "description": "(Optional, conflicts with `source` and `content_base64`) Literal string value to use as the object content, which will be uploaded as UTF-8-encoded text.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `content` argument in the `aws_s3_bucket_object` resource allows users to directly specify the literal UTF-8-encoded text that will be uploaded as the object's content in an S3 bucket. This enables users to define the object's data inline, making it ideal for scenarios where the content is small, static, or generated dynamically within the Terraform configuration, without relying on external files or sources."
+    },
+    {
+      "name": "content_base64",
+      "description": "(Optional, conflicts with `source` and `content`) Base64-encoded data that will be decoded and uploaded as raw bytes for the object content. This allows safely uploading non-UTF8 binary data, but is recommended only for small content such as the result of the `gzipbase64` function with small text strings. For larger objects, use `source` to stream the content from a disk file.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `content_base64` argument for the `aws_s3_bucket_object` resource allows users to upload Base64-encoded binary data as the object's content, enabling the safe handling of non-UTF8 or small binary files directly within Terraform. This is particularly useful for scenarios where small, compressed, or encoded data (e.g., gzip-compressed strings) needs to be embedded in the configuration, but for larger files, streaming from a local source is recommended."
+    },
+    {
+      "name": "content_disposition",
+      "description": "(Optional) Presentational information for the object. Read w3c content_disposition for further information.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `content_disposition` argument for the `aws_s3_bucket_object` resource allows users to define how the object should be presented or handled when accessed, such as specifying if it should be displayed inline in a browser or downloaded as an attachment. This is commonly used to control user-facing behavior for file downloads or content rendering, aligning with goals like enhancing user experience or enforcing content delivery preferences."
+    },
+    {
+      "name": "content_encoding",
+      "description": "(Optional) Content encodings that have been applied to the object and thus what decoding mechanisms must be applied to obtain the media-type referenced by the Content-Type header field. Read w3c content encoding for further information.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `content_encoding` argument for the `aws_s3_bucket_object` resource allows users to specify the encoding transformations applied to the object, such as `gzip` or `compress`, which inform clients how to decode the object to access its original media type. Configuring this argument helps optimize data transfer, enable compression, or ensure proper handling of encoded content by downstream systems or applications."
+    },
+    {
+      "name": "content_language",
+      "description": "(Optional) Language the content is in e.g., en-US or en-GB.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `content_language` argument for the `aws_s3_bucket_object` resource allows users to specify the language of the object's content, such as `en-US` or `en-GB`, by setting the `Content-Language` metadata header. This is typically used to inform clients or applications accessing the object about the intended language of the content, enabling better localization, compliance, or user experience in multilingual environments."
+    },
+    {
+      "name": "content_type",
+      "description": "(Optional) Standard MIME type describing the format of the object data, e.g., application/octet-stream. All Valid MIME Types are valid for this input.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `content_type` argument for the `aws_s3_bucket_object` resource allows users to specify the MIME type of the object's data, defining its format and enabling proper handling by applications or browsers (e.g., `application/json`, `image/png`). Setting this argument ensures accurate content interpretation and facilitates compatibility with downstream systems or client requests."
+    },
+    {
+      "name": "etag",
+      "description": "(Optional) Triggers updates when the value changes. The only meaningful value is `filemd5(\"path/to/file\")` (Terraform 0.11.12 or later) or `${md5(file(\"path/to/file\"))}` (Terraform 0.11.11 or earlier). This attribute is not compatible with KMS encryption, `kms_key_id` or `server_side_encryption = \"aws:kms\"` (see `source_hash` instead).",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `etag` argument in the `aws_s3_bucket_object` resource allows users to specify a hash value (typically an MD5 checksum) to track changes to the source file and trigger updates to the S3 object when the file content changes. This argument is primarily used for ensuring file integrity and managing updates but is incompatible with KMS-based encryption methods, where `source_hash` should be used instead."
+    },
+    {
+      "name": "force_destroy",
+      "description": "(Optional) Whether to allow the object to be deleted by removing any legal hold on any object version. Default is `false`. This value should be set to `true` only if the bucket has S3 object lock enabled.",
+      "required": false,
+      "type": "bool",
+      "llm_summary": "The `force_destroy` argument in the `aws_s3_bucket_object` resource controls whether an object can be forcibly deleted by overriding any legal hold on its versions, which is particularly relevant for buckets with S3 Object Lock enabled. Setting this to `true` allows users to bypass retention constraints and delete protected objects, supporting scenarios where strict compliance or versioning policies need to be overridden."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument for the `aws_s3_bucket_object` resource allows users to specify a unique identifier for the object within the S3 bucket, typically corresponding to the object's key or name. Setting this argument enables precise control over the object's location and retrieval, aligning with common user goals like organizing and accessing specific files or data within an S3 bucket."
+    },
+    {
+      "name": "key",
+      "description": "(Required) Name of the object once it is in the bucket. The following arguments are optional:",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `key` argument in the `aws_s3_bucket_object` resource specifies the unique name or path of the object within the S3 bucket, allowing users to define how the object is identified and organized in the bucket's hierarchy. Setting this argument ensures precise control over object placement, enabling use cases like structuring data, managing file paths, or creating logical groupings for efficient access and retrieval."
+    },
+    {
+      "name": "kms_key_id",
+      "description": "(Optional) ARN of the KMS Key to use for object encryption. If the S3 Bucket has server-side encryption enabled, that value will automatically be used. If referencing the `aws_kms_key` resource, use the `arn` attribute. If referencing the `aws_kms_alias` data source or resource, use the `target_key_arn` attribute. Terraform will only perform drift detection if a configuration value is provided.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `kms_key_id` argument allows users to specify the ARN of a KMS key for encrypting objects stored in the S3 bucket, enabling fine-grained control over server-side encryption. By setting this argument, users can ensure secure data storage using a custom encryption key, aligning with compliance or security requirements for sensitive data."
+    },
+    {
+      "name": "metadata",
+      "description": "(Optional) Map of keys/values to provision metadata (will be automatically prefixed by `x-amz-meta-`, note that only lowercase label are currently supported by the AWS Go API).",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `metadata` argument for the `aws_s3_bucket_object` resource allows users to define custom key-value pairs as metadata for the object, which are automatically prefixed with `x-amz-meta-` and stored alongside the object in S3. This enables users to attach additional contextual information, such as environment tags, content descriptors, or processing instructions, to the object for retrieval or use in downstream workflows."
+    },
+    {
+      "name": "object_lock_legal_hold_status",
+      "description": "(Optional) Legal hold status that you want to apply to the specified object. Valid values are `ON` and `OFF`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `object_lock_legal_hold_status` argument for the `aws_s3_bucket_object` resource allows users to specify whether a legal hold is applied to the object, controlling its protection against deletion or modification. By setting this argument to `ON` or `OFF`, users can enforce compliance or regulatory requirements by preventing unauthorized changes to the object, aligning with data governance and retention policies."
+    },
+    {
+      "name": "object_lock_mode",
+      "description": "(Optional) Object lock retention mode that you want to apply to this object. Valid values are `GOVERNANCE` and `COMPLIANCE`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `object_lock_mode` argument allows users to specify the object lock retention mode for an S3 object, enabling governance or compliance controls to protect the object from being deleted or overwritten. By setting this argument to `GOVERNANCE` or `COMPLIANCE`, users can enforce data retention policies to meet regulatory or organizational requirements."
+    },
+    {
+      "name": "object_lock_retain_until_date",
+      "description": "(Optional) Date and time, in RFC3339 format, when this object's object lock will expire.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `object_lock_retain_until_date` argument allows users to define the expiration date and time, in RFC3339 format, for an S3 object's object lock, ensuring the object remains immutable until the specified timestamp. This is typically used to enforce data retention policies or compliance requirements by preventing modifications or deletions of the object during the lock period."
+    },
+    {
+      "name": "server_side_encryption",
+      "description": "(Optional) Server-side encryption of the object in S3. Valid values are \"`AES256`\" and \"`aws:kms`\".",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `server_side_encryption` argument for the `aws_s3_bucket_object` resource allows users to specify the encryption method used to protect the object data at rest in S3. By setting this argument to either `AES256` or `aws:kms`, users can enable server-side encryption to meet security and compliance requirements, ensuring sensitive data is automatically encrypted using either S3-managed keys or AWS Key Management Service (KMS)."
+    },
+    {
+      "name": "source",
+      "description": "(Optional, conflicts with `content` and `content_base64`) Path to a file that will be read and uploaded as raw bytes for the object content.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `source` argument in the `aws_s3_bucket_object` resource allows users to specify the file path of a local file to be uploaded as the object's raw content in the S3 bucket. By setting this argument, users can define the source of the object's data, enabling direct file-based content uploads to S3 without manually providing the content or encoding it."
+    },
+    {
+      "name": "source_hash",
+      "description": "(Optional) Triggers updates like `etag` but useful to address `etag` encryption limitations. Set using `filemd5(\"path/to/source\")` (Terraform 0.11.12 or later). (The value is only stored in state and not saved by AWS.)",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `source_hash` argument in the `aws_s3_bucket_object` resource allows users to define a hash value (e.g., MD5) of the source file to trigger updates when the file changes, addressing limitations with encrypted `etag` values. By setting this argument, users can ensure accurate state tracking and force updates for the object in scenarios where `etag` alone is insufficient, supporting reliable synchronization and deployment workflows."
+    },
+    {
+      "name": "storage_class",
+      "description": "(Optional) Storage Class for the object. Defaults to \"`STANDARD`\".",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `storage_class` argument for the `aws_s3_bucket_object` resource allows users to specify the storage tier for the object, such as `STANDARD`, `REDUCED_REDUNDANCY`, or `GLACIER`, optimizing cost and performance based on access patterns and durability requirements. By configuring this property, users can align object storage with their application's data retention, retrieval frequency, and budgetary goals."
+    },
+    {
+      "name": "tags",
+      "description": "(Optional) Map of tags to assign to the object. If configured with a provider `default_tags` configuration block present, tags with matching keys will overwrite those defined at the provider-level.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags` argument for the `aws_s3_bucket_object` resource allows users to define a map of key-value pairs to assign metadata tags to the S3 object. This enables users to organize, categorize, and manage the object for purposes such as cost allocation, environment identification, or compliance tracking, with the ability to override provider-level default tags if applicable."
+    },
+    {
+      "name": "tags_all",
+      "description": "",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `tags_all` argument for the `aws_s3_bucket_object` resource allows users to define a comprehensive set of key-value tags that are applied to the S3 object, including inherited tags from the parent bucket. This enables efficient resource organization, cost allocation, and metadata management, supporting common goals like tagging for compliance, billing, or environment identification."
+    },
+    {
+      "name": "website_redirect",
+      "description": "(Optional) Target URL for website redirect. If no content is provided through source, content or content_base64, then the object will be empty. Terraform ignores all leading /s in the object's key and treats multiple /s in the rest of the object's key as a single /, so values of /index.html and index.html correspond to the same S3 object as do first//second///third// and first/second/third/.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `website_redirect` argument in the `aws_s3_bucket_object` resource allows users to specify a target URL for redirecting requests to the object, enabling website redirection functionality for the S3 object. This is typically used to configure custom routing behavior for web applications or static websites hosted on S3, ensuring that requests to the object are forwarded to the defined URL."
+    }
+  ],
+  "blocks": [],
+  "attributes": [
+    {
+      "name": "arn",
+      "description": "ARN of the object.",
+      "optional": false,
+      "type": "string"
+    },
+    {
+      "name": "version_id",
+      "description": "Unique version ID value for the object, if bucket versioning is enabled.",
+      "optional": false,
+      "type": "string"
+    }
+  ]
+}

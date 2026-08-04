@@ -1,0 +1,12 @@
+[
+    {
+        "argument_path": "function_name",
+        "references_output": "aws_lambda_function.name",
+        "target_resource_type": "aws_lambda_function"
+    },
+    {
+        "argument_path": "function_name",
+        "references_output": "aws_lambda_function.arn",
+        "target_resource_type": "aws_lambda_function"
+    }
+]

@@ -1,0 +1,230 @@
+{
+  "resource": {
+    "name": "aws_backup_selection",
+    "description": "Manages selection conditions for AWS Backup plan resources.",
+    "llm_summary": "The `aws_backup_selection` Terraform resource manages the configuration of resource selection criteria for AWS Backup plans, enabling users to define which AWS resources are included in automated backup workflows. Common use cases include setting up targeted backup policies for specific resource types (e.g., EC2 instances, RDS databases, DynamoDB tables) or applying tag-based selection for dynamic inclusion. This resource supports granular control over backup scope, ensuring efficient data protection and compliance with organizational recovery objectives."
+  },
+  "examples": [
+    {
+      "title": "IAM Role",
+      "code": "data \"aws_iam_policy_document\" \"assume_role\" {\n  statement {\n    effect = \"Allow\"\n\n    principals {\n      type        = \"Service\"\n      identifiers = [\"backup.amazonaws.com\"]\n    }\n\n    actions = [\"sts:AssumeRole\"]\n  }\n}\nresource \"aws_iam_role\" \"example\" {\n  name               = \"example\"\n  assume_role_policy = data.aws_iam_policy_document.assume_role.json\n}\n\nresource \"aws_iam_role_policy_attachment\" \"example\" {\n  policy_arn = \"arn:aws:iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup\"\n  role       = aws_iam_role.example.name\n}\n\nresource \"aws_backup_selection\" \"example\" {\n  # ... other configuration ...\n\n  iam_role_arn = aws_iam_role.example.arn\n}",
+      "llm_summary": "\"Demonstrates how to configure `aws_backup_selection` with an IAM role by creating an `aws_iam_role` that allows AWS Backup to assume the role using a trust policy and attaching the `AWSBackupServiceRolePolicyForBackup` managed policy. This example highlights the integration of IAM roles with AWS Backup for secure and automated backup resource selection.\""
+    },
+    {
+      "title": "Selecting Backups By Tag",
+      "code": "resource \"aws_backup_selection\" \"example\" {\n  iam_role_arn = aws_iam_role.example.arn\n  name         = \"tf_example_backup_selection\"\n  plan_id      = aws_backup_plan.example.id\n\n  selection_tag {\n    type  = \"STRINGEQUALS\"\n    key   = \"foo\"\n    value = \"bar\"\n  }\n}",
+      "llm_summary": "\"Demonstrates how to configure the `aws_backup_selection` resource to select AWS resources for backup based on tags using the `selection_tag` block, specifying a key-value pair (`foo=bar`) and the `STRINGEQUALS` condition. This example also shows how to associate the backup selection with an IAM role and a backup plan using the `iam_role_arn` and `plan_id` arguments.\""
+    },
+    {
+      "title": "Selecting Backups By Conditions",
+      "code": "resource \"aws_backup_selection\" \"example\" {\n  iam_role_arn = aws_iam_role.example.arn\n  name         = \"tf_example_backup_selection\"\n  plan_id      = aws_backup_plan.example.id\n  resources    = [\"*\"]\n\n  condition {\n    string_equals {\n      key   = \"aws:ResourceTag/Component\"\n      value = \"rds\"\n    }\n    string_like {\n      key   = \"aws:ResourceTag/Application\"\n      value = \"app*\"\n    }\n    string_not_equals {\n      key   = \"aws:ResourceTag/Backup\"\n      value = \"false\"\n    }\n    string_not_like {\n      key   = \"aws:ResourceTag/Environment\"\n      value = \"test*\"\n    }\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_backup_selection` resource to select AWS resources for backup based on specific tag-based conditions. It showcases the use of the `condition` block with advanced filtering criteria, including `string_equals`, `string_like`, `string_not_equals`, and `string_not_like`, enabling dynamic and granular backup selection based on resource tags such as `Component`, `Application`, `Backup`, and `Environment`."
+    },
+    {
+      "title": "Selecting Backups By Resource",
+      "code": "resource \"aws_backup_selection\" \"example\" {\n  iam_role_arn = aws_iam_role.example.arn\n  name         = \"tf_example_backup_selection\"\n  plan_id      = aws_backup_plan.example.id\n\n  resources = [\n    aws_db_instance.example.arn,\n    aws_ebs_volume.example.arn,\n    aws_efs_file_system.example.arn,\n  ]\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_backup_selection` resource to specify a set of AWS resources (RDS instance, EBS volume, and EFS file system) for inclusion in a backup plan using their ARNs. It highlights key arguments such as `iam_role_arn`, `name`, `plan_id`, and the `resources` list, enabling users to define targeted backup selections within an AWS Backup Plan."
+    },
+    {
+      "title": "Selecting Backups By Not Resource",
+      "code": "resource \"aws_backup_selection\" \"example\" {\n  iam_role_arn = aws_iam_role.example.arn\n  name         = \"tf_example_backup_selection\"\n  plan_id      = aws_backup_plan.example.id\n\n  not_resources = [\n    aws_db_instance.example.arn,\n    aws_ebs_volume.example.arn,\n    aws_efs_file_system.example.arn,\n  ]\n}",
+      "llm_summary": "This example demonstrates how to configure the `aws_backup_selection` resource to exclude specific resources from a backup plan using the `not_resources` argument. It shows how to define a backup selection with an IAM role, a backup plan ID, and a list of resource ARNs to exclude, enabling users to customize backup scopes effectively."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "iam_role_arn",
+      "description": "(Required) The ARN of the IAM role that AWS Backup uses to authenticate when restoring and backing up the target resource. See the AWS Backup Developer Guide for additional information about using AWS managed policies or creating custom policies attached to the IAM role.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `iam_role_arn` argument specifies the Amazon Resource Name (ARN) of the IAM role that AWS Backup uses to authenticate and perform backup and restore operations on the selected resources. By defining this role, users ensure proper access control and permissions for AWS Backup, enabling secure and automated management of backup processes in compliance with organizational policies."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_backup_selection` resource allows users to specify a unique identifier for the backup selection configuration. This identifier helps distinguish and reference the specific backup selection within AWS Backup, enabling better organization and management of backup plans and associated resources."
+    },
+    {
+      "name": "name",
+      "description": "(Required) The display name of a resource selection document.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `name` argument in the `aws_backup_selection` resource specifies the display name for the backup selection document, allowing users to uniquely identify and organize backup configurations within AWS Backup. By setting this required string, users can define a meaningful label that aids in managing and distinguishing resource selection groups tied to backup plans, aligning with common goals like environment-specific organization or compliance tracking."
+    },
+    {
+      "name": "not_resources",
+      "description": "(Optional) An array of strings that either contain Amazon Resource Names (ARNs) or match patterns of resources to exclude from a backup plan.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `not_resources` argument in the `aws_backup_selection` resource allows users to specify a set of resource ARNs or patterns to explicitly exclude from a backup plan. This enables fine-grained control over backup scope, ensuring certain resources are omitted from automated backups based on user-defined criteria."
+    },
+    {
+      "name": "plan_id",
+      "description": "(Required) The backup plan ID to be associated with the selection of resources.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `plan_id` argument in the `aws_backup_selection` resource specifies the unique identifier of the backup plan to associate with the selected resources. By setting this required value, users define which backup plan governs the retention, scheduling, and recovery settings for the resources included in the selection, ensuring alignment with organizational backup policies and compliance requirements."
+    },
+    {
+      "name": "resources",
+      "description": "(Optional) An array of strings that either contain Amazon Resource Names (ARNs) or match patterns of resources to assign to a backup plan.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "The `resources` argument in the `aws_backup_selection` resource allows users to specify a set of Amazon Resource Names (ARNs) or resource matching patterns to include in a backup plan. By configuring this argument, users can define which specific resources or groups of resources are protected, aligning backup operations with organizational data protection goals and compliance requirements."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "condition",
+      "description": "(Optional) Condition-based filters used to specify sets of resources for a backup plan. See below for details.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [],
+      "blocks": [
+        {
+          "name": "string_equals",
+          "description": "(Optional) Filters the values of your tagged resources for only those resources that you tagged with the same value. Also called \"exact matching\". See below for details.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "key",
+              "description": "(Required) Key for the filter.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `key` argument in the `string_equals` filter for the `aws_backup_selection` resource specifies the attribute or metadata field to evaluate when matching resources for backup inclusion. By defining this key, users can control which resource property (e.g., \"tag:Environment\" or \"resource-type\") is compared against the specified value, enabling precise targeting of resources based on their characteristics or tags for backup operations."
+            },
+            {
+              "name": "value",
+              "description": "(Required) Value for the filter.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `value` argument in the `string_equals` filter for the `aws_backup_selection` resource specifies the exact string that must match a given condition when defining backup resource selection criteria. This allows users to control which resources are included in a backup plan by matching specific attributes, such as tags or resource identifiers, to ensure precise and targeted backups."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `string_equals` block within the `condition` context of the `aws_backup_selection` resource enables exact matching of tagged resource values, filtering resources to include only those with specific tag values. This configuration helps users precisely target resources for backup plans, ensuring granular control over resource selection based on tag criteria."
+        },
+        {
+          "name": "string_like",
+          "description": "(Optional) Filters the values of your tagged resources for matching tag values with the use of a wildcard character (`*`) anywhere in the string. For example, `prod*` or `*rod*` matches the tag value `production`. See below for details.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "key",
+              "description": "(Required) Key for the filter.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `key` argument in the `aws_backup_selection` resource specifies the identifier for a filter used to define which resources are included in a backup plan based on matching criteria. By setting this required string value, users can control the selection logic for resource tags or attributes, enabling targeted backups aligned with organizational policies or specific workloads."
+            },
+            {
+              "name": "value",
+              "description": "(Required) Value for the filter.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `value` argument in the `aws_backup_selection` resource specifies the string pattern used to filter resources for inclusion in the backup plan based on the `string_like` condition. By defining this value, users can control which resources are matched and selected for backup, enabling precise targeting of resources such as tags, names, or other attributes that align with their backup strategy."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `string_like` block within the `condition` context of the `aws_backup_selection` resource enables flexible filtering of tagged resources by matching tag values using wildcard patterns (e.g., `prod*`, `*rod*`). This configuration allows users to define granular conditions for resource selection, ensuring backup policies target specific resources based on dynamic or partial tag values."
+        },
+        {
+          "name": "string_not_equals",
+          "description": "(Optional) Filters the values of your tagged resources for only those resources that you tagged that do not have the same value. Also called \"negated matching\". See below for details.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "key",
+              "description": "(Required) Key for the filter.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `key` argument in the `string_not_equals` filter for the `aws_backup_selection` resource specifies the metadata key to evaluate when determining which resources to exclude from a backup plan. By defining this key, users can target specific resource attributes (e.g., tags or properties) to fine-tune backup selection criteria, ensuring only desired resources are included or excluded based on their metadata values."
+            },
+            {
+              "name": "value",
+              "description": "(Required) Value for the filter.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `value` argument in the `string_not_equals` filter for the `aws_backup_selection` resource specifies the string value that must *not* match the defined condition, enabling users to exclude resources from backup plans based on specific attribute values (e.g., tags or resource properties). By setting this argument, users can refine backup selection criteria to ensure only desired resources are included, aligning with common goals like optimizing backup scope or adhering to compliance requirements."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `string_not_equals` block within the `condition` context of the `aws_backup_selection` resource enables negated matching by filtering tagged resources that do not have a specific value for a given tag key. This configuration allows users to exclude resources from backup plans based on tag values, providing granular control over resource selection and ensuring precise targeting for backup operations."
+        },
+        {
+          "name": "string_not_like",
+          "description": "(Optional) Filters the values of your tagged resources for non-matching tag values with the use of a wildcard character (`*`) anywhere in the string. See below for details.",
+          "cardinality": [
+            0,
+            0
+          ],
+          "arguments": [
+            {
+              "name": "key",
+              "description": "(Required) Key for the filter.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `key` argument in the `string_not_like` block of the `aws_backup_selection` resource specifies the tag key used to filter resources that should be excluded from the backup plan. By defining this key, users can target specific resource tags to ensure that resources matching the exclusion criteria are not included in the backup selection, enabling precise control over backup scope based on tagging strategies."
+            },
+            {
+              "name": "value",
+              "description": "(Required) Value for the filter.",
+              "required": true,
+              "type": "string",
+              "llm_summary": "The `value` argument in the `string_not_like` filter for the `aws_backup_selection` resource specifies the string pattern that must *not* match the resource names being evaluated for backup inclusion. By defining this value, users can exclude resources with names that match the specified pattern, enabling precise control over which resources are excluded from backup plans based on naming conventions or patterns."
+            }
+          ],
+          "blocks": [],
+          "llm_summary": "The `string_not_like` block within the `condition` configuration of the `aws_backup_selection` resource enables filtering of tagged resources by excluding those with tag values that match a specified pattern, using wildcard characters (`*`) for flexible string matching. This block allows users to precisely define backup selection criteria by excluding resources with non-matching tag values, ensuring granular control over which resources are included in backup plans."
+        }
+      ],
+      "llm_summary": "The `condition` block in the `aws_backup_selection` resource enables condition-based filtering to define specific sets of resources for inclusion in a backup plan. It encapsulates settings that allow users to apply granular criteria, such as tags or resource attributes, ensuring precise control over which resources are backed up, thereby optimizing backup scope and compliance."
+    },
+    {
+      "name": "selection_tag",
+      "description": "(Optional) Tag-based conditions used to specify a set of resources to assign to a backup plan. See below for details.",
+      "cardinality": [
+        0,
+        0
+      ],
+      "arguments": [
+        {
+          "name": "key",
+          "description": "(Required) Key for the filter.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `key` argument in the `selection_tag` block of the `aws_backup_selection` resource specifies the tag key used to filter AWS resources for inclusion in a backup plan. By defining this string value, users can target resources based on specific tag criteria, enabling precise control over which resources are protected by automated backups, such as those tagged for specific environments, applications, or compliance requirements."
+        },
+        {
+          "name": "type",
+          "description": "(Required) An operation, such as `STRINGEQUALS`, that is applied to the key-value pair used to filter resources in a selection.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `type` argument in the `selection_tag` block of the `aws_backup_selection` resource specifies the operation used to filter resources based on their tags, such as `STRINGEQUALS`. By defining this argument, users control how tag-based conditions are evaluated to include resources in a backup plan, enabling precise selection of resources that match specific key-value criteria."
+        },
+        {
+          "name": "value",
+          "description": "(Required) Value for the filter.",
+          "required": true,
+          "type": "string",
+          "llm_summary": "The `value` argument in the `selection_tag` block of the `aws_backup_selection` resource specifies the tag value used to filter resources for inclusion in a backup plan. By defining this string, users can target resources with matching tags, enabling precise control over which resources are backed up based on their metadata, such as environment, application, or role."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `selection_tag` block in the `aws_backup_selection` resource defines tag-based conditions to dynamically identify and assign resources to a backup plan. By configuring this block, users can automate resource selection based on tags, enabling efficient and scalable backup management for environments with diverse or frequently changing resources."
+    }
+  ],
+  "attributes": []
+}

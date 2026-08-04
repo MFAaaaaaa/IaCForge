@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "evaluation"))
 
 import graph_ir
+import local_repair
 import opa_evaluator
 import result_metrics
 import schema_rag
@@ -144,6 +145,24 @@ class OfflineCacheTests(unittest.TestCase):
             )
         self.assertEqual(coverage["covered"], 1)
         self.assertEqual(len(coverage["missing_prompt_sha256"]), 1)
+
+
+class LocalRepairTests(unittest.TestCase):
+    def test_plan_repair_excludes_raw_kg_and_provider_contract(self):
+        prompt = local_repair.build_prompt(
+            "Create a VPC.",
+            '{"resources": [{"type": "aws_vpc", "name": "main"}]}',
+            "aws_vpc schema context",
+            'resource "aws_vpc" "main" {}',
+            "Error: Missing required argument cidr_block",
+        )
+        self.assertIn("Terraform plan diagnostic", prompt)
+        self.assertNotIn("RAW_KG_SENTINEL", prompt)
+        policy = local_repair.policy_manifest()
+        self.assertEqual(policy["trigger"], "terraform_plan_failed")
+        self.assertFalse(policy["raw_kg_in_repair"])
+        self.assertFalse(policy["provider_contract_in_repair"])
+        self.assertFalse(policy["opa_feedback_used"])
 
 
 if __name__ == "__main__":

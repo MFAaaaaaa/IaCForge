@@ -1,0 +1,35 @@
+{
+    "resource": {
+        "name": "aws_efs_file_system_policy",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "bypass_policy_lockout_safety_check",
+            "description": "",
+            "required": false,
+            "type": "bool"
+        },
+        {
+            "name": "file_system_id",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "policy",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": []
+}

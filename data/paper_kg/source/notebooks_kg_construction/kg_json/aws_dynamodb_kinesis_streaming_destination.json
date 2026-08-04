@@ -1,0 +1,35 @@
+{
+    "resource": {
+        "name": "aws_dynamodb_kinesis_streaming_destination",
+        "description": ""
+    },
+    "examples": [],
+    "arguments": [
+        {
+            "name": "approximate_creation_date_time_precision",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "id",
+            "description": "",
+            "required": false,
+            "type": "string"
+        },
+        {
+            "name": "stream_arn",
+            "description": "",
+            "required": true,
+            "type": "string"
+        },
+        {
+            "name": "table_name",
+            "description": "",
+            "required": true,
+            "type": "string"
+        }
+    ],
+    "blocks": [],
+    "attributes": []
+}

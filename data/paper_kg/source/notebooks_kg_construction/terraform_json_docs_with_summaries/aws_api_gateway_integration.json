@@ -1,0 +1,157 @@
+{
+  "resource": {
+    "name": "aws_api_gateway_integration",
+    "description": "Provides an HTTP Method Integration for an API Gateway Integration.",
+    "llm_summary": "The `aws_api_gateway_integration` Terraform resource enables the configuration of integrations between API Gateway methods and backend services, such as AWS Lambda, HTTP endpoints, or other AWS resources. It is commonly used to set up request routing, data transformation, and error handling for APIs, supporting scenarios like serverless application development, microservices architecture, and external API consumption. Key configurations include integration types (e.g., HTTP, AWS, MOCK), request/response mapping templates, caching, and timeout settings, allowing users to optimize API performance and reliability."
+  },
+  "examples": [
+    {
+      "title": "Basic Usage",
+      "code": "resource \"aws_api_gateway_rest_api\" \"MyDemoAPI\" {\n  name        = \"MyDemoAPI\"\n  description = \"This is my API for demonstration purposes\"\n}\n\nresource \"aws_api_gateway_resource\" \"MyDemoResource\" {\n  rest_api_id = aws_api_gateway_rest_api.MyDemoAPI.id\n  parent_id   = aws_api_gateway_rest_api.MyDemoAPI.root_resource_id\n  path_part   = \"mydemoresource\"\n}\n\nresource \"aws_api_gateway_method\" \"MyDemoMethod\" {\n  rest_api_id   = aws_api_gateway_rest_api.MyDemoAPI.id\n  resource_id   = aws_api_gateway_resource.MyDemoResource.id\n  http_method   = \"GET\"\n  authorization = \"NONE\"\n}\n\nresource \"aws_api_gateway_integration\" \"MyDemoIntegration\" {\n  rest_api_id          = aws_api_gateway_rest_api.MyDemoAPI.id\n  resource_id          = aws_api_gateway_resource.MyDemoResource.id\n  http_method          = aws_api_gateway_method.MyDemoMethod.http_method\n  type                 = \"MOCK\"\n  cache_key_parameters = [\"method.request.path.param\"]\n  cache_namespace      = \"foobar\"\n  timeout_milliseconds = 29000\n\n  request_parameters = {\n    \"integration.request.header.X-Authorization\" = \"'static'\"\n  }\n\n  # Transforms the incoming XML request to JSON\n  request_templates = {\n    \"application/xml\" = <<EOF\n{\n   \"body\" : $input.json('$')\n}\nEOF\n  }\n}",
+      "llm_summary": "This example demonstrates how to configure an `aws_api_gateway_integration` resource to integrate a mock backend with an API Gateway REST API, using a `MOCK` integration type. It showcases key configurations such as request parameter mapping, XML-to-JSON request transformation via `request_templates`, caching with `cache_key_parameters` and `cache_namespace`, and setting a custom timeout with `timeout_milliseconds`."
+    }
+  ],
+  "arguments": [
+    {
+      "name": "cache_key_parameters",
+      "description": "(Optional) List of cache key parameters for the integration.",
+      "required": false,
+      "type": "set(string)",
+      "llm_summary": "Defines a set of parameters used as cache keys for the API Gateway integration, enabling fine-grained control over caching behavior by specifying which request parameters should be used to uniquely identify cached responses. This helps optimize performance and reduce backend load by ensuring cache entries are tailored to specific request attributes."
+    },
+    {
+      "name": "cache_namespace",
+      "description": "(Optional) Integration's cache namespace.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `cache_namespace` argument in the `aws_api_gateway_integration` resource allows users to define a unique namespace for caching within the API Gateway integration. By setting this value, users can isolate cached data specific to the integration, enabling more granular control over cache behavior and improving performance for API requests that rely on cached responses."
+    },
+    {
+      "name": "connection_id",
+      "description": "(Optional) ID of the VpcLink used for the integration. Required if `connection_type` is `VPC_LINK`",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `connection_id` argument in the `aws_api_gateway_integration` resource specifies the ID of the VpcLink to be used for the integration, enabling API Gateway to securely connect to resources within a VPC. This argument is essential for configuring integrations with private endpoints when the `connection_type` is set to `VPC_LINK`, supporting use cases like accessing internal services or private APIs."
+    },
+    {
+      "name": "connection_type",
+      "description": "(Optional) Integration input's connectionType. Valid values are `INTERNET` (default for connections through the public routable internet), and `VPC_LINK` (for private connections between API Gateway and a network load balancer in a VPC).",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `connection_type` argument in the `aws_api_gateway_integration` resource allows users to specify the network connectivity method for the integration, either through the public internet (`INTERNET`) or a private connection via a VPC link (`VPC_LINK`). Configuring this argument determines how API Gateway communicates with the backend service, enabling users to tailor the integration to their infrastructure needs, such as securing private connections within a VPC or leveraging public internet access."
+    },
+    {
+      "name": "content_handling",
+      "description": "(Optional) How to handle request payload content type conversions. Supported values are `CONVERT_TO_BINARY` and `CONVERT_TO_TEXT`. If this property is not defined, the request payload will be passed through from the method request to integration request without modification, provided that the passthroughBehaviors is configured to support payload pass-through.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `content_handling` argument in the `aws_api_gateway_integration` resource allows users to control how request payload content types are converted during API Gateway integration. By specifying `CONVERT_TO_BINARY` or `CONVERT_TO_TEXT`, users can define whether payloads are transformed into binary or text formats, enabling seamless integration with backend services that require specific content type handling. If not set, payloads are passed through unmodified, provided passthrough behavior is configured appropriately."
+    },
+    {
+      "name": "credentials",
+      "description": "(Optional) Credentials required for the integration. For `AWS` integrations, 2 options are available. To specify an IAM Role for Amazon API Gateway to assume, use the role's ARN. To require that the caller's identity be passed through from the request, specify the string `arn:aws:iam::\\*:user/\\*`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `credentials` argument in the `aws_api_gateway_integration` resource allows users to specify the authentication mechanism for the integration, either by providing an IAM Role ARN for API Gateway to assume or by passing the caller's identity directly from the request. Configuring this argument enables control over how API Gateway interacts with downstream AWS services, ensuring secure and appropriate access based on the integration's requirements."
+    },
+    {
+      "name": "http_method",
+      "description": "(Required) HTTP method (`GET`, `POST`, `PUT`, `DELETE`, `HEAD`, `OPTION`, `ANY`) when calling the associated resource.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `http_method` argument specifies the HTTP method (`GET`, `POST`, `PUT`, `DELETE`, `HEAD`, `OPTION`, `ANY`) used to invoke the associated API Gateway resource, enabling users to define the type of request that the integration will handle. By setting this argument, users control the interaction pattern between the API Gateway and the backend service, aligning it with the desired functionality of the API endpoint."
+    },
+    {
+      "name": "id",
+      "description": "",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `id` argument in the `aws_api_gateway_integration` resource represents a unique identifier for the integration, typically used to reference or manage the integration within the API Gateway configuration. While optional, setting this argument can help users explicitly define or track the integration's identity for organizational or programmatic purposes, aiding in resource management and automation workflows."
+    },
+    {
+      "name": "integration_http_method",
+      "description": "(Optional) Integration HTTP method (`GET`, `POST`, `PUT`, `DELETE`, `HEAD`, `OPTIONs`, `ANY`, `PATCH`) specifying how API Gateway will interact with the back end. Required if `type` is `AWS`, `AWS_PROXY`, `HTTP` or `HTTP_PROXY`. Not all methods are compatible with all `AWS` integrations. e.g., Lambda function can only be invoked via `POST`.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `integration_http_method` argument in the `aws_api_gateway_integration` resource specifies the HTTP method (`GET`, `POST`, `PUT`, etc.) used by API Gateway to interact with the backend service, such as an AWS Lambda function or an HTTP endpoint. This configuration determines how requests are routed and processed, enabling users to define the communication protocol for their integration type (`AWS`, `AWS_PROXY`, `HTTP`, or `HTTP_PROXY`) and ensuring compatibility with the backend's requirements (e.g., Lambda functions require `POST`)."
+    },
+    {
+      "name": "passthrough_behavior",
+      "description": "(Optional) Integration passthrough behavior (`WHEN_NO_MATCH`, `WHEN_NO_TEMPLATES`, `NEVER`). Required if `request_templates` is used.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `passthrough_behavior` argument in the `aws_api_gateway_integration` resource controls how the API Gateway handles requests when no matching mapping templates are found. It allows users to specify whether requests should pass through unaltered (`WHEN_NO_MATCH`), use default passthrough behavior (`WHEN_NO_TEMPLATES`), or be rejected (`NEVER`), enabling fine-grained control over request processing and integration behavior."
+    },
+    {
+      "name": "request_parameters",
+      "description": "(Optional) Map of request query string parameters and headers that should be passed to the backend responder. For example: `request_parameters = { \"integration.request.header.X-Some-Other-Header\" = \"method.request.header.X-Some-Header\" }`",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `request_parameters` argument in the `aws_api_gateway_integration` resource allows users to map request query string parameters and headers from the API Gateway method request to the backend integration request. This enables precise control over how client-supplied data, such as headers or query parameters, is forwarded to the backend responder, facilitating seamless data flow and customization of API behavior."
+    },
+    {
+      "name": "request_templates",
+      "description": "(Optional) Map of the integration's request templates.",
+      "required": false,
+      "type": "map(string)",
+      "llm_summary": "The `request_templates` argument in the `aws_api_gateway_integration` resource allows users to define a mapping of request payloads to specific integration templates using a `map(string)` format. This enables customization of how incoming requests are transformed before being sent to the backend, supporting use cases like translating client requests into formats required by downstream services or APIs."
+    },
+    {
+      "name": "resource_id",
+      "description": "(Required) API resource ID.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `resource_id` argument specifies the unique identifier of the API Gateway resource to which the integration is applied, enabling users to associate the integration with a specific API endpoint or method. By defining this argument, users ensure the integration is correctly linked to the desired resource, facilitating the configuration of backend connectivity and request handling for that API Gateway resource."
+    },
+    {
+      "name": "rest_api_id",
+      "description": "(Required) ID of the associated REST API.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `rest_api_id` argument specifies the unique identifier of the REST API to which the integration belongs, enabling the association of the integration with a specific API Gateway instance. By setting this required argument, users define the target API for configuring integration behaviors, such as connecting backend services or managing request/response transformations."
+    },
+    {
+      "name": "timeout_milliseconds",
+      "description": "(Optional) Custom timeout between 50 and 300,000 milliseconds. The default value is 29,000 milliseconds. You need to raise a Service Quota Ticket to increase time beyond 29,000 milliseconds.",
+      "required": false,
+      "type": "number",
+      "llm_summary": "The `timeout_milliseconds` argument in the `aws_api_gateway_integration` resource allows users to configure the maximum timeout duration (in milliseconds) for API Gateway to wait for a response from the integrated backend service. By specifying this value, users can optimize request handling for long-running operations, ensuring backend responsiveness while adhering to service quota limits."
+    },
+    {
+      "name": "type",
+      "description": "(Required) Integration input's type. Valid values are `HTTP` (for HTTP backends), `MOCK` (not calling any real backend), `AWS` (for AWS services), `AWS_PROXY` (for Lambda proxy integration) and `HTTP_PROXY` (for HTTP proxy integration). An `HTTP` or `HTTP_PROXY` integration with a `connection_type` of `VPC_LINK` is referred to as a private integration and uses a VpcLink to connect API Gateway to a network load balancer of a VPC.",
+      "required": true,
+      "type": "string",
+      "llm_summary": "The `type` argument in the `aws_api_gateway_integration` resource specifies the integration method used to connect API Gateway to a backend, enabling users to define how requests are routed and processed. By setting this argument, users can configure integrations such as HTTP backends, AWS services, Lambda proxy, or mock responses, tailoring the API Gateway's behavior to meet specific application requirements, including private integrations via VPC links for secure communication with VPC resources."
+    },
+    {
+      "name": "uri",
+      "description": "(Optional) Input's URI. Required if `type` is `AWS`, `AWS_PROXY`, `HTTP` or `HTTP_PROXY`. For HTTP integrations, the URI must be a fully formed, encoded HTTP(S) URL according to the RFC-3986 specification . For AWS integrations, the URI should be of the form `arn:aws:apigateway:{region}:{subdomain.service|service}:{path|action}/{service_api}`. `region`, `subdomain` and `service` are used to determine the right endpoint. e.g., `arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/arn:aws:lambda:eu-west-1:123456789012:function:my-func/invocations`. For private integrations, the URI parameter is not used for routing requests to your endpoint, but is used for setting the Host header and for certificate validation.",
+      "required": false,
+      "type": "string",
+      "llm_summary": "The `uri` argument in the `aws_api_gateway_integration` resource specifies the endpoint to which API Gateway routes requests for integrations of type `AWS`, `AWS_PROXY`, `HTTP`, or `HTTP_PROXY`. It allows users to define the target service or HTTP URL, ensuring proper request routing, Host header configuration, and certificate validation, with formats tailored to the integration type (e.g., AWS service ARNs or RFC-3986-compliant URLs)."
+    }
+  ],
+  "blocks": [
+    {
+      "name": "tls_config",
+      "description": "(Optional) TLS configuration. See below.",
+      "cardinality": [
+        0,
+        1
+      ],
+      "arguments": [
+        {
+          "name": "insecure_skip_verification",
+          "description": "",
+          "required": false,
+          "type": "bool",
+          "llm_summary": "The `insecure_skip_verification` argument in the `tls_config` block of the `aws_api_gateway_integration` resource allows users to control whether TLS certificate validation is bypassed during HTTPS communication with the backend service. Setting this to `true` disables certificate verification, which can simplify integration with services using self-signed or untrusted certificates but introduces potential security risks by accepting unverified connections."
+        }
+      ],
+      "blocks": [],
+      "llm_summary": "The `tls_config` block within the `aws_api_gateway_integration` resource enables the configuration of TLS settings for secure communication between API Gateway and the backend service. It encapsulates related settings such as client certificate validation and other TLS parameters, allowing users to enforce secure connections and enhance the integrity of data transmission in their API integrations."
+    }
+  ],
+  "attributes": []
+}

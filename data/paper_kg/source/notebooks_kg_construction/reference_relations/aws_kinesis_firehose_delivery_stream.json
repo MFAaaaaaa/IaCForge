@@ -1,0 +1,232 @@
+[
+    {
+        "argument_path": "extended_s3_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "extended_s3_configuration.bucket_arn",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "extended_s3_configuration.processing_configuration.processors.parameters.parameter_value",
+        "references_output": "aws_lambda_function.arn",
+        "target_resource_type": "aws_lambda_function"
+    },
+    {
+        "argument_path": "extended_s3_configuration.s3_backup_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "extended_s3_configuration.s3_backup_configuration.bucket_arn",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "redshift_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "redshift_configuration.cluster_jdbcurl",
+        "references_output": "aws_redshift_cluster.endpoint",
+        "target_resource_type": "aws_redshift_cluster"
+    },
+    {
+        "argument_path": "redshift_configuration.s3_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "redshift_configuration.s3_configuration.bucket_arn",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "redshift_configuration.s3_backup_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "redshift_configuration.s3_backup_configuration.bucket_arn",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "elasticsearch_configuration.domain_arn",
+        "references_output": "aws_elasticsearch_domain.arn",
+        "target_resource_type": "aws_elasticsearch_domain"
+    },
+    {
+        "argument_path": "elasticsearch_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "elasticsearch_configuration.s3_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "elasticsearch_configuration.s3_configuration.bucket_arn",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "elasticsearch_configuration.vpc_config.subnet_ids",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "elasticsearch_configuration.vpc_config.security_group_ids",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "elasticsearch_configuration.vpc_config.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "opensearch_configuration.domain_arn",
+        "references_output": "aws_opensearch_domain.arn",
+        "target_resource_type": "aws_opensearch_domain"
+    },
+    {
+        "argument_path": "opensearch_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "opensearch_configuration.s3_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "opensearch_configuration.s3_configuration.bucket_arn",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "opensearch_configuration.vpc_config.subnet_ids",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "opensearch_configuration.vpc_config.security_group_ids",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "opensearch_configuration.vpc_config.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "opensearchserverless_configuration.collection_endpoint",
+        "references_output": "aws_opensearchserverless_collection.collection_endpoint",
+        "target_resource_type": "aws_opensearchserverless_collection"
+    },
+    {
+        "argument_path": "opensearchserverless_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "opensearchserverless_configuration.s3_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "opensearchserverless_configuration.s3_configuration.bucket_arn",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "opensearchserverless_configuration.vpc_config.subnet_ids",
+        "references_output": "aws_subnet.id",
+        "target_resource_type": "aws_subnet"
+    },
+    {
+        "argument_path": "opensearchserverless_configuration.vpc_config.security_group_ids",
+        "references_output": "aws_security_group.id",
+        "target_resource_type": "aws_security_group"
+    },
+    {
+        "argument_path": "opensearchserverless_configuration.vpc_config.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "iceberg_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "iceberg_configuration.catalog_arn",
+        "references_output": "aws_glue_catalog_database.catalog_arn",
+        "target_resource_type": "aws_glue_catalog_database"
+    },
+    {
+        "argument_path": "iceberg_configuration.s3_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "iceberg_configuration.s3_configuration.bucket_arn",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "iceberg_configuration.destination_table_configuration.database_name",
+        "references_output": "aws_glue_catalog_database.name",
+        "target_resource_type": "aws_glue_catalog_database"
+    },
+    {
+        "argument_path": "iceberg_configuration.destination_table_configuration.table_name",
+        "references_output": "aws_glue_catalog_table.name",
+        "target_resource_type": "aws_glue_catalog_table"
+    },
+    {
+        "argument_path": "splunk_configuration.s3_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "splunk_configuration.s3_configuration.bucket_arn",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "http_endpoint_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "http_endpoint_configuration.s3_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "http_endpoint_configuration.s3_configuration.bucket_arn",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    },
+    {
+        "argument_path": "snowflake_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "snowflake_configuration.s3_configuration.role_arn",
+        "references_output": "aws_iam_role.arn",
+        "target_resource_type": "aws_iam_role"
+    },
+    {
+        "argument_path": "snowflake_configuration.s3_configuration.bucket_arn",
+        "references_output": "aws_s3_bucket.arn",
+        "target_resource_type": "aws_s3_bucket"
+    }
+]
