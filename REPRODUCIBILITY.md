@@ -102,7 +102,7 @@ python3 scripts/verify_package.py --strict
 sha256sum -c SHA256SUMS
 ```
 
-The manifest intentionally reports one unavailable optional pair: the exact
-14B `paperkg/both_localrepair1_no_direct_kg` run. The available 14B IR-only and
-HCL-only paper repair runs are archived under their actual stage labels; do not
-substitute either for the missing both-stage configuration.
+The manifest includes the Qwen2.5-Coder 14B
+`paperkg/both_localrepair1_no_direct_kg` run completed on 2026-08-04. This run
+uses a 32K context window, a maximum output of 16,384 tokens, and one repair
+call after plan failure without directly passing raw KG to the repair prompt.

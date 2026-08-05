@@ -114,14 +114,7 @@ def verify_result_manifest(path):
         records.append(record)
 
     missing = manifest.get("missing", [])
-    expected_missing = {
-        (
-            "kg_repair",
-            "paperkg/both_localrepair1_no_direct_kg",
-            "qwen2.5-coder-14b",
-            False,
-        )
-    }
+    expected_missing = set()
     actual_missing = {
         (
             item.get("group"),
@@ -133,8 +126,8 @@ def verify_result_manifest(path):
     }
     if actual_missing != expected_missing:
         failures.append("result manifest has an unexpected missing-artifact set")
-    if len(records) != 41:
-        failures.append(f"expected 41 result/log pairs, found {len(records)}")
+    if len(records) != 42:
+        failures.append(f"expected 42 result/log pairs, found {len(records)}")
     return {
         "artifacts": records,
         "artifact_count": len(records),

@@ -22,7 +22,7 @@ KG preserve the available Qwen2.5-Coder 3B and 14B results.
 
 - paper KG stage selection (`ir`, `hcl`, `both`);
 - paper KG 3B/14B IR-only and HCL-only results with no-direct-KG repair;
-- paper KG both-stage 3B/14B no-repair and available both-stage repair result;
+- paper KG both-stage 3B/14B results with and without repair;
 - half-paper/half-full historical results with and without repair;
 - clean multigranular KG results with and without repair.
 
@@ -30,17 +30,12 @@ Repair is one call after plan failure only. It does not directly receive raw KG
 or a KG-derived Provider Contract. It may receive Graph IR/current HCL that
 were produced by KG-enabled upstream stages.
 
-## Known Missing Result
+## Both-Stage Paper KG Repair
 
-The exact Qwen2.5-Coder 14B **both-stage** result and log for
-`paperkg/both_localrepair1_no_direct_kg` were not found in trusted historical
-sources. The missing pair is recorded in `RESULT_MANIFEST.json` with
-`required=false`. The existing 14B IR-only/HCL-only repair runs are preserved
-under their actual stage labels and are not substituted for the missing
-both-stage configuration.
-
-The available 3B run for that variant reports Validate 261/458, Plan 230/458,
-and Pass@1 102/458.
+The Qwen2.5-Coder 14B `paperkg/both_localrepair1_no_direct_kg` run was completed
+on 2026-08-04 with a 32K context window and maximum output of 16,384 tokens. It
+reports Validate 386/458, Plan 351/458, and Pass@1 168/458. The repair call does
+not directly receive raw KG.
 
 ## Qwen2.5-Coder Summary
 
@@ -58,7 +53,7 @@ Counts are `Validate / Plan / Pass@1`, each out of 458.
 | paper KG at both stages | 209 / 188 / 93 | 330 / 296 / 155 |
 | paper KG at IR only + repair | 224 / 198 / 84 | 388 / 373 / 191 |
 | paper KG at HCL only + repair | 228 / 210 / 90 | 369 / 347 / 159 |
-| paper KG at both + repair | 261 / 230 / 102 | unavailable |
+| paper KG at both + repair | 261 / 230 / 102 | 386 / 351 / 168 |
 | half-paper/half-full KG at both | 196 / 183 / 85 | 328 / 308 / 154 |
 | half-paper/half-full KG at both + repair | 245 / 230 / 104 | 362 / 348 / 166 |
 

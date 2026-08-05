@@ -498,6 +498,22 @@
     },
     {
       "group": "kg_repair",
+      "log": "kg_repair/paperkg/both_localrepair1_no_direct_kg/qwen2.5-coder-14b/qwen25coder14b-paperrepjson-both-faithfulgraph-simplegraphir-promptschema-localrepair1-promptonly-full458-v1-32k-maxtok16384-20260804.log",
+      "log_sha256": "84ada05e8ac1b9d5f02b7653a0b9bb52ca8f828ebd8e9c8d293b8d8e663f7bd1",
+      "metrics": {
+        "completed": 458,
+        "pass_at_1": 168,
+        "plan": 351,
+        "rows": 458,
+        "validate": 386
+      },
+      "model": "qwen2.5-coder-14b",
+      "result": "kg_repair/paperkg/both_localrepair1_no_direct_kg/qwen2.5-coder-14b/evaluation-dataset-for-data-FullKGVeriGraph-paperrepjson-both-faithfulgraph-simplegraphir-promptschema-localrepair1-promptonly-full458-v1-32k-maxtok16384-20260804.csv",
+      "result_sha256": "ddc8b8ff84cba6dc4eda0d1aaa1239229a51dc7a7cee0310f274d68c00fbcb00",
+      "variant": "paperkg/both_localrepair1_no_direct_kg"
+    },
+    {
+      "group": "kg_repair",
       "log": "kg_repair/half_paper_half_fullkg/hybridnested/qwen2.5-coder-3b/qwen25coder3b-paperrepjson-hybridnested-graphir-promptschema-norepair-promptonly-full458-v3-20260717.log",
       "log_sha256": "65f94957acabcb1b8dd55a149a262682ed3ecac522af9a28b70d76dc38b5691a",
       "metrics": {
@@ -657,17 +673,6 @@
       "variant": "clean_multigranular_kg/both_localrepair1"
     }
   ],
-  "missing": [
-    {
-      "group": "kg_repair",
-      "missing": [
-        "/home/fameng/zzzhong/iac-eval/evaluation/results/qwen2.5-coder-14b/complete/evaluation-dataset-for-data-FullKGVeriGraph-paperrepjson-both-faithfulgraph-simplegraphir-promptschema-localrepair1-promptonly-full458-v1-32k-maxtok16384-20260803.csv",
-        "/home/fameng/zzzhong/iac-eval/evaluation/logs/qwen25coder14b-paperrepjson-both-faithfulgraph-simplegraphir-promptschema-localrepair1-promptonly-full458-v1-32k-maxtok16384-20260803.log"
-      ],
-      "model": "qwen2.5-coder-14b",
-      "required": false,
-      "variant": "paperkg/both_localrepair1_no_direct_kg"
-    }
-  ],
+  "missing": [],
   "source": "/home/fameng/zzzhong/iac-eval/evaluation"
 }
