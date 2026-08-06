@@ -1,93 +1,61 @@
-# Architecture
+# IaCForge Architecture
 
-## Stage Contracts
+## Core flow
 
 ```text
 Prompt
-  -> KG profile selector
-  -> optional PlannerEvidence projection
-  -> Graph IR generation and safe parsing
-  -> IR/schema consistency check
-  -> exact SchemaProjection
-  -> optional instance-level ProviderContract
-  -> HCL generation and normalization
-  -> validate -> plan
-  -> optional local repair after plan failure
-  -> final validate/plan -> OPA
+  + Full KG or Paper KG evidence
+        |
+        v
+Planner LLM
+        |
+        v
+resource/dependency Graph IR
+        |
+        +--> exact provider-schema retrieval
+        |
+        v
+Compiler LLM
+        |
+        v
+normalized Terraform HCL
+        |
+        +--> validate --> plan --> OPA
+        |
+        `--> optional one-shot local repair after an initial validate/plan failure
 ```
 
-The evaluator uses four primary typed boundaries:
+KG evidence is always injected at both generation stages. There is no public stage-selection switch.
 
-1. `Prompt + optional PlannerEvidence -> GraphIR`
-2. `GraphIR -> SchemaProjection`
-3. `GraphIR + SchemaProjection + optional KG -> ProviderContract`
-4. `Prompt + GraphIR + SchemaProjection + optional ProviderContract -> HCL`
+## Planner
 
-`IAC_KG_INJECTION_STAGE=ir` enables only planner evidence. `hcl` enables only
-the KG-derived Provider Contract. `both` enables both interfaces. Schema
-grounding is separate from KG selection.
+The Planner receives the visible Prompt and evidence retrieved from the selected KG. It emits JSON containing resource instances, dependency edges, and short implementation notes. `evaluation/graph_ir.py` parses and normalizes this JSON before schema retrieval.
 
-## KG Adapters
+## Schema grounding
 
-`evaluation/eval_verigraph.py` selects one evidence adapter:
+`evaluation/schema_rag.py` uses Graph IR resource types as exact keys into the bundled AWS provider schema. The resulting context contains required, optional, computed-only, and nested-block facts. Hidden benchmark columns are not used for schema selection.
 
-- `clean_multigranular`: version-aligned public provider KG and offline cache.
-- `paper`: paper replication JSON, Chroma, lexical fallback, reranking, and
-  reference expansion.
-- `hybrid_cached_evidence_rebuilt_kg`: immutable first-build evidence used for
-  historical comparability, with the second reconstructed KG kept alongside
-  it for provenance and future rebuilding.
+## Compiler
 
-The paper adapter defaults to top-2 resources and can expand dependencies from
-`reference_relations`. Optional arguments/blocks are retrieved from the
-`terraform_arguments_blocks` Chroma collection. The clean profile uses stable
-typed nodes/edges, exact aliases, BM25, optional dense retrieval, and graph
-expansion.
+The Compiler receives four logical inputs:
 
-## Graph IR and Schema
+1. Prompt
+2. Graph IR
+3. provider Schema context
+4. selected KG representation
 
-Graph IR v2 represents resource, data-source, and external-input instances;
-field-level bindings; structured constraints; explicit dependencies; and
-unresolved requirements. Invalid model text becomes a canonical empty IR and
-is marked as an IR generation failure.
+For Full KG, `evaluation/provider_contract.py` converts retrieved graph evidence and schema facts into the typed resource/dependency Provider Contract used by the retained runs. For Paper KG, the Compiler receives the raw retrieved Paper KG evidence.
 
-`IRSchemaChecker` checks provider type/kind, assignable source fields,
-exportable target attributes, approximate type compatibility, and binding
-endpoints. It applies only unique high-confidence field-name corrections.
-`schema_rag.py` then creates the task-relevant schema context.
+The generated program is normalized only by adding Terraform/AWS provider constraints and offline provider settings when missing. No resource blocks or task-specific assignments are synthesized by normalization.
 
-## Provider Contract
+## Validation and evaluation
 
-When HCL-stage KG injection is enabled, `provider_contract.py` compiles the
-normalized IR, schema projection, and KG evidence into an instance-level
-contract. It contains required/allowed assignments, references, relevant
-nested blocks, explicit dependencies, forbidden computed assignments, and
-unresolved constraints. It may also produce a deterministic HCL skeleton.
+IaCForge runs `terraform validate`, then creates a plan and converts it to JSON. OPA receives the plan only after generation has finished and the plan succeeds.
 
-The broad raw candidate KG is not passed directly to the HCL model. The model
-receives the projected Provider Contract.
+When repair is enabled through `VERIGRAPH_MAX_REPAIR_STEPS=1` or a repair mode, one call may run after the initial candidate fails validation or planning. Its inputs are Prompt, normalized Graph IR, provider schema context, current HCL, and the Terraform diagnostic. It receives neither selected-KG data nor OPA policy/results.
 
-## Local Repair
+## Knowledge graphs
 
-`evaluation/local_repair.py` implements a strict policy:
+Full KG covers the complete bundled AWS provider resource and data-source universe. Its edges come from official documentation examples, provider schema relationships, and conservative attribute-to-resource reference rules.
 
-- trigger only after the first Terraform plan fails;
-- at most one repair model call;
-- inputs: visible Prompt, normalized Graph IR, provider schema context,
-  current HCL, and Terraform plan diagnostic;
-- no raw KG evidence;
-- no KG-derived Provider Contract;
-- no OPA policy or result.
-
-The repaired candidate is normalized, validated, and planned again. Validation
-failure before the first plan does not trigger repair. Graph IR and HCL may
-carry indirect upstream KG influence, so this is a no-direct-KG repair
-boundary, not a claim that all causal KG influence has been removed.
-
-## Evaluation and Logging
-
-All modes share the same HCL extraction and normalization path. Logs preserve
-raw/normalized IR and HCL, normalization diffs, request parameters, token use,
-latencies, KG profile and injection stage, retrieval provenance, and repair
-policy. OPA is evaluation-only and runs after generation and planning.
-
+Paper KG uses bundled document, argument/block, example, and reference-traversal assets. Its benchmark-scoped relation edges are reported separately from the dataset-independent Full KG method.

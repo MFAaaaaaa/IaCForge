@@ -1,6 +1,6 @@
 provider_installation {
   filesystem_mirror {
-    path    = "/home/fameng/zzzhong/iac-eval/evaluation/tmp/provider_mirror"
-    include = ["registry.terraform.io/hashicorp/*"]
+    path    = "/home/fameng/zzzhong/IaCForge/data/provider_mirror"
+    include = ["registry.terraform.io/hashicorp/aws"]
   }
 }

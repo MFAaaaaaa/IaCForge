@@ -1,4 +1,4 @@
-"""Paper-facing IaCForge evaluation pipeline.
+"""IaCForge evaluation pipeline.
 
 Generation is restricted to the visible Prompt plus public provider
 schema/KG evidence. Hidden IaC-Eval columns are accessed only after generation
@@ -19,15 +19,11 @@ import subprocess
 import sys
 import tempfile
 import time
-from functools import lru_cache
 from pathlib import Path
 
 import pandas as pd
 
 import graph_ir
-import evidence_projection
-import hcl_metrics
-import ir_schema_checker
 import local_repair
 import models
 import opa_evaluator
@@ -35,11 +31,10 @@ import prompt_templates_verigraph as prompt_templates
 import result_metrics
 import schema_rag
 import provider_contract as provider_contract_builder
-import versioning
 
 
 DEFAULT_TERRAFORM_VERSION_CONSTRAINT = "~> 1.9.8"
-DEFAULT_AWS_PROVIDER_VERSION_CONSTRAINT = f"= {versioning.AWS_PROVIDER_VERSION}"
+DEFAULT_AWS_PROVIDER_VERSION_CONSTRAINT = "= 5.90.0"
 DEFAULT_TERRAFORM_PLAN_TIMEOUT_SECONDS = 100
 RESULT_COLUMN_BASES = [
     "LLM Output #",
@@ -55,16 +50,11 @@ RESULT_COLUMN_BASES = [
 ROOT_DIR = Path(__file__).resolve().parents[1]
 DATA_FILE = ROOT_DIR / "data" / "complete" / "data.csv"
 PLANNER_SYSTEM_PROMPT = (
-    "You are a deterministic Infrastructure-as-Code task planner. Return only "
-    "the requested typed JSON task graph. Never use hidden benchmark labels, "
+    "You are an Infrastructure-as-Code generator. Return concise, complete, "
+    "offline-valid Terraform HCL for AWS. Do not use hidden benchmark labels, "
     "reference outputs, evaluator policies, or feedback traces."
 )
-COMPILER_SYSTEM_PROMPT = (
-    "You are a deterministic Infrastructure-as-Code compiler. Emit concise, "
-    "complete, offline-valid Terraform HCL that exactly implements the supplied "
-    "typed contract. Never use hidden benchmark labels, reference outputs, "
-    "evaluator policies, or feedback traces."
-)
+COMPILER_SYSTEM_PROMPT = PLANNER_SYSTEM_PROMPT
 SYSTEM_PROMPT = COMPILER_SYSTEM_PROMPT
 
 logger = logging.getLogger("iacforge")
@@ -328,33 +318,8 @@ def terraform_plan_json(workdir, static_plan):
     return True, plan_json, ""
 
 
-def mode_from_strategy(strategy):
-    explicit = os.environ.get("IACFORGE_MODE", "").strip()
-    if explicit:
-        return explicit
-    if strategy == "FullKGVeriGraph":
-        return "full"
-    if strategy == "VeriGraph" and os.environ.get(
-        "VERIGRAPH_PROMPT_DERIVED_SCHEMA_GROUNDING", "0"
-    ).lower() in {"0", "false", "no"}:
-        return "ir_only"
-    if strategy == "VeriGraph":
-        return "ir_schema"
-    return "baseline"
-
-
-def result_category(mode):
-    categories = {
-        "baseline": "baseline",
-        "ir_only": "ir_only_ablation",
-        "ir_schema": "ir_schema_grounding",
-        "planner_kg": "planner_kg_ablation",
-        "compiler_kg": "compiler_kg_ablation",
-        "full": "full_ir_schema_grounding_kg",
-        "full_strict": "full_strict",
-        "full_repair1": "full_repair1",
-    }
-    return categories[mode]
+def experiment_mode(kg_kind, repair):
+    return f"{kg_kind}_kg" + ("_repair" if repair else "")
 
 
 def _graph_details(raw_graph_ir):
@@ -373,43 +338,13 @@ def _generation_note(output):
     }
 
 
-def _version_manifest():
-    kg_root_value = (
-        os.environ.get("IAC_PROVIDER_CONTRACT_ROOT", "").strip()
-        or os.environ.get("IAC_KG_REPLICATION_ROOT", "").strip()
-    )
-    kg_root = Path(kg_root_value) if kg_root_value else None
-    return versioning.build_version_manifest(
-        schema_rag.provider_schema.SCHEMA_FILE,
-        kg_root if kg_root and kg_root.exists() else None,
-    )
+def _canonical_sha256(value):
+    payload = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-@lru_cache(maxsize=2)
-def _load_legacy_evidence_index(path_text):
-    index = {}
-    with Path(path_text).open(encoding="utf-8") as handle:
-        for line in handle:
-            row = json.loads(line)
-            key = row.get("prompt_sha256") or graph_ir.prompt_sha256(
-                row.get("prompt", "")
-            )
-            index.setdefault(key, []).append(row)
-    return index
-
-
-def _kg_evidence_for_prompt(question_prompt):
-    profile = os.environ.get("IAC_KG_PROFILE", "clean_multigranular").strip().lower()
-    if profile == "paper":
-        allowed = os.environ.get(
-            "IAC_ALLOW_BENCHMARK_SCOPED_PAPER_KG", "0"
-        ).lower() in {"1", "true", "yes"}
-        if not allowed:
-            raise ValueError(
-                "The paper KG may be benchmark-scoped. Set "
-                "IAC_ALLOW_BENCHMARK_SCOPED_PAPER_KG=1 only for the explicitly "
-                "labelled paper-reference experiments."
-            )
+def _kg_evidence_for_prompt(question_prompt, kg_kind):
+    if kg_kind == "paper":
         paper_root = ROOT_DIR / "data" / "paper_kg" / "source"
         paper_chroma = ROOT_DIR / "data" / "paper_kg" / "chroma"
         os.environ.setdefault("IAC_KG_PAPER_REPLICATION_ROOT", str(paper_root))
@@ -420,259 +355,124 @@ def _kg_evidence_for_prompt(question_prompt):
 
         parsed = json.loads(retrieve_paper_replication_json_evidence(question_prompt))
         return parsed, {
-            "source": "paper_replication_json",
-            "profile": profile,
+            "source": "paper_kg",
+            "kg": "paper",
             "prompt_sha256": graph_ir.prompt_sha256(question_prompt),
-            "evidence_sha256": versioning.canonical_sha256(parsed),
-            "leakage_class": "paper_reference_potentially_benchmark_scoped",
+            "evidence_sha256": _canonical_sha256(parsed),
+            "scope_notice": "paper KG contains benchmark-scoped relation edges and is reported separately from Full KG",
         }
 
-    if profile in {"hybrid", "hybrid_cached_evidence_rebuilt_kg"}:
-        evidence_path = Path(
-            os.environ.get(
-                "IAC_HYBRID_EVIDENCE_FILE",
-                ROOT_DIR
-                / "data"
-                / "hybrid_paper_fullkg"
-                / "evidence_v1"
-                / "publickg_full458.jsonl",
-            )
-        )
-        prompt_hash = graph_ir.prompt_sha256(question_prompt)
-        evidence = None
-        for row in _load_legacy_evidence_index(str(evidence_path.resolve())).get(
-            prompt_hash, []
-        ):
-            if row.get("prompt") not in {None, question_prompt}:
-                continue
-            evidence = row.get("evidence")
-            break
-        if evidence is None:
-            raise KeyError(
-                f"Hybrid evidence-v1 has no entry for prompt_sha256={prompt_hash}"
-            )
-        parsed = json.loads(evidence) if isinstance(evidence, str) else evidence
-        return parsed, {
-            "source": "first_build_offline_evidence",
-            "profile": "hybrid_cached_evidence_rebuilt_kg",
-            "prompt_sha256": prompt_hash,
-            "evidence_sha256": versioning.canonical_sha256(parsed),
-            "evidence_build": "v1_first_build",
-            "kg_build": "v2_rebuilt_after_original_loss",
-            "version_alignment": "best_effort_content_may_differ_slightly",
-            "leakage_class": "historical_semi_clean_reference",
-        }
+    if kg_kind != "full":
+        raise ValueError(f"Unknown KG: {kg_kind}")
 
-    if profile != "clean_multigranular":
-        raise ValueError(f"Unknown IAC_KG_PROFILE: {profile}")
-
-    from iac_kg.offline_provider_contract_cache import (
-        configured_cache_path,
-        get_offline_provider_contract_entry,
+    full_kg_root = ROOT_DIR / "data" / "full_kg" / "provider_kg"
+    os.environ.setdefault("IAC_PROVIDER_CONTRACT_ROOT", str(full_kg_root))
+    os.environ.setdefault("IAC_KG_REPLICATION_ROOT", str(full_kg_root))
+    from iac_kg.provider_contract_retriever import (
+        retrieve_public_provider_contract_evidence,
     )
 
-    entry = get_offline_provider_contract_entry(question_prompt)
-    source = "offline_provider_contract_cache"
-    if entry is None:
-        allow_online = os.environ.get("IAC_ALLOW_ONLINE_KG_RETRIEVAL", "0").lower() in {
-            "1",
-            "true",
-            "yes",
-        }
-        if not allow_online:
-            raise FileNotFoundError(
-                "Offline KG evidence missing for prompt_sha256="
-                f"{graph_ir.prompt_sha256(question_prompt)} in {configured_cache_path()}. "
-                "Rebuild the cache with the current retriever/version manifest."
-            )
-        from iac_kg.provider_contract_retriever import (
-            retrieve_public_provider_contract_evidence,
-        )
-
-        parsed = json.loads(
-            retrieve_public_provider_contract_evidence(question_prompt)
-        )
-        entry = {
-            "prompt_sha256": graph_ir.prompt_sha256(question_prompt),
-            "retriever_version": versioning.RETRIEVER_VERSION,
-            "provider_version": versioning.AWS_PROVIDER_VERSION,
-            "evidence": parsed,
-            "evidence_sha256": versioning.canonical_sha256(parsed),
-            "retrieval_parameters": parsed.get("retrieval_method", {}).get(
-                "retrieval_parameters", {}
-            ),
-            "candidate_scores": parsed.get("candidate_scores", []),
-        }
-        source = "online_provider_contract_retriever"
-    return entry["evidence"], {
-        "source": source,
-        "profile": profile,
-        "prompt_sha256": entry.get("prompt_sha256", ""),
-        "retriever_version": entry.get("retriever_version", ""),
-        "provider_version": entry.get("provider_version", ""),
-        "kg_sha256": entry.get("kg_sha256", ""),
-        "schema_sha256": entry.get("schema_sha256", ""),
-        "evidence_sha256": entry.get("evidence_sha256")
-        or versioning.canonical_sha256(entry["evidence"]),
-        "retrieval_parameters": entry.get("retrieval_parameters", {}),
-        "candidate_scores": entry.get("candidate_scores", []),
+    parsed = json.loads(retrieve_public_provider_contract_evidence(question_prompt))
+    return parsed, {
+        "source": "full_provider_kg",
+        "kg": "full",
+        "prompt_sha256": graph_ir.prompt_sha256(question_prompt),
+        "evidence_sha256": _canonical_sha256(parsed),
     }
 
 
 def build_generation_prompt(mode, question_prompt):
-    if mode == "baseline":
-        notes = {
-            "mode": "baseline",
-            "prompt_sha256": graph_ir.prompt_sha256(question_prompt),
-            "generation_inputs": ["Prompt"],
-            "version_manifest": _version_manifest(),
-        }
-        return prompt_templates.baseline_generation_prompt(question_prompt), notes
-
-    kg_modes = {"planner_kg", "compiler_kg", "full", "full_strict", "full_repair1"}
-    if mode == "planner_kg":
-        injection_stage = "ir"
-    elif mode == "compiler_kg":
-        injection_stage = "hcl"
-    else:
-        injection_stage = os.environ.get(
-            "IAC_KG_INJECTION_STAGE",
-            os.environ.get("VERIGRAPH_KG_INJECTION_STAGE", "both"),
-        ).strip().lower()
-    if injection_stage not in {"ir", "hcl", "both"}:
-        raise ValueError(f"Unknown KG injection stage: {injection_stage}")
-    planner_kg_enabled = mode in kg_modes and injection_stage in {"ir", "both"}
-    compiler_kg_enabled = mode in kg_modes and injection_stage in {"hcl", "both"}
-    kg_evidence = {}
-    kg_note = None
-    planner_evidence = {}
-    retrieval_ms = 0
-    if mode in kg_modes:
-        started = time.perf_counter()
-        kg_evidence, kg_note = _kg_evidence_for_prompt(question_prompt)
-        retrieval_ms = round((time.perf_counter() - started) * 1000)
-    if planner_kg_enabled:
-        planner_evidence = evidence_projection.project_planner_evidence(kg_evidence)
-        graph_prompt = prompt_templates.full_kg_resource_graph_ir_prompt_only_prompt(
-            question_prompt,
-            evidence_projection.render_planner_evidence(planner_evidence),
-        )
-    else:
-        graph_prompt = prompt_templates.resource_graph_ir_prompt_only_prompt(question_prompt)
+    if mode not in {"full_kg", "full_kg_repair", "paper_kg", "paper_kg_repair"}:
+        raise ValueError(f"Unknown experiment mode: {mode}")
+    kg_kind = "paper" if mode.startswith("paper") else "full"
+    started = time.perf_counter()
+    kg_evidence, kg_note = _kg_evidence_for_prompt(question_prompt, kg_kind)
+    retrieval_ms = round((time.perf_counter() - started) * 1000)
+    graph_prompt = prompt_templates.resource_graph_ir_kg_prompt(
+        question_prompt,
+        json.dumps(kg_evidence, ensure_ascii=False, indent=2, sort_keys=True),
+    )
 
     ir_output = models.generate_with_metadata(
         PLANNER_SYSTEM_PROMPT,
         graph_prompt,
         stage="ir",
-        guided_json=True,
     )
     raw_graph_ir = ir_output.text
     validation, graph_note = _graph_details(raw_graph_ir)
     graph_note["prompt_sha256"] = graph_ir.prompt_sha256(question_prompt)
     normalized_graph = validation.graph
-    graph_note["planner_evidence_sha256"] = (
-        versioning.canonical_sha256(planner_evidence) if planner_evidence else ""
-    )
 
-    if mode == "ir_only":
-        prompt = prompt_templates.resource_graph_ir_generation_prompt(
-            question_prompt, graph_ir.render_graph_ir(normalized_graph)
-        )
-        return prompt, {
-            "mode": mode,
-            "generation_inputs": ["Prompt", "Graph IR"],
-            "graph_ir": graph_note,
-            "generation_cost": {
-                "retrieval_ms": retrieval_ms,
-                "ir": _generation_note(ir_output),
-            },
-            "_normalized_ir": normalized_graph,
-            "_provider_contract": {},
-            "_schema_context": "",
-        }
-
-    schema_check = ir_schema_checker.check_graph_ir(normalized_graph)
-    normalized_graph = schema_check.graph
-    graph_note["schema_consistency"] = schema_check.as_dict()
     schema = schema_rag.retrieve_schema_for_graph(normalized_graph, question_prompt)
-    if compiler_kg_enabled:
+    if kg_kind == "full":
         provider_contract = provider_contract_builder.build_provider_contract(
             question_prompt,
             normalized_graph,
             schema.projection,
             kg_evidence,
         )
-        contract_validation = provider_contract_builder.validate_provider_contract(
-            provider_contract
-        )
-        use_skeleton = os.environ.get("IAC_USE_HCL_SKELETON", "1").lower() in {
-            "1",
-            "true",
-            "yes",
-        }
-        skeleton = (
-            provider_contract_builder.build_hcl_skeleton(provider_contract)
-            if use_skeleton
-            else ""
-        )
         prompt = prompt_templates.resource_graph_ir_schema_contract_generation_prompt(
             question_prompt,
-            graph_ir.render_graph_ir(normalized_graph),
+            raw_graph_ir,
             schema.context,
             provider_contract_builder.render_provider_contract(provider_contract),
-            skeleton,
         )
         inputs = [
             "Prompt",
-            "normalized typed Graph IR",
+            "Planner-generated Graph IR text",
             "IR-guided exact provider schema",
             "task-specific canonical Provider Contract",
         ]
+        hcl_kg_input = "typed_provider_contract"
     else:
         provider_contract = {}
-        contract_validation = {"valid": True, "violations": []}
-        prompt = prompt_templates.resource_graph_ir_schema_generation_prompt(
+        prompt = prompt_templates.resource_graph_ir_schema_kg_generation_prompt(
             question_prompt,
-            graph_ir.render_graph_ir(normalized_graph),
+            raw_graph_ir,
             schema.context,
+            json.dumps(kg_evidence, ensure_ascii=False, indent=2, sort_keys=True),
         )
-        inputs = ["Prompt", "normalized typed Graph IR", "IR-guided exact provider schema"]
+        inputs = [
+            "Prompt",
+            "Planner-generated Graph IR text",
+            "IR-guided exact provider schema",
+            "raw prompt-retrieved KG evidence",
+        ]
+        hcl_kg_input = "raw_kg_evidence"
     return prompt, {
         "mode": mode,
-        "version_manifest": _version_manifest(),
         "generation_inputs": inputs,
         "graph_ir": graph_note,
         "schema_rag": schema.as_dict(),
         "kg": kg_note,
         "retrieval": {
-            "kg_profile": os.environ.get("IAC_KG_PROFILE", "clean_multigranular"),
-            "injection_stage": injection_stage,
+            "kg": kg_kind,
+            "stages": ["ir", "hcl"],
             "candidate_types": [
                 item.get("type", "")
-                for item in planner_evidence.get("candidate_resources", [])
+                for item in kg_evidence.get("candidate_resources", [])
             ],
             "scores": [
                 item.get("score", 0)
-                for item in planner_evidence.get("candidate_resources", [])
+                for item in kg_evidence.get("candidate_resources", [])
             ],
             "matched_rules": [
-                item.get("matched_by", [])
-                for item in planner_evidence.get("candidate_resources", [])
+                item.get("matched_by", item.get("matched_rules", []))
+                for item in kg_evidence.get("candidate_resources", [])
             ],
-            "planner_evidence_sha256": (
-                versioning.canonical_sha256(planner_evidence)
-                if planner_evidence
-                else ""
-            ),
+            "evidence_sha256": _canonical_sha256(kg_evidence),
         },
         "compiler_contract": {
-            "contract_sha256": provider_contract.get("contract_sha256", ""),
-            "resource_instances": sorted(
-                provider_contract.get("instance_contracts", {})
+            "contract_sha256": (
+                _canonical_sha256(provider_contract) if provider_contract else ""
             ),
-            "bindings": provider_contract.get("bindings", []),
-            "validation": contract_validation,
+            "resource_types": [
+                item.get("type", "")
+                for item in provider_contract.get("resource_contracts", [])
+            ],
+            "dependencies": provider_contract.get("dependency_contracts", []),
         },
+        "hcl_kg_input": hcl_kg_input,
         "generation_cost": {
             "retrieval_ms": retrieval_ms,
             "ir": _generation_note(ir_output),
@@ -683,25 +483,23 @@ def build_generation_prompt(mode, question_prompt):
     }
 
 
-def evaluate_one(row, mode, static_plan):
+def evaluate_one(row, mode, static_plan, repair_budget=0):
     result = {base + "0": "" for base in RESULT_COLUMN_BASES}
     # Leakage boundary: generation sees only Prompt and public evidence.
     question_prompt = row.get("Prompt", "")
     try:
         generation_prompt, notes = build_generation_prompt(mode, question_prompt)
         normalized_ir = notes.pop("_normalized_ir", graph_ir.empty_graph_ir())
-        compiler_contract = notes.pop("_provider_contract", {})
+        notes.pop("_provider_contract", None)
         schema_context = notes.pop("_schema_context", "")
-        resource_count = len(
-            compiler_contract.get("instance_contracts", {})
-            or normalized_ir.get("resources", [])
-        )
-        hcl_max_tokens = min(4096, max(1536, 1024 + 384 * resource_count))
+        notes["repair"] = local_repair.policy_manifest()
+        notes["repair"]["configured_max_steps"] = repair_budget
+        notes["repair"]["enabled"] = repair_budget > 0
+        notes["repair"]["calls"] = 0
         hcl_output = models.generate_with_metadata(
             COMPILER_SYSTEM_PROMPT,
             generation_prompt,
             stage="hcl",
-            max_tokens=hcl_max_tokens,
         )
         raw_llm_hcl = extract_hcl(hcl_output.text)
         hcl, normalization_diff = normalize_terraform_config_with_diff(
@@ -712,9 +510,6 @@ def evaluate_one(row, mode, static_plan):
             "raw_llm_hcl": raw_llm_hcl,
             "normalized_hcl": hcl,
             "normalization_diff": normalization_diff,
-            "mechanism_metrics": hcl_metrics.analyze_hcl(
-                hcl, normalized_ir, compiler_contract
-            ),
         }
         result["LLM Output #0"] = hcl
         result["LLM Notes #0"] = json.dumps(notes, ensure_ascii=True, sort_keys=True)
@@ -743,7 +538,6 @@ def evaluate_one(row, mode, static_plan):
                 COMPILER_SYSTEM_PROMPT,
                 repair_prompt,
                 stage="repair",
-                max_tokens=hcl_max_tokens,
             )
             raw_llm_hcl = extract_hcl(output.text)
             hcl, normalization_diff = normalize_terraform_config_with_diff(
@@ -751,7 +545,7 @@ def evaluate_one(row, mode, static_plan):
             )
             (workdir / "main.tf").write_text(hcl, encoding="utf-8")
             repair_used = True
-            notes["repair"] = local_repair.policy_manifest()
+            notes["repair"]["configured_max_steps"] = repair_budget
             notes["repair"]["calls"] = 1
             notes["repair"]["generation"] = _generation_note(output)
             notes["hcl_generation"]["repaired_raw_llm_hcl"] = raw_llm_hcl
@@ -761,20 +555,30 @@ def evaluate_one(row, mode, static_plan):
         result["LLM Compilable? #0"] = bool(compilable)
         result["LLM Compile Phase Error #0"] = "" if compilable else compile_error
         if not compilable:
-            notes["repair_outcome"] = {
-                "initial_validate": initial_validate,
-                "final_validate": bool(compilable),
-                "repair_used": repair_used,
-            }
-            result["LLM Output #0"] = hcl
-            result["LLM Notes #0"] = json.dumps(
-                notes, ensure_ascii=True, sort_keys=True
-            )
-            return result
+            if repair_budget > 0:
+                repair_once(compile_error)
+                compilable, compile_error = terraform_validate(workdir, static_plan)
+                result["LLM Compilable? #0"] = bool(compilable)
+                result["LLM Compile Phase Error #0"] = (
+                    "" if compilable else compile_error
+                )
+            if not compilable:
+                notes["repair_outcome"] = {
+                    "initial_validate": initial_validate,
+                    "initial_plan": False,
+                    "final_validate": bool(compilable),
+                    "final_plan": False,
+                    "repair_used": repair_used,
+                }
+                result["LLM Output #0"] = hcl
+                result["LLM Notes #0"] = json.dumps(
+                    notes, ensure_ascii=True, sort_keys=True
+                )
+                return result
 
         plannable, plan_json, plan_error = terraform_plan_json(workdir, static_plan)
         initial_plan = bool(plannable)
-        if not plannable and mode == "full_repair1":
+        if not plannable and repair_budget > 0 and not repair_used:
             repair_once(plan_error)
             compilable, compile_error = terraform_validate(workdir, static_plan)
             result["LLM Compilable? #0"] = bool(compilable)
@@ -796,9 +600,6 @@ def evaluate_one(row, mode, static_plan):
             "final_plan": bool(plannable),
             "repair_used": repair_used,
         }
-        notes["hcl_generation"]["mechanism_metrics"] = hcl_metrics.analyze_hcl(
-            hcl, normalized_ir, compiler_contract
-        )
         result["LLM Output #0"] = hcl
         result["LLM Notes #0"] = json.dumps(
             notes, ensure_ascii=True, sort_keys=True
@@ -821,7 +622,7 @@ def output_paths(model_name, mode, suffix):
     file_name = f"evaluation-dataset-for-data{suffix}.csv"
     tmp_path = Path("tmp") / model_name / "complete" / file_name
     results_root = Path(os.environ.get("EVAL_RESULTS_ROOT", ROOT_DIR / "results"))
-    result_path = results_root / result_category(mode) / model_name / file_name
+    result_path = results_root / mode / model_name / file_name
     return tmp_path, result_path
 
 
@@ -858,7 +659,8 @@ def row_completed(row):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
-    parser.add_argument("--enhance-strat", default="")
+    parser.add_argument("--kg", choices=("full", "paper"), required=True)
+    parser.add_argument("--repair", action="store_true")
     parser.add_argument("--static-plan", action="store_true")
     parser.add_argument("--max-rows", type=int, default=458)
     parser.add_argument("--row-ids-file")
@@ -872,13 +674,14 @@ def main():
     setup_logging(args.log_file)
     samples, config_models = load_config(args.config)
     if samples != 1:
-        raise ValueError("Paper-facing package supports samples=1 only.")
+        raise ValueError("IaCForge supports samples=1 only.")
     if len(config_models) != 1:
         raise ValueError("Model config must contain exactly one model name.")
     if args.checkpoint_every < 1:
         raise ValueError("--checkpoint-every must be at least 1.")
 
-    mode = mode_from_strategy(args.enhance_strat)
+    repair_budget = local_repair.configured_max_steps(args.repair)
+    mode = experiment_mode(args.kg, repair_budget > 0)
     suffix = os.environ.get("EVAL_OUTPUT_SUFFIX", f"-{mode}-full{args.max_rows}")
     output_model_name = os.environ.get("EVAL_MODEL_DIR", config_models[0])
     tmp_path, result_path = output_paths(output_model_name, mode, suffix)
@@ -907,7 +710,7 @@ def main():
             logger.info("Skipping completed row_id=%s", row["Evaluation Row ID"])
             continue
         logger.info("Evaluating row_id=%s", row["Evaluation Row ID"])
-        row_result = evaluate_one(row, mode, args.static_plan)
+        row_result = evaluate_one(row, mode, args.static_plan, repair_budget)
         for key, value in row_result.items():
             df.at[index, key] = value
         dirty += 1

@@ -1,384 +1,360 @@
-"""Compile Graph IR, exact schema and KG references into a canonical contract."""
+"""Build the typed Full KG contract consumed by HCL generation."""
 
 from __future__ import annotations
 
 import json
+import re
 from typing import Any
 
-import evidence_projection
 import provider_schema
-import versioning
 
 
-def _instances_by_id(graph):
-    return {
-        str(item.get("id", "")): item
-        for item in graph.get("resources", [])
-        if isinstance(item, dict)
-    }
+def _parse_evidence(value: str | dict[str, Any] | None) -> dict[str, Any]:
+    if isinstance(value, dict):
+        return value
+    if not value:
+        return {}
+    parsed = json.loads(str(value))
+    if not isinstance(parsed, dict):
+        raise ValueError("KG evidence root must be an object.")
+    return parsed
 
 
-def _terraform_address(instance):
-    instance_id = str(instance.get("id", ""))
-    kind = str(instance.get("kind", "resource"))
-    type_name = str(instance.get("type", ""))
-    if kind == "data_source":
-        return f"data.{type_name}.{instance_id}"
-    if kind == "external_input":
-        return f"var.{instance_id}"
-    return f"{type_name}.{instance_id}"
+def _sorted(values, limit=18):
+    items = []
+    for value in values or []:
+        value = str(value or "").strip()
+        if value and value not in items:
+            items.append(value)
+    return sorted(items)[:limit]
 
 
-def _reference_expression(instance, path):
-    address = _terraform_address(instance)
-    return f"{address}.{path}" if path else address
-
-
-def _schema_by_instance(schema_projection):
-    return {
-        str(item.get("instance_id", "")): item
-        for item in schema_projection.get("resources", [])
-        if isinstance(item, dict)
-    }
-
-
-def _constraint_assignments(graph):
-    values = {}
-    unresolved = []
-    for item in graph.get("constraints", []):
-        if not isinstance(item, dict):
+def _resource_index(graph):
+    by_type = {}
+    for resource in graph.get("resources", []) or []:
+        if not isinstance(resource, dict) or resource.get("kind") != "resource":
             continue
-        target = str(item.get("target", ""))
-        if target and "." in target and "value" in item:
-            instance_id, path = target.split(".", 1)
-            values.setdefault(instance_id, {})[path] = {
-                "kind": "literal",
-                "value": item.get("value"),
-                "operator": item.get("operator", "equals"),
-                "source_text": item.get("source_text", ""),
-            }
-        else:
-            unresolved.append(item)
-    return values, unresolved
+        resource_type = str(resource.get("type", "")).strip()
+        instance_id = str(resource.get("id", "")).strip()
+        if not resource_type or not instance_id:
+            continue
+        entry = by_type.setdefault(
+            resource_type,
+            {"addresses": [], "names": [], "source_spans": [], "evidence_ids": []},
+        )
+        address = f"{resource_type}.{instance_id}"
+        if address not in entry["addresses"]:
+            entry["addresses"].append(address)
+        if instance_id not in entry["names"]:
+            entry["names"].append(instance_id)
+        source_span = str(resource.get("source_span", "")).strip()
+        if source_span and source_span not in entry["source_spans"]:
+            entry["source_spans"].append(source_span)
+        for evidence_id in resource.get("evidence_ids", []) or []:
+            evidence_id = str(evidence_id).strip()
+            if evidence_id and evidence_id not in entry["evidence_ids"]:
+                entry["evidence_ids"].append(evidence_id)
+    return by_type
 
 
-def _prompt_value_assignments(evidence, instances):
-    assignments = {}
-    value_bindings = (
-        evidence.get("provider_contract", {}).get("value_bindings", []) or []
-    )
-    for item in value_bindings:
-        if not isinstance(item, dict):
+def _kg_candidates(evidence):
+    candidates = {}
+    for candidate in evidence.get("candidate_resources", []) or []:
+        if not isinstance(candidate, dict):
             continue
-        target_type = str(item.get("target_type", ""))
-        attribute = str(item.get("attribute", ""))
-        if "/" in attribute:
-            paths = attribute.split("/")
-        else:
-            paths = [attribute]
-        matches = [
-            instance_id
-            for instance_id, instance in instances.items()
-            if instance.get("type") == target_type
-        ]
-        if len(matches) != 1:
-            continue
-        for path in paths:
-            if path and provider_schema.is_assignable(target_type, path):
-                assignments.setdefault(matches[0], {})[path] = {
-                    "kind": "literal",
-                    "value": item.get("value"),
-                    "source": "visible_prompt_slot",
-                }
-    return assignments
+        resource_type = str(candidate.get("type", "")).strip()
+        if resource_type and resource_type not in candidates:
+            candidates[resource_type] = candidate
+    return candidates
 
 
-def _binding_contract(binding, instances):
-    source = binding.get("source", {})
-    target = binding.get("target", {})
-    source_id = str(source.get("resource", ""))
-    target_id = str(target.get("resource", ""))
-    source_path = str(source.get("path", ""))
-    target_path = str(target.get("path", ""))
-    target_instance = instances.get(target_id, {})
-    return {
-        "id": binding.get("id")
-        or f"binding:{source_id}.{source_path}->{target_id}.{target_path}",
-        "source": f"{source_id}.{source_path}",
-        "target": f"{target_id}.{target_path}",
-        "kind": binding.get("kind", "attribute_reference"),
-        "expression": _reference_expression(target_instance, target_path),
-        "evidence_id": binding.get("evidence_id", ""),
-    }
+def _high_confidence_types(evidence):
+    resource_types = []
+    for hint in evidence.get("required_resource_hints", []) or []:
+        if not isinstance(hint, dict):
+            continue
+        if str(hint.get("confidence", "")).strip().lower() != "high":
+            continue
+        resource_type = str(hint.get("resource_type", "")).strip()
+        if resource_type and resource_type not in resource_types:
+            resource_types.append(resource_type)
+    return resource_types
 
 
-def _instantiate_kg_bindings(evidence, graph, existing):
-    instances = _instances_by_id(graph)
-    existing_pairs = {
-        (item.get("source", ""), item.get("target", "")) for item in existing
-    }
-    templates = (
-        evidence.get("provider_contract", {}).get("dependency_templates", []) or []
-    )
-    generated = []
-    for template in templates:
-        if not isinstance(template, dict):
+def _nested_blocks(resource_type, evidence, needed_blocks=None):
+    needed_blocks = set(needed_blocks or [])
+    blocks = []
+    for block_name, block_spec in sorted(
+        provider_schema.nested_block_types(resource_type).items()
+    ):
+        min_items = block_spec.get("min_items") or 0
+        required_by_schema = bool(min_items and int(min_items) > 0)
+        if not required_by_schema and block_name not in needed_blocks:
             continue
-        confidence = float(template.get("confidence", 0.0))
-        provenance = template.get("provenance") or template.get("source_kind")
-        # Name/schema hints are recall aids, not hard compiler contracts.
-        if confidence < 0.8 or provenance in {
-            "provider_schema_name_rule",
-            "schema_name_hint",
-        }:
-            continue
-        sources = [
-            (instance_id, value)
-            for instance_id, value in instances.items()
-            if value.get("type") == template.get("from_type")
-        ]
-        targets = [
-            (instance_id, value)
-            for instance_id, value in instances.items()
-            if value.get("type") == template.get("to_type")
-        ]
-        if len(sources) != 1 or len(targets) != 1 or not template.get("attr"):
-            continue
-        source_id, _ = sources[0]
-        target_id, target_instance = targets[0]
-        source_path = str(template.get("attr"))
-        target_path = str(template.get("target_path") or "id")
-        pair = (f"{source_id}.{source_path}", f"{target_id}.{target_path}")
-        if pair in existing_pairs:
-            continue
-        generated.append(
+        blocks.append(
             {
-                "id": template.get("edge_id")
-                or template.get("evidence_id")
-                or f"binding:{pair[0]}->{pair[1]}",
-                "source": pair[0],
-                "target": pair[1],
-                "kind": "attribute_reference",
-                "expression": _reference_expression(target_instance, target_path),
-                "evidence_id": template.get("evidence_id", ""),
-                "provenance": provenance,
-                "confidence": confidence,
-                "inferred_from_type_level_kg": True,
+                "block": block_name,
+                "required_by_schema": required_by_schema,
+                "required_attrs_when_used": _sorted(
+                    provider_schema.nested_block_required_attributes(
+                        resource_type, block_name
+                    )
+                ),
+                "known_attrs": _sorted(
+                    provider_schema.nested_block_attributes(resource_type, block_name)
+                ),
+                "source": "Terraform AWS provider schema",
+                "syntax_rule": f"use nested block syntax: {block_name} {{ ... }}",
+                "forbidden_argument_forms": [
+                    f"{block_name} = ...",
+                    f"{block_name}s = ...",
+                ],
+                "usage_policy": (
+                    "must_emit"
+                    if required_by_schema
+                    else "emit_only_if_visible_prompt_or_dependency_requires"
+                ),
             }
         )
-        existing_pairs.add(pair)
-    return generated
-
-
-def build_provider_contract(
-    prompt: str,
-    normalized_ir: dict[str, Any],
-    schema_projection: dict[str, Any],
-    kg_evidence: str | dict[str, Any] | None,
-) -> dict[str, Any]:
-    """Build the only canonical compiler contract consumed by HCL generation."""
-
-    evidence = evidence_projection.parse_evidence(kg_evidence)
-    instances = _instances_by_id(normalized_ir)
-    schema_contracts = _schema_by_instance(schema_projection)
-    constraint_values, unresolved_constraints = _constraint_assignments(normalized_ir)
-    prompt_values = _prompt_value_assignments(evidence, instances)
-    ir_bindings = [
-        _binding_contract(item, instances)
-        for item in normalized_ir.get("bindings", [])
-        if isinstance(item, dict)
-    ]
-    bindings = ir_bindings + _instantiate_kg_bindings(
-        evidence, normalized_ir, ir_bindings
-    )
-
-    binding_assignments = {}
-    for item in bindings:
-        source = str(item.get("source", ""))
-        if "." not in source:
+    for hint in evidence.get("nested_block_hints", []) or []:
+        if not isinstance(hint, dict):
             continue
-        instance_id, path = source.split(".", 1)
-        binding_assignments.setdefault(instance_id, {})[path] = {
-            "kind": "reference",
-            "expression": item.get("expression", ""),
-            "binding_id": item.get("id", ""),
-        }
-
-    instance_contracts = {}
-    resources = []
-    for instance_id, instance in instances.items():
-        kind = str(instance.get("kind", "resource"))
-        type_name = str(instance.get("type", ""))
-        if kind == "external_input":
-            resources.append(
-                {
-                    "instance_id": instance_id,
-                    "kind": kind,
-                    "value_type": instance.get("value_type", "string"),
-                }
-            )
+        if str(hint.get("resource_type", "")).strip() != resource_type:
             continue
-        schema = schema_contracts.get(instance_id, {})
-        must_assign = dict(binding_assignments.get(instance_id, {}))
-        should_assign = {}
-        should_assign.update(prompt_values.get(instance_id, {}))
-        should_assign.update(constraint_values.get(instance_id, {}))
-        required = list(schema.get("required_args", []))
-        missing_required = [
-            path for path in required if path not in must_assign and path not in should_assign
-        ]
-        nested_blocks = list(schema.get("nested_blocks", []))
-        nested_block_names = {
-            str(item.get("name", ""))
-            for item in nested_blocks
-            if isinstance(item, dict)
-        }
-        instance_contract = {
-            "type": type_name,
-            "kind": kind,
-            "generation_policy": (
-                "must_generate_block"
-                if kind in {"resource", "data_source"}
-                else "declare_external_input"
-            ),
-            "required_assignments": required,
-            "allowed_assignments": sorted(
-                set(required)
-                | set(schema.get("relevant_optional_args", []))
-                | nested_block_names
-            ),
-            "must_assign": must_assign,
-            "should_assign": should_assign,
-            "unresolved_required_assignments": missing_required,
-            "forbidden_assignments": list(schema.get("all_computed_attrs", [])),
-            "nested_blocks": nested_blocks,
-            "arg_types": dict(schema.get("arg_types", {})),
-        }
-        instance_contracts[instance_id] = instance_contract
-        resources.append(
+        block_name = str(hint.get("block", "")).strip()
+        if not block_name or any(item["block"] == block_name for item in blocks):
+            continue
+        blocks.append(
             {
-                "instance_id": instance_id,
-                "type": type_name,
-                "kind": kind,
-                "required_assignments": required,
-                "allowed_assignments": instance_contract["allowed_assignments"],
-                "forbidden_assignments": instance_contract["forbidden_assignments"],
-                "nested_blocks": instance_contract["nested_blocks"],
+                "block": block_name,
+                "required_by_schema": False,
+                "required_attrs_when_used": _sorted(hint.get("required_attrs", [])),
+                "known_attrs": _sorted(hint.get("known_attrs", [])),
+                "evidence_id": hint.get("evidence_id", ""),
+                "source": "Full KG nested block hint",
+                "syntax_rule": f"use nested block syntax: {block_name} {{ ... }}",
+                "forbidden_argument_forms": [
+                    f"{block_name} = ...",
+                    f"{block_name}s = ...",
+                ],
+                "usage_policy": "emit_only_if_visible_prompt_or_dependency_requires",
+            }
+        )
+    return blocks[:12]
+
+
+def _prompt_semantic_slots(prompt):
+    text = str(prompt or "")
+    lower = text.lower()
+    slots = {
+        "quoted_literals": [],
+        "cidr_blocks": [],
+        "regions": [],
+        "availability_zones": [],
+        "ports": [],
+        "iam_actions": [],
+        "dns_names": [],
+        "record_types": [],
+        "protocols": [],
+        "cloud_concepts": [],
+    }
+
+    def add(slot, value):
+        value = str(value or "").strip()
+        if value and value not in slots[slot]:
+            slots[slot].append(value)
+
+    for value in re.findall(r'"([^"]{1,160})"', text):
+        add("quoted_literals", value)
+    for value in re.findall(r"'([^']{1,160})'", text):
+        add("quoted_literals", value)
+    for value in re.findall(r"\b\d{1,3}(?:\.\d{1,3}){3}/\d{1,2}\b", text):
+        add("cidr_blocks", value)
+    for value in re.findall(r"\b[a-z]{2}-[a-z]+-\d\b", lower):
+        add("regions", value)
+    for value in re.findall(r"\b[a-z]{2}-[a-z]+-\d[a-z]\b", lower):
+        add("availability_zones", value)
+    for value in re.findall(r"\b(?:port|ports?)\s+(\d{1,5})\b", lower):
+        add("ports", value)
+    for value in re.findall(
+        r"\b[A-Za-z0-9]+:[A-Za-z0-9*]+(?:[A-Za-z0-9*:/_-]*)\b", text
+    ):
+        if not value.startswith(("http:", "https:")):
+            add("iam_actions", value)
+    for value in re.findall(
+        r"\b(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}\b", lower
+    ):
+        add("dns_names", value)
+    for value in re.findall(r"\b(A|AAAA|CNAME|MX|NS|PTR|SOA|SRV|TXT|CAA)\b", text):
+        add("record_types", value)
+    for value in re.findall(r"\b(HTTP|HTTPS|TCP|UDP|TLS|SSL|SSH)\b", text, flags=re.I):
+        add("protocols", value.upper())
+    for phrase in (
+        "private hosted zone",
+        "public hosted zone",
+        "query logging",
+        "weighted routing",
+        "latency routing",
+        "failover routing",
+        "geolocation routing",
+        "alias record",
+        "load balancer",
+        "server-side encryption",
+        "versioning",
+        "lifecycle rule",
+        "public access block",
+        "vpc",
+        "subnet",
+        "security group",
+        "iam role",
+        "iam policy",
+        "cloudwatch log",
+        "autoscaling",
+        "elastic beanstalk",
+        "rds",
+        "route 53",
+        "s3 bucket",
+    ):
+        if phrase in lower:
+            add("cloud_concepts", phrase)
+    return {key: values[:16] for key, values in slots.items() if values}
+
+
+def build_provider_contract(prompt, normalized_ir, schema_projection, kg_evidence):
+    """Build the typed resource/dependency contract used by Full KG runs."""
+
+    del schema_projection  # Exact schema facts are read through provider_schema.
+    evidence = _parse_evidence(kg_evidence)
+    retrieved_contract = evidence.get("provider_contract", {})
+    if not isinstance(retrieved_contract, dict):
+        retrieved_contract = {}
+    resource_index = _resource_index(normalized_ir)
+    candidates = _kg_candidates(evidence)
+    graph_types = list(resource_index)
+    contract_types = list(graph_types)
+    for resource_type in _high_confidence_types(evidence):
+        if resource_type not in contract_types:
+            contract_types.append(resource_type)
+
+    needed_blocks = {}
+    for dependency in evidence.get("dependency_hints", []) or []:
+        if not isinstance(dependency, dict):
+            continue
+        from_type = str(dependency.get("from_type", "")).strip()
+        attribute = str(dependency.get("attr", "")).strip()
+        if "." in attribute and from_type:
+            block_name = attribute.split(".", 1)[0]
+            if block_name in provider_schema.nested_block_types(from_type):
+                needed_blocks.setdefault(from_type, set()).add(block_name)
+
+    resource_contracts = []
+    for resource_type in contract_types[:16]:
+        if not provider_schema.resource_type_exists(resource_type):
+            continue
+        candidate = candidates.get(resource_type, {})
+        graph_entry = resource_index.get(resource_type, {})
+        assignable = provider_schema.assignable_attributes(resource_type)
+        resource_contracts.append(
+            {
+                "type": resource_type,
+                "required_by_graph": resource_type in graph_types,
+                "kg_retrieval_role": candidate.get("retrieval_role", "absent"),
+                "graph_addresses": graph_entry.get("addresses", [])[:6],
+                "graph_names": graph_entry.get("names", [])[:6],
+                "source_spans": graph_entry.get("source_spans", [])[:4],
+                "required_attributes": _sorted(
+                    set(provider_schema.required_attributes(resource_type))
+                    | set(candidate.get("required_attrs", []))
+                ),
+                "useful_optional_attributes": [
+                    attribute
+                    for attribute in _sorted(candidate.get("useful_optional_attrs", []))
+                    if attribute in assignable
+                ][:12],
+                "forbidden_computed_attributes": _sorted(
+                    set(provider_schema.computed_only_attributes(resource_type))
+                    | set(candidate.get("computed_only_attrs", []))
+                ),
+                "nested_block_contracts": _nested_blocks(
+                    resource_type, evidence, needed_blocks.get(resource_type)
+                ),
+                "evidence_ids": _sorted(
+                    graph_entry.get("evidence_ids", [])
+                    + ([candidate.get("evidence_id")] if candidate else [])
+                ),
+                "generation_policy": (
+                    "must_generate_resource"
+                    if resource_type in graph_types
+                    else "may_generate_only_if_visible_prompt_requires_or_dependency_closure_requires"
+                ),
             }
         )
 
-    evidence_contract = evidence.get("provider_contract", {})
-    negative = list(schema_projection.get("negative_constraints", []))
-    negative.extend(evidence_contract.get("negative_constraints", []) or [])
-    contract = {
-        "contract_version": versioning.CONTRACT_VERSION,
-        "resources": resources,
-        "instance_contracts": instance_contracts,
-        "bindings": bindings,
-        "value_bindings": [
-            item
-            for values in prompt_values.values()
-            for item in values.values()
-        ],
-        "usage_constraints": list(
-            evidence_contract.get("usage_constraints", []) or []
-        ),
-        "negative_constraints": negative,
-        "explicit_dependencies": list(
-            normalized_ir.get("explicit_dependencies", []) or []
-        ),
-        "unresolved_constraints": unresolved_constraints,
-        "unresolved_requirements": [
-            item
-            for item in normalized_ir.get("requirements", [])
-            if isinstance(item, dict) and not item.get("implemented_by")
-        ],
+    dependency_contracts = []
+    for dependency in evidence.get("dependency_hints", []) or []:
+        if not isinstance(dependency, dict):
+            continue
+        from_type = str(dependency.get("from_type", "")).strip()
+        to_type = str(dependency.get("to_type", "")).strip()
+        attribute = str(dependency.get("attr", "")).strip()
+        if not from_type or not to_type or not attribute:
+            continue
+        attribute_root = attribute.split(".", 1)[0]
+        if not provider_schema.resource_type_exists(from_type):
+            continue
+        if attribute_root not in provider_schema.assignable_attributes(
+            from_type
+        ) and attribute_root not in provider_schema.nested_block_types(from_type):
+            continue
+        dependency_contracts.append(
+            {
+                "from_type": from_type,
+                "to_type": to_type,
+                "attribute": attribute,
+                "expression_hint": str(dependency.get("expr_hint", "")).strip(),
+                "evidence_id": str(dependency.get("evidence_id", "")).strip(),
+                "use_when": "both endpoint resource types are generated",
+                "reference_policy": "replace placeholder names with generated Terraform labels",
+                "type_fidelity_policy": "preserve the exact endpoint resource types",
+            }
+        )
+
+    return {
+        "contract_kind": "typed_provider_contract",
         "source_policy": (
-            "Compiled only from the visible prompt, normalized Graph IR, exact "
-            "version-aligned provider schema and public KG evidence."
+            "Built only from the visible Prompt, prompt-derived Graph IR, bundled "
+            "provider schema, and prompt-retrieved Full KG evidence."
         ),
+        "retrieved_evidence_kind": evidence.get(
+            "evidence_kind", "full_kg_evidence"
+        ),
+        "retrieved_contract_kind": evidence.get("contract_kind", ""),
+        "resource_contracts": resource_contracts,
+        "dependency_contracts": dependency_contracts[:24],
+        "literal_attribute_obligations": [],
+        "prompt_semantic_slots": _prompt_semantic_slots(prompt),
+        "retrieved_prompt_semantic_slots": retrieved_contract.get(
+            "prompt_semantic_slots", {}
+        ),
+        "value_bindings": retrieved_contract.get("value_bindings", [])[:24],
+        "semantic_obligations": retrieved_contract.get("semantic_obligations", [])[:24],
+        "usage_constraints": retrieved_contract.get("usage_constraints", [])[:16],
+        "negative_constraints": retrieved_contract.get("negative_constraints", [])[:12],
+        "global_generation_rules": [
+            "Generate every resource with generation_policy=must_generate_resource.",
+            "Use may_generate resources only when required by the visible Prompt or dependency closure.",
+            "Include every required attribute for each generated resource.",
+            "Never assign forbidden computed attributes.",
+            "Use nested block contracts with block syntax.",
+            "Use dependency contracts when both endpoint resource types are generated.",
+            "Preserve exact resource types in dependency contracts.",
+            "Apply value bindings to generated target resources and attributes.",
+            "Treat usage and negative constraints as provider-syntax guardrails.",
+            "Preserve visible literal values captured in prompt semantic slots.",
+            "Do not introduce input variables without realistic defaults.",
+        ],
     }
-    contract["contract_sha256"] = versioning.canonical_sha256(contract)
-    return contract
-
-
-def validate_provider_contract(contract):
-    violations = []
-    for instance_id, item in contract.get("instance_contracts", {}).items():
-        required = set(item.get("required_assignments", []))
-        forbidden = set(item.get("forbidden_assignments", []))
-        assigned = set(item.get("must_assign", [])) | set(item.get("should_assign", []))
-        assigned_roots = {path.split(".", 1)[0] for path in assigned}
-        overlap = assigned_roots & forbidden
-        if overlap:
-            violations.append(
-                {
-                    "code": "COMPUTED_ONLY_ASSIGNMENT",
-                    "instance_id": instance_id,
-                    "attributes": sorted(overlap),
-                }
-            )
-        unsupported = assigned_roots - set(item.get("allowed_assignments", []))
-        if unsupported:
-            violations.append(
-                {
-                    "code": "UNSUPPORTED_ASSIGNMENT",
-                    "instance_id": instance_id,
-                    "attributes": sorted(unsupported),
-                }
-            )
-        unresolved = required - assigned
-        if unresolved != set(item.get("unresolved_required_assignments", [])):
-            violations.append(
-                {
-                    "code": "INCONSISTENT_REQUIRED_ASSIGNMENTS",
-                    "instance_id": instance_id,
-                    "attributes": sorted(unresolved),
-                }
-            )
-    return {"valid": not violations, "violations": violations}
 
 
 def render_provider_contract(contract):
     return json.dumps(contract, ensure_ascii=False, indent=2, sort_keys=True)
-
-
-def build_hcl_skeleton(contract):
-    """Create a deterministic block skeleton without inventing unknown values."""
-
-    blocks = []
-    for instance_id, item in contract.get("instance_contracts", {}).items():
-        kind = item.get("kind", "resource")
-        type_name = item.get("type", "")
-        keyword = "data" if kind == "data_source" else "resource"
-        lines = [f'{keyword} "{type_name}" "{instance_id}" {{']
-        assigned = {}
-        assigned.update(item.get("must_assign", {}))
-        assigned.update(item.get("should_assign", {}))
-        nested_assignments = {}
-        for attr, assignment in sorted(assigned.items()):
-            if "." in attr:
-                block_name, nested_attr = attr.split(".", 1)
-                nested_assignments.setdefault(block_name, {})[nested_attr] = assignment
-                continue
-            if assignment.get("kind") == "reference":
-                value = assignment.get("expression", "")
-            else:
-                value = json.dumps(assignment.get("value"), ensure_ascii=False)
-            lines.append(f"  {attr} = {value}")
-        for block_name, block_values in sorted(nested_assignments.items()):
-            lines.append(f"  {block_name} {{")
-            for attr, assignment in sorted(block_values.items()):
-                if assignment.get("kind") == "reference":
-                    value = assignment.get("expression", "")
-                else:
-                    value = json.dumps(
-                        assignment.get("value"), ensure_ascii=False
-                    )
-                lines.append(f"    {attr} = {value}")
-            lines.append("  }")
-        for attr in item.get("unresolved_required_assignments", []):
-            lines.append(f"  # REQUIRED: assign {attr} from the visible prompt/contract")
-        lines.append("}")
-        blocks.append("\n".join(lines))
-    return "\n\n".join(blocks)

@@ -6,9 +6,7 @@ provider docs/schema package plus the bundled provider schema. Runtime
 selection uses only the visible prompt.
 """
 
-import hashlib
 import json
-import math
 import os
 import re
 from collections import defaultdict
@@ -25,15 +23,6 @@ MAX_OPTIONAL_ATTRS = int(os.environ.get("IAC_CONTRACT_MAX_OPTIONAL_ATTRS", "14")
 MAX_COMPUTED_ATTRS = int(os.environ.get("IAC_CONTRACT_MAX_COMPUTED_ATTRS", "12"))
 MAX_BLOCKS = int(os.environ.get("IAC_CONTRACT_MAX_BLOCKS", "10"))
 MAX_VALUE_BINDINGS = int(os.environ.get("IAC_CONTRACT_MAX_VALUE_BINDINGS", "20"))
-MAX_EXAMPLE_PATTERNS = int(os.environ.get("IAC_CONTRACT_MAX_EXAMPLE_PATTERNS", "6"))
-MAX_EXAMPLE_PATTERNS_PER_SOURCE = int(os.environ.get("IAC_CONTRACT_MAX_EXAMPLE_PATTERNS_PER_SOURCE", "2"))
-MAX_PATTERN_ATTRS = int(os.environ.get("IAC_CONTRACT_MAX_PATTERN_ATTRS", "10"))
-MAX_PATTERN_LITERALS = int(os.environ.get("IAC_CONTRACT_MAX_PATTERN_LITERALS", "8"))
-MIN_RESOURCES = int(os.environ.get("IAC_CONTRACT_MIN_RESOURCES", "3"))
-RESOURCE_SCORE_THRESHOLD = float(
-    os.environ.get("IAC_CONTRACT_SCORE_THRESHOLD", "8")
-)
-RESOURCE_SCORE_GAP = float(os.environ.get("IAC_CONTRACT_SCORE_GAP", "24"))
 ALLOW_SINGLE_LABEL_TYPES = {
     "aws_elb",
     "aws_eip",
@@ -306,145 +295,6 @@ ASSIGNMENT_WITH_REF_RE = re.compile(
     r"^\s*(?P<attr>[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)?)\s*=\s*(?P<expr>.*aws_[A-Za-z0-9_]+\.[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_]+)?)",
     re.MULTILINE,
 )
-SIMPLE_ASSIGNMENT_RE = re.compile(
-    r"^\s*(?P<attr>[A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?P<expr>[^\n#]+)",
-    re.MULTILINE,
-)
-NESTED_BLOCK_START_RE = re.compile(r"^\s*(?P<block>[A-Za-z_][A-Za-z0-9_]*)\s*\{", re.MULTILINE)
-IAM_ACTION_RE = re.compile(r"\b[A-Za-z0-9]+:[A-Za-z0-9*]+(?:[A-Za-z0-9*:/_-]*)\b")
-SAFE_LITERAL_ATTRS = {
-    "acl",
-    "action",
-    "actions",
-    "effect",
-    "engine",
-    "event",
-    "events",
-    "filter_prefix",
-    "filter_suffix",
-    "identifier",
-    "instance_class",
-    "principal",
-    "principals",
-    "protocol",
-    "routing_policy",
-    "sse_algorithm",
-    "status",
-    "storage_class",
-    "target_prefix",
-    "type",
-}
-SKIP_LITERAL_ATTRS = {
-    "arn",
-    "bucket",
-    "description",
-    "domain",
-    "domain_name",
-    "id",
-    "name",
-    "name_prefix",
-    "policy_name",
-    "tags",
-    "tags_all",
-}
-PATTERN_STOPWORDS = TOKEN_STOPWORDS | {
-    "basic",
-    "example",
-    "usage",
-    "terraform",
-    "hashicorp",
-    "provider",
-    "latest",
-    "docs",
-}
-WEAK_PATTERN_TOKENS = PATTERN_STOPWORDS | {
-    "access",
-    "arn",
-    "bucket",
-    "cloudwatch",
-    "configuration",
-    "create",
-    "default",
-    "database",
-    "databases",
-    "group",
-    "id",
-    "endpoint",
-    "endpoints",
-    "instance",
-    "instances",
-    "log",
-    "logs",
-    "main",
-    "policy",
-    "route",
-    "role",
-    "rds",
-    "subnet",
-    "target",
-}
-BROAD_RESOURCE_ALIASES = {
-    "access policy",
-    "account policy",
-    "domain name",
-    "resource policy",
-    "role policy",
-    "subnet group",
-}
-
-RULE_SOURCE = "author_defined_public_domain_knowledge"
-
-
-def retrieval_rule_catalog():
-    """Return every handwritten retrieval rule as an auditable data record."""
-
-    rules = []
-    merged_aliases = defaultdict(set)
-    for mapping in (RESOURCE_ALIASES, EXTRA_RESOURCE_ALIASES):
-        for resource_type, terms in mapping.items():
-            merged_aliases[resource_type].update(terms)
-    for resource_type, terms in sorted(merged_aliases.items()):
-        rules.append(
-            {
-                "rule_id": f"alias:{resource_type}",
-                "kind": "resource_alias",
-                "terms": sorted(terms),
-                "candidate_resources": [resource_type],
-                "source": RULE_SOURCE,
-            }
-        )
-    for bundle in CONCEPT_BUNDLES:
-        rules.append(
-            {
-                "rule_id": f"concept:{bundle['id']}",
-                "kind": "concept_bundle",
-                "terms": list(bundle.get("triggers", [])),
-                "candidate_resources": list(bundle.get("resources", [])),
-                "source": RULE_SOURCE,
-            }
-        )
-    for attr, (resource_type, target_attr) in sorted(REFERENCE_ATTR_HINTS.items()):
-        rules.append(
-            {
-                "rule_id": f"reference_hint:{attr}",
-                "kind": "schema_name_hint",
-                "source_path": attr,
-                "target_type": resource_type,
-                "target_path": target_attr,
-                "source": RULE_SOURCE,
-                "confidence": 0.55,
-            }
-        )
-    return rules
-
-
-def retrieval_rules_sha256():
-    payload = json.dumps(
-        retrieval_rule_catalog(), sort_keys=True, separators=(",", ":")
-    )
-    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
-
-
 def configured_root():
     value = os.environ.get("IAC_PROVIDER_CONTRACT_ROOT", "").strip()
     if value:
@@ -455,8 +305,8 @@ def configured_root():
     return (
         Path(__file__).resolve().parents[2]
         / "data"
-        / "leakfree_multigranular_kg"
-        / "terraform_aws_5.90.0_public_kg"
+        / "full_kg"
+        / "provider_kg"
     ).resolve()
 
 
@@ -504,166 +354,6 @@ def _load_jsonl(path):
     return rows
 
 
-def _add_unique(items, value, limit=None):
-    if value and value not in items and (limit is None or len(items) < limit):
-        items.append(value)
-
-
-def _iter_resource_blocks(code):
-    text = str(code or "")
-    start_re = re.compile(r'resource\s+"(?P<type>aws_[A-Za-z0-9_]+)"\s+"(?P<label>[^"]+)"\s*\{')
-    for match in start_re.finditer(text):
-        resource_type = match.group("type")
-        label = match.group("label")
-        start = match.end()
-        depth = 1
-        i = start
-        in_string = False
-        escape = False
-        while i < len(text):
-            ch = text[i]
-            if in_string:
-                if escape:
-                    escape = False
-                elif ch == "\\":
-                    escape = True
-                elif ch == '"':
-                    in_string = False
-            else:
-                if ch == '"':
-                    in_string = True
-                elif ch == "{":
-                    depth += 1
-                elif ch == "}":
-                    depth -= 1
-                    if depth == 0:
-                        yield resource_type, label, text[start:i]
-                        break
-            i += 1
-
-
-def _safe_literal_value(expr):
-    expr = str(expr or "").strip().rstrip(",")
-    if not expr:
-        return ""
-    if re.fullmatch(r"(true|false)", expr, flags=re.I):
-        return expr.lower()
-    if re.fullmatch(r"-?\d+(?:\.\d+)?", expr):
-        return expr
-    if re.fullmatch(r'"[^"\n]{1,120}"', expr):
-        return expr
-    if re.fullmatch(r"\[[^\]\n]{1,240}\]", expr) and '"' in expr:
-        return re.sub(r"\s+", " ", expr)
-    return ""
-
-
-def _generalize_ref_expr(expr):
-    return re.sub(
-        r"\b(aws_[A-Za-z0-9_]+)\.[A-Za-z0-9_-]+\.([A-Za-z0-9_]+)",
-        r"\1.<name>.\2",
-        str(expr or "").strip(),
-    )
-
-
-def _pattern_tokens_for_example(record, example, resource_types, attrs, nested_blocks):
-    pieces = [
-        record.get("resource_type", ""),
-        record.get("source_doc", ""),
-        record.get("description", ""),
-        example.get("name", ""),
-    ]
-    pieces.extend(resource_types)
-    pieces.extend(resource_type.removeprefix("aws_").replace("_", " ") for resource_type in resource_types)
-    pieces.extend(attrs)
-    pieces.extend(nested_blocks)
-    tokens = []
-    for piece in pieces:
-        for token in _tokenize(piece):
-            if token not in PATTERN_STOPWORDS:
-                _add_unique(tokens, token, limit=80)
-    return tokens
-
-
-def _feature_tokens_for_example(attrs, nested_blocks, iam_actions):
-    tokens = []
-    for piece in list(attrs or []) + list(nested_blocks or []) + list(iam_actions or []):
-        for token in _tokenize(piece):
-            if token not in PATTERN_STOPWORDS:
-                _add_unique(tokens, token, limit=80)
-    return tokens
-
-
-def _example_patterns_from_record(record):
-    source_type = record.get("resource_type", "")
-    if not source_type or not provider_schema.resource_type_exists(source_type):
-        return []
-    patterns = []
-    for example in record.get("examples", []) or []:
-        code = str(example.get("code", "") or "")
-        if not code:
-            continue
-        resource_types = []
-        per_resource = defaultdict(lambda: {"attrs": [], "nested_blocks": [], "literal_hints": [], "reference_hints": []})
-        all_attrs = []
-        all_nested = []
-        all_actions = []
-        for resource_type, _, body in _iter_resource_blocks(code):
-            if not provider_schema.resource_type_exists(resource_type):
-                continue
-            _add_unique(resource_types, resource_type)
-            assignable = provider_schema.assignable_attributes(resource_type)
-            nested_block_types = provider_schema.nested_block_types(resource_type)
-            for assignment in SIMPLE_ASSIGNMENT_RE.finditer(body):
-                attr = assignment.group("attr")
-                expr = assignment.group("expr").strip()
-                if attr not in assignable:
-                    continue
-                _add_unique(per_resource[resource_type]["attrs"], attr, MAX_PATTERN_ATTRS)
-                _add_unique(all_attrs, attr, MAX_PATTERN_ATTRS * 2)
-                if "aws_" in expr:
-                    _add_unique(
-                        per_resource[resource_type]["reference_hints"],
-                        f"{attr} = {_generalize_ref_expr(expr)}",
-                        MAX_PATTERN_ATTRS,
-                    )
-                    continue
-                literal = _safe_literal_value(expr)
-                if not literal or attr in SKIP_LITERAL_ATTRS:
-                    continue
-                if attr in SAFE_LITERAL_ATTRS or literal in {"true", "false"}:
-                    _add_unique(
-                        per_resource[resource_type]["literal_hints"],
-                        f"{attr} = {literal}",
-                        MAX_PATTERN_LITERALS,
-                    )
-            for block_match in NESTED_BLOCK_START_RE.finditer(body):
-                block_name = block_match.group("block")
-                if block_name in nested_block_types:
-                    _add_unique(per_resource[resource_type]["nested_blocks"], block_name, MAX_PATTERN_ATTRS)
-                    _add_unique(all_nested, block_name, MAX_PATTERN_ATTRS * 2)
-        for action in IAM_ACTION_RE.findall(code):
-            if not action.startswith(("http:", "https:")):
-                _add_unique(all_actions, action, MAX_PATTERN_LITERALS)
-        if not resource_types:
-            continue
-        tokens = _pattern_tokens_for_example(record, example, resource_types, all_attrs, all_nested)
-        pattern_id = f"public_example_pattern:{source_type}:{example.get('index', len(patterns))}"
-        patterns.append(
-            {
-                "id": pattern_id,
-                "source_resource_type": source_type,
-                "name": str(example.get("name", "") or "official provider example"),
-                "resource_types": resource_types[:MAX_RESOURCES],
-                "tokens": tokens,
-                "feature_tokens": _feature_tokens_for_example(all_attrs, all_nested, all_actions),
-                "per_resource": dict(per_resource),
-                "iam_actions": all_actions,
-                "source_doc": record.get("source_doc", ""),
-            }
-        )
-    return patterns
-
-
 def _item_names(items):
     names = []
     for item in items or []:
@@ -690,9 +380,7 @@ def _resource_aliases(resource_type, record):
         aliases.add(label)
     parts = label.split()
     if len(parts) >= 2:
-        tail_alias = " ".join(parts[-2:])
-        if tail_alias not in BROAD_RESOURCE_ALIASES:
-            aliases.add(tail_alias)
+        aliases.add(" ".join(parts[-2:]))
     if "route53" in label:
         aliases.add(label.replace("route53", "route 53"))
     description = _normalize(record.get("description", ""))
@@ -702,19 +390,16 @@ def _resource_aliases(resource_type, record):
         aliases.add("query log")
     if "elastic beanstalk" in description:
         aliases.add("elastic beanstalk " + parts[-1])
-    return sorted(alias for alias in aliases if alias and alias not in BROAD_RESOURCE_ALIASES)
+    return sorted(alias for alias in aliases if alias)
 
 
 def _contract_from_record(record):
     resource_type = record.get("resource_type", "")
-    kind = str(record.get("kind", "resource")).replace(" ", "_")
-    if kind not in {"resource", "data_source"}:
-        kind = "resource"
     required = _item_names(record.get("required_args"))
     optional = _item_names(record.get("optional_args"))
     computed = _item_names(record.get("attributes"))
     schema_required, schema_optional, schema_computed = provider_schema.attribute_sets(
-        resource_type, kind
+        resource_type
     )
     blocks = []
     for block in record.get("blocks", []) or []:
@@ -733,11 +418,8 @@ def _contract_from_record(record):
             }
         )
     return {
-        "entity_id": (
-            f"aws@{versioning.AWS_PROVIDER_VERSION}::{kind}::{resource_type}"
-        ),
         "type": resource_type,
-        "kind": kind,
+        "kind": record.get("kind", "resource"),
         "required_attrs": sorted(set(required) | set(schema_required)),
         "useful_optional_attrs": sorted(set(optional) | set(schema_optional))[:MAX_OPTIONAL_ATTRS],
         "computed_only_attrs": sorted(set(computed) | set(schema_computed))[:MAX_COMPUTED_ATTRS],
@@ -798,28 +480,8 @@ def _add_template(templates, item):
             return
     key = _template_key(item)
     current = templates.get(key)
-    item = dict(item)
-    item.setdefault("support_count", 1)
-    item.setdefault("provider_version", versioning.AWS_PROVIDER_VERSION)
-    item.setdefault("relation", "REQUIRES_VALUE_OF_TYPE")
-    item.setdefault("provenance", item.get("source_kind", ""))
-    item.setdefault(
-        "edge_id",
-        f"ref:{from_type}.{attr}->{to_type}.{item.get('target_path', 'id')}",
-    )
-    if current is None:
+    if current is None or item.get("confidence", 0) > current.get("confidence", 0):
         templates[key] = item
-    else:
-        combined = dict(current)
-        combined["support_count"] = int(current.get("support_count", 1)) + int(
-            item.get("support_count", 1)
-        )
-        if item.get("confidence", 0) > current.get("confidence", 0):
-            combined.update(item)
-            combined["support_count"] = int(current.get("support_count", 1)) + int(
-                item.get("support_count", 1)
-            )
-        templates[key] = combined
 
 
 def _templates_from_example(record):
@@ -848,11 +510,6 @@ def _templates_from_example(record):
                         "required": attr in provider_schema.required_attributes(source_type),
                         "confidence": 0.98,
                         "source_kind": "official_doc_example",
-                        "provenance": "official_doc_example",
-                        "source_document": record.get("source_doc", ""),
-                        "example_title": example.get("name", ""),
-                        "target_path": target_attr or "id",
-                        "relation": "REQUIRES_VALUE_OF_TYPE",
                         "evidence_id": f"provider_contract_example:{source_type}.{attr}->{target_type}",
                     }
 
@@ -864,16 +521,11 @@ def _load_contract_index(root_text):
     edges = _load_jsonl(root / "kg_edges.jsonl")
     contracts = {}
     templates = {}
-    example_patterns = []
     for record in records:
         resource_type = record.get("resource_type", "")
-        kind = str(record.get("kind", "resource")).replace(" ", "_")
-        if kind not in {"resource", "data_source"}:
-            kind = "resource"
-        if not provider_schema.type_exists(resource_type, kind):
+        if not provider_schema.resource_type_exists(resource_type):
             continue
         contracts[resource_type] = _contract_from_record(record)
-        example_patterns.extend(_example_patterns_from_record(record))
     for edge in edges:
         source_type = edge.get("from", "")
         target_type = edge.get("to", "")
@@ -892,16 +544,8 @@ def _load_contract_index(root_text):
                     "attr": attr,
                     "expr_hint": expr,
                     "required": attr in provider_schema.required_attributes(source_type),
-                    "confidence": 0.55
-                    if edge.get("source") == "schema_reference_hint"
-                    else 0.86,
+                    "confidence": 0.92 if edge.get("source") == "schema_reference_hint" else 0.86,
                     "source_kind": edge.get("source", "public_provider_edge"),
-                    "provenance": edge.get("source", "public_provider_edge"),
-                    "source_document": edge.get("source_document")
-                    or edge.get("source_doc", ""),
-                    "target_path": edge.get("target_attribute")
-                    or REFERENCE_ATTR_HINTS.get(attr, (target_type, "id"))[1],
-                    "relation": edge.get("relation") or "REQUIRES_VALUE_OF_TYPE",
                     "evidence_id": f"provider_contract_edge:{source_type}.{attr}->{target_type}",
                 },
             )
@@ -936,11 +580,8 @@ def _load_contract_index(root_text):
                     "attr": attr,
                     "expr_hint": _expr_for_attr(attr, target_type, target_attr),
                     "required": attr in contract["required_attrs"],
-                    "confidence": 0.55,
+                    "confidence": 0.9 if attr in contract["required_attrs"] else 0.78,
                     "source_kind": "provider_schema_name_rule",
-                    "provenance": "schema_name_hint",
-                    "target_path": target_attr,
-                    "relation": "REQUIRES_VALUE_OF_TYPE",
                     "evidence_id": f"provider_contract_name_rule:{resource_type}.{attr}->{target_type}",
                 },
             )
@@ -951,39 +592,12 @@ def _load_contract_index(root_text):
             metadata = json.loads(metadata_path.read_text(encoding="utf-8", errors="ignore"))
         except json.JSONDecodeError:
             metadata = {}
-    dense_vectors = {}
-    dense_path = root / "resource_dense_index.json"
-    if dense_path.exists():
-        try:
-            dense_payload = json.loads(dense_path.read_text(encoding="utf-8"))
-            dense_vectors = {
-                str(item["type"]): list(item["vector"])
-                for item in dense_payload.get("resources", [])
-                if isinstance(item, dict)
-                and item.get("type")
-                and isinstance(item.get("vector"), list)
-            }
-        except (json.JSONDecodeError, TypeError, ValueError):
-            dense_vectors = {}
     return {
         "root": str(root),
         "metadata": metadata,
         "contracts": contracts,
         "templates": list(templates.values()),
-        "example_patterns": example_patterns,
-        "resource_document_tokens": {
-            resource_type: _tokenize(_resource_document(resource_type, contract))
-            for resource_type, contract in contracts.items()
-        },
-        "dense_vectors": dense_vectors,
     }
-
-
-def public_provider_contract_available():
-    root = configured_root()
-    return (root / "resources.jsonl").exists() and bool(
-        _load_contract_index(str(root)).get("contracts")
-    )
 
 
 def _score_resource(prompt_text, prompt_tokens, resource_type, contract):
@@ -1010,124 +624,6 @@ def _score_resource(prompt_text, prompt_tokens, resource_type, contract):
     return score
 
 
-def _resource_document(resource_type, contract):
-    return " ".join(
-        [
-            resource_type.replace("_", " "),
-            *contract.get("aliases", []),
-            str(contract.get("description", "")),
-        ]
-    )
-
-
-def _bm25_scores(prompt_tokens, index):
-    """Small deterministic BM25 implementation over resource-level documents."""
-
-    query = list(prompt_tokens)
-    documents = index.get("resource_document_tokens", {})
-    if not query or not documents:
-        return {}
-    document_count = len(documents)
-    average_length = (
-        sum(len(tokens) for tokens in documents.values()) / document_count
-    )
-    document_frequency = defaultdict(int)
-    for tokens in documents.values():
-        for token in set(tokens):
-            document_frequency[token] += 1
-    scores = {}
-    k1 = 1.5
-    b = 0.75
-    for resource_type, tokens in documents.items():
-        frequencies = defaultdict(int)
-        for token in tokens:
-            frequencies[token] += 1
-        score = 0.0
-        for token in query:
-            frequency = frequencies.get(token, 0)
-            if not frequency:
-                continue
-            df = document_frequency[token]
-            inverse_document_frequency = math.log(
-                1 + (document_count - df + 0.5) / (df + 0.5)
-            )
-            denominator = frequency + k1 * (
-                1 - b + b * len(tokens) / max(average_length, 1)
-            )
-            score += inverse_document_frequency * (
-                frequency * (k1 + 1) / denominator
-            )
-        if score:
-            scores[resource_type] = score
-    return scores
-
-
-def _cosine(left, right):
-    if not left or not right or len(left) != len(right):
-        return 0.0
-    dot = sum(a * b for a, b in zip(left, right))
-    left_norm = math.sqrt(sum(a * a for a in left))
-    right_norm = math.sqrt(sum(b * b for b in right))
-    if not left_norm or not right_norm:
-        return 0.0
-    return dot / (left_norm * right_norm)
-
-
-def _dense_scores(prompt, index):
-    """Optional semantic retrieval against a prebuilt public resource index.
-
-    Dense retrieval is enabled only when ``IAC_DENSE_RETRIEVAL=1`` and
-    ``resource_dense_index.json`` exists under the KG root.  The index contains
-    only type, alias, description and short public-purpose text.
-    """
-
-    enabled = os.environ.get("IAC_DENSE_RETRIEVAL", "0").lower() in {
-        "1",
-        "true",
-        "yes",
-    }
-    vectors = index.get("dense_vectors", {})
-    if not enabled or not vectors:
-        return {}
-    try:
-        from openai import OpenAI
-
-        client = OpenAI(
-            api_key=os.environ.get("IAC_EMBEDDING_API_KEY", "EMPTY"),
-            base_url=os.environ.get(
-                "IAC_EMBEDDING_BASE_URL",
-                os.environ.get("QWEN_BASE_URL", "http://127.0.0.1:8000/v1"),
-            ),
-        )
-        model = os.environ.get("IAC_EMBEDDING_MODEL", "text-embedding-3-small")
-        vector = client.embeddings.create(model=model, input=[str(prompt)]).data[0].embedding
-    except Exception:
-        if os.environ.get("IAC_DENSE_REQUIRED", "0") == "1":
-            raise
-        return {}
-    return {
-        resource_type: _cosine(vector, candidate)
-        for resource_type, candidate in vectors.items()
-    }
-
-
-def _dynamic_resource_selection(scores):
-    ranked = sorted(scores.items(), key=lambda item: (-item[1], item[0]))
-    if not ranked:
-        return []
-    selected = []
-    for index, (resource_type, score) in enumerate(ranked[:MAX_RESOURCES]):
-        if index >= MIN_RESOURCES and score < RESOURCE_SCORE_THRESHOLD:
-            break
-        if (
-            index >= MIN_RESOURCES
-            and ranked[index - 1][1] - score > RESOURCE_SCORE_GAP
-        ):
-            break
-        selected.append(resource_type)
-    return selected
-
-
 def _canonical_reference_target(attr):
     hint = REFERENCE_ATTR_HINTS.get(str(attr or ""))
     return hint[0] if hint else ""
@@ -1147,149 +643,16 @@ def _matched_bundles(prompt_text):
     return [bundle for _, bundle in sorted(matched, key=lambda item: (-item[0], item[1]["id"]))]
 
 
-def _source_pattern_match(prompt_text, prompt_tokens, pattern, index):
-    source_type = pattern.get("source_resource_type", "")
-    contract = index.get("contracts", {}).get(source_type, {})
-    if not source_type or not contract:
-        return 0, ""
-    if (
-        source_type == "aws_lb"
-        and _phrase_present(prompt_text, "elastic load balancer")
-        and not any(
-            _phrase_present(prompt_text, phrase)
-            for phrase in ("application load balancer", "network load balancer", "alb", "nlb")
-        )
-    ):
-        return 0, ""
-    score = 0
-    for phrase in [source_type, source_type.removeprefix("aws_").replace("_", " ")] + list(contract.get("aliases", [])):
-        phrase_tokens = _tokenize(phrase)
-        if (
-            len(phrase_tokens) == 1
-            and source_type not in ALLOW_SINGLE_LABEL_TYPES
-            and phrase != source_type
-        ):
-            continue
-        phrase_score = _phrase_score(prompt_text, phrase, weight=5)
-        if phrase_score:
-            score += phrase_score + 24
-    if score > 0:
-        return score, "source_resource_alias_match"
-
-    label_tokens = {
-        token
-        for token in _tokenize(source_type.removeprefix("aws_").replace("_", " "))
-        if token not in PATTERN_STOPWORDS
-    }
-    source_overlap = prompt_tokens.intersection(label_tokens)
-    core_overlap = source_overlap.intersection(label_tokens - WEAK_PATTERN_TOKENS)
-    if len(source_overlap) >= 2 and (
-        len(source_overlap) / max(1, len(label_tokens)) >= 0.67
-    ) and core_overlap:
-        return 22 + 3 * len(source_overlap), "source_resource_label_token_match"
-    feature_overlap = {
-        token
-        for token in prompt_tokens.intersection(pattern.get("feature_tokens", []))
-        if token not in WEAK_PATTERN_TOKENS and token not in label_tokens and len(token) > 1
-    }
-    core_source_overlap = source_overlap.intersection(label_tokens - WEAK_PATTERN_TOKENS)
-    route53_service_overlap = "route53" in label_tokens and {"route", "53"}.issubset(prompt_tokens)
-    if (core_source_overlap or route53_service_overlap) and len(feature_overlap) >= 2:
-        return 18 + 3 * len(feature_overlap), "source_service_plus_example_feature_match"
-    return 0, ""
-
-
-def _example_pattern_score(prompt_text, prompt_tokens, pattern, seed_types, index):
-    source_score, source_reason = _source_pattern_match(prompt_text, prompt_tokens, pattern, index)
-    if source_score <= 0:
-        return 0, ""
-    seed_set = set(seed_types)
-    seed_overlap = seed_set.intersection(pattern.get("resource_types", []))
-    source_type = pattern.get("source_resource_type", "")
-    non_source_seed_overlap = seed_overlap - {source_type}
-    token_overlap = {
-        token
-        for token in prompt_tokens.intersection(pattern.get("tokens", []))
-        if token not in WEAK_PATTERN_TOKENS and len(token) > 1
-    }
-    if source_type in seed_set and len(seed_set) > 1 and not non_source_seed_overlap:
-        return 0, ""
-    score = source_score
-    if source_type in seed_overlap:
-        score += 20
-    elif seed_overlap:
-        score += 4 * len(seed_overlap)
-    if len(token_overlap) >= 2:
-        score += min(30, 4 * len(token_overlap))
-    name = str(pattern.get("name", ""))
-    if name and name.lower() not in {"basic usage", "example"}:
-        score += _phrase_score(prompt_text, name, weight=1)
-    if score < 20:
-        return 0, ""
-    return score, source_reason
-
-
-def _matched_example_patterns(prompt_text, prompt_tokens, index, seed_types):
-    scored = []
-    for pattern in index.get("example_patterns", []):
-        score, reason = _example_pattern_score(prompt_text, prompt_tokens, pattern, seed_types, index)
-        if score > 0:
-            item = dict(pattern)
-            item["match_score"] = score
-            item["match_reason"] = reason
-            scored.append((score, item))
-    result = []
-    per_source = defaultdict(int)
-    for _, pattern in sorted(scored, key=lambda item: (-item[0], item[1].get("id", ""))):
-        source_type = pattern.get("source_resource_type", "")
-        source_limit = (
-            1
-            if len(set(pattern.get("resource_types", []))) <= 1
-            else MAX_EXAMPLE_PATTERNS_PER_SOURCE
-        )
-        if per_source[source_type] >= source_limit:
-            continue
-        result.append(pattern)
-        per_source[source_type] += 1
-        if len(result) >= MAX_EXAMPLE_PATTERNS:
-            break
-    return result
-
-
-def _select_resources(prompt, index, use_static_bundles=True, use_example_patterns=False):
+def _select_resources(prompt, index):
     prompt_text = _normalize(prompt)
     prompt_tokens = set(_tokenize(prompt_text))
-    retrieval_mode = os.environ.get("IAC_RETRIEVAL_MODE", "hybrid_graph").lower()
     scores = {}
     reasons = defaultdict(list)
     for resource_type, contract in index["contracts"].items():
         score = _score_resource(prompt_text, prompt_tokens, resource_type, contract)
         if score > 0:
             scores[resource_type] = max(scores.get(resource_type, 0), score)
-            reasons[resource_type].append("exact_or_alias_match")
-    if retrieval_mode in {"lexical", "hybrid", "hybrid_graph"}:
-        lexical = sorted(
-            _bm25_scores(prompt_tokens, index).items(),
-            key=lambda item: (-item[1], item[0]),
-        )[:30]
-        for resource_type, score in lexical:
-            scaled = min(50.0, score * 8.0)
-            if scaled < RESOURCE_SCORE_THRESHOLD:
-                continue
-            scores[resource_type] = max(scores.get(resource_type, 0), scaled)
-            reasons[resource_type].append("bm25_top30")
-    if retrieval_mode in {"dense", "hybrid", "hybrid_graph"}:
-        dense = sorted(
-            _dense_scores(prompt, index).items(),
-            key=lambda item: (-item[1], item[0]),
-        )[:30]
-        for resource_type, similarity in dense:
-            if similarity < float(os.environ.get("IAC_DENSE_THRESHOLD", "0.2")):
-                continue
-            scores[resource_type] = max(
-                scores.get(resource_type, 0), similarity * 50.0
-            )
-            reasons[resource_type].append("dense_top30")
+            reasons[resource_type].append("prompt_alias_or_schema_doc_match")
     classic_elb = any(
         _phrase_present(prompt_text, phrase)
         for phrase in ("elastic load balancer", "classic load balancer", "elb")
@@ -1301,58 +664,22 @@ def _select_resources(prompt, index, use_static_bundles=True, use_example_patter
     if classic_elb and not modern_lb and "aws_elb" in scores:
         scores.pop("aws_lb", None)
         reasons.pop("aws_lb", None)
-    example_patterns = []
-    if use_example_patterns:
-        example_patterns = _matched_example_patterns(prompt_text, prompt_tokens, index, scores.keys())
-        for pattern in example_patterns:
-            source_type = pattern.get("source_resource_type", "")
-            for resource_type in pattern.get("resource_types", []):
-                if resource_type not in index["contracts"]:
-                    continue
-                if resource_type not in scores and resource_type != source_type:
-                    continue
-                pattern_score = 66 if resource_type == pattern.get("source_resource_type") else 58
-                scores[resource_type] = max(scores.get(resource_type, 0), pattern_score)
-                reasons[resource_type].append(f"public_example_pattern:{pattern.get('id', '')}")
-    bundles = _matched_bundles(prompt_text) if use_static_bundles else []
+    bundles = _matched_bundles(prompt_text)
     for bundle in bundles:
         for resource_type in bundle["resources"]:
             if resource_type not in index["contracts"]:
                 continue
             scores[resource_type] = max(scores.get(resource_type, 0), 70)
             reasons[resource_type].append(f"concept_bundle:{bundle['id']}")
-    if retrieval_mode == "hybrid_graph":
-        for template in index.get("templates", []):
-            source_type = template.get("from_type", "")
-            target_type = template.get("to_type", "")
-            confidence = float(template.get("confidence", 0))
-            if source_type not in scores or target_type not in scores:
-                continue
-            if confidence < 0.8:
-                continue
-            bonus = min(12.0, confidence * 10.0)
-            scores[source_type] += bonus
-            scores[target_type] += bonus
-            edge_id = template.get("edge_id") or template.get("evidence_id", "")
-            reasons[source_type].append(f"kg_rerank:{edge_id}")
-            reasons[target_type].append(f"kg_rerank:{edge_id}")
-    selected = _dynamic_resource_selection(scores)
+    selected = [
+        resource_type
+        for resource_type, _ in sorted(
+            scores.items(), key=lambda item: (-item[1], item[0])
+        )
+    ][:MAX_RESOURCES]
     selected_set = set(selected)
 
-    # Conditional dependency expansion: a value requirement is not automatically
-    # a resource-creation requirement.  Existing/external cues explicitly block
-    # managed-resource closure.
-    external_value_cue = any(
-        phrase in prompt_text
-        for phrase in (
-            "existing ",
-            "already existing",
-            "provided id",
-            "given id",
-            "use vpc-",
-            "use subnet-",
-        )
-    )
+    # Add public schema/doc sources for required reference arguments.
     for template in sorted(
         index["templates"],
         key=lambda item: (-int(bool(item.get("required"))), -item.get("confidence", 0), item.get("from_type", "")),
@@ -1367,33 +694,23 @@ def _select_resources(prompt, index, use_static_bundles=True, use_example_patter
         if not attr:
             continue
         attr_tokens = set(_tokenize(attr))
-        target_label = str(to_type).removeprefix("aws_").replace("_", " ")
-        explicit_target = _phrase_present(prompt_text, target_label)
-        should_add = (
-            not external_value_cue
-            and _canonical_dependency_ok(attr, to_type)
-            and (
-                template.get("relation") == "MUST_CREATE_WITH"
-                or explicit_target
-            )
+        should_add = _canonical_dependency_ok(attr, to_type) and (
+            bool(template.get("required")) or bool(attr_tokens & prompt_tokens)
         )
         if should_add and to_type in index["contracts"]:
             selected.append(to_type)
             selected_set.add(to_type)
             reasons[to_type].append(f"dependency_closure:{from_type}.{attr}")
-            scores[to_type] = max(scores.get(to_type, 0), 40)
-    return selected, reasons, bundles, prompt_tokens, example_patterns, scores
+    return selected, reasons, bundles, prompt_tokens
 
 
-def _candidate_resource(resource_type, contract, reasons, score=0):
+def _candidate_resource(resource_type, contract, reasons):
     return {
         "type": resource_type,
-        "entity_id": contract.get("entity_id", ""),
         "evidence_id": f"provider_contract_resource:{resource_type}",
         "reason": "Task-conditioned match against public Terraform provider contract aliases/schema/docs.",
         "retrieval_role": "candidate_or_dependency_closure",
         "matched_by": sorted(set(reasons.get(resource_type, [])))[:6],
-        "score": round(float(score), 4),
         "required_attrs": contract["required_attrs"][:MAX_OPTIONAL_ATTRS],
         "useful_optional_attrs": contract["useful_optional_attrs"][:MAX_OPTIONAL_ATTRS],
         "computed_only_attrs": contract["computed_only_attrs"][:MAX_COMPUTED_ATTRS],
@@ -1445,18 +762,6 @@ def _selected_dependencies(index, selected, prompt_tokens):
                 "required": bool(template.get("required")),
                 "confidence": round(float(template.get("confidence", 0)), 3),
                 "source_kind": template.get("source_kind", ""),
-                "provenance": template.get("provenance")
-                or template.get("source_kind", ""),
-                "source_document": template.get("source_document", ""),
-                "example_title": template.get("example_title", ""),
-                "support_count": int(template.get("support_count", 1)),
-                "provider_version": template.get(
-                    "provider_version", versioning.AWS_PROVIDER_VERSION
-                ),
-                "relation": template.get("relation", "REQUIRES_VALUE_OF_TYPE"),
-                "source_path": attr,
-                "target_path": template.get("target_path", "id"),
-                "edge_id": template.get("edge_id", ""),
                 "evidence_id": template.get("evidence_id", ""),
             }
         )
@@ -1629,277 +934,18 @@ def _negative_constraints(prompt):
     return constraints[:8]
 
 
-def _example_semantic_obligations(prompt, selected, example_patterns):
-    prompt_text = _normalize(prompt)
-    selected_set = set(selected)
-    obligations = []
-    seen = set()
-    for pattern in example_patterns or []:
-        pattern_types = set(pattern.get("resource_types", []))
-        if not pattern_types.intersection(selected_set):
-            continue
-        for resource_type in pattern.get("resource_types", []):
-            if resource_type not in selected_set:
-                continue
-            resource_pattern = pattern.get("per_resource", {}).get(resource_type, {})
-            attrs = list(resource_pattern.get("attrs", []))
-            nested = list(resource_pattern.get("nested_blocks", []))
-            literals = list(resource_pattern.get("literal_hints", []))
-            refs = list(resource_pattern.get("reference_hints", []))
-            actions = list(pattern.get("iam_actions", []))
-            if not (attrs or nested or literals or refs or actions):
-                continue
-            key = (pattern.get("id", ""), resource_type)
-            if key in seen:
-                continue
-            seen.add(key)
-            details = []
-            if refs:
-                details.append("reference templates: " + "; ".join(refs[:4]))
-            if literals:
-                details.append("literal/default hints: " + "; ".join(literals[:4]))
-            if nested:
-                details.append("nested blocks: " + ", ".join(nested[:4]))
-            if actions and ("iam" in resource_type or "policy" in resource_type or "cloudwatch_log_resource_policy" in resource_type):
-                details.append("policy actions visible in the public example: " + ", ".join(actions[:6]))
-            if not details:
-                details.append("follow the public provider example's resource wiring and provider-valid attributes")
-            obligations.append(
-                {
-                    "resource_type": resource_type,
-                    "action": "apply_public_example_pattern",
-                    "requirement": (
-                        f"Apply the official provider example pattern '{pattern.get('name', 'example')}' "
-                        f"for {resource_type}: " + " | ".join(details)
-                        + ". Replace example-specific names/domains with visible prompt literals or realistic offline-valid defaults."
-                    ),
-                    "attributes_or_blocks": (attrs + nested)[:MAX_PATTERN_ATTRS],
-                    "reference_templates": refs[:MAX_PATTERN_ATTRS],
-                    "literal_hints": literals[:MAX_PATTERN_LITERALS],
-                    "source_kind": "official_provider_example_pattern",
-                    "evidence_id": pattern.get("id", ""),
-                    "when": "when the resource is generated and the visible prompt matches this public example pattern",
-                }
-            )
-    return obligations[:MAX_EXAMPLE_PATTERNS * 3]
-
-
-def _semantic_obligations(prompt, selected, deps, slots, example_patterns=None, include_static=True):
-    prompt_text = _normalize(prompt)
-    selected_set = set(selected)
-    deps = deps or []
-    obligations = _example_semantic_obligations(prompt, selected, example_patterns)
-    if not include_static:
-        return obligations[:20]
-
-    def add(resource_type, action, requirement, attrs=None, evidence_id="", when="when the resource is generated"):
-        if resource_type not in selected_set:
-            return
-        item = {
-            "resource_type": resource_type,
-            "action": action,
-            "requirement": requirement,
-            "when": when,
-            "source_kind": "public_provider_semantic_contract",
-            "evidence_id": evidence_id or f"semantic_contract:{resource_type}:{action}",
-        }
-        if attrs:
-            item["attributes_or_blocks"] = attrs
-        obligations.append(item)
-
-    def has_any(*phrases):
-        return any(_phrase_present(prompt_text, phrase) for phrase in phrases)
-
-    if has_any("bucket versioning", "versioning enabled", "enable versioning"):
-        add(
-            "aws_s3_bucket_versioning",
-            "enable_s3_versioning",
-            "Emit versioning_configuration { status = \"Enabled\" } for the bucket versioning resource.",
-            ["versioning_configuration.status"],
-            "semantic_contract:s3:versioning_enabled",
-        )
-    if has_any("server side encryption", "server-side encryption", "bucket encryption", "encrypted bucket", "sse"):
-        algorithm = "aws:kms" if has_any("kms", "kms key") else "AES256"
-        add(
-            "aws_s3_bucket_server_side_encryption_configuration",
-            "enable_s3_encryption",
-            f"Emit rule {{ apply_server_side_encryption_by_default {{ sse_algorithm = \"{algorithm}\" }} }}.",
-            ["rule.apply_server_side_encryption_by_default.sse_algorithm"],
-            "semantic_contract:s3:server_side_encryption",
-        )
-    if has_any("block public access", "public access block", "prevent public access"):
-        add(
-            "aws_s3_bucket_public_access_block",
-            "block_s3_public_access",
-            "Set block_public_acls, ignore_public_acls, block_public_policy, and restrict_public_buckets to true.",
-            [
-                "block_public_acls",
-                "ignore_public_acls",
-                "block_public_policy",
-                "restrict_public_buckets",
-            ],
-            "semantic_contract:s3:public_access_block",
-        )
-    if has_any("static website", "website hosting", "bucket website"):
-        add(
-            "aws_s3_bucket_website_configuration",
-            "configure_s3_website",
-            "Emit index_document { suffix = \"index.html\" } unless the prompt names another index document.",
-            ["index_document.suffix"],
-            "semantic_contract:s3:website_configuration",
-        )
-
-    if "aws_route53_record" in selected_set and ("aws_elb" in selected_set or "aws_lb" in selected_set):
-        if has_any("alias", "load balancer", "elastic load balancer", "elb", "alb", "nlb"):
-            add(
-                "aws_route53_record",
-                "route53_load_balancer_alias",
-                "Use alias { name = load_balancer.dns_name, zone_id = load_balancer.zone_id, evaluate_target_health = true } and omit records and ttl.",
-                ["alias.name", "alias.zone_id", "alias.evaluate_target_health"],
-                "semantic_contract:route53:load_balancer_alias",
-            )
-    if has_any("weighted routing", "weighted record", "weighted routing policy"):
-        add(
-            "aws_route53_record",
-            "route53_weighted_record",
-            "Emit weighted_routing_policy { weight = 1 } and set_identifier; do not create a separate weighted-routing resource.",
-            ["weighted_routing_policy.weight", "set_identifier"],
-            "semantic_contract:route53:weighted_record",
-        )
-    if "aws_route53_query_log" in selected_set or has_any("query log", "query logging"):
-        add(
-            "aws_cloudwatch_log_resource_policy",
-            "route53_query_log_policy",
-            "policy_document must allow service principal route53.amazonaws.com to perform logs:CreateLogStream and logs:PutLogEvents.",
-            ["policy_document", "policy_name"],
-            "semantic_contract:route53:query_log_resource_policy",
-        )
-        add(
-            "aws_route53_query_log",
-            "route53_query_log_references",
-            "Reference aws_route53_zone.zone_id and aws_cloudwatch_log_group.arn through zone_id and cloudwatch_log_group_arn.",
-            ["zone_id", "cloudwatch_log_group_arn"],
-            "semantic_contract:route53:query_log_references",
-        )
-
-    if "aws_iam_role" in selected_set and has_any("lambda", "lambda function", "lambda execution role"):
-        add(
-            "aws_iam_role",
-            "lambda_assume_role_policy",
-            "assume_role_policy must allow service principal lambda.amazonaws.com to assume the role.",
-            ["assume_role_policy"],
-            "semantic_contract:iam:lambda_assume_role",
-        )
-    if "iam_actions" in slots and ("aws_iam_policy" in selected_set or "aws_iam_role_policy" in selected_set):
-        add(
-            "aws_iam_policy" if "aws_iam_policy" in selected_set else "aws_iam_role_policy",
-            "preserve_prompt_iam_actions",
-            "Include the IAM actions explicitly visible in the prompt in the generated policy JSON.",
-            ["policy"],
-            "semantic_contract:iam:prompt_actions",
-        )
-
-    if "ports" in slots and ("aws_security_group" in selected_set or "aws_security_group_rule" in selected_set):
-        target_type = "aws_security_group_rule" if "aws_security_group_rule" in selected_set else "aws_security_group"
-        protocol = (slots.get("protocols") or ["tcp"])[0]
-        add(
-            target_type,
-            "security_group_prompt_ports",
-            f"For every visible prompt port, set from_port and to_port to that port and protocol to {protocol}.",
-            ["from_port", "to_port", "protocol"],
-            "semantic_contract:security_group:prompt_ports",
-        )
-
-    if has_any("public subnet", "internet gateway", "internet access", "public route"):
-        add(
-            "aws_subnet",
-            "public_subnet_defaults",
-            "For a public subnet, set map_public_ip_on_launch = true and use a valid subnet CIDR inside the generated VPC CIDR.",
-            ["map_public_ip_on_launch", "cidr_block", "vpc_id"],
-            "semantic_contract:vpc:public_subnet",
-        )
-        add(
-            "aws_route",
-            "public_default_route",
-            "For public internet access, create a 0.0.0.0/0 route through the generated internet gateway.",
-            ["destination_cidr_block", "gateway_id"],
-            "semantic_contract:vpc:public_default_route",
-        )
-
-    if "aws_db_instance" in selected_set:
-        if has_any("mysql", "postgres", "postgresql", "mariadb", "sqlserver", "oracle"):
-            add(
-                "aws_db_instance",
-                "preserve_database_engine",
-                "Use the database engine family visible in the prompt and provide a compatible offline-valid instance_class and allocated_storage.",
-                ["engine", "instance_class", "allocated_storage"],
-                "semantic_contract:rds:engine_family",
-            )
-        if "aws_db_subnet_group" in selected_set:
-            add(
-                "aws_db_instance",
-                "rds_subnet_group_reference",
-                "Use db_subnet_group_name = aws_db_subnet_group.<name>.name, not a top-level vpc_id.",
-                ["db_subnet_group_name"],
-                "semantic_contract:rds:db_subnet_group",
-            )
-
-    # Keep the contract compact and stable for small models.
-    return obligations[:20]
-
-
-def retrieve_public_provider_contract_evidence(
-    prompt,
-    include_semantic=None,
-    use_auto_patterns=None,
-    use_static_bundles=None,
-    include_static_semantic=None,
-):
+def retrieve_public_provider_contract_evidence(prompt):
     root = configured_root()
     index = _load_contract_index(str(root))
     versioning.assert_version_alignment(
         index.get("metadata", {}).get("provider_version", "")
     )
-    if include_semantic is None:
-        include_semantic = os.environ.get("IAC_CONTRACT_INCLUDE_SEMANTIC", "0").lower() in {
-            "1",
-            "true",
-            "yes",
-        }
-    if use_auto_patterns is None:
-        use_auto_patterns = os.environ.get("IAC_CONTRACT_USE_EXAMPLE_PATTERNS", "0").lower() in {
-            "1",
-            "true",
-            "yes",
-        }
-    if use_static_bundles is None:
-        use_static_bundles = os.environ.get("IAC_CONTRACT_USE_STATIC_BUNDLES", "1").lower() in {
-            "1",
-            "true",
-            "yes",
-        }
-    if include_static_semantic is None:
-        include_static_semantic = os.environ.get("IAC_CONTRACT_USE_STATIC_SEMANTIC", "1").lower() in {
-            "1",
-            "true",
-            "yes",
-        }
-    selected, reasons, bundles, prompt_tokens, example_patterns, scores = _select_resources(
-        prompt,
-        index,
-        use_static_bundles=use_static_bundles,
-        use_example_patterns=use_auto_patterns,
-    )
+    selected, reasons, bundles, prompt_tokens = _select_resources(prompt, index)
     deps = _selected_dependencies(index, selected, prompt_tokens)
     value_bindings, slots = _value_bindings(prompt, selected)
 
     candidate_resources = [
-        _candidate_resource(
-            resource_type,
-            index["contracts"][resource_type],
-            reasons,
-            scores.get(resource_type, 0),
-        )
+        _candidate_resource(resource_type, index["contracts"][resource_type], reasons)
         for resource_type in selected
         if resource_type in index["contracts"]
     ]
@@ -1916,13 +962,7 @@ def retrieve_public_provider_contract_evidence(
     }
     evidence = {
         "evidence_kind": "task_conditioned_provider_contract",
-        "contract_kind": (
-            "public_provider_auto_semantic_contract_graph_v1"
-            if include_semantic and use_auto_patterns and not include_static_semantic
-            else "public_provider_semantic_contract_graph_v1"
-            if include_semantic
-            else "public_provider_contract_graph_v1"
-        ),
+        "contract_kind": "public_provider_contract_graph",
         "source_policy": (
             "Built from the full public Terraform AWS provider schema and official provider docs/examples "
             "under the configured public KG root. Runtime retrieval uses only the visible prompt. "
@@ -1930,38 +970,16 @@ def retrieve_public_provider_contract_evidence(
             "OPA result, generated HCL, or repair trace is used."
         ),
         "retrieval_method": {
-            "retriever_version": versioning.RETRIEVER_VERSION,
-            "mode": os.environ.get("IAC_RETRIEVAL_MODE", "hybrid_graph"),
-            "entity_linking": "exact/alias + BM25 + optional dense semantic retrieval",
-            "dependency_reranking": "provenance-aware public KG reference templates",
-            "dependency_closure": "conditional expansion; REQUIRES_VALUE_OF_TYPE does not imply managed-resource creation",
-            "retrieval_rules_sha256": retrieval_rules_sha256(),
-            "retrieval_parameters": {
-                "min_resources": MIN_RESOURCES,
-                "max_resources": MAX_RESOURCES,
-                "max_dependencies": MAX_DEPENDENCIES,
-                "score_threshold": RESOURCE_SCORE_THRESHOLD,
-                "score_gap": RESOURCE_SCORE_GAP,
-            },
+            "entity_linking": "deterministic resource alias/schema-doc matching plus weak lexical overlap",
+            "dependency_closure": "public provider schema name rules and official-doc example reference templates",
             "injection_granularity": {
                 "ir": "resource candidates, dependency closure, required resource hints, prompt slots",
                 "hcl": "argument contracts, nested block contracts, reference templates, usage constraints, value bindings",
             },
             "package_root": index["root"],
             "provider_version": index.get("metadata", {}).get("provider_version", ""),
-            "example_pattern_graph": "official provider examples parsed into resource bundles, reference templates, nested blocks, and literal hints"
-            if use_auto_patterns
-            else "",
         },
         "candidate_resources": candidate_resources,
-        "candidate_scores": [
-            {
-                "type": item["type"],
-                "score": item["score"],
-                "matched_by": item["matched_by"],
-            }
-            for item in candidate_resources
-        ],
         "required_resource_hints": [
             {
                 "resource_type": resource_type,
@@ -1999,16 +1017,6 @@ def retrieve_public_provider_contract_evidence(
             {"id": bundle["id"], "resources": [r for r in bundle["resources"] if r in selected]}
             for bundle in bundles
         ],
-        "matched_example_patterns": [
-            {
-                "id": pattern.get("id", ""),
-                "name": pattern.get("name", ""),
-                "source_resource_type": pattern.get("source_resource_type", ""),
-                "resource_types": [r for r in pattern.get("resource_types", []) if r in selected],
-                "source_doc": pattern.get("source_doc", ""),
-            }
-            for pattern in example_patterns
-        ],
         "kg_triples": [
             {
                 "subject": dep["from_type"],
@@ -2026,33 +1034,6 @@ def retrieve_public_provider_contract_evidence(
             "value_bindings": value_bindings,
             "usage_constraints": _usage_constraints(selected),
             "negative_constraints": _negative_constraints(prompt),
-            "semantic_obligations": _semantic_obligations(
-                prompt,
-                selected,
-                deps,
-                slots,
-                example_patterns=example_patterns,
-                include_static=include_static_semantic,
-            )
-            if include_semantic
-            else [],
         },
     }
     return json.dumps(evidence, indent=2, sort_keys=True)
-
-
-retrieve_provider_contract_evidence = retrieve_public_provider_contract_evidence
-
-
-def retrieve_public_provider_semantic_contract_evidence(prompt):
-    return retrieve_public_provider_contract_evidence(prompt, include_semantic=True)
-
-
-def retrieve_public_provider_auto_semantic_contract_evidence(prompt):
-    return retrieve_public_provider_contract_evidence(
-        prompt,
-        include_semantic=True,
-        use_auto_patterns=True,
-        use_static_bundles=False,
-        include_static_semantic=False,
-    )

@@ -15,9 +15,6 @@ def _schema_file():
 
 SCHEMA_FILE = _schema_file()
 PROVIDER_KEY = "registry.terraform.io/hashicorp/aws"
-MAX_ITEMS = 18
-
-
 @lru_cache(maxsize=1)
 def load_aws_schema():
     with SCHEMA_FILE.open() as f:
@@ -37,56 +34,6 @@ def _split_attrs(attrs):
         elif spec.get("computed"):
             computed.append(name)
     return required, optional, computed
-
-
-def _block_summary(block_types):
-    rows = []
-    for name, spec in sorted(block_types.items()):
-        nested = spec.get("block", {})
-        attrs = nested.get("attributes", {})
-        required, optional, computed = _split_attrs(attrs)
-        bits = [f"{name} block"]
-        if required:
-            bits.append("required attrs: " + ", ".join(required[:MAX_ITEMS]))
-        if optional:
-            bits.append("optional attrs: " + ", ".join(optional[:MAX_ITEMS]))
-        rows.append("; ".join(bits))
-    return rows
-
-
-def summarize_type(type_name):
-    aws = load_aws_schema()
-    resource_schema = aws.get("resource_schemas", {}).get(type_name)
-    data_schema = aws.get("data_source_schemas", {}).get(type_name)
-
-    if not resource_schema and not data_schema:
-        return f"{type_name}: not found in AWS provider schema."
-
-    schema = resource_schema or data_schema
-    kind = "resource" if resource_schema else "data source"
-    block = schema.get("block", {})
-    attrs = block.get("attributes", {})
-    block_types = block.get("block_types", {})
-    required, optional, computed = _split_attrs(attrs)
-
-    lines = [f"{type_name}: {kind}"]
-    if required:
-        lines.append("  required attributes: " + ", ".join(required[:MAX_ITEMS]))
-    if optional:
-        lines.append("  optional attributes: " + ", ".join(optional[:MAX_ITEMS]))
-    if computed:
-        lines.append("  computed-only attributes: " + ", ".join(computed[:MAX_ITEMS]))
-    if block_types:
-        lines.append("  nested blocks:")
-        for row in _block_summary(block_types)[:MAX_ITEMS]:
-            lines.append("    - " + row)
-
-    if data_schema and not resource_schema:
-        lines.append(f"  use syntax: data \"{type_name}\" \"name\" {{ ... }}")
-    elif resource_schema:
-        lines.append(f"  use syntax: resource \"{type_name}\" \"name\" {{ ... }}")
-
-    return "\n".join(lines)
 
 
 def type_block(type_name, kind=None):
@@ -222,38 +169,6 @@ def is_exported(type_name, path, kind=None):
     return root in supported_attributes(type_name, kind)
 
 
-def _type_label(value: Any) -> str:
-    if isinstance(value, str):
-        return value
-    if isinstance(value, list) and value:
-        if value[0] in {"list", "set", "map", "tuple"}:
-            inner = _type_label(value[1]) if len(value) > 1 else "any"
-            return f"{value[0]}({inner})"
-        if value[0] == "object":
-            return "object"
-    return "any"
-
-
-def types_compatible(source_type, target_type):
-    """Conservative Terraform type compatibility check.
-
-    ``source_type`` is the assignable argument and ``target_type`` is the
-    exported value.  Unknown/complex provider-schema encodings are reported as
-    compatible so the checker does not invent unsafe repairs.
-    """
-
-    source = _type_label(source_type)
-    target = _type_label(target_type)
-    if "any" in {source, target}:
-        return True
-    if source == target:
-        return True
-    if source.startswith(("list(", "set(", "tuple(")):
-        inner = source[source.find("(") + 1 : -1]
-        return target == inner or target.startswith(("list(", "set(", "tuple("))
-    return False
-
-
 def schema_contract_for_instance(instance, relevant_paths=()):
     """Return a structured, IR-guided exact schema projection."""
 
@@ -347,7 +262,6 @@ def schema_projection_for_graph(graph, prompt=""):
         else:
             contracts.append(contract)
     return {
-        "schema_contract_version": "2.0",
         "retrieval_method": "ir_guided_exact_schema_grounding",
         "resources": contracts,
         "missing_types": sorted(set(missing)),
@@ -360,36 +274,3 @@ def schema_projection_for_graph(graph, prompt=""):
 
 def render_schema_projection(projection):
     return json.dumps(projection, ensure_ascii=False, indent=2, sort_keys=True)
-
-
-def schema_context_for_types(type_names):
-    seen = []
-    for type_name in type_names:
-        type_name = str(type_name).strip()
-        if type_name and type_name not in seen:
-            seen.append(type_name)
-
-    if not seen:
-        return "No resource types were supplied for schema lookup."
-
-    parts = ["Terraform AWS provider schema summary:"]
-    for type_name in seen:
-        parts.append(summarize_type(type_name))
-    return "\n\n".join(parts)
-
-
-def extract_types_from_error(error_text):
-    text = str(error_text or "")
-    types = set()
-    for match in re.finditer(r'(?:resource|data) "([^"]+)" "([^"]+)"', text):
-        types.add(match.group(1))
-    for match in re.finditer(r"\bwith ([a-z0-9_]+)\.[A-Za-z0-9_-]+", text):
-        types.add(match.group(1))
-    return sorted(types)
-
-
-def schema_context_for_error(error_text):
-    types = extract_types_from_error(error_text)
-    if not types:
-        return ""
-    return schema_context_for_types(types)

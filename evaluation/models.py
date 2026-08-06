@@ -25,12 +25,12 @@ def _stage_parameters(stage: str, max_tokens: int | None = None):
     stage = str(stage or "hcl").lower()
     prefix = "QWEN_IR" if stage == "ir" else "QWEN_HCL"
     if stage == "ir":
-        defaults = {"temperature": 0.0, "top_p": 1.0, "max_tokens": 1536}
+        defaults = {"temperature": 0.2, "top_p": 0.95, "max_tokens": 1536}
     elif stage == "repair":
-        defaults = {"temperature": 0.0, "top_p": 1.0, "max_tokens": 2048}
+        defaults = {"temperature": 0.2, "top_p": 0.95, "max_tokens": 1536}
         prefix = "QWEN_REPAIR"
     else:
-        defaults = {"temperature": 0.0, "top_p": 1.0, "max_tokens": 2048}
+        defaults = {"temperature": 0.2, "top_p": 0.95, "max_tokens": 1536}
     return {
         "temperature": float(
             os.environ.get(
@@ -65,7 +65,6 @@ def openai_compatible_chat(
     *,
     stage="hcl",
     max_tokens=None,
-    guided_json=None,
 ):
     client = OpenAI(
         api_key=os.environ.get("QWEN_API_KEY", "EMPTY"),
@@ -82,17 +81,9 @@ def openai_compatible_chat(
     }
     if os.environ.get("QWEN_DISABLE_THINKING", "0") == "1":
         request["extra_body"] = {"chat_template_kwargs": {"enable_thinking": False}}
-    if guided_json is None:
-        guided_json = stage == "ir" and os.environ.get(
-            "QWEN_IR_GUIDED_JSON", "1"
-        ).lower() in {"1", "true", "yes"}
-    if guided_json:
-        request["response_format"] = {"type": "json_object"}
-
     retries = int(os.environ.get("QWEN_MAX_RETRIES", "3"))
     retry_delay = float(os.environ.get("QWEN_RETRY_DELAY_SECONDS", "2"))
     attempt = 0
-    removed_unsupported_guidance = False
     started = time.perf_counter()
     while True:
         try:
@@ -107,23 +98,12 @@ def openai_compatible_chat(
                 stage=stage,
                 request_parameters={
                     key: request[key]
-                    for key in ("temperature", "top_p", "max_tokens", "response_format")
+                    for key in ("temperature", "top_p", "max_tokens")
                     if key in request
                 },
             )
         except BadRequestError as exc:
             message = str(exc)
-            if (
-                "response_format" in request
-                and not removed_unsupported_guidance
-                and any(
-                    marker in message.lower()
-                    for marker in ("response_format", "guided", "json_object", "unsupported")
-                )
-            ):
-                request.pop("response_format", None)
-                removed_unsupported_guidance = True
-                continue
             if "maximum context length" not in message:
                 raise
             model_limit = re.search(r"maximum context length is (\d+) tokens", message)
@@ -154,22 +134,10 @@ def generate_with_metadata(
     *,
     stage="hcl",
     max_tokens=None,
-    guided_json=None,
 ):
     return openai_compatible_chat(
         system_prompt,
         user_prompt,
         stage=stage,
         max_tokens=max_tokens,
-        guided_json=guided_json,
     )
-
-
-def generate_text(system_prompt, user_prompt, **kwargs):
-    return generate_with_metadata(system_prompt, user_prompt, **kwargs).text
-
-
-def Qwen25Coder3B(system_prompt, user_prompt):
-    """Backward-compatible alias retained for archived experiment code."""
-
-    return generate_text(system_prompt, user_prompt)

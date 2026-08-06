@@ -3,106 +3,49 @@
 ## Environment
 
 - Python 3.10+
-- Terraform 1.9.8
-- Terraform AWS Provider 5.90.0
-- OPA 0.61.0 or a validated compatible version
-- OpenAI-compatible model endpoint
+- Terraform 1.9.8-compatible CLI
+- AWS provider 5.90.0
+- OPA 0.61.0 or compatible
+- OpenAI-compatible Qwen2.5-Coder endpoint
+
+Install `requirements.txt`. Install `requirements-paper-kg.txt` when running Paper KG.
+
+Prepare an offline provider mirror when network-free planning is required:
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+scripts/prepare_provider_mirror.sh /path/to/terraform-provider-aws
+```
 
-# Only required for paper-KG Chroma retrieval/rebuilding.
-pip install -r requirements-paper-kg.txt
+## Supported runs
 
+The current entry point exposes only four runs:
+
+| Mode | KG at Planner | KG at Compiler | Local repair |
+|---|---|---|---|
+| `full_kg` | Full KG evidence | typed Provider Contract | disabled |
+| `full_kg_repair` | Full KG evidence | typed Provider Contract | at most one call |
+| `paper_kg` | Paper KG evidence | Paper KG evidence | disabled |
+| `paper_kg_repair` | Paper KG evidence | Paper KG evidence | at most one call |
+
+Run a small sanity subset first:
+
+```bash
+MODE=full_kg MODEL=qwen2.5-coder-3b MAX_ROWS=3 scripts/run_framework.sh
+MODE=paper_kg MODEL=qwen2.5-coder-3b MAX_ROWS=3 scripts/run_framework.sh
+```
+
+Then run all 458 rows by setting `MAX_ROWS=458`. `ROW_IDS_FILE` selects an explicit ordered subset, `RESUME=1` resumes checkpoints, and `CHECKPOINT_EVERY` controls checkpoint frequency.
+
+`VERIGRAPH_MAX_REPAIR_STEPS` is the repair switch retained from the original runner. It defaults to `0` for `full_kg` and `paper_kg`, and to `1` for `full_kg_repair` and `paper_kg_repair`. Values above `1` are clipped to one repair call.
+
+The retained result artifacts are immutable copies of completed runs. Their byte hashes and measured metrics are recorded in `results/RESULT_MANIFEST.json`.
+
+## Verification
+
+```bash
 python3 -m unittest discover -s tests -v
 python3 scripts/verify_package.py --strict
+sha256sum -c --quiet SHA256SUMS
 ```
 
-Formal clean runs use Graph IR 2.0, Provider Contract 2.0, and retriever
-`hybrid-v2`. Changing the provider version requires rebuilding the schema,
-documentation KG, typed graph, dense index, and offline cache.
-
-## Common Runner
-
-```bash
-MODE=full MODEL=qwen2.5-coder-3b MAX_ROWS=458 \
-QWEN_BASE_URL=http://127.0.0.1:8000/v1 \
-./scripts/run_framework.sh
-```
-
-Supported models are listed in `configs/models/`. Key controls:
-
-```text
-MAX_ROWS=458
-ROW_IDS_FILE=/path/to/row_ids.json
-RESUME=1
-CHECKPOINT_EVERY=1
-QWEN_IR_MAX_TOKENS=1536
-QWEN_MAX_TOKENS=2048
-QWEN_TEMPERATURE=0
-QWEN_TOP_P=1
-```
-
-The evaluator dynamically caps an HCL/repair call at 4096 tokens based on IR
-resource count. To reproduce a historical result exactly, use the request
-parameters stored in that CSV/log; historical runs used several larger output
-limits and are retained as immutable artifacts rather than silently rerun.
-
-## Mode Matrix
-
-| Command mode | KG profile | KG stage | Repair |
-| --- | --- | --- | ---: |
-| `baseline` | none | none | no |
-| `ir_only` | none | none | no |
-| `ir_schema` | none | none | no |
-| `full` | clean multigranular | both | no |
-| `full_repair1` | clean multigranular | both | one plan-failure call |
-| `paper_ir` | paper | IR | no |
-| `paper_hcl` | paper | HCL | no |
-| `paper_both` | paper | both | no |
-| `paper_both_repair1` | paper | both | one plan-failure call |
-| `hybrid_both` | hybrid | both | no |
-| `hybrid_both_repair1` | hybrid | both | one plan-failure call |
-
-Paper modes explicitly enable the benchmark-scoped profile. Repair never gets
-raw KG evidence or the Provider Contract directly.
-
-## Paper KG Retrieval
-
-The bundled Chroma index uses
-`sentence-transformers/all-mpnet-base-v2`. Default resource top-k is 2.
-Retrieval starts from Prompt-to-document/resource matches, uses the in-code
-BM25/resource-label fallback and hybrid reranking, expands direct resources
-through `reference_relations`, and retrieves optional argument/block evidence
-from the corresponding Chroma collection.
-
-Expected Chroma counts:
-
-```text
-terraform_resources           5996
-terraform_doc_chunks          1390
-terraform_examples             422
-terraform_arguments_blocks    4419
-total                         12227
-```
-
-The embedding model must already be available locally because the retriever
-loads it with `local_files_only=True`.
-
-## Result Integrity
-
-`results/RESULT_MANIFEST.json` is authoritative for selected historical runs.
-It stores SHA-256 for each CSV/log and verifies 458 completed rows per CSV.
-Run:
-
-```bash
-python3 scripts/verify_package.py --strict
-sha256sum -c SHA256SUMS
-```
-
-The manifest includes the Qwen2.5-Coder 14B
-`paperkg/both_localrepair1_no_direct_kg` run completed on 2026-08-04. This run
-uses a 32K context window, a maximum output of 16,384 tokens, and one repair
-call after plan failure without directly passing raw KG to the repair prompt.
+`scripts/verify_package.py` checks dataset size, KG assets, Paper KG index counts, the repair boundary, retained result/log pairs, model configurations, and forbidden removed paths.

@@ -1,9 +1,4 @@
-"""Typed task Graph IR parsing, normalization, validation, and provenance.
-
-Graph IR v2 is instance-level and field-level.  The parser accepts legacy v1
-payloads for archived experiments, but every downstream stage receives only a
-canonical v2 object.  Invalid model text is never forwarded to HCL generation.
-"""
+"""Graph IR parsing, normalization, validation, and provenance."""
 
 from __future__ import annotations
 
@@ -14,7 +9,6 @@ from dataclasses import dataclass
 from typing import Any
 
 
-GRAPH_IR_VERSION = "2.0"
 RESOURCE_TYPE_RE = re.compile(r"^aws_[A-Za-z0-9_]+$")
 IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 RESOURCE_ADDRESS_RE = re.compile(
@@ -42,13 +36,8 @@ def prompt_sha256(prompt: str) -> str:
     return hashlib.sha256(str(prompt or "").encode("utf-8")).hexdigest()
 
 
-def canonical_json(value: Any) -> str:
-    return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
-
-
 def empty_graph_ir(note: str = "") -> dict[str, Any]:
     graph = {
-        "graph_ir_version": GRAPH_IR_VERSION,
         "resources": [],
         "bindings": [],
         "constraints": [],
@@ -112,10 +101,10 @@ def _address_to_id(address: str, address_map: dict[str, str]) -> str:
     return match.group("name") if match else address
 
 
-def _normalize_legacy_graph(
+def _normalize_graph(
     graph: dict[str, Any],
 ) -> tuple[dict[str, Any], list[str], list[str]]:
-    """Convert legacy resource/dependency IR into the canonical v2 shape."""
+    """Normalize resource/dependency model output for internal use."""
 
     actions: list[str] = []
     warnings: list[str] = []
@@ -124,13 +113,13 @@ def _normalize_legacy_graph(
         resources = []
     normalized_resources: list[dict[str, Any]] = []
     address_map: dict[str, str] = {}
-    legacy_resource_dependencies: list[tuple[str, str]] = []
+    resource_dependencies: list[tuple[str, str]] = []
     for index, item in enumerate(resources):
         if not isinstance(item, dict):
             continue
         resource_type = str(item.get("type", "")).strip()
-        legacy_name = str(item.get("name", "")).strip()
-        instance_id = _safe_identifier(item.get("id") or legacy_name, f"resource_{index + 1}")
+        model_name = str(item.get("name", "")).strip()
+        instance_id = _safe_identifier(item.get("id") or model_name, f"resource_{index + 1}")
         kind = str(item.get("kind") or "resource").strip()
         normalized = dict(item)
         normalized["id"] = instance_id
@@ -138,21 +127,20 @@ def _normalize_legacy_graph(
         normalized["kind"] = kind
         normalized["role"] = str(item.get("role") or item.get("reason") or "").strip()
         normalized.pop("name", None)
-        legacy_depends = normalized.pop("depends_on", None)
-        if legacy_depends:
+        declared_dependencies = normalized.pop("depends_on", None)
+        if declared_dependencies:
             warnings.append(
-                f"resources[{index}].depends_on was legacy resource-level metadata; "
-                "it was converted to explicit_dependencies"
+                f"resources[{index}].depends_on was converted to explicit_dependencies"
             )
-            if isinstance(legacy_depends, list):
-                legacy_resource_dependencies.extend(
+            if isinstance(declared_dependencies, list):
+                resource_dependencies.extend(
                     (instance_id, str(target).strip())
-                    for target in legacy_depends
+                    for target in declared_dependencies
                     if str(target).strip()
                 )
         normalized_resources.append(normalized)
-        if resource_type and legacy_name:
-            address_map[f"{resource_type}.{legacy_name}"] = instance_id
+        if resource_type and model_name:
+            address_map[f"{resource_type}.{model_name}"] = instance_id
 
     bindings = graph.get("bindings", [])
     if not isinstance(bindings, list):
@@ -160,19 +148,19 @@ def _normalize_legacy_graph(
     explicit_dependencies = graph.get("explicit_dependencies", [])
     if not isinstance(explicit_dependencies, list):
         explicit_dependencies = []
-    for source, target_address in legacy_resource_dependencies:
+    for source, target_address in resource_dependencies:
         explicit_dependencies.append(
             {
                 "source": source,
                 "target": _address_to_id(target_address, address_map),
-                "reason": "legacy resource-level depends_on",
+                "reason": "resource-level depends_on",
                 "evidence_ids": [],
             }
         )
-    legacy_dependencies = graph.get("dependencies", [])
-    if isinstance(legacy_dependencies, list) and legacy_dependencies:
-        actions.append("converted legacy dependencies to explicit_dependencies")
-        for item in legacy_dependencies:
+    declared_dependencies = graph.get("dependencies", [])
+    if isinstance(declared_dependencies, list) and declared_dependencies:
+        actions.append("converted dependencies to explicit_dependencies")
+        for item in declared_dependencies:
             if not isinstance(item, dict):
                 continue
             source = _address_to_id(str(item.get("from", "")).strip(), address_map)
@@ -208,9 +196,9 @@ def _normalize_legacy_graph(
     requirements = graph.get("requirements", [])
     if not isinstance(requirements, list):
         requirements = []
-    legacy_coverage = graph.get("intent_coverage", [])
-    if not requirements and isinstance(legacy_coverage, list):
-        for index, text in enumerate(legacy_coverage):
+    declared_coverage = graph.get("intent_coverage", [])
+    if not requirements and isinstance(declared_coverage, list):
+        for index, text in enumerate(declared_coverage):
             if str(text).strip():
                 requirements.append(
                     {
@@ -228,7 +216,6 @@ def _normalize_legacy_graph(
         actions.append("normalized notes to a list")
 
     normalized = {
-        "graph_ir_version": GRAPH_IR_VERSION,
         "resources": normalized_resources,
         "bindings": bindings,
         "constraints": normalized_constraints,
@@ -236,8 +223,6 @@ def _normalize_legacy_graph(
         "requirements": requirements,
         "notes": notes,
     }
-    if str(graph.get("graph_ir_version", "1.0")) != GRAPH_IR_VERSION:
-        actions.append(f"upgraded Graph IR to {GRAPH_IR_VERSION}")
     return normalized, actions, warnings
 
 
@@ -260,9 +245,9 @@ def _validate_endpoint(
 
 
 def validate_graph_ir(graph: dict[str, Any]) -> GraphIRValidation:
-    normalized, actions, legacy_warnings = _normalize_legacy_graph(graph)
+    normalized, actions, normalization_warnings = _normalize_graph(graph)
     errors: list[str] = []
-    warnings: list[str] = list(legacy_warnings)
+    warnings: list[str] = list(normalization_warnings)
     resources = normalized["resources"]
     node_ids: set[str] = set()
 
@@ -370,7 +355,7 @@ def safe_parse_graph_ir(text: str) -> GraphIRValidation:
                 errors=validation.errors,
                 warnings=validation.warnings,
                 normalization_actions=validation.normalization_actions
-                + ("replaced structurally invalid IR with canonical empty IR",),
+                + ("replaced structurally invalid IR with an empty graph",),
                 generation_failure=True,
                 raw_text=str(text or ""),
             )
@@ -381,7 +366,7 @@ def safe_parse_graph_ir(text: str) -> GraphIRValidation:
             graph=graph,
             errors=(str(exc),),
             warnings=(),
-            normalization_actions=("replaced invalid model output with canonical empty IR",),
+            normalization_actions=("replaced invalid model output with an empty graph",),
             generation_failure=True,
             raw_text=str(text or ""),
         )
@@ -405,7 +390,6 @@ def render_graph_ir(graph: dict[str, Any]) -> str:
 def provenance(prompt: str, validation: GraphIRValidation) -> dict[str, Any]:
     raw_sha = hashlib.sha256(validation.raw_text.encode("utf-8")).hexdigest()
     return {
-        "graph_ir_version": GRAPH_IR_VERSION,
         "prompt_sha256": prompt_sha256(prompt),
         "raw_ir_sha256": raw_sha,
         "valid": validation.valid,

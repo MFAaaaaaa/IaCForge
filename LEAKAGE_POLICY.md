@@ -1,82 +1,33 @@
-# Data Leakage Policy
+# Leakage Policy
 
-## Clean Generation Boundary
+IaCForge exposes two explicitly different KG conditions.
 
-Allowed before generation:
+| KG | Construction | Interpretation |
+|---|---|---|
+| Full KG | Complete AWS provider schema and official provider documentation/examples | Leakage-free method condition |
+| Paper KG | Bundled graph/indexes, including benchmark-scoped relation edges | Reported separately from Full KG |
 
-- visible IaC-Eval `Prompt`;
-- Graph IR generated from that prompt;
-- public Terraform AWS provider schema, documentation, and examples;
-- KG nodes/edges constructed only from those public sources;
-- deterministic clean retrieval output keyed by prompt SHA-256.
+## Generation boundary
 
-Forbidden before final generation:
+Before HCL generation completes, the pipeline may read only:
 
-- IaC-Eval `Resource`, `Intent`, `Rego intent`, or reference output/HCL;
-- validation errors, plan errors, or OPA results from other candidates;
-- historical repair traces;
-- manually encoded row IDs, hidden expected resources, or policy predicates.
+- the row’s visible `Prompt`;
+- the selected KG and its retrieval indexes;
+- the bundled AWS provider schema;
+- model/runtime configuration.
 
-`Rego intent` is evaluation-only and may be read only after final HCL
-generation and planning.
+It must not read the benchmark `Resource`, `Intent`, `Rego intent`, reference output, validation outcome, plan outcome, OPA outcome, another generated candidate, or a repair trace.
 
-## Profile Classification
+`Rego intent` is read only after the final candidate has produced a valid Terraform plan. It is used exclusively by the OPA evaluator.
 
-| Profile | Classification | Use |
-| --- | --- | --- |
-| `clean_multigranular` | clean/public | Main no-leakage and ablation results |
-| `paper` | potentially benchmark-scoped | Paper-replication comparison only |
-| `hybrid_cached_evidence_rebuilt_kg` | historical semi-clean | Historical comparison only |
+## Full KG
 
-Paper KG is disabled unless `IAC_ALLOW_BENCHMARK_SCOPED_PAPER_KG=1` is set.
-Its resource universe comes from the paper replication package and must not be
-reported as the main clean KG result.
+Full KG is built from the complete provider schema plus official Terraform AWS provider documentation and examples. Its build does not accept the benchmark dataset as a resource-universe or edge source. Runtime retrieval is conditioned only on the visible Prompt.
 
-The hybrid profile preserves evidence from the first construction. The
-original raw KG was lost, and the bundled public-provider KG is a second
-construction. Its content may differ slightly from the KG that produced the
-evidence, though expected aggregate results should remain close. This profile
-must not be relabelled as the clean multigranular profile.
+## Paper KG
 
-## Repair Boundary
+Paper KG contains benchmark-scoped relation edges, so its metrics are reported separately and are not evidence for the dataset-independent Full KG claim. Runtime retrieval still uses only the visible Prompt; that restriction does not remove information already encoded in the graph.
 
-Local repair is permitted to use the current candidate's Terraform **plan**
-diagnostic. It is not triggered by initial validation failure and is called at
-most once.
+## Local repair
 
-Repair directly receives:
-
-- visible Prompt;
-- generated normalized Graph IR;
-- provider schema context;
-- current HCL;
-- current Terraform plan diagnostic.
-
-Repair does not directly receive raw KG evidence, a KG-derived Provider
-Contract, an OPA policy/result, hidden intent, or reference HCL. The Graph IR
-and HCL may already reflect an upstream KG-enabled generation stage; therefore
-the accurate label is `localrepair1_no_direct_kg`, not `repair_without_any_kg_influence`.
-
-Every repaired row records:
-
-```json
-{
-  "trigger": "terraform_plan_failed",
-  "max_calls": 1,
-  "raw_kg_in_repair": false,
-  "provider_contract_in_repair": false,
-  "opa_feedback_used": false
-}
-```
-
-## Cache and Tuning Policy
-
-The clean offline cache may use only Prompt plus public KG data and is keyed by
-SHA-256 of Prompt text. A miss fails closed unless online retrieval is
-explicitly enabled. Resource aliases and semantic rules must encode only
-public AWS/Terraform knowledge and must be included in an ablation when making
-a fully automatic retrieval claim.
-
-Do not tune prompts, retrieval rules, or compiler behavior on held-out outputs.
-Record development row IDs separately from final evaluation rows.
-
+Local repair is enabled by `VERIGRAPH_MAX_REPAIR_STEPS=1` or by a repair mode and is limited to one call after an initial validation or planning failure. It may use the current candidate and the corresponding Terraform diagnostic. It cannot access KG evidence, Provider Contract data, hidden benchmark fields, or OPA policy/results.

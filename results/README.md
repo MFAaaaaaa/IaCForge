@@ -1,62 +1,51 @@
-# Results Archive
+# Results
 
-`RESULT_MANIFEST.json` is the machine-readable index. Every listed artifact has
-458 completed rows plus SHA-256 for its result CSV and matching log.
+This directory retains exactly 24 complete result/log pairs on all 458 benchmark rows. The three non-KG controls isolate the effects of Graph IR and provider-schema grounding; the KG conditions use Qwen2.5-Coder 3B and 14B.
 
-## Clean Multigranular KG and Ablations
+## Baseline
 
-`clean_multigranular_kg_and_ablations/` contains:
+| Model | Validate | Plan | Pass@1 |
+|---|---:|---:|---:|
+| Qwen2.5-Coder 3B | 77 | 72 | 27 |
+| Qwen2.5-Coder 14B | 146 | 99 | 34 |
+| Qwen2.5-Coder 32B AWQ | 173 | 141 | 67 |
+| Mistral 7B Instruct | 72 | 52 | 13 |
+| Qwen3 8B | 69 | 58 | 22 |
+| Qwen3 14B | 128 | 115 | 48 |
+| CodeLlama 13B Instruct | 148 | 142 | 42 |
 
-- `baseline`: direct Prompt-to-HCL generation;
-- `ir_only`: Graph IR without schema, KG, or repair;
-- `ir_schema`: Graph IR plus schema, without KG or repair;
-- `ir_schema_multigranular_kg`: Graph IR, schema, and clean multigranular KG at
-  both generation stages.
+## Baseline + IR
 
-Baseline and IR+schema preserve all available models. IR-only and full clean
-KG preserve the available Qwen2.5-Coder 3B and 14B results.
+| Model | Validate | Plan | Pass@1 |
+|---|---:|---:|---:|
+| Qwen2.5-Coder 3B | 98 | 96 | 27 |
+| Qwen2.5-Coder 14B | 172 | 144 | 59 |
 
-## KG and Repair
+## Baseline + IR + Schema
 
-`kg_repair/` contains:
+| Model | Validate | Plan | Pass@1 |
+|---|---:|---:|---:|
+| Qwen2.5-Coder 3B | 145 | 134 | 45 |
+| Qwen2.5-Coder 14B | 277 | 267 | 116 |
+| Qwen2.5-Coder 32B AWQ | 273 | 257 | 109 |
+| Mistral 7B Instruct | 56 | 52 | 15 |
+| Qwen3 8B | 154 | 135 | 58 |
+| Qwen3 14B | 225 | 215 | 97 |
+| CodeLlama 13B Instruct | 177 | 168 | 63 |
 
-- paper KG stage selection (`ir`, `hcl`, `both`);
-- paper KG 3B/14B IR-only and HCL-only results with no-direct-KG repair;
-- paper KG both-stage 3B/14B results with and without repair;
-- half-paper/half-full historical results with and without repair;
-- clean multigranular KG results with and without repair.
+## KG conditions
 
-Repair is one call after plan failure only. It does not directly receive raw KG
-or a KG-derived Provider Contract. It may receive Graph IR/current HCL that
-were produced by KG-enabled upstream stages.
+| Mode | Model | Validate | Plan | Pass@1 |
+|---|---|---:|---:|---:|
+| Full KG | 3B | 174 | 165 | 61 |
+| Full KG | 14B | 338 | 326 | 138 |
+| Full KG + local repair | 3B | 233 | 220 | 76 |
+| Full KG + local repair | 14B | 376 | 367 | 149 |
+| Paper KG | 3B | 209 | 188 | 93 |
+| Paper KG | 14B | 330 | 296 | 155 |
+| Paper KG + local repair | 3B | 261 | 230 | 102 |
+| Paper KG + local repair | 14B | 386 | 351 | 168 |
 
-## Both-Stage Paper KG Repair
+Paper KG contains benchmark-scoped relation edges, so those rows are leakage-analysis results and are not directly comparable to Full KG as leakage-free evidence.
 
-The Qwen2.5-Coder 14B `paperkg/both_localrepair1_no_direct_kg` run was completed
-on 2026-08-04 with a 32K context window and maximum output of 16,384 tokens. It
-reports Validate 386/458, Plan 351/458, and Pass@1 168/458. The repair call does
-not directly receive raw KG.
-
-## Qwen2.5-Coder Summary
-
-Counts are `Validate / Plan / Pass@1`, each out of 458.
-
-| Family / variant | 3B | 14B |
-| --- | ---: | ---: |
-| clean baseline | 77 / 72 / 27 | 146 / 99 / 34 |
-| IR only | 98 / 96 / 27 | 172 / 144 / 59 |
-| IR + schema | 145 / 134 / 45 | 277 / 267 / 116 |
-| IR + schema + clean multigranular KG | 174 / 165 / 61 | 338 / 326 / 138 |
-| clean multigranular KG + repair | 233 / 220 / 76 | 376 / 367 / 149 |
-| paper KG at IR only | 163 / 149 / 65 | 290 / 281 / 142 |
-| paper KG at HCL only | 183 / 166 / 73 | 309 / 280 / 131 |
-| paper KG at both stages | 209 / 188 / 93 | 330 / 296 / 155 |
-| paper KG at IR only + repair | 224 / 198 / 84 | 388 / 373 / 191 |
-| paper KG at HCL only + repair | 228 / 210 / 90 | 369 / 347 / 159 |
-| paper KG at both + repair | 261 / 230 / 102 | 386 / 351 / 168 |
-| half-paper/half-full KG at both | 196 / 183 / 85 | 328 / 308 / 154 |
-| half-paper/half-full KG at both + repair | 245 / 230 / 104 | 362 / 348 / 166 |
-
-These are preserved historical artifacts. Consult each CSV/log for its exact
-context and output-token settings before treating differences as controlled
-comparisons.
+Each mode/model directory contains `result.csv` and `run.log`. The files were renamed without changing their bytes. `RESULT_MANIFEST.json` records SHA-256 hashes and the metrics above.

@@ -21,17 +21,14 @@ def default_root():
     value = os.environ.get("IAC_KG_PAPER_REPLICATION_ROOT", "").strip()
     if value:
         return Path(value).expanduser().resolve()
-    return (
-        Path(__file__).with_name("paper_replication_downloads")
-        / "iac-research-without-agent"
-    ).resolve()
+    return (Path(__file__).resolve().parents[2] / "data" / "paper_kg" / "source").resolve()
 
 
 def default_index_dir(root):
     value = os.environ.get("IAC_KG_PAPER_CHROMA_DIR", "").strip()
     if value:
         return Path(value).expanduser().resolve()
-    return root / "graphrag_approaches" / "langgraph_GR-Base" / "app" / "paper_rebuilt_chroma"
+    return (Path(__file__).resolve().parents[2] / "data" / "paper_kg" / "chroma").resolve()
 
 
 def docs_dir(root):
